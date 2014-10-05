@@ -55,16 +55,22 @@ public class LoadConstraints implements Iterable<LoadConstraint> {
         addLoadConstraints(loadConstraints);
     }
 
-    public void addIndex(Index index) {
+    public LoadConstraint addIndex(Index index) {
+        LoadConstraint loadConstraint = new LoadConstraint(index);
         addLoadConstraint(new LoadConstraint(index));
+        return loadConstraint;
     }
 
-    public void addPrimaryKey(PrimaryKey primaryKey) {
+    public LoadConstraint addPrimaryKey(PrimaryKey primaryKey) {
+        LoadConstraint loadConstraint = new LoadConstraint(primaryKey);
         addLoadConstraint(new LoadConstraint(primaryKey));
+        return loadConstraint;
     }
 
-    public void addForeignKey(ForeignKey foreignKey) {
-        addLoadConstraint(new LoadConstraint(foreignKey));
+    public LoadConstraint addForeignKey(ForeignKey foreignKey) {
+        LoadConstraint loadConstraint = new LoadConstraint(foreignKey);
+        addLoadConstraint(loadConstraint);
+        return loadConstraint;
     }
 
     public void addLoadConstraint(LoadConstraint loadConstraint) {

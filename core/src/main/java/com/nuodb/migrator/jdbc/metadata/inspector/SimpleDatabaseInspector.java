@@ -35,7 +35,6 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -57,32 +56,32 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     @Override
     public void inspect(InspectionContext inspectionContext) throws SQLException {
         Database database = addDatabase(inspectionContext.getInspectionResults());
-        Connection connection = inspectionContext.getConnection();
-        DatabaseMetaData metaData = connection.getMetaData();
 
-        DriverInfo driverInfo = new DriverInfo();
-        driverInfo.setName(metaData.getDriverName());
-        driverInfo.setVersion(metaData.getDriverVersion());
-        driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
-        driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
+        DriverInfo driverInfo = getDriverInfo(inspectionContext);
         if (logger.isDebugEnabled()) {
             logger.debug(format("Driver info %s", driverInfo));
         }
         database.setDriverInfo(driverInfo);
 
-        DatabaseInfo databaseInfo = new DatabaseInfo();
-        databaseInfo.setProductName(metaData.getDatabaseProductName());
-        databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
-        databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
-        databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
+        DatabaseInfo databaseInfo = getDatabaseInfo(inspectionContext);
         if (logger.isDebugEnabled()) {
             logger.debug(format("Database info %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
+
         database.setDialect(inspectionContext.getDialect());
+        Connection connection = inspectionContext.getConnection();
         if (connection instanceof ConnectionProxy) {
             database.setConnectionSpec(((ConnectionProxy) connection).getConnectionSpec());
         }
+    }
+
+    protected DriverInfo getDriverInfo(InspectionContext inspectionContext) throws SQLException {
+        return new DriverInfo(inspectionContext.getConnection().getMetaData());
+    }
+
+    protected DatabaseInfo getDatabaseInfo(InspectionContext inspectionContext) throws SQLException {
+        return new DatabaseInfo(inspectionContext.getConnection().getMetaData());
     }
 
     @Override

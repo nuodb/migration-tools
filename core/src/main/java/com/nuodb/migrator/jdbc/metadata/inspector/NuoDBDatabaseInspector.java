@@ -25,16 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.NuoDBDatabaseInfo;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public class NuoDBDatabaseInspector extends SimpleDatabaseInspector {
 
-    Connection getConnection();
+
+    @Override
+    protected DatabaseInfo getDatabaseInfo(InspectionContext inspectionContext)
+            throws SQLException {
+        return new NuoDBDatabaseInfo(inspectionContext.getConnection().getMetaData());
+    }
 }

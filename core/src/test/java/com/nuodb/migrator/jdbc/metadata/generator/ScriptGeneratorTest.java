@@ -29,9 +29,18 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.DB2Dialect;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.MySQLDialect;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.dialect.NuoDBDialect206;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -41,9 +50,12 @@ import java.sql.Types;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.CREATE;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.DROP;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
+import static java.sql.Types.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -56,13 +68,7 @@ public class ScriptGeneratorTest {
 
     @BeforeMethod
     public void setUp() throws SQLException {
-        NuoDBDialect dialect = new NuoDBDialect();
-
-        Database database = new Database();
-        database.setDialect(dialect);
-
         scriptGeneratorManager = new ScriptGeneratorManager();
-        scriptGeneratorManager.setTargetDialect(dialect);
         scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(MYSQL)));
     }
 
@@ -72,30 +78,30 @@ public class ScriptGeneratorTest {
         Database database1 = new Database();
         database1.setDialect(new MySQLDialect(new DatabaseInfo("MySQL")));
 
-        Table table = new Table("users");
-        table.setDatabase(database1);
+        Table table1 = new Table("users");
+        table1.setDatabase(database1);
 
-        Column id = table.addColumn("id");
-        id.setTypeCode(Types.INTEGER);
-        id.setTypeName("INTEGER");
-        id.setNullable(false);
-        id.setPosition(1);
+        Column f1_1 = table1.addColumn("id");
+        f1_1.setTypeCode(INTEGER);
+        f1_1.setTypeName("INTEGER");
+        f1_1.setNullable(false);
+        f1_1.setPosition(1);
 
-        Column login = table.addColumn("login");
-        login.setTypeCode(Types.VARCHAR);
-        login.setTypeName("VARCHAR");
-        login.setSize(32);
-        login.setNullable(false);
-        login.setPosition(2);
+        Column f1_2 = table1.addColumn("login");
+        f1_2.setTypeCode(Types.VARCHAR);
+        f1_2.setTypeName("VARCHAR");
+        f1_2.setSize(32);
+        f1_2.setNullable(false);
+        f1_2.setPosition(2);
 
-        PrimaryKey primaryKey = new PrimaryKey(valueOf("users_id"));
-        primaryKey.addColumn(id, 1);
-        table.setPrimaryKey(primaryKey);
+        PrimaryKey pk1_1 = new PrimaryKey(valueOf("users_id"));
+        pk1_1.addColumn(f1_1, 1);
+        table1.setPrimaryKey(pk1_1);
 
-        Collection<Object[]> data = Lists.newArrayList();
-        data.add(new Object[]{table, newArrayList(ScriptType.DROP),
+        Collection<Object[]> data = newArrayList();
+        data.add(new Object[]{table1, newArrayList(DROP), null,
                 newArrayList("DROP TABLE IF EXISTS \"users\" CASCADE")});
-        data.add(new Object[]{table, newArrayList(ScriptType.CREATE),
+        data.add(new Object[]{table1, newArrayList(CREATE), null,
                 newArrayList(
                         "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, " +
                                 "\"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
@@ -103,40 +109,100 @@ public class ScriptGeneratorTest {
         // test db2 multiple schemas
         Database database2 = new Database();
         database2.setDialect(new DB2Dialect(new DatabaseInfo("DB2/DARWIN")));
-        Catalog catalog1 = database2.addCatalog(valueOf(null));
+        Catalog catalog2 = database2.addCatalog(valueOf(null));
 
-        Table table1 = new Table("t1");
-        table1.setDatabase(database2);
-        Column id1 = table.addColumn("id");
-        id.setTypeCode(Types.INTEGER);
-        id.setTypeName("INTEGER");
-        table1.addColumn(id1);
-        catalog1.addSchema(valueOf("s1")).addTable(table1);
+        Table table2_1 = new Table("t1");
+        table2_1.setDatabase(database2);
+        Column f2_1 = table2_1.addColumn("id");
+        f2_1.setTypeCode(BIGINT);
+        f2_1.setTypeName("BIGINT");
+        table2_1.addColumn(f2_1);
+        catalog2.addSchema(valueOf("s1")).addTable(table2_1);
 
-        Table table2 = new Table("t1");
-        table2.setDatabase(database2);
+        Table table2_2 = new Table("t2");
+        table2_2.setDatabase(database2);
 
-        Column id2 = table.addColumn("id");
-        id.setTypeCode(Types.INTEGER);
-        id.setTypeName("INTEGER");
-        table2.addColumn(id2);
-        catalog1.addSchema(valueOf("s2")).addTable(table2);
+        Column f2_3 = table2_2.addColumn("id");
+        f2_3.setTypeCode(VARCHAR);
+        f2_3.setTypeName("VARCHAR");
+        f2_3.setSize(100);
+        table2_2.addColumn(f2_3);
+        catalog2.addSchema(valueOf("s2")).addTable(table2_2);
 
-        data.add(new Object[]{database2, newArrayList(ScriptType.CREATE),
+        data.add(new Object[]{database2, newArrayList(CREATE), null,
                 newArrayList(
-                        "USE \"s1\"", "CREATE TABLE \"t1\" (\"id\" INTEGER NOT NULL)",
-                        "USE \"s2\"", "CREATE TABLE \"t1\" (\"id\" INTEGER NOT NULL)")
-        });
+                        "USE \"s1\"", "CREATE TABLE \"t1\" (\"id\" BIGINT NOT NULL)",
+                        "USE \"s2\"", "CREATE TABLE \"t2\" (\"id\" VARCHAR(100) NOT NULL)")
+                });
+
+
+        // test create indexes grouping
+        Database database4_11 = new Database();
+        database4_11.setDialect(new MySQLDialect(new DatabaseInfo("MySQL")));
+        Catalog catalog4 = database4_11.addCatalog(valueOf("c1"));
+        Table table4 = new Table("t1");
+
+        Column f4_1 = table4.addColumn("f1");
+        f4_1.setTypeCode(VARCHAR);
+        f4_1.setTypeName("VARCHAR");
+        table4.addColumn(f4_1);
+
+        Column f4_2 = table4.addColumn("f2");
+        f4_2.setTypeCode(FLOAT);
+        f4_2.setTypeName("FLOAT");
+        table4.addColumn(f4_2);
+
+        Column f4_3 = table4.addColumn("f3");
+        f4_3.setTypeCode(DATE);
+        f4_3.setTypeName("DATE");
+        table4.addColumn(f4_3);
+
+        Index index4_1 = new Index("4_1");
+        index4_1.addColumn(f4_1, 1);
+        table4.addIndex(index4_1);
+
+        Index index4_2 = new Index("4_2");
+        index4_2.addColumn(f4_1, 1);
+        index4_2.addColumn(f4_3, 2);
+        table4.addIndex(index4_2);
+
+        Index index4_3 = new Index("4_3");
+        index4_3.addColumn(f4_3, 1);
+        table4.addIndex(index4_3);
+
+        catalog4.addSchema((String) null).addTable(table4);
+
+        Database database4_2 = new Database();
+        NuoDBDialect206 targetDialect4 = new NuoDBDialect206();
+        database4_2.setDialect(targetDialect4);
+
+        data.add(new Object[]{database4_11, newArrayList(CREATE), targetDialect4,
+                newArrayList(
+                        "USE \"c1\"",
+                        "CREATE TABLE \"t1\" (\"f1\" VARCHAR(0) NOT NULL, \"f2\" FLOAT NOT NULL, \"f3\" DATE NOT NULL)",
+                        // comma concatenated indexes
+                        "CREATE INDEX \"idx_t1_4_1\" ON \"t1\" (\"f1\"), " +
+                        "CREATE INDEX \"idx_t1_4_2\" ON \"t1\" (\"f1\", \"f3\"), " +
+                        "CREATE INDEX \"idx_t1_4_3\" ON \"t1\" (\"f3\")"
+                )});
         return data.toArray(new Object[][]{});
     }
 
     @Test(dataProvider = "getScripts")
-    public void testGetScripts(MetaData object, Collection<ScriptType> scriptTypes,
+    public void testGetScripts(MetaData object, Collection<ScriptType> scriptTypes, Dialect targetDialect,
                                Collection<String> expected) throws Exception {
+        scriptGeneratorManager.setTargetDialect(targetDialect == null ? createTargetDialect() : targetDialect);
         scriptGeneratorManager.setScriptTypes(scriptTypes);
 
         Collection<String> scripts = scriptGeneratorManager.getScripts(object);
         assertNotNull(scripts);
         assertEquals(newArrayList(expected), newArrayList(scripts));
+    }
+
+    private Dialect createTargetDialect() {
+        NuoDBDialect dialect = new NuoDBDialect();
+        Database database = new Database();
+        database.setDialect(dialect);
+        return dialect;
     }
 }

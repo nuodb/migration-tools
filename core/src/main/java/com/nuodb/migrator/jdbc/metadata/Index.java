@@ -51,6 +51,10 @@ public class Index extends ConstraintBase {
         super(INDEX);
     }
 
+    public Index(String identifier) {
+        super(INDEX, identifier);
+    }
+
     public Index(Identifier identifier) {
         super(INDEX, identifier);
     }

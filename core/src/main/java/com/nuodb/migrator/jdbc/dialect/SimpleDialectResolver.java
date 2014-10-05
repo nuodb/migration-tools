@@ -44,6 +44,7 @@ public class SimpleDialectResolver extends SimpleCachingServiceResolver<Dialect>
         register(MYSQL, MySQLDialect.class);
         register(NUODB, NuoDBDialect.class);
         register(NUODB_203, NuoDBDialect203.class);
+        register(NUODB_206, NuoDBDialect206.class);
         register(POSTGRE_SQL, PostgreSQLDialect.class);
         register(ORACLE, OracleDialect.class);
         register(MSSQL_SERVER, MSSQLServerDialect.class);

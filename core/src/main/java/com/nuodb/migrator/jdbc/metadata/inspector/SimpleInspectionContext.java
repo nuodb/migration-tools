@@ -56,6 +56,7 @@ public class SimpleInspectionContext implements InspectionContext {
     private Connection connection;
     private InspectionResults inspectionResults;
     private MetaDataType[] objectTypes;
+    private Dialect dialect;
 
     public SimpleInspectionContext(InspectionManager inspectionManager, Connection connection,
                                    InspectionResults inspectionResults, MetaDataType... objectTypes) {
@@ -67,8 +68,12 @@ public class SimpleInspectionContext implements InspectionContext {
 
     @Override
     public Dialect getDialect() throws SQLException {
-        DialectResolver dialectResolver = createService(inspectionManager.getDialectResolver(), DialectResolver.class);
-        return dialectResolver.resolve(getConnection());
+        if (dialect == null) {
+            DialectResolver dialectResolver = createService(
+                    inspectionManager.getDialectResolver(), DialectResolver.class);
+            dialect = dialectResolver.resolve(getConnection());
+        }
+        return dialect;
     }
 
     @Override

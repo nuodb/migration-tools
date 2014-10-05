@@ -39,6 +39,9 @@ public class LoadConstraint {
     private Constraint constraint;
     private LoadConstraints loadConstraints;
 
+    public LoadConstraint() {
+    }
+
     public LoadConstraint(Constraint constraint) {
         this.constraint = constraint;
     }

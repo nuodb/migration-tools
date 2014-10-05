@@ -168,12 +168,12 @@ public class BackupLoader {
         backupLoaderContext.setParallelizer(getParallelizer());
         backupLoaderContext.setRowSetMapper(getRowSetMapper());
         backupLoaderContext.setTimeZone(getTimeZone());
+        openSourceSession(backupLoaderContext);
+        openTargetSession(backupLoaderContext);
         if (backupLoaderContext.isLoadSchema()) {
             backupLoaderContext.setLoadConstraints(
                     createLoadConstraints(backupLoaderContext));
         }
-        openSourceSession(backupLoaderContext);
-        openTargetSession(backupLoaderContext);
         return backupLoaderContext;
     }
 
@@ -229,7 +229,7 @@ public class BackupLoader {
     protected Database openDatabase(Session session) throws SQLException {
         InspectionScope inspectionScope = new TableInspectionScope(null, null, getTableTypes());
         return getInspectionManager().inspect(session.getConnection(), inspectionScope,
-                DATABASE, CATALOG, MetaDataType.SCHEMA, TABLE, COLUMN).getObject(DATABASE);
+                DATABASE, CATALOG, SCHEMA, TABLE, COLUMN).getObject(DATABASE);
     }
 
     protected ValueFormatRegistry createValueFormatRegistry(Session session) throws Exception {
@@ -240,13 +240,10 @@ public class BackupLoader {
         Collection<ScriptExporter> scriptExporters = newArrayList();
         ScriptExporter scriptExporter = getScriptExporter();
         if (scriptExporter != null) {
-            // will close underlying script exporter later manually
-            scriptExporters.add(new ProxyScriptExporter(scriptExporter, false));
+            scriptExporters.add(scriptExporter);
         }
-        SessionFactory targetSessionFactory = backupLoaderContext.getTargetSessionFactory();
-        if (targetSessionFactory != null) {
-            scriptExporters.add(new SessionScriptExporter(targetSessionFactory.openSession()));
-        }
+        scriptExporters.add(new ProxyScriptExporter(new SessionScriptExporter(
+                backupLoaderContext.getTargetSession()), false));
         return new CompositeScriptExporter(scriptExporters);
     }
 
@@ -272,7 +269,7 @@ public class BackupLoader {
         DialectResolver dialectResolver = getDialectResolver();
         Session targetSession = backupLoaderContext.getTargetSession();
         Dialect dialect = targetSession != null ? dialectResolver.resolve(
-                targetSession.getConnection()) : dialectResolver.resolve(NUODB);
+                targetSession.getDatabaseInfo()) : dialectResolver.resolve(NUODB);
 
         dialect.getTranslationManager().setTranslationConfig(getTranslationConfig());
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
@@ -339,6 +336,8 @@ public class BackupLoader {
             scriptExporter.exportScripts(
                     scriptGeneratorManager.getScripts(
                             backupLoaderContext.getBackup().getDatabase()));
+            Session targetSession = backupLoaderContext.getTargetSession();
+            targetSession.getConnection().commit();
         } finally {
             closeQuietly(scriptExporter);
             scriptGeneratorManager.setObjectTypes(objectTypes);
@@ -409,8 +408,10 @@ public class BackupLoader {
         boolean loadPrimaryKey = contains(getObjectTypes(), PRIMARY_KEY);
         boolean loadForeignKey = contains(getObjectTypes(), FOREIGN_KEY);
         Database database = backupLoaderContext.getBackup().getDatabase();
+        Dialect dialect = backupLoaderContext.getTargetSession().getDialect();
         for (Table table : database.getTables()) {
             if (loadIndex) {
+                LoadIndexes loadIndexes = null;
                 Collection<Index> indexes = getNonRepeatingIndexes(table,
                         new Predicate<Index>() {
                             @Override
@@ -433,9 +434,20 @@ public class BackupLoader {
                             }
                         });
                 for (Index index : indexes) {
-                    if (!index.isPrimary()) {
+                    if (index.isPrimary()) {
+                        continue;
+                    }
+                    if (dialect.supportsCreateMultipleIndexes()) {
+                        if (loadIndexes == null) {
+                            loadIndexes = new LoadIndexes();
+                        }
+                        loadIndexes.addIndex(index);
+                    } else {
                         loadConstraints.addIndex(index);
                     }
+                }
+                if (loadIndexes != null) {
+                    loadConstraints.addLoadConstraint(loadIndexes);
                 }
             }
             if (loadPrimaryKey) {

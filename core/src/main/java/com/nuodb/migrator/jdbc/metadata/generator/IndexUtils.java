@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Index;
@@ -35,13 +36,29 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.singleton;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Sergey Bushik
  */
 public class IndexUtils {
+
+    private static final String COMMA = ", ";
+
+    public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
+                                                              final ScriptGeneratorManager scriptGeneratorManager) {
+        return singleton(join(transform(indexes, new Function<Index, String>() {
+            @Override
+            public String apply(Index index) {
+                return get(scriptGeneratorManager.getCreateScripts(index), 0);
+            }
+        }), COMMA));
+    }
 
     public static Collection<Index> getNonRepeatingIndexes(Table table) {
         return getNonRepeatingIndexes(table, null);
@@ -50,7 +67,7 @@ public class IndexUtils {
     /**
      * Bypasses MIG-88 "an index on these columns already exists" and executes predicate for duplicated indexes
      *
-     * @param table to get non repeating indexes for
+     * @param table     to get non repeating indexes for
      * @param predicate receives each duplicate index
      * @return non repeating indexes
      */

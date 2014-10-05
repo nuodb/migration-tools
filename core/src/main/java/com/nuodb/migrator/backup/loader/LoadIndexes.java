@@ -25,16 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.jdbc.metadata.Constraint;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
-import java.sql.Connection;
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public class LoadIndexes extends LoadConstraint {
 
-    Connection getConnection();
+    private Collection<Index> indexes = newArrayList();
+
+    public LoadIndexes() {
+    }
+
+    @Override
+    public Table getTable() {
+        return get(indexes, 0).getTable();
+    }
+
+    @Override
+    public Constraint getConstraint() {
+        return get(indexes, 0);
+    }
+
+    public Collection<Index> getIndexes() {
+        return indexes;
+    }
+
+    public void addIndex(Index index) {
+        this.indexes.add(index);
+    }
 }

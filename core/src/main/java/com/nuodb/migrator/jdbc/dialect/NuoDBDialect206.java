@@ -25,16 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
-
-import java.sql.Connection;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public class NuoDBDialect206 extends NuoDBDialect203 {
 
-    Connection getConnection();
+    public NuoDBDialect206() {
+    }
+
+    public NuoDBDialect206(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
+    }
+
+    /**
+     * Checks whether groping of multiple CREATE INDEX statements, separated each by a comma (, ) is supported. Grouping
+     * of several statements will require only one table scan and performance time for the creation of the index will be
+     * improved.
+     *
+     * @return true
+     */
+    @Override
+    public boolean supportsCreateMultipleIndexes() {
+        return true;
+    }
 }
