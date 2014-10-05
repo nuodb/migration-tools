@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
@@ -96,7 +95,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);
             }
-            if (objectTypes.contains(INDEX)) {
+            if (objectTypes.contains(INDEX) && !dialect.supportsCreateMultipleIndexes()) {
                 Optional<Index> index = tryFind(indexes, new Predicate<Index>() {
                     @Override
                     public boolean apply(Index index) {
@@ -136,7 +135,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(", ").append(generator.getConstraintScript(primaryKey, scriptGeneratorManager));
             }
         }
-        if (objectTypes.contains(INDEX) && dialect.supportsIndexInCreateTable()) {
+        if (objectTypes.contains(INDEX) &&
+                (dialect.supportsIndexInCreateTable() && !dialect.supportsCreateMultipleIndexes())) {
             boolean primary = false;
             for (Index index : indexes) {
                 if (!primary && index.isPrimary()) {

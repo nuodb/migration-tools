@@ -27,7 +27,10 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.google.common.base.Function;
+import com.nuodb.migrator.jdbc.metadata.Constraint;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ProxyScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
@@ -37,12 +40,16 @@ import com.nuodb.migrator.jdbc.session.WorkBase;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.BackupMessages.LOAD_CONSTRAINT_WORK;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static com.nuodb.migrator.jdbc.metadata.generator.IndexUtils.getCreateMultipleIndexes;
 import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getUseSchema;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * Loads schema scripts for a desired object
@@ -63,11 +70,23 @@ public class LoadConstraintWork extends WorkBase {
 
     @Override
     public String getName() {
-        BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        ScriptGeneratorManager scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
-        Constraint constraint = loadConstraint.getConstraint();
+        final BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
+        final ScriptGeneratorManager scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
+        final Constraint constraint = loadConstraint.getConstraint();
         String constraintType = getMessage(getClassName(constraint.getClass()));
-        String constraintName = scriptGeneratorManager.getName(constraint);
+        Collection<Index> indexes = loadConstraint instanceof LoadIndexes ?
+                ((LoadIndexes) loadConstraint).getIndexes() : null;
+        String constraintName;
+        if (!isEmpty(indexes)) {
+            constraintName = join(transform(indexes, new Function<Index, String>() {
+                @Override
+                public String apply(Index index) {
+                    return scriptGeneratorManager.getName(index);
+                }
+            }), ",");
+        } else {
+            constraintName = scriptGeneratorManager.getName(constraint);
+        }
         String tableName = scriptGeneratorManager.getName(constraint.getTable());
         return getMessage(LOAD_CONSTRAINT_WORK, constraintType, constraintName, tableName);
     }
@@ -96,8 +115,14 @@ public class LoadConstraintWork extends WorkBase {
             ScriptGeneratorManager scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
             Schema schema = getLoadConstraint().getTable().getSchema();
             scriptExporter.exportScript(getUseSchema(schema, scriptGeneratorManager));
-            Constraint constraint = getLoadConstraint().getConstraint();
-            scriptExporter.exportScripts(scriptGeneratorManager.getCreateScripts(constraint));
+            Collection<String> scripts;
+            if (loadConstraint instanceof LoadIndexes) {
+                Collection<Index> indexes = ((LoadIndexes) loadConstraint).getIndexes();
+                scripts = getCreateMultipleIndexes(indexes, scriptGeneratorManager);
+            } else {
+                scripts = scriptGeneratorManager.getCreateScripts(loadConstraint.getConstraint());
+            }
+            scriptExporter.exportScripts(scripts);
             getSession().getConnection().commit();
         }
     }

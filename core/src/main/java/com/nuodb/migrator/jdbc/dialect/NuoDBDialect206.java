@@ -28,31 +28,28 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
-
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
-import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleDialectResolver extends SimpleCachingServiceResolver<Dialect> implements DialectResolver {
+public class NuoDBDialect206 extends NuoDBDialect203 {
 
-    public SimpleDialectResolver() {
-        super(SimpleDialect.class);
-        register(DB2, DB2Dialect.class);
-        register(MYSQL, MySQLDialect.class);
-        register(NUODB, NuoDBDialect.class);
-        register(NUODB_203, NuoDBDialect203.class);
-        register(NUODB_206, NuoDBDialect206.class);
-        register(POSTGRE_SQL, PostgreSQLDialect.class);
-        register(ORACLE, OracleDialect.class);
-        register(MSSQL_SERVER, MSSQLServerDialect.class);
-        register(MSSQL_SERVER_2005, MSSQLServer2005Dialect.class);
+    public NuoDBDialect206() {
     }
 
+    public NuoDBDialect206(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
+    }
+
+    /**
+     * Checks whether groping of multiple CREATE INDEX statements, separated each by a comma (, ) is supported. Grouping
+     * of several statements will require only one table scan and performance time for the creation of the index will be
+     * improved.
+     *
+     * @return true
+     */
     @Override
-    protected Dialect createService(Class<? extends Dialect> serviceClass, DatabaseInfo databaseInfo) {
-        return newInstance(serviceClass, databaseInfo);
+    public boolean supportsCreateMultipleIndexes() {
+        return true;
     }
 }

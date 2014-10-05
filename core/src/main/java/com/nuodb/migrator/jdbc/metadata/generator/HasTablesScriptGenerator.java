@@ -32,16 +32,23 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.ForeignKey;
+import com.nuodb.migrator.jdbc.metadata.HasTables;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
 
 import java.util.Collection;
 
-import static com.google.common.collect.Iterables.get;
-import static com.google.common.collect.Iterables.size;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migrator.jdbc.metadata.generator.IndexUtils.getCreateMultipleIndexes;
 import static com.nuodb.migrator.jdbc.metadata.generator.IndexUtils.getNonRepeatingIndexes;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -99,7 +106,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     for (Table table : tables.getTables()) {
                         addTablesCreateScripts(singleton(table), scripts, scriptGeneratorManager);
                     }
-                    addForeignKeysScripts(scripts, true, scriptGeneratorManager);
+                    addForeignKeysCreateScripts(scripts, true, scriptGeneratorManager);
                     break;
                 case META_DATA:
                     addTablesCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
@@ -145,7 +152,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                         addTablesDropScripts(singleton(table), scripts, scriptGeneratorManager);
                         addTablesCreateScripts(singleton(table), scripts, scriptGeneratorManager);
                     }
-                    addForeignKeysScripts(scripts, true, scriptGeneratorManager);
+                    addForeignKeysCreateScripts(scripts, true, scriptGeneratorManager);
                     break;
                 case META_DATA:
                     addTablesDropScripts(tables.getTables(), scripts, scriptGeneratorManager);
@@ -166,7 +173,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     protected void addTablesCreateScripts(Collection<Table> tables, Collection<String> scripts,
                                           ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
-        Dialect dialect = scriptGeneratorManager.getTargetDialect();
         boolean createSequences = scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
                 scriptGeneratorManager.getTargetDialect().supportsSequence();
         boolean createTables = objectTypes.contains(TABLE);
@@ -176,115 +182,170 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         boolean createTriggers = objectTypes.contains(TRIGGER);
         boolean createColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
         if (createSequences) {
-            for (Table table : tables) {
-                if (!addTableScripts(table, scriptGeneratorManager)) {
-                    continue;
-                }
-                for (Sequence sequence : table.getSequences()) {
-                    scripts.addAll(scriptGeneratorManager.getCreateScripts(sequence));
-                }
-            }
+            createSequencesScripts(tables, scripts, scriptGeneratorManager);
         }
         if (createTables) {
-            ScriptGeneratorManager tableScriptGeneratorManager = new ScriptGeneratorManager(scriptGeneratorManager);
-            Collection<Table> primaryTables = (Collection<Table>)
-                    tableScriptGeneratorManager.getAttributes().get(TABLES);
-            tableScriptGeneratorManager.getObjectTypes().remove(FOREIGN_KEY);
-            for (Table table : tables) {
-                if (!addTableScripts(table, scriptGeneratorManager)) {
-                    continue;
-                }
-                scripts.addAll(tableScriptGeneratorManager.getCreateScripts(table));
-                primaryTables.add(table);
-            }
+            createTablesScripts(tables, scripts, scriptGeneratorManager);
         }
-        if (createPrimaryKeys && !createTables) {
-            Collection<String> primaryKeys = newLinkedHashSet();
-            for (Table table : tables) {
-                PrimaryKey primaryKey = table.getPrimaryKey();
-                if (primaryKey != null) {
-                    primaryKeys.addAll(scriptGeneratorManager.getCreateScripts(primaryKey));
-                }
-            }
-            scripts.addAll(primaryKeys);
+        if (createPrimaryKeys) {
+            createPrimaryKeysScripts(tables, scripts, scriptGeneratorManager);
         }
-        if (createIndexes && (!dialect.supportsIndexInCreateTable() || !createTables)) {
-            Collection<String> indexes = newLinkedHashSet();
-            for (Table table : tables) {
-                for (Index index : getNonRepeatingIndexes(table,
-                        new Predicate<Index>() {
-                            @Override
-                            public boolean apply(Index index) {
-                                if (logger.isTraceEnabled()) {
-                                    String indexName = index.getName();
-                                    String tableName = index.getTable().getQualifiedName();
-                                    Iterable<String> columnsNames = transform(index.getTable().getColumns(),
-                                            new Function<Identifiable, String>() {
-                                                @Override
-                                                public String apply(Identifiable column) {
-                                                    return column.getName();
-                                                }
-                                            });
-                                    logger.trace(format("Index %s on table %s skipped " +
-                                            "as index with column(s) %s is added already",
-                                            indexName, tableName, join(columnsNames, ", ")));
-                                }
-                                return true;
-                            }
-                        })) {
-                    boolean uniqueInCreateTable = index.isUnique() && size(index.getColumns()) == 1 &&
-                            !get(index.getColumns(), 0).isNullable() && dialect.supportsUniqueInCreateTable() && createTables;
-                    if (!addTableScripts(index.getTable(), scriptGeneratorManager) || index.isPrimary() ||
-                            uniqueInCreateTable) {
-                        continue;
-                    }
-                    indexes.addAll(scriptGeneratorManager.getCreateScripts(index));
-                }
-            }
-            scripts.addAll(indexes);
+        if (createIndexes) {
+            createIndexesScripts(tables, scripts, scriptGeneratorManager);
         }
         if (createTriggers || createColumnTriggers) {
-            Collection<String> triggers = newLinkedHashSet();
-            for (Table table : tables) {
-                if (!addTableScripts(table, scriptGeneratorManager)) {
-                    continue;
-                }
-                for (Trigger trigger : table.getTriggers()) {
-                    if (trigger.getObjectType() == TRIGGER && createTriggers) {
-                        triggers.addAll(scriptGeneratorManager.getCreateScripts(trigger));
-                    } else if (trigger.getObjectType() == COLUMN_TRIGGER && createColumnTriggers) {
-                        triggers.addAll(scriptGeneratorManager.getCreateScripts(trigger));
-                    }
-                }
-            }
-            scripts.addAll(triggers);
+            createTriggersScripts(tables, scripts, scriptGeneratorManager);
         }
         if (createForeignKeys) {
-            Collection<Table> primaryTables = (Collection<Table>) scriptGeneratorManager.getAttribute(TABLES);
-            Multimap<Table, ForeignKey> foreignKeys =
-                    (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttribute(FOREIGN_KEYS);
-            for (Table table : tables) {
-                for (ForeignKey foreignKey : table.getForeignKeys()) {
-                    Table primaryTable = foreignKey.getPrimaryTable();
-                    Table foreignTable = foreignKey.getForeignTable();
-                    if (!addTableScripts(primaryTable, scriptGeneratorManager) ||
-                            !addTableScripts(foreignTable, scriptGeneratorManager)) {
-                        continue;
-                    }
-                    if (!primaryTables.contains(primaryTable)) {
-                        foreignKeys.put(primaryTable, foreignKey);
+            createForeignKeysScripts(tables, scripts, scriptGeneratorManager);
+        }
+        addForeignKeysCreateScripts(scripts, false, scriptGeneratorManager);
+    }
+
+    protected void createSequencesScripts(Collection<Table> tables, Collection<String> scripts,
+                                          ScriptGeneratorManager scriptGeneratorManager) {
+        for (Table table : tables) {
+            if (!addTableScripts(table, scriptGeneratorManager)) {
+                continue;
+            }
+            for (Sequence sequence : table.getSequences()) {
+                scripts.addAll(scriptGeneratorManager.getCreateScripts(sequence));
+            }
+        }
+    }
+
+    protected void createTablesScripts(Collection<Table> tables, Collection<String> scripts,
+                                       ScriptGeneratorManager scriptGeneratorManager) {
+        ScriptGeneratorManager tableScriptGeneratorManager = new ScriptGeneratorManager(scriptGeneratorManager);
+        Collection<Table> primaryTables = (Collection<Table>)
+                tableScriptGeneratorManager.getAttributes().get(TABLES);
+        tableScriptGeneratorManager.getObjectTypes().remove(FOREIGN_KEY);
+        for (Table table : tables) {
+            if (!addTableScripts(table, scriptGeneratorManager)) {
+                continue;
+            }
+            scripts.addAll(tableScriptGeneratorManager.getCreateScripts(table));
+            primaryTables.add(table);
+        }
+    }
+
+    protected void createPrimaryKeysScripts(Collection<Table> tables, Collection<String> scripts,
+                                            ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean createTables = objectTypes.contains(TABLE);
+        if (createTables) {
+            return;
+        }
+        Collection<String> primaryKeys = newLinkedHashSet();
+        for (Table table : tables) {
+            PrimaryKey primaryKey = table.getPrimaryKey();
+            if (primaryKey != null) {
+                primaryKeys.addAll(scriptGeneratorManager.getCreateScripts(primaryKey));
+            }
+        }
+        scripts.addAll(primaryKeys);
+    }
+
+    protected void createIndexesScripts(Collection<Table> tables, Collection<String> scripts,
+                                        ScriptGeneratorManager scriptGeneratorManager) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean createTables = objectTypes.contains(TABLE);
+        if (createTables && dialect.supportsIndexInCreateTable()) {
+            return;
+        }
+        Collection<String> indexes = newLinkedHashSet();
+        for (Table table : tables) {
+            Collection<Index> nonRepeatingIndexes = getNonRepeatingIndexes(table,
+                    new Predicate<Index>() {
+                        @Override
+                        public boolean apply(Index index) {
+                            if (logger.isTraceEnabled()) {
+                                String indexName = index.getName();
+                                String tableName = index.getTable().getQualifiedName();
+                                Iterable<String> columnsNames = transform(index.getTable().getColumns(),
+                                        new Function<Identifiable, String>() {
+                                            @Override
+                                            public String apply(Identifiable column) {
+                                                return column.getName();
+                                            }
+                                        });
+                                logger.trace(format("Index %s on table %s skipped " +
+                                        "as index with column(s) %s is added already",
+                                        indexName, tableName, join(columnsNames, ", ")));
+                            }
+                            return true;
+                        }
+                    });
+            Collection<Index> multipleIndexes = newArrayList();
+            for (Index nonRepeatingIndex : nonRepeatingIndexes) {
+                boolean uniqueInCreateTable =
+                        nonRepeatingIndex.isUnique() && size(nonRepeatingIndex.getColumns()) == 1 &&
+                                !get(nonRepeatingIndex.getColumns(), 0).isNullable() &&
+                                dialect.supportsUniqueInCreateTable() && createTables;
+                if (addTableScripts(nonRepeatingIndex.getTable(), scriptGeneratorManager) &&
+                        (!nonRepeatingIndex.isPrimary() || !uniqueInCreateTable)) {
+                    if (dialect.supportsCreateMultipleIndexes()) {
+                        multipleIndexes.add(nonRepeatingIndex);
                     } else {
-                        foreignKeys.remove(primaryTable, foreignKey);
-                        scripts.addAll(scriptGeneratorManager.getCreateScripts(foreignKey));
+                        indexes.addAll(scriptGeneratorManager.getCreateScripts(nonRepeatingIndex));
                     }
                 }
             }
+            // join multiple indexes with comma and add this statement to scripts
+            if (dialect.supportsCreateMultipleIndexes()) {
+                indexes.addAll(getCreateMultipleIndexes(multipleIndexes, scriptGeneratorManager));
+            }
         }
-        addForeignKeysScripts(scripts, false, scriptGeneratorManager);
+        scripts.addAll(indexes);
     }
 
-    protected void addForeignKeysScripts(Collection<String> scripts, boolean force,
+    protected void createTriggersScripts(Collection<Table> tables, Collection<String> scripts,
                                          ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean createTriggers = objectTypes.contains(TRIGGER);
+        boolean createColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
+        Collection<String> triggers = newLinkedHashSet();
+        for (Table table : tables) {
+            if (!addTableScripts(table, scriptGeneratorManager)) {
+                continue;
+            }
+            for (Trigger trigger : table.getTriggers()) {
+                if (trigger.getObjectType() == TRIGGER && createTriggers) {
+                    triggers.addAll(scriptGeneratorManager.getCreateScripts(trigger));
+                } else if (trigger.getObjectType() == COLUMN_TRIGGER && createColumnTriggers) {
+                    triggers.addAll(scriptGeneratorManager.getCreateScripts(trigger));
+                }
+            }
+        }
+        scripts.addAll(triggers);
+    }
+
+    protected void createForeignKeysScripts(Collection<Table> tables, Collection<String> scripts,
+                                            ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<Table> primaryTables = (Collection<Table>) scriptGeneratorManager.getAttribute(TABLES);
+        Multimap<Table, ForeignKey> foreignKeys =
+                (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttribute(FOREIGN_KEYS);
+        for (Table table : tables) {
+            for (ForeignKey foreignKey : table.getForeignKeys()) {
+                Table primaryTable = foreignKey.getPrimaryTable();
+                Table foreignTable = foreignKey.getForeignTable();
+                if (!addTableScripts(primaryTable, scriptGeneratorManager) ||
+                        !addTableScripts(foreignTable, scriptGeneratorManager)) {
+                    continue;
+                }
+                if (!primaryTables.contains(primaryTable)) {
+                    foreignKeys.put(primaryTable, foreignKey);
+                } else {
+                    foreignKeys.remove(primaryTable, foreignKey);
+                    scripts.addAll(scriptGeneratorManager.getCreateScripts(foreignKey));
+                }
+            }
+        }
+    }
+
+    protected void addForeignKeysCreateScripts(Collection<String> scripts, boolean force,
+                                               ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         if (objectTypes.contains(FOREIGN_KEY)) {
             Collection<Table> primaryTables = (Collection<Table>) scriptGeneratorManager.getAttribute(TABLES);

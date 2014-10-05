@@ -265,6 +265,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public boolean supportsCreateMultipleIndexes() {
+        return false;
+    }
+
+    @Override
     public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
     }
 

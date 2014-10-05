@@ -53,6 +53,8 @@ public interface Dialect {
 
     boolean supportsColumnCheck();
 
+    boolean supportsCreateMultipleIndexes();
+
     boolean supportsIndexInCreateTable();
 
     boolean supportsTableCheck();

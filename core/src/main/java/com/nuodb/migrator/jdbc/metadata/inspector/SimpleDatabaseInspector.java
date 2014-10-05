@@ -57,32 +57,46 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     @Override
     public void inspect(InspectionContext inspectionContext) throws SQLException {
         Database database = addDatabase(inspectionContext.getInspectionResults());
-        Connection connection = inspectionContext.getConnection();
-        DatabaseMetaData metaData = connection.getMetaData();
 
-        DriverInfo driverInfo = new DriverInfo();
-        driverInfo.setName(metaData.getDriverName());
-        driverInfo.setVersion(metaData.getDriverVersion());
-        driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
-        driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
+        DriverInfo driverInfo = getDriverInfo(inspectionContext);
         if (logger.isDebugEnabled()) {
             logger.debug(format("Driver info %s", driverInfo));
         }
         database.setDriverInfo(driverInfo);
 
-        DatabaseInfo databaseInfo = new DatabaseInfo();
-        databaseInfo.setProductName(metaData.getDatabaseProductName());
-        databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
-        databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
-        databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
+        DatabaseInfo databaseInfo = getDatabaseInfo(inspectionContext);
         if (logger.isDebugEnabled()) {
             logger.debug(format("Database info %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
+
         database.setDialect(inspectionContext.getDialect());
+        Connection connection = inspectionContext.getConnection();
         if (connection instanceof ConnectionProxy) {
             database.setConnectionSpec(((ConnectionProxy) connection).getConnectionSpec());
         }
+    }
+
+    protected DriverInfo getDriverInfo(InspectionContext inspectionContext) throws SQLException {
+        Connection connection = inspectionContext.getConnection();
+        DatabaseMetaData metaData = connection.getMetaData();
+        DriverInfo driverInfo = new DriverInfo();
+        driverInfo.setName(metaData.getDriverName());
+        driverInfo.setVersion(metaData.getDriverVersion());
+        driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
+        driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
+        return driverInfo;
+    }
+
+    protected DatabaseInfo getDatabaseInfo(InspectionContext inspectionContext) throws SQLException {
+        Connection connection = inspectionContext.getConnection();
+        DatabaseMetaData metaData = connection.getMetaData();
+        DatabaseInfo databaseInfo = new DatabaseInfo();
+        databaseInfo.setProductName(metaData.getDatabaseProductName());
+        databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
+        databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
+        databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
+        return databaseInfo;
     }
 
     @Override

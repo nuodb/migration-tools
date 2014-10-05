@@ -168,12 +168,12 @@ public class BackupLoader {
         backupLoaderContext.setParallelizer(getParallelizer());
         backupLoaderContext.setRowSetMapper(getRowSetMapper());
         backupLoaderContext.setTimeZone(getTimeZone());
+        openSourceSession(backupLoaderContext);
+        openTargetSession(backupLoaderContext);
         if (backupLoaderContext.isLoadSchema()) {
             backupLoaderContext.setLoadConstraints(
                     createLoadConstraints(backupLoaderContext));
         }
-        openSourceSession(backupLoaderContext);
-        openTargetSession(backupLoaderContext);
         return backupLoaderContext;
     }
 
@@ -409,8 +409,10 @@ public class BackupLoader {
         boolean loadPrimaryKey = contains(getObjectTypes(), PRIMARY_KEY);
         boolean loadForeignKey = contains(getObjectTypes(), FOREIGN_KEY);
         Database database = backupLoaderContext.getBackup().getDatabase();
+        Dialect dialect = backupLoaderContext.getTargetSession().getDialect();
         for (Table table : database.getTables()) {
             if (loadIndex) {
+                LoadIndexes loadIndexes = null;
                 Collection<Index> indexes = getNonRepeatingIndexes(table,
                         new Predicate<Index>() {
                             @Override
@@ -433,9 +435,20 @@ public class BackupLoader {
                             }
                         });
                 for (Index index : indexes) {
-                    if (!index.isPrimary()) {
+                    if (index.isPrimary()) {
+                        continue;
+                    }
+                    if (dialect.supportsCreateMultipleIndexes()) {
+                        if (loadIndexes == null) {
+                            loadIndexes = new LoadIndexes();
+                        }
+                        loadIndexes.addIndex(index);
+                    } else {
                         loadConstraints.addIndex(index);
                     }
+                }
+                if (loadIndexes != null) {
+                    loadConstraints.addLoadConstraint(loadIndexes);
                 }
             }
             if (loadPrimaryKey) {

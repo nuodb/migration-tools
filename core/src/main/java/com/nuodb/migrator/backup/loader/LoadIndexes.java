@@ -25,34 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.Constraint;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
-import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleDialectResolver extends SimpleCachingServiceResolver<Dialect> implements DialectResolver {
+public class LoadIndexes extends LoadConstraint {
 
-    public SimpleDialectResolver() {
-        super(SimpleDialect.class);
-        register(DB2, DB2Dialect.class);
-        register(MYSQL, MySQLDialect.class);
-        register(NUODB, NuoDBDialect.class);
-        register(NUODB_203, NuoDBDialect203.class);
-        register(NUODB_206, NuoDBDialect206.class);
-        register(POSTGRE_SQL, PostgreSQLDialect.class);
-        register(ORACLE, OracleDialect.class);
-        register(MSSQL_SERVER, MSSQLServerDialect.class);
-        register(MSSQL_SERVER_2005, MSSQLServer2005Dialect.class);
+    private Collection<Index> indexes = newArrayList();
+
+    public LoadIndexes() {
     }
 
     @Override
-    protected Dialect createService(Class<? extends Dialect> serviceClass, DatabaseInfo databaseInfo) {
-        return newInstance(serviceClass, databaseInfo);
+    public Table getTable() {
+        return get(indexes, 0).getTable();
+    }
+
+    @Override
+    public Constraint getConstraint() {
+        return get(indexes, 0);
+    }
+
+    public Collection<Index> getIndexes() {
+        return indexes;
+    }
+
+    public void addIndex(Index index) {
+        this.indexes.add(index);
     }
 }

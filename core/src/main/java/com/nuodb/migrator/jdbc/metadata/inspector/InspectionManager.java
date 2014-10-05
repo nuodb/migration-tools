@@ -57,7 +57,10 @@ public class InspectionManager {
     private Collection<Inspector> inspectors = newPrioritySet();
 
     public InspectionManager() {
-        addInspector(new SimpleDatabaseInspector());
+        InspectorResolver databaseInspector = new InspectorResolver(DATABASE, new SimpleDatabaseInspector());
+        databaseInspector.register(NUODB, new NuoDBDatabaseInspector());
+        addInspector(databaseInspector);
+
         addInspector(new SimpleCatalogInspector());
 
         InspectorResolver schemaInspector = new InspectorResolver(SCHEMA, new SimpleSchemaInspector());
