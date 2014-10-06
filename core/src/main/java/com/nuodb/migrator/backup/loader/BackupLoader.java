@@ -327,7 +327,6 @@ public class BackupLoader {
         ScriptGeneratorManager scriptGeneratorManager =
                 backupLoaderContext.getScriptGeneratorManager();
         Collection<MetaDataType> objectTypes = getObjectTypes();
-        SessionFactory targetSessionFactory = backupLoaderContext.getTargetSessionFactory();
         ScriptExporter scriptExporter = createScriptExporter(backupLoaderContext);
         try {
             scriptExporter.open();
@@ -337,6 +336,8 @@ public class BackupLoader {
             scriptExporter.exportScripts(
                     scriptGeneratorManager.getScripts(
                             backupLoaderContext.getBackup().getDatabase()));
+            Session targetSession = backupLoaderContext.getTargetSession();
+            targetSession.getConnection().commit();
         } finally {
             closeQuietly(scriptExporter);
             scriptGeneratorManager.setObjectTypes(objectTypes);
