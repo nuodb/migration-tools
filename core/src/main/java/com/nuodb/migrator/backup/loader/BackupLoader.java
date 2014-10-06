@@ -229,7 +229,7 @@ public class BackupLoader {
     protected Database openDatabase(Session session) throws SQLException {
         InspectionScope inspectionScope = new TableInspectionScope(null, null, getTableTypes());
         return getInspectionManager().inspect(session.getConnection(), inspectionScope,
-                DATABASE, CATALOG, MetaDataType.SCHEMA, TABLE, COLUMN).getObject(DATABASE);
+                DATABASE, CATALOG, SCHEMA, TABLE, COLUMN).getObject(DATABASE);
     }
 
     protected ValueFormatRegistry createValueFormatRegistry(Session session) throws Exception {
@@ -240,13 +240,10 @@ public class BackupLoader {
         Collection<ScriptExporter> scriptExporters = newArrayList();
         ScriptExporter scriptExporter = getScriptExporter();
         if (scriptExporter != null) {
-            // will close underlying script exporter later manually
-            scriptExporters.add(new ProxyScriptExporter(scriptExporter, false));
+            scriptExporters.add(scriptExporter);
         }
-        SessionFactory targetSessionFactory = backupLoaderContext.getTargetSessionFactory();
-        if (targetSessionFactory != null) {
-            scriptExporters.add(new SessionScriptExporter(targetSessionFactory.openSession()));
-        }
+        scriptExporters.add(new ProxyScriptExporter(new SessionScriptExporter(
+                backupLoaderContext.getTargetSession()), false));
         return new CompositeScriptExporter(scriptExporters);
     }
 
@@ -330,6 +327,7 @@ public class BackupLoader {
         ScriptGeneratorManager scriptGeneratorManager =
                 backupLoaderContext.getScriptGeneratorManager();
         Collection<MetaDataType> objectTypes = getObjectTypes();
+        SessionFactory targetSessionFactory = backupLoaderContext.getTargetSessionFactory();
         ScriptExporter scriptExporter = createScriptExporter(backupLoaderContext);
         try {
             scriptExporter.open();
