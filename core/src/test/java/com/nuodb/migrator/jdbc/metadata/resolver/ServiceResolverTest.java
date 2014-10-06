@@ -74,16 +74,16 @@ public class ServiceResolverTest {
     @DataProvider(name = "resolveService")
     public Object[][] createResolveServiceData() {
         return new Object[][]{
-                {"NuoDB", "1.0.1-129", 18, 2, new ServiceInstance("service-1")},
-                {"NuoDB", "1.0.1-128", 16, 0, new ServiceInstance("service-2")},
-                {"NuoDB", "1.0.1-128", 17, 0, new ServiceInstance("service-3")},
-                {"NuoDB", "1.0.1-128", 17, 2, new ServiceInstance("service-4")},
+                {"NuoDB", "1.0.1-129", 18, 2, 18, new ServiceInstance("service-1")},
+                {"NuoDB", "1.0.1-128", 16, 0, 16, new ServiceInstance("service-2")},
+                {"NuoDB", "1.0.1-128", 17, 0, 17, new ServiceInstance("service-3")},
+                {"NuoDB", "1.0.1-128", 17, 2, 17, new ServiceInstance("service-4")},
         };
     }
 
     @Test(dataProvider = "resolveService")
     public void testResolveService(String productName, String productVersion, int majorVersion, int minorVersion,
-                                   Service service) throws Exception {
+                                   int platformVersion, Service service) throws Exception {
         DatabaseMetaData metaData = createDatabaseMetaData(productName, productVersion, majorVersion, minorVersion);
         Connection connection = mock(Connection.class);
         given(connection.getMetaData()).willReturn(metaData);
@@ -94,7 +94,7 @@ public class ServiceResolverTest {
         ResultSet resultSet = mock(ResultSet.class);
         given(statement.executeQuery(anyString())).willReturn(resultSet);
         given(resultSet.next()).willReturn(true);
-        given(resultSet.getInt(1)).willReturn(majorVersion);
+        given(resultSet.getInt(1)).willReturn(platformVersion);
 
         assertEquals(serviceResolver.resolve(connection), service);
 
