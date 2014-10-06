@@ -34,6 +34,8 @@ import org.testng.annotations.Test;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -85,6 +87,14 @@ public class ServiceResolverTest {
         DatabaseMetaData metaData = createDatabaseMetaData(productName, productVersion, majorVersion, minorVersion);
         Connection connection = mock(Connection.class);
         given(connection.getMetaData()).willReturn(metaData);
+        given(metaData.getConnection()).willReturn(connection);
+
+        Statement statement = mock(Statement.class);
+        given(connection.createStatement()).willReturn(statement);
+        ResultSet resultSet = mock(ResultSet.class);
+        given(statement.executeQuery(anyString())).willReturn(resultSet);
+        given(resultSet.next()).willReturn(true);
+        given(resultSet.getInt(1)).willReturn(majorVersion);
 
         assertEquals(serviceResolver.resolve(connection), service);
 

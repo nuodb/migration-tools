@@ -272,7 +272,7 @@ public class BackupLoader {
         DialectResolver dialectResolver = getDialectResolver();
         Session targetSession = backupLoaderContext.getTargetSession();
         Dialect dialect = targetSession != null ? dialectResolver.resolve(
-                targetSession.getConnection()) : dialectResolver.resolve(NUODB);
+                targetSession.getDatabaseInfo()) : dialectResolver.resolve(NUODB);
 
         dialect.getTranslationManager().setTranslationConfig(getTranslationConfig());
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();

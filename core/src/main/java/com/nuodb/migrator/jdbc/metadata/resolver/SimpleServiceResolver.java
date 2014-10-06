@@ -28,8 +28,8 @@
 package com.nuodb.migrator.jdbc.metadata.resolver;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.NuoDBDatabaseInfo;
 import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.utils.ReflectionUtils;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
@@ -38,6 +38,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -45,6 +46,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("all")
 public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     private final transient Logger logger = getLogger(getClass());
@@ -87,7 +89,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     @Override
     public T resolve(Session session) throws SQLException {
-        return resolve(session.getConnection());
+        return resolve(session.getDatabaseInfo());
     }
 
     @Override
@@ -171,8 +173,13 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
     }
 
     @Override
-    public T resolve(DatabaseMetaData databaseMetaData) throws SQLException {
-        return resolve(new DatabaseInfo(databaseMetaData));
+    public T resolve(DatabaseMetaData metaData) throws SQLException {
+        return resolve(getDatabaseInfo(metaData));
+    }
+
+    protected DatabaseInfo getDatabaseInfo(DatabaseMetaData metaData) throws SQLException {
+        DatabaseInfo databaseInfo = new DatabaseInfo(metaData);
+        return NUODB.isAssignable(databaseInfo) ? new NuoDBDatabaseInfo(metaData) : databaseInfo;
     }
 
     protected T createService(Class<? extends T> serviceClass, DatabaseInfo databaseInfo) {

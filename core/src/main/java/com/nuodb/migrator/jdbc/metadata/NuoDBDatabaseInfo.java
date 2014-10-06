@@ -28,9 +28,15 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.ComparisonChain;
+import com.nuodb.migrator.jdbc.query.StatementAction;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static com.google.common.collect.Ordering.natural;
 
@@ -39,7 +45,9 @@ import static com.google.common.collect.Ordering.natural;
  */
 public class NuoDBDatabaseInfo extends DatabaseInfo {
 
-    private Integer protocolVersion;
+    private static final String QUERY = "SELECT GETEFFECTIVEPLATFORMVERSION() FROM DUAL";
+
+    private Integer platformVersion;
 
     public NuoDBDatabaseInfo() {
     }
@@ -63,37 +71,78 @@ public class NuoDBDatabaseInfo extends DatabaseInfo {
 
     public NuoDBDatabaseInfo(DatabaseMetaData metaData) throws SQLException {
         super(metaData);
+        this.platformVersion = new StatementTemplate(metaData.getConnection()).executeStatement(
+                new StatementFactory<Statement>() {
+                    @Override
+                    public Statement createStatement(Connection connection) throws SQLException {
+                        return connection.createStatement();
+                    }
+                },
+                new StatementAction<Statement, Integer>() {
+                    @Override
+                    public Integer executeStatement(Statement statement) throws SQLException {
+                        ResultSet resultSet = statement.executeQuery(QUERY);
+                        return resultSet.next() ? resultSet.getInt(1) : null;
+                    }
+                }
+        );
+    }
+
+    public NuoDBDatabaseInfo(DatabaseMetaData metaData, Integer platformVersion) throws SQLException {
+        super(metaData);
+        this.platformVersion = platformVersion;
     }
 
     public NuoDBDatabaseInfo(String productName, String productVersion, Integer majorVersion,
-                             Integer minorVersion, Integer protocolVersion) {
+                             Integer minorVersion, Integer platformVersion) {
         super(productName, productVersion, majorVersion, minorVersion);
-        setProtocolVersion(protocolVersion);
+        setPlatformVersion(platformVersion);
     }
 
-    public Integer getProtocolVersion() {
-        return protocolVersion;
+    public Integer getPlatformVersion() {
+        return platformVersion;
     }
 
-    public void setProtocolVersion(Integer protocolVersion) {
-        this.protocolVersion = protocolVersion;
+    public void setPlatformVersion(Integer platformVersion) {
+        this.platformVersion = platformVersion;
     }
 
     protected ComparisonChain isAssignable(DatabaseInfo databaseInfo, ComparisonChain comparator) {
         comparator = isAssignableProductName(databaseInfo, comparator);
         comparator = isAssignableProductVersion(databaseInfo, comparator);
-        comparator = isAssignableProtocolVersion(databaseInfo, comparator);
+        comparator = isAssignablePlatformVersion(databaseInfo, comparator);
         comparator = isAssignableMajorVersion(databaseInfo, comparator);
         comparator = isAssignableMinorVersion(databaseInfo, comparator);
         return comparator;
     }
 
-    protected ComparisonChain isAssignableProtocolVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+    protected ComparisonChain isAssignablePlatformVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
         if (databaseInfo instanceof NuoDBDatabaseInfo) {
-            Integer protocolVersion = ((NuoDBDatabaseInfo) databaseInfo).getProtocolVersion();
-            return comparator.compare(getProtocolVersion(), protocolVersion, natural().nullsFirst());
+            Integer platformVersion = ((NuoDBDatabaseInfo) databaseInfo).getPlatformVersion();
+            return comparator.compare(getPlatformVersion(), platformVersion, natural().nullsFirst());
         } else {
             return comparator;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        NuoDBDatabaseInfo that = (NuoDBDatabaseInfo) o;
+
+        if (platformVersion != null ? !platformVersion.equals(that.platformVersion) : that.platformVersion != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (platformVersion != null ? platformVersion.hashCode() : 0);
+        return result;
     }
 }

@@ -82,15 +82,19 @@ public class SessionFactories {
     public static SessionFactory newSessionFactory(final ConnectionProvider connectionProvider,
                                                    final DialectResolver dialectResolver) {
         return new SessionFactoryBase() {
+
+            private Dialect dialect;
+
             @Override
             protected SessionBase open(Map<Object, Object> context) throws SQLException {
                 Connection connection = connectionProvider.getConnection();
-                Dialect dialect;
-                try {
-                    dialect = dialectResolver.resolve(connection);
-                } catch (SQLException exception) {
-                    connection.close();
-                    throw exception;
+                if (dialect == null) {
+                    try {
+                        dialect = dialectResolver.resolve(connection);
+                    } catch (SQLException exception) {
+                        connection.close();
+                        throw exception;
+                    }
                 }
                 return new SessionBase(this, connection, dialect, context);
             }

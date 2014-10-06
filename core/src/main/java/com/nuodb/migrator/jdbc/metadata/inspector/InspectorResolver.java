@@ -131,6 +131,6 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector<
     }
 
     public Inspector resolve(InspectionContext inspectionContext) throws SQLException {
-        return resolve(inspectionContext.getConnection().getMetaData());
+        return resolve(inspectionContext.getDialect().getDatabaseInfo());
     }
 }

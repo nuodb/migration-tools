@@ -30,8 +30,8 @@ package com.nuodb.migrator.jdbc.metadata;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.io.Serializable;
-
-import static java.lang.String.format;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
@@ -40,8 +40,8 @@ public class DriverInfo implements Serializable {
 
     private String name;
     private String version;
-    private int minorVersion;
     private int majorVersion;
+    private int minorVersion;
 
     public DriverInfo() {
     }
@@ -51,6 +51,13 @@ public class DriverInfo implements Serializable {
         this.version = version;
         this.minorVersion = minorVersion;
         this.majorVersion = majorVersion;
+    }
+
+    public DriverInfo(DatabaseMetaData metaData) throws SQLException {
+        this.name = metaData.getDriverName();
+        this.version = metaData.getDriverVersion();
+        this.majorVersion = metaData.getDriverMajorVersion();
+        this.minorVersion = metaData.getDriverMinorVersion();
     }
 
     public String getName() {

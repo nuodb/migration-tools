@@ -29,49 +29,18 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.NuoDBDatabaseInfo;
-import com.nuodb.migrator.jdbc.query.StatementAction;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
 public class NuoDBDatabaseInspector extends SimpleDatabaseInspector {
 
-    private static final String QUERY = "SELECT GETEFFECTIVEPLATFORMVERSION() FROM DUAL";
 
     @Override
     protected DatabaseInfo getDatabaseInfo(InspectionContext inspectionContext)
             throws SQLException {
-        Connection connection = inspectionContext.getConnection();
-        DatabaseMetaData metaData = connection.getMetaData();
-        NuoDBDatabaseInfo databaseInfo = new NuoDBDatabaseInfo();
-        databaseInfo.setProductName(metaData.getDatabaseProductName());
-        databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
-        databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
-        databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
-        Integer protocolVersion = new StatementTemplate(inspectionContext.getConnection()).executeStatement(
-                new StatementFactory<Statement>() {
-                    @Override
-                    public Statement createStatement(Connection connection) throws SQLException {
-                        return connection.createStatement();
-                    }
-                },
-                new StatementAction<Statement, Integer>() {
-                    @Override
-                    public Integer executeStatement(Statement statement) throws SQLException {
-                        ResultSet resultSet = statement.executeQuery(QUERY);
-                        return resultSet.next() ? resultSet.getInt(1) : null;
-                    }
-                }
-        );
-        databaseInfo.setProtocolVersion(protocolVersion);
-        return databaseInfo;
+        return new NuoDBDatabaseInfo(inspectionContext.getConnection().getMetaData());
     }
 }

@@ -35,7 +35,6 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -78,25 +77,11 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     }
 
     protected DriverInfo getDriverInfo(InspectionContext inspectionContext) throws SQLException {
-        Connection connection = inspectionContext.getConnection();
-        DatabaseMetaData metaData = connection.getMetaData();
-        DriverInfo driverInfo = new DriverInfo();
-        driverInfo.setName(metaData.getDriverName());
-        driverInfo.setVersion(metaData.getDriverVersion());
-        driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
-        driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
-        return driverInfo;
+        return new DriverInfo(inspectionContext.getConnection().getMetaData());
     }
 
     protected DatabaseInfo getDatabaseInfo(InspectionContext inspectionContext) throws SQLException {
-        Connection connection = inspectionContext.getConnection();
-        DatabaseMetaData metaData = connection.getMetaData();
-        DatabaseInfo databaseInfo = new DatabaseInfo();
-        databaseInfo.setProductName(metaData.getDatabaseProductName());
-        databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
-        databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
-        databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
-        return databaseInfo;
+        return new DatabaseInfo(inspectionContext.getConnection().getMetaData());
     }
 
     @Override
