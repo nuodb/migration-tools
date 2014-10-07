@@ -154,6 +154,8 @@ public class CliRunSupport extends CliSupport {
                 withMinimum(1);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
+
         Option driver = newBasicOptionBuilder().
                 withName(SOURCE_DRIVER).
                 withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
