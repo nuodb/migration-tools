@@ -555,6 +555,28 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
+    protected Group createTableGroup() {
+        GroupBuilder group = newGroupBuilder().
+                withName(getMessage(TABLE_GROUP_NAME)).
+                withMaximum(MAX_VALUE);
+
+        group.withOption(createTableOption());
+        return group.build();
+    }
+
+    protected Option createTableOption() {
+        return newBasicOptionBuilder()
+                .withName(TABLE)
+                .withDescription(getMessage(TABLE_OPTION_DESCRIPTION))
+                .withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TABLE_ARGUMENT_NAME)).
+                                withMinimum(1).
+                                withMaximum(MAX_VALUE).
+                                withRequired(true).build()
+                ).build();
+    }
+
     protected Group createJdbcTypeGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(JDBC_TYPE_GROUP_NAME));
 

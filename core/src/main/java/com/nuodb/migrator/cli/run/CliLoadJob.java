@@ -35,13 +35,24 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.spec.LoadJobSpec;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
+import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newEitherOfFilters;
+import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newNameEqualsFilter;
+import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newNameMatchesFilter;
+import static com.nuodb.migrator.match.AntRegexCompiler.isPattern;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.Integer.MAX_VALUE;
@@ -91,6 +102,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
 
     protected Option createDataMigrationGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(DATA_MIGRATION_GROUP_NAME));
+        group.withOption(createTableGroup());
         group.withOption(createCommitGroup());
         group.withOption(createInsertTypeGroup());
         group.withOption(createTimeZoneOption());
@@ -151,6 +163,23 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
     }
 
     protected void parseDataMigrationGroup(OptionSet optionSet, LoadJobSpec jobSpec) {
+        // TODO: add handling of --table.exclude switch
+        MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
+        Collection<MetaDataFilter<Identifiable>> tableFilters = newArrayList();
+        for (String table : optionSet.<String>getValues(TABLE)) {
+            MetaDataFilter<Identifiable> tableFilter;
+            boolean qualifyName = table.contains(".");
+            if (isPattern(table)) {
+                tableFilter = newNameMatchesFilter(MetaDataType.TABLE, qualifyName, table);
+            } else {
+                tableFilter = newNameEqualsFilter(MetaDataType.TABLE, qualifyName, table);
+            }
+            tableFilters.add(tableFilter);
+        }
+        if (!isEmpty(tableFilters)) {
+            metaDataFilterManager.addMetaDataFilter(newEitherOfFilters(MetaDataType.TABLE, tableFilters));
+        }
+        jobSpec.setMetaDataFilterManager(metaDataFilterManager);
         jobSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
         jobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         parseInsertTypeGroup(optionSet, jobSpec);

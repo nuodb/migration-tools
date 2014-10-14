@@ -44,11 +44,9 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -105,20 +103,13 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
     /**
      * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
+    @Override
     protected Group createTableGroup() {
-        GroupBuilder group = newGroupBuilder().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(MAX_VALUE);
+        GroupBuilder group = newGroupBuilder().
+                withName(getMessage(TABLE_GROUP_NAME)).
+                withMaximum(MAX_VALUE);
 
-        Option table = newBasicOptionBuilder().
-                withName(TABLE).
-                withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withMaximum(Integer.MAX_VALUE).
-                                withRequired(true).build()
-                ).build();
-        group.withOption(table);
+        group.withOption(createTableOption());
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);

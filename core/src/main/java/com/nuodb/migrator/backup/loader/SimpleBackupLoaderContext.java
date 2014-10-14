@@ -33,6 +33,7 @@ import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.session.Session;
@@ -71,11 +72,12 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private LoadTables loadTables;
     private Parallelizer parallelizer;
     private Collection<MigrationMode> migrationModes;
+    private RowSetMapper rowSetMapper;
     private ConnectionSpec sourceSpec;
     private Session sourceSession;
     private SessionFactory sourceSessionFactory;
+    private Collection<Table> sourceTables;
     private ConnectionSpec targetSpec;
-    private RowSetMapper rowSetMapper;
     private Session targetSession;
     private SessionFactory targetSessionFactory;
     private ScriptExporter scriptExporter;
@@ -250,6 +252,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public void setSourceSessionFactory(SessionFactory sourceSessionFactory) {
         this.sourceSessionFactory = sourceSessionFactory;
+    }
+
+    @Override
+    public Collection<Table> getSourceTables() {
+        return sourceTables;
+    }
+
+    @Override
+    public void setSourceTables(Collection<Table> sourceTables) {
+        this.sourceTables = sourceTables;
     }
 
     @Override
