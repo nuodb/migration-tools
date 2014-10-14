@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.utils.PrioritySet;
 
@@ -61,9 +62,9 @@ public class ScriptGeneratorManager {
     private Map<String, Object> attributes = newHashMap();
     private PrioritySet<NamingStrategy<? extends MetaData>> namingStrategies = newPrioritySet();
     private PrioritySet<ScriptGenerator<? extends MetaData>> scriptGenerators = newPrioritySet();
-
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private Collection<MetaDataType> objectTypes = newHashSet(TYPES);
+    private MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
 
     public ScriptGeneratorManager() {
         addScriptGenerator(new HasTablesScriptGenerator(), LOW);
@@ -96,6 +97,8 @@ public class ScriptGeneratorManager {
 
         namingStrategies.addAll(scriptGeneratorManager.getNamingStrategies());
         scriptGenerators.addAll(scriptGeneratorManager.getScriptGenerators());
+
+        metaDataFilterManager = scriptGeneratorManager.getMetaDataFilterManager();
     }
 
     public String getName(MetaData object) {
@@ -245,6 +248,14 @@ public class ScriptGeneratorManager {
 
     public void setObjectTypes(Collection<MetaDataType> objectTypes) {
         this.objectTypes = objectTypes;
+    }
+
+    public MetaDataFilterManager getMetaDataFilterManager() {
+        return metaDataFilterManager;
+    }
+
+    public void setMetaDataFilterManager(MetaDataFilterManager metaDataFilterManager) {
+        this.metaDataFilterManager = metaDataFilterManager;
     }
 
     public PrioritySet<NamingStrategy<? extends MetaData>> getNamingStrategies() {

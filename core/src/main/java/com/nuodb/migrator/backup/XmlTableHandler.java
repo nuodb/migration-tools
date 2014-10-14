@@ -33,9 +33,12 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.spec.TableSpec;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
@@ -146,17 +149,9 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
             skip = indexOf(tableTypes, equalTo(table.getType())) == -1;
         }
         if (!skip) {
-            Collection<TableSpec> tableSpecs = metaDataSpec != null ? metaDataSpec.getTableSpecs() : null;
-            if (!isEmpty(tableSpecs)) {
-                skip = true;
-                Database database = table.getDatabase();
-                for (TableSpec tableSpec : tableSpecs) {
-                    if (database.findTable(tableSpec.getTable()).equals(table)) {
-                        skip = false;
-                        break;
-                    }
-                }
-            }
+            MetaDataFilter tableFilter = metaDataSpec != null ?
+                    metaDataSpec.getMetaDataFilter(MetaDataType.TABLE) : null;
+            skip = !(tableFilter == null || tableFilter.accepts(table));
         }
         return skip;
     }

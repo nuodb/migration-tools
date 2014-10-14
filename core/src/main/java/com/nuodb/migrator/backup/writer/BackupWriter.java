@@ -43,6 +43,8 @@ import com.nuodb.migrator.jdbc.metadata.HasTables;
 import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
@@ -56,7 +58,6 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.spec.MigrationMode;
 import com.nuodb.migrator.spec.QuerySpec;
-import com.nuodb.migrator.spec.TableSpec;
 import com.nuodb.migrator.utils.concurrent.ForkJoinPool;
 import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 import org.slf4j.Logger;
@@ -117,7 +118,7 @@ public class BackupWriter {
     private Collection<WriteQuery> writeQueries = newArrayList();
 
     public void addQuery(String query) {
-        addWriteQuery(createWriteQuery(query), getWriteQueries());
+        getWriteQueries().add(createWriteQuery(query));
     }
 
     public void addTable(Table table, Collection<Column> columns) {
@@ -144,7 +145,7 @@ public class BackupWriter {
 
     protected void addTable(Table table, Collection<Column> columns, String filter,
                             QueryLimit queryLimit, Collection<WriteQuery> writeQueries) {
-        addWriteQuery(createWriteQuery(table, columns, filter, queryLimit), writeQueries);
+        writeQueries.add(createWriteQuery(table, columns, filter, queryLimit));
     }
 
     /**
@@ -177,8 +178,8 @@ public class BackupWriter {
             addTable = addTable && (catalog == null || table.getCatalog().getIdentifier().equals(catalog));
             addTable = addTable && (schema == null || table.getSchema().getIdentifier().equals(schema));
             if (addTable) {
-                addWriteQuery(createWriteQuery(
-                        table, table.getColumns(), null, getQueryLimit()), writeQueries);
+                writeQueries.add(createWriteQuery(
+                        table, table.getColumns(), null, getQueryLimit()));
             } else {
                 if (logger.isTraceEnabled()) {
                     logger.trace(format("Table %s %s skipped",
@@ -186,10 +187,6 @@ public class BackupWriter {
                 }
             }
         }
-    }
-
-    protected void addWriteQuery(WriteQuery writeQuery, Collection<WriteQuery> writeQueries) {
-        writeQueries.add(writeQuery);
     }
 
     public void addTable(Table table) {
@@ -366,29 +363,18 @@ public class BackupWriter {
     protected Collection<WriteQuery> createWriteQueries(BackupWriterContext backupWriterContext) {
         Collection<WriteQuery> writeQueries = newArrayList(getWriteQueries());
         Database database = backupWriterContext.getDatabase();
-        Collection<TableSpec> tableSpecs = getTableSpecs();
-        if (isEmpty(tableSpecs)) {
-            addTables(database, getInspectionScope(), writeQueries);
-        } else {
-            for (TableSpec tableSpec : tableSpecs) {
-                Table table = database.findTable(tableSpec.getTable());
-                Collection<Column> columns;
-                if (isEmpty(tableSpec.getColumns())) {
-                    columns = table.getColumns();
-                } else {
-                    columns = newArrayList();
-                    for (String column : tableSpec.getColumns()) {
-                        columns.add(table.getColumn(column));
-                    }
-                }
-                String filter = tableSpec.getFilter();
-                writeQueries.add(createWriteQuery(table, columns, filter, getQueryLimit()));
+        MetaDataFilter tableFilter = getMetaDataFilter(MetaDataType.TABLE);
+        for (Table table : database.getTables()) {
+            if (tableFilter == null || tableFilter.supports(table)) {
+                WriteQuery writeQuery = createWriteQuery(table, table.getColumns(), null, getQueryLimit());
+                writeQueries.add(writeQuery);
             }
         }
         Collection<QuerySpec> querySpecs = getQuerySpecs();
         if (!isEmpty(querySpecs)) {
             for (QuerySpec querySpec : querySpecs) {
-                addWriteQuery(createWriteQuery(querySpec.getQuery()), writeQueries);
+                WriteQuery writeQuery = createWriteQuery(querySpec.getQuery());
+                writeQueries.add(writeQuery);
             }
         }
         return writeQueries;
@@ -432,9 +418,9 @@ public class BackupWriter {
         return metaDataSpec != null ? metaDataSpec.getTableTypes() : null;
     }
 
-    protected Collection<TableSpec> getTableSpecs() {
+    protected MetaDataFilter getMetaDataFilter(MetaDataType objectType) {
         final MetaDataSpec metaDataSpec = getMetaDataSpec();
-        return metaDataSpec != null ? metaDataSpec.getTableSpecs() : null;
+        return metaDataSpec != null ? metaDataSpec.getMetaDataFilter(objectType) : null;
     }
 
     public Database getDatabase() {

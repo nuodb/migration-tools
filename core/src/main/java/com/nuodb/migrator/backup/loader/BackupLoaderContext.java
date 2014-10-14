@@ -33,6 +33,7 @@ import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.session.Session;
@@ -121,6 +122,10 @@ public interface BackupLoaderContext {
     SessionFactory getSourceSessionFactory();
 
     void setSourceSessionFactory(SessionFactory sourceSessionFactory);
+
+    Collection<Table> getSourceTables();
+
+    void setSourceTables(Collection<Table> tables);
 
     ConnectionSpec getTargetSpec();
 

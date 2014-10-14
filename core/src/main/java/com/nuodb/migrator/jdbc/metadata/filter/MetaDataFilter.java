@@ -25,55 +25,15 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.match;
+package com.nuodb.migrator.jdbc.metadata.filter;
 
-import com.nuodb.migrator.utils.ObjectUtils;
-
-import java.util.regex.Pattern;
-
-import static java.util.Arrays.asList;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataHandler;
 
 /**
  * @author Sergey Bushik
  */
-public class PatternRegex extends RegexBase {
+public interface MetaDataFilter<T extends MetaData> extends MetaDataHandler {
 
-    private final Pattern pattern;
-    private final String regex;
-
-    public PatternRegex(String regex, Pattern pattern) {
-        this.regex = regex;
-        this.pattern = pattern;
-    }
-
-    @Override
-    public String regex() {
-        return regex;
-    }
-
-    @Override
-    public Match exec(String input) {
-        return new PatternMatch(pattern, input);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PatternRegex that = (PatternRegex) o;
-
-        if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return regex != null ? regex.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this, asList("regex"));
-    }
+    boolean accepts(T object);
 }

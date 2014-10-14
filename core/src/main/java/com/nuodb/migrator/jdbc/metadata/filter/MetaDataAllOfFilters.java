@@ -25,55 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.match;
+package com.nuodb.migrator.jdbc.metadata.filter;
 
-import com.nuodb.migrator.utils.ObjectUtils;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
-import java.util.regex.Pattern;
-
-import static java.util.Arrays.asList;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class PatternRegex extends RegexBase {
+public class MetaDataAllOfFilters<T extends MetaData> extends MetaDataFiltersBase<T> {
 
-    private final Pattern pattern;
-    private final String regex;
+    public MetaDataAllOfFilters(MetaDataType objectType) {
+        super(objectType);
+    }
 
-    public PatternRegex(String regex, Pattern pattern) {
-        this.regex = regex;
-        this.pattern = pattern;
+    public MetaDataAllOfFilters(MetaDataType objectType, Collection<MetaDataFilter<T>> filters) {
+        super(objectType);
+        if (filters != null) {
+            for (MetaDataFilter<T> filter : filters) {
+                addFilter(filter);
+            }
+        }
     }
 
     @Override
-    public String regex() {
-        return regex;
-    }
-
-    @Override
-    public Match exec(String input) {
-        return new PatternMatch(pattern, input);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PatternRegex that = (PatternRegex) o;
-
-        if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
+    public boolean accepts(T object) {
+        for (MetaDataFilter<T> filter : getFilters()) {
+            if (!filter.accepts(object)) {
+                return false;
+            }
+        }
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return regex != null ? regex.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this, asList("regex"));
     }
 }

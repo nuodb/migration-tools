@@ -35,20 +35,15 @@ import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.spec.DumpJobSpec;
 import com.nuodb.migrator.spec.QuerySpec;
-import com.nuodb.migrator.spec.TableSpec;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -95,47 +90,10 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
 
     protected Option createDataMigrationGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(DATA_MIGRATION_GROUP_NAME));
-        group.withOption(createTableGroup());
+        group.withOption(createMetaDataFilterManagerGroup());
         group.withOption(createQueryGroup());
         group.withOption(createTimeZoneOption());
         group.withOption(createQueryLimitOption());
-        return group.build();
-    }
-
-    /**
-     * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
-     */
-    protected Group createTableGroup() {
-        GroupBuilder group = newGroupBuilder().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(MAX_VALUE);
-
-        Option table = newBasicOptionBuilder().
-                withName(TABLE).
-                withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withMaximum(Integer.MAX_VALUE).
-                                withRequired(true).build()
-                ).build();
-        group.withOption(table);
-
-        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
-        optionFormat.setValuesSeparator(null);
-
-        Option tableFilter = newRegexOptionBuilder().
-                withName(TABLE_FILTER).
-                withDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION)).
-                withRegex(TABLE_FILTER, 1, LOW).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withMinimum(1).
-                                withRequired(true).build()
-                ).build();
-
-        group.withOption(tableFilter);
         return group.build();
     }
 
@@ -171,28 +129,11 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
     }
 
     protected void parseDataMigrationGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
-        parseTableGroup(optionSet, jobSpec);
+        jobSpec.setMetaDataFilterManager(parseMetaDataFilterManagerGroup(optionSet, this));
         jobSpec.setQuerySpecs(parseQueryGroup(optionSet));
         jobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         jobSpec.setThreads(parseThreadsOption(optionSet, this));
         jobSpec.setQueryLimit(parseQueryLimitOption(optionSet, this));
-    }
-
-    protected void parseTableGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
-        Map<String, TableSpec> tableQueryMapping = newHashMap();
-        for (String table : optionSet.<String>getValues(TABLE)) {
-            tableQueryMapping.put(table, new TableSpec(table));
-        }
-        for (Iterator<String> iterator = optionSet.<String>getValues(
-                TABLE_FILTER).iterator(); iterator.hasNext(); ) {
-            String name = iterator.next();
-            TableSpec tableSpec = tableQueryMapping.get(name);
-            if (tableSpec == null) {
-                tableQueryMapping.put(name, tableSpec = new TableSpec(name));
-            }
-            tableSpec.setFilter(iterator.next());
-        }
-        jobSpec.setTableSpecs(newArrayList(tableQueryMapping.values()));
     }
 
     protected Collection<QuerySpec> parseQueryGroup(OptionSet optionSet) {

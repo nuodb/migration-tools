@@ -32,6 +32,7 @@ import com.nuodb.migrator.backup.loader.Parallelizer;
 import com.nuodb.migrator.backup.loader.TableLevelParallelizer;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.query.InsertType;
 
 import java.util.Collection;

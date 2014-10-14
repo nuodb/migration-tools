@@ -53,6 +53,10 @@ public class AntRegexCompiler extends PatternCompilerBase {
         pattern = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}", flags);
     }
 
+    public static boolean isPattern(String regex) {
+        return INSTANCE.pattern.matcher(regex).find();
+    }
+
     @Override
     protected Pattern pattern(String regex) {
         if (regex == null) {

@@ -78,8 +78,8 @@ public interface CliOptions {
     final String MIGRATION_MODE_SCHEMA = "schema";
 
     final String TABLE = "table";
+    final String TABLE_EXCLUDE = "table.exclude";
     final String TABLE_TYPE = "table.type";
-    final String TABLE_FILTER = "table.*.filter";
     final String TABLE_INSERT = "table.*.insert";
     final String TABLE_REPLACE = "table.*.replace";
 

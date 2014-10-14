@@ -29,6 +29,7 @@ package com.nuodb.migrator.spec;
 
 import com.nuodb.migrator.backup.writer.BackupWriterListener;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 
 import java.util.Collection;
@@ -122,16 +123,16 @@ public class DumpJobSpec extends JobSpecBase {
         metaDataSpec.setTableTypes(tableTypes);
     }
 
-    public Collection<TableSpec> getTableSpecs() {
-        return metaDataSpec.getTableSpecs();
+    public MetaDataFilterManager getMetaDataFilterManager() {
+        return metaDataSpec.getMetaDataFilterManager();
     }
 
     public String[] getTableTypes() {
         return metaDataSpec.getTableTypes();
     }
 
-    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
-        metaDataSpec.setTableSpecs(tableSpecs);
+    public void setMetaDataFilterManager(MetaDataFilterManager metaDataFilterManager) {
+        metaDataSpec.setMetaDataFilterManager(metaDataFilterManager);
     }
 
     public void setObjectTypes(Collection<MetaDataType> objectTypes) {

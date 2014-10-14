@@ -25,55 +25,49 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.match;
+package com.nuodb.migrator.jdbc.metadata.filter;
 
-import com.nuodb.migrator.utils.ObjectUtils;
-
-import java.util.regex.Pattern;
-
-import static java.util.Arrays.asList;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
 /**
  * @author Sergey Bushik
  */
-public class PatternRegex extends RegexBase {
+public abstract class MetaDataNameFilterBase<T extends Identifiable> extends MetaDataFilterBase<T> {
 
-    private final Pattern pattern;
-    private final String regex;
+    private boolean qualifyName;
 
-    public PatternRegex(String regex, Pattern pattern) {
-        this.regex = regex;
-        this.pattern = pattern;
+    protected MetaDataNameFilterBase(Class<? extends MetaData> objectClass) {
+        super(objectClass);
+    }
+
+    protected MetaDataNameFilterBase(MetaDataType objectType) {
+        super(objectType);
+    }
+
+    protected MetaDataNameFilterBase(Class<? extends MetaData> objectClass, boolean qualifyName) {
+        super(objectClass);
+        this.qualifyName = qualifyName;
+    }
+
+    protected MetaDataNameFilterBase(MetaDataType objectType, boolean qualifyName) {
+        super(objectType);
+        this.qualifyName = qualifyName;
     }
 
     @Override
-    public String regex() {
-        return regex;
+    public boolean accepts(T object) {
+        return accepts(qualifyName ? object.getQualifiedName() : object.getName());
     }
 
-    @Override
-    public Match exec(String input) {
-        return new PatternMatch(pattern, input);
+    protected abstract boolean accepts(String name);
+
+    public boolean isQualifyName() {
+        return qualifyName;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PatternRegex that = (PatternRegex) o;
-
-        if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return regex != null ? regex.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this, asList("regex"));
+    public void setQualifyName(boolean qualifyName) {
+        this.qualifyName = qualifyName;
     }
 }

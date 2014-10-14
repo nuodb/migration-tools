@@ -25,55 +25,72 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.match;
+package com.nuodb.migrator.jdbc.metadata.filter;
 
-import com.nuodb.migrator.utils.ObjectUtils;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
-import java.util.regex.Pattern;
+import java.util.Collection;
 
-import static java.util.Arrays.asList;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
-public class PatternRegex extends RegexBase {
+public abstract class MetaDataFiltersBase<T extends MetaData> extends MetaDataFilterBase<T> {
 
-    private final Pattern pattern;
-    private final String regex;
+    private Collection<MetaDataFilter<T>> filters = newArrayList();
 
-    public PatternRegex(String regex, Pattern pattern) {
-        this.regex = regex;
-        this.pattern = pattern;
+    public MetaDataFiltersBase(Class<? extends MetaData> objectClass) {
+        super(objectClass);
     }
 
-    @Override
-    public String regex() {
-        return regex;
+    public MetaDataFiltersBase(MetaDataType objectType) {
+        super(objectType);
     }
 
-    @Override
-    public Match exec(String input) {
-        return new PatternMatch(pattern, input);
+    public MetaDataFiltersBase(MetaDataType objectType, Collection<MetaDataFilter<T>> filters) {
+        super(objectType);
+        if (filters != null) {
+            for (MetaDataFilter<T> filter : filters) {
+                addFilter(filter);
+            }
+        }
+    }
+
+    public void addFilter(MetaDataFilter<T> filter) {
+        filters.add(filter);
+    }
+
+    public boolean removeFilter(MetaDataFilter filter) {
+        return filters.remove(filter);
+    }
+
+    public Collection<MetaDataFilter<T>> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(Collection<MetaDataFilter<T>> filters) {
+        this.filters = filters;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
-        PatternRegex that = (PatternRegex) o;
+        MetaDataFiltersBase that = (MetaDataFiltersBase) o;
 
-        if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
+        if (filters != null ? !filters.equals(that.filters) : that.filters != null) return false;
+
         return true;
     }
 
     @Override
     public int hashCode() {
-        return regex != null ? regex.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this, asList("regex"));
+        int result = super.hashCode();
+        result = 31 * result + (filters != null ? filters.hashCode() : 0);
+        return result;
     }
 }

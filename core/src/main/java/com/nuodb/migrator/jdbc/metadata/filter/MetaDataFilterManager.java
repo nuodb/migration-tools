@@ -25,35 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.match;
+package com.nuodb.migrator.jdbc.metadata.filter;
 
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.utils.ObjectUtils;
 
-import java.util.regex.Pattern;
+import java.util.Collection;
 
-import static java.util.Arrays.asList;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.getHandler;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 
 /**
  * @author Sergey Bushik
  */
-public class PatternRegex extends RegexBase {
+public class MetaDataFilterManager {
 
-    private final Pattern pattern;
-    private final String regex;
+    private Collection<MetaDataFilter> metaDataFilters = newPrioritySet();
 
-    public PatternRegex(String regex, Pattern pattern) {
-        this.regex = regex;
-        this.pattern = pattern;
+    /**
+     * Returns meta data filter for a requested object type or null of there is no registered filter.
+     *
+     * @param objectType requested object type to be filter.
+     * @return meta data filter or null if not found.
+     */
+    public MetaDataFilter getMetaDataFilter(MetaDataType objectType) {
+        return getHandler(metaDataFilters, objectType, false);
     }
 
-    @Override
-    public String regex() {
-        return regex;
+    public void addMetaDataFilter(MetaDataFilter objectFilter) {
+        metaDataFilters.add(objectFilter);
     }
 
-    @Override
-    public Match exec(String input) {
-        return new PatternMatch(pattern, input);
+    public void removeMetaDataFilter(MetaDataFilter objectFilter) {
+        metaDataFilters.remove(objectFilter);
     }
 
     @Override
@@ -61,19 +65,22 @@ public class PatternRegex extends RegexBase {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PatternRegex that = (PatternRegex) o;
+        MetaDataFilterManager that = (MetaDataFilterManager) o;
 
-        if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
+        if (metaDataFilters != null ? !metaDataFilters.equals(that.metaDataFilters) :
+                that.metaDataFilters != null)
+            return false;
+
         return true;
     }
 
     @Override
     public int hashCode() {
-        return regex != null ? regex.hashCode() : 0;
+        return metaDataFilters != null ? metaDataFilters.hashCode() : 0;
     }
 
     @Override
     public String toString() {
-        return ObjectUtils.toString(this, asList("regex"));
+        return ObjectUtils.toString(this);
     }
 }

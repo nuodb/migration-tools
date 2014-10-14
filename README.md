@@ -54,9 +54,9 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--data=[true | false]]                                     Enables or disables data migration, true by default
             [--schema=[true | false]]                                   Enables or disables schema migration, true by default
         [data migration, optional]
-            [table names & query filters, optional]
-                [--table=table [table ...]]                             Table name
-                [--table.*.filter=[query filter]]                       Filters table records using specified filter by appending it to the SELECT statement after WHERE clause
+            [table names]
+                [--table=table [table ...]]                             Comma separated list of either simple table names or fully qualified names including catalog and schema or table name patterns using regex symbols, where * matches any number of characters and ? symbol to match any single character or mix of table names and table name patterns
+                [--table.exclude=table [table ...]]                     Comma separated list of either excluded table names or excluded table name patterns using regex symbol * to match any number of characters and ? to match any single character
             [select statements, optional]
                 [--query=query [query ...]]                             Select statement
             [--time.zone (-z)=time zone]                                Time zone enables date columns to be dumped and reloaded between servers in different time zones
@@ -83,13 +83,17 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--data=[true | false]]                                     Enables or disables data migration, true by default
             [--schema=[true | false]]                                   Enables or disables schema migration, true by default
         [data migration, optional]
+            [table names]
+                [--table=table [table ...]]                             Comma separated list of either simple table names or fully qualified names including catalog and schema or table name patterns using regex symbols, where * matches any number of characters and ? symbol to match any single character or mix of table names and table name patterns
+                [--table.exclude=table [table ...]]                     Comma separated list of either excluded table names or excluded table name patterns using regex symbol * to match any number of characters and ? to match any single character
             [commit strategy specification]
                 [--commit.strategy=[single | batch | custom]]           Commit strategy name, either single or batch or fully classified class name of a custom strategy implementing com.nuodb.migrator.jdbc.commit.CommitStrategy, default is batch
                 [--commit.*=[commit strategy attributes]]               Commit strategy attributes, such as commit.batch.size which is a number of updates to batch for commit point used with batch commit strategy, default is 1000
             [insert type specification]
                 [--replace (-r)]                                        Writes REPLACE statements rather than INSERT statements
                 [--table.*.replace]                                     Writes REPLACE statement for the specified table
-                [--table.*.insert]                                      Writes INSERT statement for the specified table
+                [--table.*.insert]                                      Writes INSERT statement for the specified
+                table
             [--time.zone (-z)=time zone]                                Time zone enables date columns to be dumped and reloaded between servers in different time zones
         [schema migration, optional]
             [type declarations & translations, optional]
@@ -133,6 +137,9 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--target.schema=[schema]]                                  Default database schema name to use
         [script output, optional]                                      
             --output.path=output path                                   Saves script to a file specified by path
+        [table names]
+            [--table=table [table ...]]                                 Comma separated list of either simple table names or fully qualified names including catalog and schema or table name patterns using regex symbols, where * matches any number of characters and ? symbol to match any single character or mix of table names and table name patterns
+            [--table.exclude=table [table ...]]                         Comma separated list of either excluded table names or excluded table name patterns using regex symbol * to match any number of characters and ? to match any single character
         [type declarations & translations, optional]
             [--use.nuodb.types=[true | false]]                          Instructs the migrator to transform source database types to the best matching NuoDB types, where CHAR, VARCHAR and CLOB source types will be rendered as STRING columns, nuodb-types.properties file is a source of type overrides, the option is false by default
             [--use.explicit.defaults=[true | false]]                    Transforms source column implicit default values to NuoDB explicit defaults, the option is false by default

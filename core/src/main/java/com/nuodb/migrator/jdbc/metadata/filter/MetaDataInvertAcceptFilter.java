@@ -25,55 +25,54 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.match;
+package com.nuodb.migrator.jdbc.metadata.filter;
 
-import com.nuodb.migrator.utils.ObjectUtils;
-
-import java.util.regex.Pattern;
-
-import static java.util.Arrays.asList;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
 /**
  * @author Sergey Bushik
  */
-public class PatternRegex extends RegexBase {
+@SuppressWarnings("all")
+public class MetaDataInvertAcceptFilter<T extends MetaData> extends MetaDataFilterBase<T> {
 
-    private final Pattern pattern;
-    private final String regex;
+    private MetaDataFilter<T> filter;
 
-    public PatternRegex(String regex, Pattern pattern) {
-        this.regex = regex;
-        this.pattern = pattern;
+    public MetaDataInvertAcceptFilter(MetaDataType objectType, MetaDataFilter filter) {
+        super(objectType);
+        this.filter = filter;
+    }
+
+    public MetaDataFilter<T> getFilter() {
+        return filter;
+    }
+
+    public void setFilter(MetaDataFilter<T> filter) {
+        this.filter = filter;
     }
 
     @Override
-    public String regex() {
-        return regex;
-    }
-
-    @Override
-    public Match exec(String input) {
-        return new PatternMatch(pattern, input);
+    public boolean accepts(MetaData object) {
+        return !filter.accepts((T) object);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
-        PatternRegex that = (PatternRegex) o;
+        MetaDataInvertAcceptFilter that = (MetaDataInvertAcceptFilter) o;
 
-        if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
+        if (filter != null ? !filter.equals(that.filter) : that.filter != null) return false;
+
         return true;
     }
 
     @Override
     public int hashCode() {
-        return regex != null ? regex.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this, asList("regex"));
+        int result = super.hashCode();
+        result = 31 * result + (filter != null ? filter.hashCode() : 0);
+        return result;
     }
 }
