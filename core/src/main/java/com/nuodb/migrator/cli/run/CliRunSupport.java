@@ -561,16 +561,30 @@ public class CliRunSupport extends CliSupport {
                 withMaximum(MAX_VALUE);
 
         group.withOption(createTableOption());
+        group.withOption(createTableExcludeOption());
         return group.build();
     }
 
     protected Option createTableOption() {
-        return newBasicOptionBuilder()
-                .withName(TABLE)
-                .withDescription(getMessage(TABLE_OPTION_DESCRIPTION))
-                .withArgument(
+        return newBasicOptionBuilder().
+                withName(TABLE).
+                withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
+                withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(TABLE_ARGUMENT_NAME)).
+                                withMinimum(1).
+                                withMaximum(MAX_VALUE).
+                                withRequired(true).build()
+                ).build();
+    }
+
+    protected Option createTableExcludeOption() {
+        return newBasicOptionBuilder().
+                withName(TABLE_EXCLUDE).
+                withDescription(getMessage(TABLE_EXCLUDE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TABLE_EXCLUDE_ARGUMENT_NAME)).
                                 withMinimum(1).
                                 withMaximum(MAX_VALUE).
                                 withRequired(true).build()

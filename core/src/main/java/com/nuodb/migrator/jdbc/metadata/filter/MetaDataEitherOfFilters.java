@@ -32,20 +32,11 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
 import java.util.Collection;
 
-import static com.google.common.collect.Lists.newArrayList;
-
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("all")
-public class MetaDataEitherOfFilters<T extends MetaData> extends MetaDataFilterBase<T>
-        implements MetaDataSetOfFilters<T> {
-
-    private Collection<MetaDataFilter<T>> filters = newArrayList();
-
-    public MetaDataEitherOfFilters(Class<? extends MetaData> objectClass) {
-        super(objectClass);
-    }
+public class MetaDataEitherOfFilters<T extends MetaData> extends MetaDataFiltersBase<T> {
 
     public MetaDataEitherOfFilters(MetaDataType objectType) {
         super(objectType);
@@ -58,22 +49,6 @@ public class MetaDataEitherOfFilters<T extends MetaData> extends MetaDataFilterB
                 addFilter(filter);
             }
         }
-    }
-
-    public Collection<MetaDataFilter<T>> getFilters() {
-        return filters;
-    }
-
-    public void addFilter(MetaDataFilter filter) {
-        filters.add(filter);
-    }
-
-    public boolean removeFilter(MetaDataFilter filter) {
-        return filters.remove(filter);
-    }
-
-    public void setFilters(Collection<MetaDataFilter<T>> filters) {
-        this.filters = filters;
     }
 
     @Override

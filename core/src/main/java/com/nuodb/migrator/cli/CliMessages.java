@@ -88,9 +88,11 @@ public interface CliMessages {
 
     final String TABLE_GROUP_NAME = "com.nuodb.migrator.table.group.name";
     final String TABLE_OPTION_DESCRIPTION = "com.nuodb.migrator.table.option.description";
+    final String TABLE_EXCLUDE_OPTION_DESCRIPTION = "com.nuodb.migrator.table.exclude.option.description";
     final String TABLE_TYPE_OPTION_DESCRIPTION = "com.nuodb.migrator.table.type.option.description";
     final String TABLE_TYPE_ARGUMENT_NAME = "com.nuodb.migrator.table.type.argument.name";
     final String TABLE_ARGUMENT_NAME = "com.nuodb.migrator.table.argument.name";
+    final String TABLE_EXCLUDE_ARGUMENT_NAME = "com.nuodb.migrator.table.exclude.argument.name";
     final String TABLE_FILTER_OPTION_DESCRIPTION = "com.nuodb.migrator.table.filter.option.description";
     final String TABLE_FILTER_ARGUMENT_NAME = "com.nuodb.migrator.table.filter.argument.name";
 

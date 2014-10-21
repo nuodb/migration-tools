@@ -33,8 +33,6 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
 import java.util.Collection;
 
-import static com.google.common.collect.Lists.newArrayList;
-
 /**
  * @author Sergey Bushik
  */
@@ -43,59 +41,19 @@ public class MetaDataFilters {
     private MetaDataFilters() {
     }
 
-    public static <T extends Identifiable> MetaDataFilter<T> newNameEqualsFilter(MetaDataType objectType,
-                                                                                 String name) {
-        return newNameEqualsFilter(objectType, false, name);
+    public static <T extends Identifiable> MetaDataFilter<T> newInvertAcceptFilter(MetaDataType objectType,
+                                                                                   MetaDataFilter<T> filter) {
+        return new MetaDataInvertAcceptFilter<T>(objectType, filter);
     }
 
     public static <T extends Identifiable> MetaDataFilter<T> newNameEqualsFilter(MetaDataType objectType,
-                                                                                 boolean qualifyName,
-                                                                                 String name) {
-        return newNameEqualsFilter(objectType, qualifyName, name, true);
-    }
-
-    public static <T extends Identifiable> MetaDataFilter<T> newNameDoesNotEqualsFilter(MetaDataType objectType,
-                                                                                        String name) {
-        return newNameEqualsFilter(objectType, false, name);
-    }
-
-    public static <T extends Identifiable> MetaDataFilter<T> newNameDoesNotEqualsFilter(MetaDataType objectType,
-                                                                                        boolean qualifyName,
-                                                                                        String name) {
-        return newNameEqualsFilter(objectType, qualifyName, name, false);
-    }
-
-    private static <T extends Identifiable> MetaDataFilter<T> newNameEqualsFilter(MetaDataType objectType,
-                                                                                  boolean qualifyName, String name,
-                                                                                  boolean invertAccept) {
-        return new MetaDataNameEqualsFilter<T>(objectType, qualifyName, name, invertAccept);
-    }
-
-    public static <T extends Identifiable> MetaDataFilter<T> newNameMatchesFilter(MetaDataType objectType,
-                                                                                  String regex) {
-        return newNameMatchesFilter(objectType, false, regex);
+                                                                                 boolean qualifyName, String name) {
+        return new MetaDataNameEqualsFilter<T>(objectType, qualifyName, name);
     }
 
     public static <T extends Identifiable> MetaDataFilter<T> newNameMatchesFilter(MetaDataType objectType,
                                                                                   boolean qualifyName, String regex) {
-        return newNameMatchesFilter(objectType, qualifyName, regex, false);
-    }
-
-    public static <T extends Identifiable> MetaDataFilter<T> newNameDoesNotMatchesFilter(MetaDataType objectType,
-                                                                                         String regex) {
-        return newNameDoesNotMatchesFilter(objectType, false, regex);
-    }
-
-    private static <T extends Identifiable> MetaDataFilter<T> newNameDoesNotMatchesFilter(MetaDataType objectType,
-                                                                                          boolean qualifyName,
-                                                                                          String regex) {
-        return newNameMatchesFilter(objectType, qualifyName, regex, true);
-    }
-
-    public static <T extends Identifiable> MetaDataFilter<T> newNameMatchesFilter(MetaDataType objectType,
-                                                                                  boolean qualifyName, String regex,
-                                                                                  boolean invertAccept) {
-        return new MetaDataNameMatchesFilter<T>(objectType, qualifyName, regex, invertAccept);
+        return new MetaDataNameMatchesFilter<T>(objectType, qualifyName, regex);
     }
 
     public static <T extends MetaData> MetaDataFilter<T> newEitherOfFilters(MetaDataType objectType,
@@ -104,11 +62,7 @@ public class MetaDataFilters {
     }
 
     public static <T extends MetaData> MetaDataFilter<T> newAllOfFilters(MetaDataType objectType,
-                                                                         MetaDataFilter<T>... filters) {
-        MetaDataAllOfFilters<T> filter = new MetaDataAllOfFilters<T>(objectType);
-        if (filters != null) {
-            filter.setFilters(newArrayList(filters));
-        }
-        return filter;
+                                                                         Collection<MetaDataFilter<T>> filters) {
+        return new MetaDataAllOfFilters<T>(objectType, filters);
     }
 }

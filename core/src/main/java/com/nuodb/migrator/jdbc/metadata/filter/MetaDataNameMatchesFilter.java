@@ -39,26 +39,16 @@ import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
 public class MetaDataNameMatchesFilter<T extends Identifiable> extends MetaDataNameFilterBase<T> {
 
     private Regex regex;
-    private boolean invertAccept;
-
-    public MetaDataNameMatchesFilter(MetaDataType objectType, String regex,
-                                    boolean invertAccept) {
-        super(objectType, false);
-        this.regex = INSTANCE.compile(regex);
-        this.invertAccept = invertAccept;
-    }
 
     public MetaDataNameMatchesFilter(MetaDataType objectType, boolean qualifyName,
-                                    String regex, boolean invertAccept) {
+                                     String regex) {
         super(objectType, qualifyName);
         this.regex = INSTANCE.compile(regex);
-        this.invertAccept = invertAccept;
     }
 
     @Override
     protected boolean accepts(String name) {
-        boolean equals = name != null && regex.test(name);
-        return !invertAccept ? equals : !equals;
+        return name != null && regex.test(name);
     }
 
     @Override
@@ -69,7 +59,6 @@ public class MetaDataNameMatchesFilter<T extends Identifiable> extends MetaDataN
 
         MetaDataNameMatchesFilter that = (MetaDataNameMatchesFilter) o;
 
-        if (invertAccept != that.invertAccept) return false;
         if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
 
         return true;
@@ -79,7 +68,6 @@ public class MetaDataNameMatchesFilter<T extends Identifiable> extends MetaDataN
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (regex != null ? regex.hashCode() : 0);
-        result = 31 * result + (invertAccept ? 1 : 0);
         return result;
     }
 }

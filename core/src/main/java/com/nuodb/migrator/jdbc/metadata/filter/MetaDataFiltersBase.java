@@ -27,29 +27,51 @@
  */
 package com.nuodb.migrator.jdbc.metadata.filter;
 
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
-import com.nuodb.migrator.jdbc.metadata.Identifier;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.utils.ObjectUtils;
 
-import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
-public class MetaDataNameEqualsFilter<T extends Identifiable> extends MetaDataNameFilterBase<T> {
+public abstract class MetaDataFiltersBase<T extends MetaData> extends MetaDataFilterBase<T> {
 
-    private Identifier identifier;
+    private Collection<MetaDataFilter<T>> filters = newArrayList();
 
-    public MetaDataNameEqualsFilter(MetaDataType objectType, boolean qualifyName,
-                                    String name) {
-        super(objectType, qualifyName);
-        this.identifier = valueOf(name);
+    public MetaDataFiltersBase(Class<? extends MetaData> objectClass) {
+        super(objectClass);
     }
 
-    @Override
-    protected boolean accepts(String name) {
-        return ObjectUtils.equals(identifier, valueOf(name));
+    public MetaDataFiltersBase(MetaDataType objectType) {
+        super(objectType);
+    }
+
+    public MetaDataFiltersBase(MetaDataType objectType, Collection<MetaDataFilter<T>> filters) {
+        super(objectType);
+        if (filters != null) {
+            for (MetaDataFilter<T> filter : filters) {
+                addFilter(filter);
+            }
+        }
+    }
+
+    public void addFilter(MetaDataFilter<T> filter) {
+        filters.add(filter);
+    }
+
+    public boolean removeFilter(MetaDataFilter filter) {
+        return filters.remove(filter);
+    }
+
+    public Collection<MetaDataFilter<T>> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(Collection<MetaDataFilter<T>> filters) {
+        this.filters = filters;
     }
 
     @Override
@@ -58,9 +80,9 @@ public class MetaDataNameEqualsFilter<T extends Identifiable> extends MetaDataNa
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        MetaDataNameEqualsFilter that = (MetaDataNameEqualsFilter) o;
+        MetaDataFiltersBase that = (MetaDataFiltersBase) o;
 
-        if (identifier != null ? !identifier.equals(that.identifier) : that.identifier != null) return false;
+        if (filters != null ? !filters.equals(that.filters) : that.filters != null) return false;
 
         return true;
     }
@@ -68,7 +90,7 @@ public class MetaDataNameEqualsFilter<T extends Identifiable> extends MetaDataNa
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (identifier != null ? identifier.hashCode() : 0);
+        result = 31 * result + (filters != null ? filters.hashCode() : 0);
         return result;
     }
 }

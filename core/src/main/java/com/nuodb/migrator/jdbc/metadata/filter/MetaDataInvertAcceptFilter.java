@@ -28,18 +28,51 @@
 package com.nuodb.migrator.jdbc.metadata.filter;
 
 import com.nuodb.migrator.jdbc.metadata.MetaData;
-
-import java.util.Collection;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
 /**
  * @author Sergey Bushik
  */
-public interface MetaDataSetOfFilters<T extends MetaData> extends MetaDataFilter<T> {
-    void addFilter(MetaDataFilter filter);
+@SuppressWarnings("all")
+public class MetaDataInvertAcceptFilter<T extends MetaData> extends MetaDataFilterBase<T> {
 
-    boolean removeFilter(MetaDataFilter filter);
+    private MetaDataFilter<T> filter;
 
-    Collection<MetaDataFilter<T>> getFilters();
+    public MetaDataInvertAcceptFilter(MetaDataType objectType, MetaDataFilter filter) {
+        super(objectType);
+        this.filter = filter;
+    }
 
-    void setFilters(Collection<MetaDataFilter<T>> filters);
+    public MetaDataFilter<T> getFilter() {
+        return filter;
+    }
+
+    public void setFilter(MetaDataFilter<T> filter) {
+        this.filter = filter;
+    }
+
+    @Override
+    public boolean accepts(MetaData object) {
+        return !filter.accepts((T) object);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        MetaDataInvertAcceptFilter that = (MetaDataInvertAcceptFilter) o;
+
+        if (filter != null ? !filter.equals(that.filter) : that.filter != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (filter != null ? filter.hashCode() : 0);
+        return result;
+    }
 }

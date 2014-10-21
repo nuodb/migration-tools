@@ -48,10 +48,9 @@ import java.util.TreeMap;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
-import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newEitherOfFilters;
-import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newNameEqualsFilter;
-import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newNameMatchesFilter;
+import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.*;
 import static com.nuodb.migrator.match.AntRegexCompiler.isPattern;
+import static com.nuodb.migrator.utils.Collections.addIgnoreNull;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
@@ -163,26 +162,41 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
     }
 
     protected void parseDataMigrationGroup(OptionSet optionSet, LoadJobSpec jobSpec) {
-        // TODO: add handling of --table.exclude switch
-        MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
-        Collection<MetaDataFilter<Identifiable>> tableFilters = newArrayList();
-        for (String table : optionSet.<String>getValues(TABLE)) {
-            MetaDataFilter<Identifiable> tableFilter;
-            boolean qualifyName = table.contains(".");
-            if (isPattern(table)) {
-                tableFilter = newNameMatchesFilter(MetaDataType.TABLE, qualifyName, table);
-            } else {
-                tableFilter = newNameEqualsFilter(MetaDataType.TABLE, qualifyName, table);
-            }
-            tableFilters.add(tableFilter);
+        Collection<MetaDataFilter<Identifiable>> filters = newArrayList();
+        // add --table=table1,table2,*table* filters
+        addIgnoreNull(filters, getMetaDataFilter(optionSet, TABLE, false, true));
+        // add --table.exclude=table3,table4,*table* filters
+        addIgnoreNull(filters, getMetaDataFilter(optionSet, TABLE_EXCLUDE, true, false));
+        if (!isEmpty(filters)) {
+            MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
+            metaDataFilterManager.addMetaDataFilter(newEitherOfFilters(MetaDataType.TABLE, filters));
+            jobSpec.setMetaDataFilterManager(metaDataFilterManager);
         }
-        if (!isEmpty(tableFilters)) {
-            metaDataFilterManager.addMetaDataFilter(newEitherOfFilters(MetaDataType.TABLE, tableFilters));
-        }
-        jobSpec.setMetaDataFilterManager(metaDataFilterManager);
         jobSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
         jobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         parseInsertTypeGroup(optionSet, jobSpec);
+    }
+
+    protected MetaDataFilter<Identifiable> getMetaDataFilter(OptionSet optionSet,
+                                                             String option, boolean invertAccept,
+                                                             boolean eitherOfFilters) {
+        Collection<MetaDataFilter<Identifiable>> filters = newArrayList();
+        for (String table : optionSet.<String>getValues(option)) {
+            MetaDataFilter<Identifiable> filter;
+            boolean qualifyName = table.contains(".");
+            if (isPattern(table)) {
+                filter = newNameMatchesFilter(MetaDataType.TABLE, qualifyName, table);
+            } else {
+                filter = newNameEqualsFilter(MetaDataType.TABLE, qualifyName, table);
+            }
+            filters.add(invertAccept ? newInvertAcceptFilter(MetaDataType.TABLE, filter) : filter);
+        }
+        MetaDataFilter<Identifiable> filter = null;
+        if (!filters.isEmpty()) {
+            filter = eitherOfFilters ?
+                    newEitherOfFilters(MetaDataType.TABLE, filters) : newAllOfFilters(MetaDataType.TABLE, filters);
+        }
+        return filter;
     }
 
     protected void parseInsertTypeGroup(OptionSet optionSet, LoadJobSpec loadJobSpec) {
