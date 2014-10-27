@@ -41,6 +41,9 @@ import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.Trigger;
+import com.nuodb.migrator.jdbc.metadata.filter.HasTablesFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 
 import java.util.Collection;
 
@@ -78,21 +81,21 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
 
     @Override
     public Collection<String> getCreateScripts(H tables, ScriptGeneratorManager scriptGeneratorManager) {
-        return getHasTablesCreateScripts(getTables(tables, scriptGeneratorManager), scriptGeneratorManager);
+        return getHasTablesCreateScripts(tables, scriptGeneratorManager);
     }
 
     @Override
     public Collection<String> getDropScripts(H tables, ScriptGeneratorManager scriptGeneratorManager) {
-        return getHasTablesDropScripts(getTables(tables, scriptGeneratorManager), scriptGeneratorManager);
+        return getHasTablesDropScripts(tables, scriptGeneratorManager);
     }
 
     @Override
     public Collection<String> getDropCreateScripts(H tables, ScriptGeneratorManager scriptGeneratorManager) {
-        return getHasTablesDropCreateScripts(getTables(tables, scriptGeneratorManager), scriptGeneratorManager);
+        return getHasTablesDropCreateScripts(tables, scriptGeneratorManager);
     }
 
-    protected HasTables getTables(H tables, ScriptGeneratorManager scriptGeneratorManager) {
-        return tables;
+    protected HasTables getTables(HasTables tables, ScriptGeneratorManager scriptGeneratorManager) {
+        return new HasTablesFilter(tables, scriptGeneratorManager.getMetaDataFilterManager());
     }
 
     protected Collection<String> getHasTablesCreateScripts(HasTables tables,
@@ -103,13 +106,14 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
-                    for (Table table : tables.getTables()) {
+                    for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
                         addTablesCreateScripts(singleton(table), scripts, scriptGeneratorManager);
                     }
                     addForeignKeysCreateScripts(scripts, true, scriptGeneratorManager);
                     break;
                 case META_DATA:
-                    addTablesCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
+                    addTablesCreateScripts(getTables(tables, scriptGeneratorManager).getTables(),
+                            scripts, scriptGeneratorManager);
                     break;
             }
             return scripts;
@@ -126,12 +130,13 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
-                    for (Table table : tables.getTables()) {
+                    for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
                         addTablesDropScripts(singleton(table), scripts, scriptGeneratorManager);
                     }
                     break;
                 case META_DATA:
-                    addTablesDropScripts(tables.getTables(), scripts, scriptGeneratorManager);
+                    addTablesDropScripts(getTables(tables, scriptGeneratorManager).getTables(),
+                            scripts, scriptGeneratorManager);
                     break;
             }
             return scripts;
@@ -148,15 +153,17 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
-                    for (Table table : tables.getTables()) {
+                    for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
                         addTablesDropScripts(singleton(table), scripts, scriptGeneratorManager);
                         addTablesCreateScripts(singleton(table), scripts, scriptGeneratorManager);
                     }
                     addForeignKeysCreateScripts(scripts, true, scriptGeneratorManager);
                     break;
                 case META_DATA:
-                    addTablesDropScripts(tables.getTables(), scripts, scriptGeneratorManager);
-                    addTablesCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
+                    addTablesDropScripts(getTables(tables, scriptGeneratorManager).getTables(),
+                            scripts, scriptGeneratorManager);
+                    addTablesCreateScripts(getTables(tables, scriptGeneratorManager).getTables(),
+                            scripts, scriptGeneratorManager);
                     break;
             }
             return scripts;

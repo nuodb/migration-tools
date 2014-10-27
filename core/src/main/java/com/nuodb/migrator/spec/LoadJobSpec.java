@@ -50,7 +50,6 @@ import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
  */
 public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
-    private MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
     private CommitStrategy commitStrategy = new BatchCommitStrategy();
     private ResourceSpec inputSpec;
     private InsertType insertType;
@@ -61,14 +60,6 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
     private ConnectionSpec targetSpec;
     private TimeZone timeZone;
     private Integer threads;
-
-    public MetaDataFilterManager getMetaDataFilterManager() {
-        return metaDataFilterManager;
-    }
-
-    public void setMetaDataFilterManager(MetaDataFilterManager metaDataFilterManager) {
-        this.metaDataFilterManager = metaDataFilterManager;
-    }
 
     public CommitStrategy getCommitStrategy() {
         return commitStrategy;
@@ -162,8 +153,6 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
         LoadJobSpec that = (LoadJobSpec) o;
 
-        if (metaDataFilterManager != null ? !metaDataFilterManager.equals(that.metaDataFilterManager) : that.metaDataFilterManager != null)
-            return false;
         if (commitStrategy != null ? !commitStrategy.equals(that.commitStrategy) : that.commitStrategy != null)
             return false;
         if (inputSpec != null ? !inputSpec.equals(that.inputSpec) : that.inputSpec != null) return false;
@@ -182,7 +171,6 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (metaDataFilterManager != null ? metaDataFilterManager.hashCode() : 0);
         result = 31 * result + (commitStrategy != null ? commitStrategy.hashCode() : 0);
         result = 31 * result + (inputSpec != null ? inputSpec.hashCode() : 0);
         result = 31 * result + (insertType != null ? insertType.hashCode() : 0);

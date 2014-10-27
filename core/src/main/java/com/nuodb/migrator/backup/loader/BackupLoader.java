@@ -297,6 +297,7 @@ public class BackupLoader {
         scriptGeneratorManager.getAttributes().put(GROUP_SCRIPTS_BY, getGroupScriptsBy());
         scriptGeneratorManager.setObjectTypes(getObjectTypes());
         scriptGeneratorManager.setScriptTypes(getScriptTypes());
+        scriptGeneratorManager.setMetaDataFilterManager(getMetaDataFilterManager());
 
         Session sourceSession = backupLoaderContext.getSourceSession();
         ConnectionSpec sourceSpec = sourceSession != null ? sourceSession.getConnectionSpec() : null;

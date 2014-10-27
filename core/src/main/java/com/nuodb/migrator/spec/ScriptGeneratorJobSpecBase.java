@@ -31,6 +31,7 @@ import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
@@ -49,6 +50,7 @@ import static com.nuodb.migrator.utils.Collections.newPrioritySet;
  */
 public class ScriptGeneratorJobSpecBase extends JobSpecBase {
 
+    private MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
     private Collection<JdbcTypeSpec> jdbcTypeSpecs = newArrayList();
     private MetaDataSpec metaDataSpec = new MetaDataSpec();
@@ -58,6 +60,14 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private ConnectionSpec targetSpec;
     private TranslationConfig translationConfig = new TranslationConfig();
+
+    public MetaDataFilterManager getMetaDataFilterManager() {
+        return metaDataFilterManager;
+    }
+
+    public void setMetaDataFilterManager(MetaDataFilterManager metaDataFilterManager) {
+        this.metaDataFilterManager = metaDataFilterManager;
+    }
 
     public MetaDataSpec getMetaDataSpec() {
         return metaDataSpec;
@@ -163,6 +173,8 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
 
         ScriptGeneratorJobSpecBase that = (ScriptGeneratorJobSpecBase) o;
 
+        if (metaDataFilterManager != null ? !metaDataFilterManager.equals(that.metaDataFilterManager) :
+                that.metaDataFilterManager != null) return false;
         if (groupScriptsBy != that.groupScriptsBy) return false;
         if (identifierNormalizer != null ? !identifierNormalizer.equals(that.identifierNormalizer) :
                 that.identifierNormalizer != null) return false;
@@ -184,6 +196,7 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (metaDataFilterManager != null ? metaDataFilterManager.hashCode() : 0);
         result = 31 * result + (scriptTypes != null ? scriptTypes.hashCode() : 0);
         result = 31 * result + (groupScriptsBy != null ? groupScriptsBy.hashCode() : 0);
         result = 31 * result + (jdbcTypeSpecs != null ? jdbcTypeSpecs.hashCode() : 0);

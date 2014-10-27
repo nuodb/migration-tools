@@ -46,8 +46,11 @@ import com.nuodb.migrator.jdbc.commit.SingleCommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyAutoNamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyHashNamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyQualifyNamingStrategy;
@@ -72,6 +75,7 @@ import com.nuodb.migrator.spec.ScriptGeneratorJobSpecBase;
 import com.nuodb.migrator.utils.PrioritySet;
 import com.nuodb.migrator.utils.ReflectionException;
 import com.nuodb.migrator.utils.ReflectionUtils;
+import com.nuodb.migrator.utils.StringUtils;
 import org.slf4j.Logger;
 
 import java.io.UnsupportedEncodingException;
@@ -95,7 +99,12 @@ import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
+import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.*;
+import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newEitherOfFilters;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
+import static com.nuodb.migrator.match.AntRegexCompiler.isPattern;
+import static com.nuodb.migrator.utils.Collections.addIgnoreNull;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 import static com.nuodb.migrator.utils.Priority.HIGH;
 import static com.nuodb.migrator.utils.Priority.LOW;
@@ -702,6 +711,39 @@ public class CliRunSupport extends CliSupport {
         group.withOption(threads);
     }
 
+    protected void parseTableGroup(OptionSet optionSet, ScriptGeneratorJobSpecBase jobSpec, Option option) {
+        MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
+        Collection<MetaDataFilter<Identifiable>> filters = newArrayList();
+        // add --table=table1,table2,*table* filters
+        addIgnoreNull(filters, getMetaDataFilter(optionSet, TABLE, false, true));
+        // add --table.exclude=table3,table4,*table* filters
+        addIgnoreNull(filters, getMetaDataFilter(optionSet, TABLE_EXCLUDE, true, false));
+        if (!isEmpty(filters)) {
+            metaDataFilterManager.addMetaDataFilter(newAllOfFilters(MetaDataType.TABLE, filters));
+        }
+        jobSpec.setMetaDataFilterManager(metaDataFilterManager);
+    }
+
+    protected MetaDataFilter<Identifiable> getMetaDataFilter(OptionSet optionSet, String option, boolean invertAccept, boolean eitherOfFilters) {
+        Collection<MetaDataFilter<Identifiable>> filters = newArrayList();
+        for (String table : optionSet.<String>getValues(option)) {
+            MetaDataFilter<Identifiable> filter;
+            boolean qualifyName = table.contains(".");
+            if (isPattern(table)) {
+                filter = newNameMatchesFilter(MetaDataType.TABLE, qualifyName, table);
+            } else {
+                filter = newNameEqualsFilter(MetaDataType.TABLE, qualifyName, table);
+            }
+            filters.add(invertAccept ? newInvertAcceptFilter(MetaDataType.TABLE, filter) : filter);
+        }
+        MetaDataFilter<Identifiable> filter = null;
+        if (!filters.isEmpty()) {
+            filter = eitherOfFilters ?
+                    newEitherOfFilters(MetaDataType.TABLE, filters) : newAllOfFilters(MetaDataType.TABLE, filters);
+        }
+        return filter;
+    }
+
     protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER));
@@ -850,17 +892,16 @@ public class CliRunSupport extends CliSupport {
         return resource;
     }
 
-    protected void parseSchemaMigrationGroup(OptionSet optionSet, ScriptGeneratorJobSpecBase schemaGeneratorJobSpec,
-                                             Option option) {
-        schemaGeneratorJobSpec.setJdbcTypeSpecs(parseJdbcTypeSpecs(optionSet, option));
-        schemaGeneratorJobSpec.setTranslationConfig(parseTranslationConfig(optionSet, option));
-        schemaGeneratorJobSpec.setObjectTypes(parseObjectTypes(optionSet));
-        schemaGeneratorJobSpec.setScriptTypes(parseScriptTypes(optionSet, option));
-        schemaGeneratorJobSpec.setGroupScriptsBy(parseGroupScriptsBy(optionSet, option));
-        schemaGeneratorJobSpec.setNamingStrategies(parseNamingStrategies(optionSet));
-        schemaGeneratorJobSpec.setIdentifierQuoting(parseIdentifierQuoting(optionSet, option));
-        schemaGeneratorJobSpec.setIdentifierNormalizer(parseIdentifierNormalizer(optionSet, option));
-        schemaGeneratorJobSpec.setTableTypes(parseTableTypes(optionSet));
+    protected void parseSchemaMigrationGroup(OptionSet optionSet, ScriptGeneratorJobSpecBase jobSpec, Option option) {
+        jobSpec.setJdbcTypeSpecs(parseJdbcTypeSpecs(optionSet, option));
+        jobSpec.setTranslationConfig(parseTranslationConfig(optionSet, option));
+        jobSpec.setObjectTypes(parseObjectTypes(optionSet));
+        jobSpec.setScriptTypes(parseScriptTypes(optionSet, option));
+        jobSpec.setGroupScriptsBy(parseGroupScriptsBy(optionSet, option));
+        jobSpec.setNamingStrategies(parseNamingStrategies(optionSet));
+        jobSpec.setIdentifierQuoting(parseIdentifierQuoting(optionSet, option));
+        jobSpec.setIdentifierNormalizer(parseIdentifierNormalizer(optionSet, option));
+        jobSpec.setTableTypes(parseTableTypes(optionSet));
     }
 
     protected TranslationConfig parseTranslationConfig(OptionSet optionSet, Option option) {
@@ -888,9 +929,9 @@ public class CliRunSupport extends CliSupport {
             jdbcTypeSpec.setTypeName(typeName);
             Integer typeCodeInt = jdbcTypeCodes.getTypeCode(typeCode);
             jdbcTypeSpec.setTypeCode(typeCodeInt != null ? typeCodeInt : parseInt(typeCode));
-            jdbcTypeSpec.setSize(!isEmpty(size) ? parseInt(size) : null);
-            jdbcTypeSpec.setPrecision(!isEmpty(precision) ? parseInt(precision) : null);
-            jdbcTypeSpec.setScale(!isEmpty(scale) ? parseInt(scale) : null);
+            jdbcTypeSpec.setSize(!StringUtils.isEmpty(size) ? parseInt(size) : null);
+            jdbcTypeSpec.setPrecision(!StringUtils.isEmpty(precision) ? parseInt(precision) : null);
+            jdbcTypeSpec.setScale(!StringUtils.isEmpty(scale) ? parseInt(scale) : null);
             jdbcTypeSpecs.add(jdbcTypeSpec);
         }
         return jdbcTypeSpecs;
@@ -1018,7 +1059,7 @@ public class CliRunSupport extends CliSupport {
 
     protected Integer parseThreadsOption(OptionSet optionSet, Option option) {
         String threadsValue = (String) optionSet.getValue(THREADS);
-        return !isEmpty(threadsValue) ? parseInt(threadsValue) : null;
+        return !StringUtils.isEmpty(threadsValue) ? parseInt(threadsValue) : null;
     }
 
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {

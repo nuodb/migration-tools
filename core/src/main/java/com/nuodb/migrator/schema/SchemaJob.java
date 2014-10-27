@@ -31,6 +31,7 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.FileScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
@@ -154,6 +155,7 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
         scriptGeneratorManager.setSourceCatalog(sourceSpec != null ? sourceSpec.getCatalog() : null);
         scriptGeneratorManager.setSourceSchema(sourceSpec != null ? sourceSpec.getSchema() : null);
         scriptGeneratorManager.setSourceSession(getSourceSession());
+        scriptGeneratorManager.setMetaDataFilterManager(getMetaDataFilterManager());
 
         ConnectionSpec targetSpec = getTargetSpec();
         if (targetSpec != null) {
@@ -187,6 +189,10 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
         closeQuietly(getSourceSession());
         closeQuietly(getTargetSession());
         closeQuietly(getScriptExporter());
+    }
+
+    protected MetaDataFilterManager getMetaDataFilterManager() {
+        return getJobSpec().getMetaDataFilterManager();
     }
 
     protected ConnectionSpec getSourceSpec() {
