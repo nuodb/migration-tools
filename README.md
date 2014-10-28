@@ -84,8 +84,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--schema=[true | false]]                                   Enables or disables schema migration, true by default
         [data migration, optional]
             [table names & types]
-                [--table=table [table ...]]                             Comma separated list of exact table names either shortened or fully qualified including catalog and schema; table name patterns using regex symbols * to match any number of characters and ? symbol to match any single character or mix of table names and table name patterns
-                [--table.exclude=table [table ...]]                     Comma separated list of excluded table names or excluded table name patterns using regex symbol * to match any number of characters and ? to match any single character
+                [--table=table [table ...]]                             Comma separated list of either simple table names or fully qualified names including catalog and schema or table name patterns using regex symbols, where * matches any number of characters and ? symbol to match any single character or mix of table names and table name patterns
+                [--table.exclude=table [table ...]]                     Comma separated list of either excluded table names or excluded table name patterns using regex symbol * to match any number of characters and ? to match any single character
             [commit strategy specification]
                 [--commit.strategy=[single | batch | custom]]           Commit strategy name, either single or batch or fully classified class name of a custom strategy implementing com.nuodb.migrator.jdbc.commit.CommitStrategy, default is batch
                 [--commit.*=[commit strategy attributes]]               Commit strategy attributes, such as commit.batch.size which is a number of updates to batch for commit point used with batch commit strategy, default is 1000
