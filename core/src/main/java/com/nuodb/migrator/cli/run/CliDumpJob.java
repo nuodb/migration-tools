@@ -101,10 +101,10 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
     }
 
     /**
-     * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
+     * Table group handles --table=name_or_pattern, --table.exclude=name_or_pattern
      */
     @Override
-    protected Group createTableGroup() {
+    protected Option createTableGroup() {
         GroupBuilder group = newGroupBuilder().
                 withName(getMessage(TABLE_GROUP_NAME)).
                 withMaximum(MAX_VALUE);

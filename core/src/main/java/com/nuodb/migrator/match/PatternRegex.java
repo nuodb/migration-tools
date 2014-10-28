@@ -27,7 +27,11 @@
  */
 package com.nuodb.migrator.match;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
 import java.util.regex.Pattern;
+
+import static java.util.Arrays.asList;
 
 /**
  * @author Sergey Bushik
@@ -66,5 +70,10 @@ public class PatternRegex extends RegexBase {
     @Override
     public int hashCode() {
         return regex != null ? regex.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this, asList("regex"));
     }
 }

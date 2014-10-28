@@ -564,7 +564,7 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
-    protected Group createTableGroup() {
+    protected Option createTableGroup() {
         GroupBuilder group = newGroupBuilder().
                 withName(getMessage(TABLE_GROUP_NAME)).
                 withMaximum(MAX_VALUE);

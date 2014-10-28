@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata.filter;
 
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Collection;
 
@@ -66,7 +67,8 @@ public class MetaDataFilterManager {
 
         MetaDataFilterManager that = (MetaDataFilterManager) o;
 
-        if (metaDataFilters != null ? !metaDataFilters.equals(that.metaDataFilters) : that.metaDataFilters != null)
+        if (metaDataFilters != null ? !metaDataFilters.equals(that.metaDataFilters) :
+                that.metaDataFilters != null)
             return false;
 
         return true;
@@ -75,5 +77,10 @@ public class MetaDataFilterManager {
     @Override
     public int hashCode() {
         return metaDataFilters != null ? metaDataFilters.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

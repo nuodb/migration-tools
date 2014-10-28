@@ -33,7 +33,11 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 /**
+ * Virtual constructors for various meta data filters.
+ *
  * @author Sergey Bushik
  */
 public class MetaDataFilters {
@@ -57,8 +61,18 @@ public class MetaDataFilters {
     }
 
     public static <T extends MetaData> MetaDataFilter<T> newEitherOfFilters(MetaDataType objectType,
+                                                                            MetaDataFilter<T>... filters) {
+        return newEitherOfFilters(objectType, newArrayList(filters));
+    }
+
+    public static <T extends MetaData> MetaDataFilter<T> newEitherOfFilters(MetaDataType objectType,
                                                                             Collection<MetaDataFilter<T>> filters) {
         return new MetaDataEitherOfFilters<T>(objectType, filters);
+    }
+
+    public static <T extends MetaData> MetaDataFilter<T> newAllOfFilters(MetaDataType objectType,
+                                                                         MetaDataFilter<T>... filters) {
+        return newAllOfFilters(objectType, newArrayList(filters));
     }
 
     public static <T extends MetaData> MetaDataFilter<T> newAllOfFilters(MetaDataType objectType,
