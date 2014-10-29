@@ -564,18 +564,12 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
-    protected Option createTableGroup() {
+    protected Option createMetaDataFilterManagerGroup() {
         GroupBuilder group = newGroupBuilder().
-                withName(getMessage(TABLE_GROUP_NAME)).
+                withName(getMessage(META_DATA_FILTER_MANAGER_GROUP_NAME)).
                 withMaximum(MAX_VALUE);
 
-        group.withOption(createTableOption());
-        group.withOption(createTableExcludeOption());
-        return group.build();
-    }
-
-    protected Option createTableOption() {
-        return newBasicOptionBuilder().
+        Option table = newBasicOptionBuilder().
                 withName(TABLE).
                 withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
                 withArgument(
@@ -585,10 +579,9 @@ public class CliRunSupport extends CliSupport {
                                 withMaximum(MAX_VALUE).
                                 withRequired(true).build()
                 ).build();
-    }
+        group.withOption(table);
 
-    protected Option createTableExcludeOption() {
-        return newBasicOptionBuilder().
+        Option tableExclude = newBasicOptionBuilder().
                 withName(TABLE_EXCLUDE).
                 withDescription(getMessage(TABLE_EXCLUDE_OPTION_DESCRIPTION)).
                 withArgument(
@@ -598,6 +591,8 @@ public class CliRunSupport extends CliSupport {
                                 withMaximum(MAX_VALUE).
                                 withRequired(true).build()
                 ).build();
+        group.withOption(tableExclude);
+        return group.build();
     }
 
     protected Group createJdbcTypeGroup() {
@@ -711,17 +706,17 @@ public class CliRunSupport extends CliSupport {
         group.withOption(threads);
     }
 
-    protected void parseTableGroup(OptionSet optionSet, ScriptGeneratorJobSpecBase jobSpec, Option option) {
-        MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
+    protected MetaDataFilterManager parseMetaDataFilterManagerGroup(OptionSet optionSet, Option option) {
+        MetaDataFilterManager filterManager = new MetaDataFilterManager();
         Collection<MetaDataFilter<Identifiable>> filters = newArrayList();
         // add --table=table1,table2,*table* filters
         addIgnoreNull(filters, getMetaDataFilter(optionSet, TABLE, false, true));
         // add --table.exclude=table3,table4,*table* filters
         addIgnoreNull(filters, getMetaDataFilter(optionSet, TABLE_EXCLUDE, true, false));
         if (!isEmpty(filters)) {
-            metaDataFilterManager.addMetaDataFilter(newAllOfFilters(MetaDataType.TABLE, filters));
+            filterManager.addMetaDataFilter(newAllOfFilters(MetaDataType.TABLE, filters));
         }
-        jobSpec.setMetaDataFilterManager(metaDataFilterManager);
+        return filterManager;
     }
 
     protected MetaDataFilter<Identifiable> getMetaDataFilter(OptionSet optionSet, String option, boolean invertAccept, boolean eitherOfFilters) {

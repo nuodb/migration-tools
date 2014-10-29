@@ -76,9 +76,6 @@ public class CliDumpJobTest {
 
                 "--table.type=TABLE",
                 "--table.type=SYSTEM TABLE",
-                "--table=users",
-                "--table=users_roles",
-                "--table.users_roles.filter=role_id in (1,2,3,4,5)",
 
                 "--query=SELECT id, name, definition FROM definitions",
                 "--time.zone=GMT"
@@ -115,10 +112,6 @@ public class CliDumpJobTest {
         outputSpec.setAttributes(attributes);
 
         dumpSpec.setOutputSpec(outputSpec);
-        dumpSpec.setTableSpecs(asList(
-                new TableSpec("users"),
-                new TableSpec("users_roles", "role_id in (1,2,3,4,5)")
-        ));
         dumpSpec.setQuerySpecs(asList(new QuerySpec("SELECT id, name, definition FROM definitions")));
         dumpSpec.setTableTypes(new String[]{"TABLE", "SYSTEM TABLE"});
         dumpSpec.setTimeZone(TimeZone.getTimeZone("GMT"));

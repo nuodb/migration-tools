@@ -28,6 +28,8 @@
 package com.nuodb.migrator.spec;
 
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,7 +47,7 @@ public class MetaDataSpec extends SpecBase {
     public static final String[] TABLE_TYPES = new String[]{TABLE};
 
     private Collection<MetaDataType> objectTypes = OBJECT_TYPES;
-    private Collection<TableSpec> tableSpecs;
+    private MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
     private String[] tableTypes = TABLE_TYPES;
 
     public Collection<MetaDataType> getObjectTypes() {
@@ -56,12 +58,17 @@ public class MetaDataSpec extends SpecBase {
         this.objectTypes = objectTypes;
     }
 
-    public Collection<TableSpec> getTableSpecs() {
-        return tableSpecs;
+    public MetaDataFilter getMetaDataFilter(MetaDataType objectType) {
+        MetaDataFilterManager metaDataFilterManager = getMetaDataFilterManager();
+        return metaDataFilterManager != null ? metaDataFilterManager.getMetaDataFilter(objectType) : null;
     }
 
-    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
-        this.tableSpecs = tableSpecs;
+    public MetaDataFilterManager getMetaDataFilterManager() {
+        return metaDataFilterManager;
+    }
+
+    public void setMetaDataFilterManager(MetaDataFilterManager metaDataFilterManager) {
+        this.metaDataFilterManager = metaDataFilterManager;
     }
 
     public String[] getTableTypes() {
@@ -81,7 +88,8 @@ public class MetaDataSpec extends SpecBase {
         MetaDataSpec that = (MetaDataSpec) o;
 
         if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null) return false;
-        if (tableSpecs != null ? !tableSpecs.equals(that.tableSpecs) : that.tableSpecs != null) return false;
+        if (metaDataFilterManager != null ? !metaDataFilterManager.equals(that.metaDataFilterManager) :
+                that.metaDataFilterManager != null) return false;
         if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
 
         return true;
@@ -91,7 +99,7 @@ public class MetaDataSpec extends SpecBase {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (objectTypes != null ? objectTypes.hashCode() : 0);
-        result = 31 * result + (tableSpecs != null ? tableSpecs.hashCode() : 0);
+        result = 31 * result + (metaDataFilterManager != null ? metaDataFilterManager.hashCode() : 0);
         result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         return result;
     }

@@ -30,6 +30,7 @@ package com.nuodb.migrator.job;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
@@ -54,8 +55,8 @@ public abstract class ScriptGeneratorJobBase<T extends ScriptGeneratorJobSpecBas
         return getJobSpec().getMetaDataSpec();
     }
 
-    protected Collection<TableSpec> getTableSpecs() {
-        return getJobSpec().getTableSpecs();
+    protected MetaDataFilterManager getMetaDataFilterManager() {
+        return getJobSpec().getMetaDataFilterManager();
     }
 
     protected String[] getTableTypes() {

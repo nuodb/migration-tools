@@ -41,7 +41,6 @@ import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
 import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.ScriptGeneratorJobSpecBase;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -69,7 +68,7 @@ import static org.testng.Assert.assertEquals;
  * CliRunSupport#createInputGroup()} & {@link CliRunSupport#parseInputGroup(OptionSet, Option)}</li> <li>{@link
  * CliRunSupport#createOutputGroup()} & {@link CliRunSupport#parseOutputGroup(OptionSet, Option)}</li> <li>{@link
  * CliRunSupport#createTimeZoneOption()} & {@link CliRunSupport#parseTimeZoneOption(OptionSet, Option)}</li> <li>{@link
- * com.nuodb.migrator.cli.run.CliRunSupport#createTableGroup()} & {@link CliRunSupport#parseTableGroup (OptionSet,
+ * com.nuodb.migrator.cli.run.CliRunSupport#createMetaDataFilterManagerGroup()} & {@link CliRunSupport#parseMetaDataFilterManagerGroup (OptionSet,
  * ScriptGeneratorJobSpecBase, Option)}</li> </ul>
  *
  * @author Sergey Bushik
@@ -343,16 +342,11 @@ public class CliRunSupportTest {
      */
     @Test(dataProvider = "tableGroup")
     public void testTableGroup(String[] arguments, Map<Table, Boolean> tables) {
-        Option group = cliRunSupport.createTableGroup();
+        Option group = cliRunSupport.createMetaDataFilterManagerGroup();
         assertNotNull(group, "Table group is required");
 
         OptionSet options = parser.parse(arguments, group);
-        ScriptGeneratorJobSpecBase jobSpec = spy(new ScriptGeneratorJobSpecBase());
-        cliRunSupport.parseTableGroup(options, jobSpec, group);
-        verify(jobSpec).setMetaDataFilterManager(
-                notNull(MetaDataFilterManager.class));
-
-        MetaDataFilterManager filterManager = jobSpec.getMetaDataFilterManager();
+        MetaDataFilterManager filterManager = cliRunSupport.parseMetaDataFilterManagerGroup(options, group);
         MetaDataFilter<Table> filter = filterManager.getMetaDataFilter(MetaDataType.TABLE);
         for (Map.Entry<Table, Boolean> entry : tables.entrySet()) {
             Table table = entry.getKey();

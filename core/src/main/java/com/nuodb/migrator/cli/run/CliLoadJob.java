@@ -91,7 +91,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
 
     protected Option createDataMigrationGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(DATA_MIGRATION_GROUP_NAME));
-        group.withOption(createTableGroup());
+        group.withOption(createMetaDataFilterManagerGroup());
         group.withOption(createCommitGroup());
         group.withOption(createInsertTypeGroup());
         group.withOption(createTimeZoneOption());
@@ -152,7 +152,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
     }
 
     protected void parseDataMigrationGroup(OptionSet optionSet, LoadJobSpec jobSpec) {
-        parseTableGroup(optionSet, jobSpec, this);
+        jobSpec.setMetaDataFilterManager(parseMetaDataFilterManagerGroup(optionSet, this));
         jobSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
         jobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         parseInsertTypeGroup(optionSet, jobSpec);

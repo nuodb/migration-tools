@@ -85,16 +85,8 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
         metaDataSpec.setTableTypes(tableTypes);
     }
 
-    public Collection<TableSpec> getTableSpecs() {
-        return metaDataSpec.getTableSpecs();
-    }
-
     public String[] getTableTypes() {
         return metaDataSpec.getTableTypes();
-    }
-
-    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
-        metaDataSpec.setTableSpecs(tableSpecs);
     }
 
     public void setObjectTypes(Collection<MetaDataType> objectTypes) {
