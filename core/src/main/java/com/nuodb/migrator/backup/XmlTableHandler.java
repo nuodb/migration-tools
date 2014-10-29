@@ -149,7 +149,8 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
             skip = indexOf(tableTypes, equalTo(table.getType())) == -1;
         }
         if (!skip) {
-            MetaDataFilter tableFilter = metaDataSpec.getMetaDataFilter(MetaDataType.TABLE);
+            MetaDataFilter tableFilter = metaDataSpec != null ?
+                    metaDataSpec.getMetaDataFilter(MetaDataType.TABLE) : null;
             skip = !(tableFilter == null || tableFilter.accepts(table));
         }
         return skip;
