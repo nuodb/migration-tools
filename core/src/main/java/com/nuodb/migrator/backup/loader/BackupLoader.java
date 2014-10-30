@@ -540,13 +540,16 @@ public class BackupLoader {
                 continue;
             }
             TableRowSet tableRowSet = rowSet instanceof TableRowSet ? (TableRowSet) rowSet : null;
-            Table sourceTable = tableRowSet != null ? database.getCatalog(tableRowSet.getCatalog()).
-                    getSchema(tableRowSet.getSchema()).getTable(tableRowSet.getTable()) : null;
+            Catalog sourceCatalog = database.hasCatalog(tableRowSet.getCatalog()) ?
+                    database.getCatalog(tableRowSet.getCatalog()) : null;
+            Schema sourceSchema = sourceCatalog != null && sourceCatalog.hasSchema(tableRowSet.getSchema()) ?
+                    sourceCatalog.getSchema(tableRowSet.getSchema()) : null;
+            Table sourceTable = sourceSchema != null && sourceSchema.hasTable(tableRowSet.getTable()) ?
+                    sourceSchema.getTable(tableRowSet.getTable()) : null;
             if (!isEmpty(sourceTables) && (sourceTable == null || !sourceTables.contains(sourceTable))) {
                 continue;
             }
-            Table targetTable = backupLoaderContext.getRowSetMapper().
-                    mapRowSet(rowSet, backupLoaderContext);
+            Table targetTable = backupLoaderContext.getRowSetMapper().mapRowSet(rowSet, backupLoaderContext);
             if (targetTable == null) {
                 continue;
             }
