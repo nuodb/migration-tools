@@ -17,9 +17,21 @@
 package com.nuodb.migrator.cli.parse.option;
 
 import com.google.common.collect.Iterables;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Argument;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Help;
+import com.nuodb.migrator.cli.parse.HelpHint;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import com.nuodb.migrator.cli.parse.OptionProcessor;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.*;
 import static java.util.Collections.singletonList;

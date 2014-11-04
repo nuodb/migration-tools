@@ -19,7 +19,11 @@ package com.nuodb.migrator.cli.parse;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.utils.PrioritySet;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * The super type of all options representing a particular element of the executable line interface.

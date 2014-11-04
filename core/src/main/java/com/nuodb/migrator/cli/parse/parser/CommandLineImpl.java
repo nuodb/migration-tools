@@ -41,7 +41,7 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Collections.unmodifiableSet;
 
 /**
- * A executable line implementation allowing options to row their processed information to a CommandLine.
+ * A command line implementation allowing options to save processed information to a CommandLine.
  */
 public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 

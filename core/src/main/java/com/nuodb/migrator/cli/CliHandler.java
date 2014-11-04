@@ -34,7 +34,6 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.Parser;
-import com.nuodb.migrator.config.Config;
 import com.nuodb.migrator.cli.parse.help.HelpFormatter;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
@@ -42,6 +41,7 @@ import com.nuodb.migrator.cli.processor.ConfigOptionProcessor;
 import com.nuodb.migrator.cli.run.CliRun;
 import com.nuodb.migrator.cli.run.CliRunCommand;
 import com.nuodb.migrator.cli.run.CliRunLookup;
+import com.nuodb.migrator.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

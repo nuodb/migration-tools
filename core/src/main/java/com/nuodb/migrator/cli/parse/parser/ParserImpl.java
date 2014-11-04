@@ -17,9 +17,12 @@
 package com.nuodb.migrator.cli.parse.parser;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import com.nuodb.migrator.cli.parse.OptionSet;
+import com.nuodb.migrator.cli.parse.Parser;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.ListIterator;
@@ -27,10 +30,11 @@ import java.util.ListIterator;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.join;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class ParserImpl implements Parser {
 
-    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
+    protected transient final Logger logger = getLogger(getClass());
 
     /**
      * Parse the withConnection.arguments according to the specified options and properties.

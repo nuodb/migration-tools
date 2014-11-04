@@ -16,7 +16,12 @@
  */
 package com.nuodb.migrator.cli.parse.option;
 
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.HelpHint;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionProcessor;
+import com.nuodb.migrator.cli.parse.OptionValidator;
+import com.nuodb.migrator.cli.parse.Trigger;
 import com.nuodb.migrator.utils.Priority;
 import com.nuodb.migrator.utils.PrioritySet;
 

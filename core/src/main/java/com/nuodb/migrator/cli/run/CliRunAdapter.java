@@ -28,11 +28,22 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Help;
+import com.nuodb.migrator.cli.parse.HelpHint;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionProcessor;
+import com.nuodb.migrator.cli.parse.OptionSet;
+import com.nuodb.migrator.cli.parse.OptionValidator;
+import com.nuodb.migrator.cli.parse.Trigger;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.utils.PrioritySet;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * @author Sergey Bushik

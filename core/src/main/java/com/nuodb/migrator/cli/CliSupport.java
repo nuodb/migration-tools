@@ -27,7 +27,12 @@
  */
 package com.nuodb.migrator.cli;
 
-import com.nuodb.migrator.cli.parse.option.*;
+import com.nuodb.migrator.cli.parse.option.ArgumentBuilder;
+import com.nuodb.migrator.cli.parse.option.BasicOptionBuilder;
+import com.nuodb.migrator.cli.parse.option.GroupBuilder;
+import com.nuodb.migrator.cli.parse.option.OptionFormat;
+import com.nuodb.migrator.cli.parse.option.OptionToolkit;
+import com.nuodb.migrator.cli.parse.option.RegexOptionBuilder;
 
 /**
  * @author Sergey Bushik

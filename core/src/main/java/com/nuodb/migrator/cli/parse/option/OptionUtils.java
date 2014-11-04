@@ -32,8 +32,6 @@ import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 
-import java.util.ListIterator;
-
 import static java.lang.String.format;
 
 /**
