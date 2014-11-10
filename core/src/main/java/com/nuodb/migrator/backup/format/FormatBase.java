@@ -32,15 +32,15 @@ import org.slf4j.Logger;
 
 import java.util.Map;
 
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.Integer.parseInt;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public abstract class FormatBase implements Format {
-
-    public static final boolean BUFFERING = true;
-    public static final int BUFFER_SIZE = 8 * 1024;
 
     protected transient final Logger logger = getLogger(getClass());
 
@@ -75,7 +75,8 @@ public abstract class FormatBase implements Format {
 
     @Override
     public boolean isBuffering() {
-        return buffering;
+        String bufferingValue = (String) getAttribute(ATTRIBUTE_BUFFERING);
+        return isEmpty(bufferingValue) ? buffering : parseBoolean(bufferingValue);
     }
 
     @Override
@@ -85,7 +86,8 @@ public abstract class FormatBase implements Format {
 
     @Override
     public int getBufferSize() {
-        return bufferSize;
+        String bufferSizeValue = (String) getAttribute(ATTRIBUTE_BUFFER_SIZE);
+        return isEmpty(bufferSizeValue) ? bufferSize : parseInt(bufferSizeValue);
     }
 
     @Override

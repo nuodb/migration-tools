@@ -72,12 +72,12 @@ class CsvFormatBuilder implements CsvFormat {
     }
 
     public CSVFormat build() {
-        CSVFormat format = newFormat(delimiter = createDelimiter());
-        format = format.withEscape(escape = createEscape());
-        format = format.withCommentMarker(commentMarker = createCommentMarker());
-        format = format.withRecordSeparator(lineSeparator = createLineSeparator());
-        quote = createQuote();
-        quoting = createQuoting();
+        CSVFormat format = newFormat(delimiter = initDelimiter());
+        format = format.withEscape(escape = initEscape());
+        format = format.withCommentMarker(commentMarker = initCommentMarker());
+        format = format.withRecordSeparator(lineSeparator = initLineSeparator());
+        quote = initQuote();
+        quoting = initQuoting();
         if (quoting) {
             format = format.withQuotePolicy(Quote.MINIMAL);
             format = format.withQuoteChar(quote);
@@ -85,7 +85,7 @@ class CsvFormatBuilder implements CsvFormat {
         return format;
     }
 
-    protected Character createEscape() {
+    protected Character initEscape() {
         String escapeValue = (String) format.getAttribute(ATTRIBUTE_ESCAPE);
         if (isEmpty(escapeValue)) {
             escape = ESCAPE;
@@ -95,7 +95,7 @@ class CsvFormatBuilder implements CsvFormat {
         return escape;
     }
 
-    protected Character createQuote() {
+    protected Character initQuote() {
         Character quote;
         String quoteValue = (String) format.getAttribute(ATTRIBUTE_QUOTE);
         if (isEmpty(quoteValue)) {
@@ -106,7 +106,7 @@ class CsvFormatBuilder implements CsvFormat {
         return quote;
     }
 
-    protected boolean createQuoting() {
+    protected boolean initQuoting() {
         boolean quoting;
         String quotingValue = (String) format.getAttribute(ATTRIBUTE_QUOTING);
         if (isEmpty(quotingValue)) {
@@ -117,7 +117,7 @@ class CsvFormatBuilder implements CsvFormat {
         return quoting;
     }
 
-    protected Character createDelimiter() {
+    protected Character initDelimiter() {
         Character delimiter = null;
         String delimiterValue = (String) format.getAttribute(ATTRIBUTE_DELIMITER);
         if (delimiterValue != null) {
@@ -133,7 +133,7 @@ class CsvFormatBuilder implements CsvFormat {
         return delimiter;
     }
 
-    protected String createLineSeparator() {
+    protected String initLineSeparator() {
         String lineSeparator = null;
         String lineSeparatorValue = (String) format.getAttribute(ATTRIBUTE_LINE_SEPARATOR);
         if (lineSeparatorValue != null) {
@@ -149,7 +149,7 @@ class CsvFormatBuilder implements CsvFormat {
         return lineSeparator;
     }
 
-    protected Character createCommentMarker() {
+    protected Character initCommentMarker() {
         return COMMENT_MARKER;
     }
 

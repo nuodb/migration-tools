@@ -27,51 +27,40 @@
  */
 package com.nuodb.migrator.backup.format;
 
-import com.nuodb.migrator.backup.RowSet;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-import java.io.Closeable;
 import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migrator.backup.format.Format.ATTRIBUTE_BUFFERING;
+import static com.nuodb.migrator.backup.format.Format.ATTRIBUTE_BUFFER_SIZE;
+import static java.lang.String.format;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
  */
-public interface Format extends Closeable {
-    /**
-     * Attribute name to enable/disable input/output buffering, default is true
-     */
-    final String ATTRIBUTE_BUFFERING = "buffering";
-    /**
-     * Attribute name enabling custom buffer size, default is 1MB
-     */
-    final String ATTRIBUTE_BUFFER_SIZE = "buffer.size";
+public class FormatFactoryTest {
 
-    final boolean BUFFERING = true;
+    private FormatFactory formatFactory;
 
-    final int BUFFER_SIZE = 1024 * 1024;
+    @BeforeClass
+    public void setUp() {
+        formatFactory = new SimpleFormatFactory();
+    }
 
-    void init();
+    @Test
+    public void testBufferSize() {
+        Map<String, Object> inputAttributes = newHashMap();
+        int bufferSize = 1024 * 1024 * 2;
+        inputAttributes.put(ATTRIBUTE_BUFFER_SIZE, format("%d", bufferSize));
+        Input input = formatFactory.createInput("csv", inputAttributes);
+        assertEquals(input.getBufferSize(), bufferSize);
 
-    void close();
-
-    String getFormat();
-
-    boolean isBuffering();
-
-    void setBuffering(boolean buffering);
-
-    int getBufferSize();
-
-    void setBufferSize(int bufferSize);
-
-    Object getAttribute(String attribute);
-
-    Object getAttribute(String attribute, Object defaultValue);
-
-    Map<String, Object> getAttributes();
-
-    void setAttributes(Map<String, Object> attributes);
-
-    RowSet getRowSet();
-
-    void setRowSet(RowSet rowSet);
+        boolean buffering = false;
+        inputAttributes.put(ATTRIBUTE_BUFFERING, format("%b", buffering));
+        Output output = formatFactory.createOutput("csv", inputAttributes);
+        assertEquals(output.isBuffering(), buffering);
+    }
 }
