@@ -40,6 +40,7 @@ import static java.lang.String.valueOf;
 import static java.sql.Types.BLOB;
 import static java.sql.Types.CLOB;
 import static java.sql.Types.TIMESTAMP;
+import static java.sql.Types.VARCHAR;
 
 /**
  * @author Sergey Bushik
@@ -48,6 +49,21 @@ public class MSSQLServerDialect extends SimpleDialect {
 
     public static final int DATETIMEOFFSET_CODE = -155;
     public static final String DATETIMEOFFSET_NAME = "DATETIMEOFFSET";
+    
+    /**
+     * Bug Fix: MIG-7: MSSQL NTEXT Migrator unsupported type
+     * It all depends on which SQL Server JDBC driver you use.
+     * We found out that by using jtds jdbc driver there are no issues.
+     * This issue is only with MSSQL jdbc driver 4.0
+     * 
+     * Add the jdbc type alias mapping between 'ntext' and 'clob' with 
+     * type code -16
+     * 
+     */
+    public static final int NTEXT_CODE = -16;
+    public static final String NTEXT_NAME = "NTEXT";
+    public static final int UNIQUEIDENTIFIER_CODE = 1;
+    public static final String UNIQUEIDENTIFIER_NAME = "UNIQUEIDENTIFIER";
 
     public MSSQLServerDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -60,6 +76,20 @@ public class MSSQLServerDialect extends SimpleDialect {
         addJdbcTypeAlias(Types.LONGVARCHAR, "TEXT", CLOB);
         addJdbcTypeAlias(Types.LONGNVARCHAR, "XML", CLOB);
         addJdbcTypeAlias(DATETIMEOFFSET_CODE, DATETIMEOFFSET_NAME, TIMESTAMP);
+        
+        /**
+         * Bug Fix MIG-7: MSSQL NTEXT Migrator unsupported type
+         * Add the jdbc type alias mapping between 'ntext' and 'clob' with 
+         * type code -16
+         */  
+         addJdbcTypeAlias(NTEXT_CODE, NTEXT_NAME, CLOB);
+         
+         /**
+          * Bug Fix MIG-13:Migrator is migrating sql server uniqueidentifier to char(36)
+          * Add the jdbc type alias mapping between MSSQL UNIQUEIDENTIFIER and VARCHAR with 
+          * type code as 1
+          */ 
+         addJdbcTypeAlias(UNIQUEIDENTIFIER_CODE, UNIQUEIDENTIFIER_NAME, VARCHAR);
     }
 
     @Override
