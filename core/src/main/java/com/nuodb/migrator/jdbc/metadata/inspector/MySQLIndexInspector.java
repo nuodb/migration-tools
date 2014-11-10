@@ -27,19 +27,32 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Index;
-import com.nuodb.migrator.utils.StringUtils;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.union;
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+
+import org.slf4j.Logger;
+
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
+import com.nuodb.migrator.utils.StringUtils;
 
 /**
  * @author Sergey Bushik
  */
 public class MySQLIndexInspector extends SimpleIndexInspector {
+	
+	protected transient final Logger logger = getLogger(getClass());
 
     private static final String PRIMARY = "PRIMARY";
-
+    
     @Override
     protected void processIndex(InspectionContext inspectionContext, ResultSet indexes,
                                 Index index) throws SQLException {
@@ -47,5 +60,40 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
         if (StringUtils.equals(index.getName(), PRIMARY)) {
             index.setPrimary(true);
         }
+
+        /**
+         *  Bug Fix : MIG -28 :Migrator should not convert FULLTEXT MySQL indexes to
+         *  normal NuoDB indexes. Extract the Index type from result set.
+         */
+        index.setType(indexes.getString("INDEX_TYPE"));
+    }
+    
+    /**
+     * Bug Fix : MIG -28 :Migrator should not convert FULLTEXT MySQL indexes to 
+     * normal NuoDB indexes.
+     * 
+     * This method is overridden to build a query to fetch information from MySQL 
+     * INFORMATION_SCHEMA.STATISTICS and INFORMATION_SCHEMA.COLUMNS tables including 
+     * all index types
+     */
+    @Override
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        SelectQuery statisticsIndex = new SelectQuery();
+        Collection<String> parameters = newArrayList();
+        statisticsIndex.columns("S.TABLE_CATALOG ", "S.TABLE_SCHEMA AS TABLE_CAT ","NULL AS TABLE_SCHEM " , "S.TABLE_NAME", "S.NON_UNIQUE",
+                "S.INDEX_SCHEMA", "S.INDEX_NAME", "S.COLUMN_NAME","1 AS TYPE","S.COLLATION AS ASC_OR_DESC",
+                "S.CARDINALITY", "S.SUB_PART","S.INDEX_TYPE"," C.ORDINAL_POSITION" ,"NULL AS FILTER_CONDITION");
+        statisticsIndex.from("INFORMATION_SCHEMA.STATISTICS S");
+        statisticsIndex.join("INFORMATION_SCHEMA.COLUMNS C",
+                "C.TABLE_NAME = S.TABLE_NAME AND C.COLUMN_NAME = S.COLUMN_NAME");
+        String table = tableInspectionScope.getTable();
+        if (!isEmpty(table)) {
+            statisticsIndex.where("S.TABLE_NAME=?");
+            parameters.add(table);
+         }
+         return new ParameterizedQuery(union(statisticsIndex, null), parameters);
     }
 }
+    
+    
+

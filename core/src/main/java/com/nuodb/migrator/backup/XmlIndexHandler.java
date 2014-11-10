@@ -50,6 +50,7 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
     private static final String SORT_ORDER_ATTRIBUTE = "sort-order";
     private static final String FILTER_CONDITION_ATTRIBUTE = "filter-condition";
     private static final String COLUMN_ELEMENT = "column";
+    private static final String INDEX_TYPE = "type";
 
     public XmlIndexHandler() {
         super(Index.class);
@@ -59,6 +60,11 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
     protected void readAttributes(InputNode input, Index target, XmlReadContext context) throws Exception {
         super.readAttributes(input, target, context);
         target.setUnique(context.readAttribute(input, UNIQUE_ATTRIBUTE, boolean.class));
+        /**
+         *  Bug Fix : MIG -28 :Migrator should not convert FULLTEXT MySQL indexes to
+         *  normal NuoDB indexes. read type property from XML.
+         */
+        target.setType(context.readAttribute(input, INDEX_TYPE, String.class));
         String sortOrder = context.readAttribute(input, SORT_ORDER_ATTRIBUTE, String.class);
         if (sortOrder != null) {
             target.setSortOrder(valueOf(upperCase(sortOrder)));
@@ -84,6 +90,13 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
         super.writeAttributes(index, output, context);
         context.writeAttribute(output, UNIQUE_ATTRIBUTE, index.isUnique());
         SortOrder sortOrder = index.getSortOrder();
+        /**
+         *  Bug Fix : MIG -28 :Migrator should not convert FULLTEXT MySQL indexes to
+         *  normal NuoDB indexes. write type property in XML.
+         */
+        if (index.getType() != null) {
+            context.writeAttribute(output, INDEX_TYPE, upperCase(index.getType()));
+        }
         if (sortOrder != null) {
             context.writeAttribute(output, SORT_ORDER_ATTRIBUTE, lowerCase(sortOrder.name()));
         }
@@ -105,3 +118,4 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
         }
     }
 }
+
