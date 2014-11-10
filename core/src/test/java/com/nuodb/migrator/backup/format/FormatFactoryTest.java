@@ -38,7 +38,6 @@ import static com.nuodb.migrator.backup.format.Format.ATTRIBUTE_BUFFER_SIZE;
 import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
 
-
 /**
  * @author Sergey Bushik
  */
