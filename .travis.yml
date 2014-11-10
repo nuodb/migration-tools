@@ -7,8 +7,10 @@ jdk:
 
 notifications:
   recipients:
-    - moorthy@asthra.com
-    - sergey.bushik@altoros.com
+    - moorthy@nuodb.com
+    - mgodekere@nuodb.com
+    - bmukund@nuodb.com
+    - sbushik@nuodb.com
     - plothridge@nuodb.com
 
 before_install:
