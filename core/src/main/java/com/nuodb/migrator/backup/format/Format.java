@@ -36,6 +36,18 @@ import java.util.Map;
  * @author Sergey Bushik
  */
 public interface Format extends Closeable {
+    /**
+     * Attribute name to enable/disable input/output buffering, default is true
+     */
+    final String ATTRIBUTE_BUFFERING = "buffering";
+    /**
+     * Attribute name enabling custom buffer size, default is 1MB
+     */
+    final String ATTRIBUTE_BUFFER_SIZE = "buffer.size";
+
+    final boolean BUFFERING = true;
+
+    final int BUFFER_SIZE = 1024 * 1024;
 
     void init();
 
