@@ -60,22 +60,15 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
         if (StringUtils.equals(index.getName(), PRIMARY)) {
             index.setPrimary(true);
         }
-
-        /**
-         *  Bug Fix : MIG -28 :Migrator should not convert FULLTEXT MySQL indexes to
-         *  normal NuoDB indexes. Extract the Index type from result set.
-         */
+        /* Extract the Index type from result set. */
         index.setType(indexes.getString("INDEX_TYPE"));
     }
-    
-    /**
-     * Bug Fix : MIG -28 :Migrator should not convert FULLTEXT MySQL indexes to 
-     * normal NuoDB indexes.
-     * 
-     * This method is overridden to build a query to fetch information from MySQL 
-     * INFORMATION_SCHEMA.STATISTICS and INFORMATION_SCHEMA.COLUMNS tables including 
-     * all index types
-     */
+
+    /** 
+    * This method is overridden to build a query to fetch information from MySQL 
+    * INFORMATION_SCHEMA.STATISTICS and INFORMATION_SCHEMA.COLUMNS tables including 
+    * all index types
+    */
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery statisticsIndex = new SelectQuery();
@@ -94,6 +87,4 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
          return new ParameterizedQuery(union(statisticsIndex, null), parameters);
     }
 }
-    
-    
 

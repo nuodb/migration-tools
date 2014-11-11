@@ -54,17 +54,15 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     @Override
     public Collection<String> getCreateScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         /**
-         *  Bug Fix : MIG -28 :Migrator should not convert FULLTEXT MySQL indexes to
-         *  normal NuoDB indexes. Checking Index type .
+         *  Drop all indexes other than BTREE 
          */
-        if ((index.getType() != null) &&
-    			(!index.getType().equalsIgnoreCase("BTREE"))) {
+        if ((index.getType() != null) && (!index.isBtree())) {
             if (logger.isWarnEnabled()) {
                 logger.warn(format("Only BTREE index is supported, %s is %s index", index, index.getType()));
             }
             return emptySet();
         }
-    	
+
         if (index.getExpression() != null) {
             if (logger.isWarnEnabled()) {
                 logger.warn(format("Expression based indexes not supported %s", index));
@@ -96,18 +94,16 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     @Override
     public Collection<String> getDropScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         /**
-         *  Bug Fix : MIG -28 :Migrator should not convert FULLTEXT MySQL indexes to
-         *  normal NuoDB indexes. Checking Index type   .
+         *  Drop all indexes other than BTREE 
          */
-        if ((index.getType() != null) &&
-    			(!index.getType().equalsIgnoreCase("BTREE"))) {
+        if ((index.getType() != null) && (!index.isBtree())) {
             if (logger.isWarnEnabled()) {
                 logger.warn(format("Only BTREE index is supported, %s is %s index", index, index.getType()));
             }
             return emptySet();
         }
-    	
-    	if (index.getExpression() != null) {
+
+       if (index.getExpression() != null) {
             if (logger.isWarnEnabled()) {
                 logger.warn(format("Index expressions are not supported %s", index));
             }
