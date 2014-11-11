@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.Maps;
+import com.nuodb.migrator.utils.StringUtils;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -47,7 +48,8 @@ public class Index extends ConstraintBase {
     private Map<Integer, Column> columns = Maps.newTreeMap();
     private String expression;
     private String type;
-    
+    public static final String BTREE = "BTREE";
+
     public Index() {
         super(INDEX);
     }
@@ -111,14 +113,18 @@ public class Index extends ConstraintBase {
     }
 
     public String getType() {
-		return type;
-	}
+        return type;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	@Override
+    public boolean isBtree() {
+        return StringUtils.equalsIgnoreCase(type, BTREE);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -164,7 +170,7 @@ public class Index extends ConstraintBase {
         String expression = getExpression();
         if (expression != null) {
             buffer.append(expression);
-        }else {
+        } else {
             Collection<Column> columns = getColumns();
             buffer.append('(');
             for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
