@@ -28,27 +28,56 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Index;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 
 import java.util.Collection;
-import java.util.Map;
 
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Maps.newLinkedHashMap;
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Sergey Bushik
  */
-public class IndexUtils {
+@SuppressWarnings("all")
+public class ScriptGeneratorUtils {
 
     private static final String COMMA = ", ";
+
+    public static String getUseSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
+        String useSchema = null;
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        if (scriptGeneratorManager.getTargetSchema() != null) {
+            useSchema = dialect.getUseSchema(scriptGeneratorManager.getTargetSchema(), true);
+        } else if (scriptGeneratorManager.getTargetCatalog() != null) {
+            useSchema = dialect.getUseSchema(scriptGeneratorManager.getTargetCatalog(), true);
+        }
+        if (useSchema == null) {
+            useSchema = schema.getIdentifier() != null ?
+                    dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
+                    dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog()));
+        }
+        return useSchema;
+    }
+
+    public static String getDropSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
+        String dropSchema = null;
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        if (scriptGeneratorManager.getTargetSchema() != null) {
+            dropSchema = dialect.getDropSchema(scriptGeneratorManager.getTargetSchema(), true);
+        } else if (scriptGeneratorManager.getTargetCatalog() != null) {
+            dropSchema = dialect.getDropSchema(scriptGeneratorManager.getTargetCatalog(), true);
+        }
+        if (dropSchema == null) {
+            dropSchema = schema.getIdentifier() != null ?
+                    dialect.getDropSchema(scriptGeneratorManager.getName(schema)) :
+                    dialect.getDropSchema(scriptGeneratorManager.getName(schema.getCatalog()));
+        }
+        return dropSchema;
+    }
 
     public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
@@ -58,32 +87,5 @@ public class IndexUtils {
                 return get(scriptGeneratorManager.getCreateScripts(index), 0);
             }
         }), COMMA));
-    }
-
-    public static Collection<Index> getNonRepeatingIndexes(Table table) {
-        return getNonRepeatingIndexes(table, null);
-    }
-
-    /**
-     * Bypasses MIG-88 "an index on these columns already exists" and executes predicate for duplicated indexes
-     *
-     * @param table     to get non repeating indexes for
-     * @param predicate receives each duplicate index
-     * @return non repeating indexes
-     */
-    public static Collection<Index> getNonRepeatingIndexes(Table table, Predicate<Index> predicate) {
-        Map<Collection<Column>, Index> nonRepeatingIndexes = newLinkedHashMap();
-        for (Index index : table.getIndexes()) {
-            Collection<Column> columns = newHashSet(index.getColumns());
-            Index nonRepeatingIndex = nonRepeatingIndexes.get(columns);
-            boolean replaceWithUniqueIndex =
-                    index.isUnique() && nonRepeatingIndex != null && !nonRepeatingIndex.isUnique();
-            if (index.isPrimary() || replaceWithUniqueIndex || nonRepeatingIndex == null) {
-                nonRepeatingIndexes.put(columns, index);
-            } else if (predicate != null) {
-                predicate.apply(index);
-            }
-        }
-        return nonRepeatingIndexes.values();
     }
 }

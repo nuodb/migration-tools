@@ -52,6 +52,12 @@ import static com.nuodb.migrator.utils.Priority.LOW;
 @SuppressWarnings("unchecked")
 public class ScriptGeneratorManager {
 
+    public static final String FOREIGN_KEYS = "foreign.keys";
+
+    public static final String TABLE_TYPES = "table.types";
+
+    public static final String TABLES = "tables";
+
     private String sourceCatalog;
     private String sourceSchema;
     private Session sourceSession;

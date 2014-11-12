@@ -39,8 +39,8 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
-import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getDropSchema;
-import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getUseSchema;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorUtils.getDropSchema;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorUtils.getUseSchema;
 
 /**
  * @author Sergey Bushik
@@ -52,35 +52,10 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     }
 
     @Override
-    public Collection<String> getCreateScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<String> getScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
         Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
         for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
-            Collection<String> scripts = getHasTablesCreateScripts(schema, scriptGeneratorManager);
-            if (!scripts.isEmpty()) {
-                schemaScripts.put(schema, scripts);
-            }
-        }
-        return getScripts(schemaScripts, scriptGeneratorManager, false, true);
-    }
-
-    @Override
-    public Collection<String> getDropScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
-        Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
-        for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
-            Collection<String> scripts = getHasTablesDropScripts(schema, scriptGeneratorManager);
-            if (!scripts.isEmpty()) {
-                schemaScripts.put(schema, scripts);
-            }
-        }
-        return getScripts(schemaScripts, scriptGeneratorManager, false, true);
-    }
-
-    @Override
-    public Collection<String> getDropCreateScripts(HasSchemas hasSchemas,
-                                                   ScriptGeneratorManager scriptGeneratorManager) {
-        Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
-        for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
-            Collection<String> scripts = getHasTablesDropCreateScripts(schema, scriptGeneratorManager);
+            Collection<String> scripts = getScripts(schema, scriptGeneratorManager);
             if (!scripts.isEmpty()) {
                 schemaScripts.put(schema, scripts);
             }
@@ -123,14 +98,14 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     protected Collection<Schema> getSchemas(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
         Collection<Schema> schemas = newArrayList();
         for (Schema schema : hasSchemas.getSchemas()) {
-            if (addSchemaScripts(schema, scriptGeneratorManager)) {
+            if (addScripts(schema, scriptGeneratorManager)) {
                 schemas.add(schema);
             }
         }
         return schemas;
     }
 
-    protected boolean addSchemaScripts(Schema schema, ScriptGeneratorManager manager) {
+    protected boolean addScripts(Schema schema, ScriptGeneratorManager manager) {
         boolean generate = true;
         Identifier catalogId = valueOf(manager.getSourceCatalog());
         if (catalogId != null) {

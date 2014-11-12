@@ -99,7 +99,9 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         } else if (SET_ELEMENT.equals(element)) {
             column.setJdbcType(context.read(input, JdbcSetType.class));
         } else if (TRIGGER_ELEMENT.equals(element)) {
-            context.read(input, ColumnTrigger.class).setColumn(column);
+            ColumnTrigger columnTrigger = context.read(input, ColumnTrigger.class);
+            columnTrigger.setColumn(column);
+            column.getTable().addTrigger(columnTrigger);
         } else if (CHECK_ELEMENT.equals(element)) {
             column.addCheck(context.read(input, Check.class));
         } else if (SEQUENCE_ELEMENT.equals(element)) {

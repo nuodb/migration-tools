@@ -27,40 +27,43 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Multimap;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
 import com.nuodb.migrator.jdbc.type.JdbcType;
-import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Iterator;
 
-import static com.google.common.collect.Iterables.tryFind;
+import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static com.nuodb.migrator.jdbc.metadata.IndexUtils.getNonRepeatingIndexes;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
-import static com.nuodb.migrator.jdbc.metadata.generator.IndexUtils.getNonRepeatingIndexes;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager.*;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorUtils.getCreateMultipleIndexes;
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.join;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"all"})
 public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
-
-    protected final transient Logger logger = getLogger(getClass());
 
     public TableScriptGenerator() {
         super(Table.class);
@@ -68,12 +71,152 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
 
     @Override
     public Collection<String> getCreateScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<String> scripts = newArrayList();
+        addCreateSequencesScripts(table, scripts, scriptGeneratorManager);
+        addCreateTableScript(table, scripts, scriptGeneratorManager);
+        addCreatePrimaryKeysScripts(table, scripts, scriptGeneratorManager);
+        addCreateIndexesScripts(table, scripts, scriptGeneratorManager);
+        addCreateTriggersScripts(table, scripts, scriptGeneratorManager);
+        addCreateForeignKeysScripts(table, scripts, scriptGeneratorManager);
+        return scripts;
+    }
+
+    protected void addCreateSequencesScripts(Table table, Collection<String> scripts,
+                                             ScriptGeneratorManager scriptGeneratorManager) {
+        boolean createSequences = scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
+                scriptGeneratorManager.getTargetDialect().supportsSequence();
+        if (!createSequences) {
+            return;
+        }
+        for (Sequence sequence : table.getSequences()) {
+            scripts.addAll(scriptGeneratorManager.getCreateScripts(sequence));
+        }
+    }
+
+    protected void addCreatePrimaryKeysScripts(Table table, Collection<String> scripts,
+                                               ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean createPrimaryKey = objectTypes.contains(PRIMARY_KEY);
+        boolean createTable = objectTypes.contains(TABLE);
+        if (!createPrimaryKey || createTable) {
+            return;
+        }
+        PrimaryKey primaryKey = table.getPrimaryKey();
+        if (primaryKey != null) {
+            scripts.addAll(scriptGeneratorManager.getCreateScripts(primaryKey));
+        }
+    }
+
+    protected void addCreateIndexesScripts(Table table, Collection<String> scripts,
+                                           ScriptGeneratorManager scriptGeneratorManager) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean createTables = objectTypes.contains(TABLE);
+        boolean createIndexes = objectTypes.contains(INDEX);
+        if (!createIndexes || (createTables && dialect.supportsIndexInCreateTable())) {
+            return;
+        }
+        Collection<String> indexes = newLinkedHashSet();
+        Collection<Index> nonRepeatingIndexes = getNonRepeatingIndexes(table,
+                new Predicate<Index>() {
+                    @Override
+                    public boolean apply(Index index) {
+                        if (logger.isTraceEnabled()) {
+                            String indexName = index.getName();
+                            String tableName = index.getTable().getQualifiedName();
+                            Iterable<String> columnsNames = transform(index.getTable().getColumns(),
+                                    new Function<Identifiable, String>() {
+                                        @Override
+                                        public String apply(Identifiable column) {
+                                            return column.getName();
+                                        }
+                                    });
+                            logger.trace(format("Index %s on table %s skipped " +
+                                    "as index with column(s) %s is added already",
+                                    indexName, tableName, join(columnsNames, ", ")));
+                        }
+                        return true;
+                    }
+                });
+        Collection<Index> multipleIndexes = newArrayList();
+        for (Index nonRepeatingIndex : nonRepeatingIndexes) {
+            boolean uniqueInCreateTable =
+                    nonRepeatingIndex.isUnique() && size(nonRepeatingIndex.getColumns()) == 1 &&
+                            !get(nonRepeatingIndex.getColumns(), 0).isNullable() &&
+                            dialect.supportsUniqueInCreateTable() && createTables;
+            if (!nonRepeatingIndex.isPrimary() || !uniqueInCreateTable) {
+                if (dialect.supportsCreateMultipleIndexes()) {
+                    multipleIndexes.add(nonRepeatingIndex);
+                } else {
+                    indexes.addAll(scriptGeneratorManager.getCreateScripts(nonRepeatingIndex));
+                }
+            }
+        }
+        // join multiple indexes with comma and add this statement to scripts
+        if (dialect.supportsCreateMultipleIndexes()) {
+            indexes.addAll(getCreateMultipleIndexes(multipleIndexes, scriptGeneratorManager));
+        }
+        scripts.addAll(indexes);
+    }
+
+    protected void addCreateTriggersScripts(Table table, Collection<String> scripts,
+                                            ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean createTriggers = objectTypes.contains(TRIGGER);
+        boolean createColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
+        if (!createTriggers && !createColumnTriggers) {
+            return;
+        }
+        for (Trigger trigger : table.getTriggers()) {
+            if (trigger.getObjectType() == TRIGGER && createTriggers) {
+                scripts.addAll(scriptGeneratorManager.getCreateScripts(trigger));
+            } else if (trigger.getObjectType() == COLUMN_TRIGGER && createColumnTriggers) {
+                scripts.addAll(scriptGeneratorManager.getCreateScripts(trigger));
+            }
+        }
+    }
+
+    protected void addCreateForeignKeysScripts(Table table, Collection<String> scripts,
+                                               ScriptGeneratorManager scriptGeneratorManager) {
+        boolean createForeignKeys = scriptGeneratorManager.getObjectTypes().contains(FOREIGN_KEY);
+        if (!createForeignKeys) {
+            return;
+        }
+        Collection<Table> tables = (Collection<Table>) scriptGeneratorManager.getAttribute(TABLES);
+        Multimap<Table, ForeignKey> foreignKeys =
+                (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttribute(FOREIGN_KEYS);
+        for (ForeignKey foreignKey : table.getForeignKeys()) {
+            Table primaryTable = foreignKey.getPrimaryTable();
+            Table foreignTable = foreignKey.getForeignTable();
+            if (!addScripts(primaryTable, scriptGeneratorManager) ||
+                    !addScripts(foreignTable, scriptGeneratorManager)) {
+                continue;
+            }
+            if (!tables.contains(primaryTable)) {
+                foreignKeys.put(primaryTable, foreignKey);
+            } else {
+                foreignKeys.remove(primaryTable, foreignKey);
+                scripts.addAll(scriptGeneratorManager.getCreateScripts(foreignKey));
+            }
+        }
+    }
+
+    protected void addCreateTableScript(Table table, Collection<String> scripts, ScriptGeneratorManager
+            scriptGeneratorManager) {
+        boolean createTable = scriptGeneratorManager.getObjectTypes().contains(TABLE);
+        if (!createTable) {
+            return;
+        }
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
         buffer.append(' ').append(scriptGeneratorManager.getName(table)).append(" (");
         Collection<Column> columns = table.getColumns();
         Collection<Index> indexes = getNonRepeatingIndexes(table);
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        Collection<Table> tables = (Collection<Table>) scriptGeneratorManager.getAttributes().get(TABLES);
+        if (tables != null) {
+            tables.add(table);
+        }
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorManager.getName(column));
@@ -173,30 +316,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         if (!isEmpty(comment)) {
             buffer.append(dialect.getTableComment(comment));
         }
-        return singleton(buffer.toString());
-    }
-
-    @Override
-    public Collection<String> getDropScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
-        Dialect dialect = scriptGeneratorManager.getTargetDialect();
-        StringBuilder buffer = new StringBuilder("DROP TABLE");
-        buffer.append(' ');
-        boolean ifExistsBeforeTable;
-        if (ifExistsBeforeTable = dialect.supportsIfExistsBeforeDropTable()) {
-            buffer.append("IF EXISTS");
-            buffer.append(' ');
-        }
-        buffer.append(scriptGeneratorManager.getName(table));
-        String cascadeConstraints = dialect.getCascadeConstraints();
-        if (cascadeConstraints != null) {
-            buffer.append(' ');
-            buffer.append(cascadeConstraints);
-        }
-        if (!ifExistsBeforeTable && dialect.supportsIfExistsAfterDropTable()) {
-            buffer.append(' ');
-            buffer.append("IF EXISTS");
-        }
-        return singleton(buffer.toString());
+        scripts.add(buffer.toString());
     }
 
     protected String getTypeName(Column column, ScriptGeneratorManager scriptGeneratorManager) {
@@ -227,5 +347,92 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                             tableName, columnName, join(typeInfo, ", ")));
         }
         return typeName;
+    }
+
+    @Override
+    public Collection<String> getDropScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<String> scripts = newArrayList();
+        addDropForeignKeysScripts(table, scripts, scriptGeneratorManager);
+        addDropTriggersScripts(table, scripts, scriptGeneratorManager);
+        addDropTableScript(table, scripts, scriptGeneratorManager);
+        addDropSequencesScripts(table, scripts, scriptGeneratorManager);
+        return scripts;
+    }
+
+    protected void addDropSequencesScripts(Table table, Collection<String> scripts,
+                                           ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean dropSequences = objectTypes.contains(SEQUENCE) &&
+                scriptGeneratorManager.getTargetDialect().supportsSequence();
+        if (!dropSequences) {
+            return;
+        }
+        for (Sequence sequence : table.getSequences()) {
+            scripts.addAll(scriptGeneratorManager.getDropScripts(sequence));
+        }
+    }
+
+    protected void addDropTriggersScripts(Table table, Collection<String> scripts,
+                                          ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean dropTriggers = objectTypes.contains(TRIGGER);
+        boolean dropColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
+        if (!dropTriggers && !dropColumnTriggers) {
+            return;
+        }
+        for (Trigger trigger : table.getTriggers()) {
+            if (trigger.getObjectType() == TRIGGER && dropTriggers) {
+                scripts.addAll(scriptGeneratorManager.getDropScripts(trigger));
+            } else if (trigger.getObjectType() == COLUMN_TRIGGER && dropColumnTriggers) {
+                scripts.addAll(scriptGeneratorManager.getDropScripts(trigger));
+            }
+        }
+    }
+
+    protected void addDropForeignKeysScripts(Table table, Collection<String> scripts,
+                                             ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        boolean dropForeignKeys = objectTypes.contains(FOREIGN_KEY) &&
+                dialect.supportsDropConstraints();
+        if (!dropForeignKeys) {
+            return;
+        }
+        for (ForeignKey foreignKey : table.getForeignKeys()) {
+            scripts.addAll(scriptGeneratorManager.getDropScripts(foreignKey));
+        }
+    }
+
+    protected void addDropTableScript(Table table, Collection<String> scripts,
+                                      ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+        boolean dropTable = objectTypes.contains(TABLE);
+        if (!dropTable) {
+            return;
+        }
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        StringBuilder buffer = new StringBuilder("DROP TABLE");
+        buffer.append(' ');
+        boolean ifExistsBeforeTable;
+        if (ifExistsBeforeTable = dialect.supportsIfExistsBeforeDropTable()) {
+            buffer.append("IF EXISTS");
+            buffer.append(' ');
+        }
+        buffer.append(scriptGeneratorManager.getName(table));
+        String cascadeConstraints = dialect.getCascadeConstraints();
+        if (cascadeConstraints != null) {
+            buffer.append(' ');
+            buffer.append(cascadeConstraints);
+        }
+        if (!ifExistsBeforeTable && dialect.supportsIfExistsAfterDropTable()) {
+            buffer.append(' ');
+            buffer.append("IF EXISTS");
+        }
+        scripts.add(buffer.toString());
+    }
+
+    protected boolean addScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<String> tableTypes = (Collection<String>) scriptGeneratorManager.getAttributes().get(TABLE_TYPES);
+        return tableTypes != null ? tableTypes.contains(table.getType()) : Table.TABLE.equals(table.getType());
     }
 }
