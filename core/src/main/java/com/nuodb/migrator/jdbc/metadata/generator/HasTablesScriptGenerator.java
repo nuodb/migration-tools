@@ -77,7 +77,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
                     for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
                         scripts.addAll(scriptGeneratorManager.getScripts(table));
                     }
-                    addForeignKeysScripts(scripts, true, scriptGeneratorManager);
+                    addCreateForeignKeysScripts(scripts, true, scriptGeneratorManager);
                     break;
                 case META_DATA:
                     Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
@@ -107,8 +107,8 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
         return groupScriptsBy != null ? groupScriptsBy : GroupScriptsBy.TABLE;
     }
 
-    protected void addForeignKeysScripts(Collection<String> scripts, boolean force,
-                                         ScriptGeneratorManager scriptGeneratorManager) {
+    protected void addCreateForeignKeysScripts(Collection<String> scripts, boolean force,
+                                               ScriptGeneratorManager scriptGeneratorManager) {
         boolean createForeignKeys = scriptGeneratorManager.getObjectTypes().contains(FOREIGN_KEY);
         if (!createForeignKeys) {
             return;
@@ -118,12 +118,8 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
                 (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttribute(FOREIGN_KEYS);
         for (ForeignKey foreignKey : newArrayList(foreignKeys.values())) {
             Table primaryTable = foreignKey.getPrimaryTable();
-            // if (!addScripts(primaryTable, scriptGeneratorManager) ||
-            //        !addScripts(foreignKey.getForeignTable(), scriptGeneratorManager)) {
-            //    continue;
-            // }
             if (tables.contains(primaryTable) || force) {
-                scripts.addAll(scriptGeneratorManager.getScripts(foreignKey));
+                scripts.addAll(scriptGeneratorManager.getCreateScripts(foreignKey));
                 foreignKeys.remove(primaryTable, foreignKey);
             }
         }

@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.DB2Dialect;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.MySQLDialect;
@@ -52,6 +51,7 @@ import java.util.Collection;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager.SCRIPTS_IN_CREATE_TABLE;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.CREATE;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.DROP;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
@@ -69,6 +69,7 @@ public class ScriptGeneratorTest {
     @BeforeMethod
     public void setUp() throws SQLException {
         scriptGeneratorManager = new ScriptGeneratorManager();
+        scriptGeneratorManager.addAttribute(SCRIPTS_IN_CREATE_TABLE, true);
         scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(MYSQL)));
     }
 
@@ -133,7 +134,7 @@ public class ScriptGeneratorTest {
                 newArrayList(
                         "USE \"s1\"", "CREATE TABLE \"t1\" (\"id\" BIGINT NOT NULL)",
                         "USE \"s2\"", "CREATE TABLE \"t2\" (\"id\" VARCHAR(100) NOT NULL)")
-                });
+        });
 
 
         // test create indexes grouping
