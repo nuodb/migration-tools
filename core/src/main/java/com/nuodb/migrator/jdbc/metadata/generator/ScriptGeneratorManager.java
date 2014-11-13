@@ -51,12 +51,26 @@ import static com.nuodb.migrator.utils.Priority.LOW;
  */
 @SuppressWarnings("unchecked")
 public class ScriptGeneratorManager {
-
-    public static final String FOREIGN_KEYS = "foreign.keys";
-
+    /**
+     * Script generator manager attribute with supported table types for table script generator, by default TABLE type
+     * is migrated only.
+     */
     public static final String TABLE_TYPES = "table.types";
-
+    /**
+     * Contains Multimap<Table, ForeignKey> to share foreign keys pending generation of primary table.
+     */
+    public static final String FOREIGN_KEYS = "foreign.keys";
+    /**
+     * If with "tables" attribute a non null collection is assigned, the collection will hold a list of generated
+     * tables.
+     */
     public static final String TABLES = "tables";
+    /**
+     * Script generator manager attribute which accepts true or false value. If set to true results in in-lined
+     * statements for primary key, indexes and foreign keys, default is false.
+     */
+    public static final String SCRIPTS_IN_CREATE_TABLE = "scripts.in.create.table";
+    public static final boolean SCRIPTS_IN_CREATE_TABLE_DEFAULT = false;
 
     private String sourceCatalog;
     private String sourceSchema;

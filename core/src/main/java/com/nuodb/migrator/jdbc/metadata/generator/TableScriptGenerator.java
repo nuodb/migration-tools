@@ -96,7 +96,9 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
 
     protected boolean addScriptsInCreateTable(Table table, MetaDataType objectType,
                                               ScriptGeneratorManager scriptGeneratorManager) {
-        return false;
+        Object scriptsInCreateTable = scriptGeneratorManager.getAttribute(SCRIPTS_IN_CREATE_TABLE);
+        return scriptsInCreateTable instanceof Boolean ? (Boolean) scriptsInCreateTable :
+                SCRIPTS_IN_CREATE_TABLE_DEFAULT;
     }
 
     protected void addCreateSequencesScripts(Table table, Collection<String> scripts,
@@ -114,7 +116,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     protected void addCreatePrimaryKeyScript(Table table, Collection<String> scripts,
                                              ScriptGeneratorManager scriptGeneratorManager) {
         boolean createPrimaryKey = addCreateScripts(table, PRIMARY_KEY, scriptGeneratorManager) ?
-                addScriptsInCreateTable(table, PRIMARY_KEY, scriptGeneratorManager) : false;
+                !addScriptsInCreateTable(table, PRIMARY_KEY, scriptGeneratorManager) : false;
         if (!createPrimaryKey) {
             return;
         }
@@ -154,13 +156,13 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                         return true;
                     }
                 });
-        boolean addIndexes = addScriptsInCreateTable(table, INDEX, scriptGeneratorManager);
+        boolean addIndexesInCreateTable = addScriptsInCreateTable(table, INDEX, scriptGeneratorManager);
         Collection<Index> multipleIndexes = newArrayList();
         for (Index nonRepeatingIndex : nonRepeatingIndexes) {
             boolean uniqueInCreateTable =
                     nonRepeatingIndex.isUnique() && size(nonRepeatingIndex.getColumns()) == 1 &&
                             !get(nonRepeatingIndex.getColumns(), 0).isNullable() &&
-                            dialect.supportsUniqueInCreateTable() && addIndexes;
+                            dialect.supportsUniqueInCreateTable() && addIndexesInCreateTable;
             if (!nonRepeatingIndex.isPrimary() || !uniqueInCreateTable) {
                 if (dialect.supportsCreateMultipleIndexes()) {
                     multipleIndexes.add(nonRepeatingIndex);
@@ -195,7 +197,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     protected void addCreateForeignKeysScripts(Table table, Collection<String> scripts,
                                                ScriptGeneratorManager scriptGeneratorManager) {
         boolean createForeignKeys = addCreateScripts(table, FOREIGN_KEY, scriptGeneratorManager) ?
-                addScriptsInCreateTable(table, FOREIGN_KEY, scriptGeneratorManager) : false;
+                !addScriptsInCreateTable(table, FOREIGN_KEY, scriptGeneratorManager) : false;
         if (!createForeignKeys) {
             return;
         }
