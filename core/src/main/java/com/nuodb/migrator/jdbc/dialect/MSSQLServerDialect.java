@@ -51,11 +51,6 @@ public class MSSQLServerDialect extends SimpleDialect {
     public static final String DATETIMEOFFSET_NAME = "DATETIMEOFFSET";
     
     /**
-     * Bug Fix: MIG-7: MSSQL NTEXT Migrator unsupported type
-     * It all depends on which SQL Server JDBC driver you use.
-     * We found out that by using jtds jdbc driver there are no issues.
-     * This issue is only with MSSQL jdbc driver 4.0
-     * 
      * Add the jdbc type alias mapping between 'ntext' and 'clob' with 
      * type code -16
      * 
@@ -78,14 +73,12 @@ public class MSSQLServerDialect extends SimpleDialect {
         addJdbcTypeAlias(DATETIMEOFFSET_CODE, DATETIMEOFFSET_NAME, TIMESTAMP);
         
         /**
-         * Bug Fix MIG-7: MSSQL NTEXT Migrator unsupported type
          * Add the jdbc type alias mapping between 'ntext' and 'clob' with 
          * type code -16
          */  
          addJdbcTypeAlias(NTEXT_CODE, NTEXT_NAME, CLOB);
          
          /**
-          * Bug Fix MIG-13:Migrator is migrating sql server uniqueidentifier to char(36)
           * Add the jdbc type alias mapping between MSSQL UNIQUEIDENTIFIER and VARCHAR with 
           * type code as 1
           */ 
