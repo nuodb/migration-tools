@@ -30,12 +30,15 @@ package com.nuodb.migrator.backup.format.value;
 import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
 
 import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
 import static com.nuodb.migrator.backup.format.value.ValueUtils.binary;
 import static com.nuodb.migrator.utils.ReflectionUtils.*;
+import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 
 /**
@@ -45,14 +48,18 @@ public class OracleBFileTypeValueFormat extends LazyInitValueFormatBase<Object> 
 
     private static final String BFILE_CLASS_NAME = "oracle.sql.BFILE";
     private Class<?> bfileClass;
-    private Method getBytes;
+    private Method openFile;
+    private Method getBinaryStream;
+    private Method closeFile;
 
     @Override
     protected void doLazyInit() {
         ClassLoader classLoader = getClassLoader();
         try {
             bfileClass = classLoader.loadClass(BFILE_CLASS_NAME);
-            getBytes = bfileClass.getMethod("getBytes", EMPTY_CLASS_ARRAY);
+            openFile = bfileClass.getMethod("openFile", EMPTY_CLASS_ARRAY);
+            getBinaryStream = bfileClass.getMethod("getBinaryStream", EMPTY_CLASS_ARRAY);
+            closeFile = bfileClass.getMethod("closeFile", EMPTY_CLASS_ARRAY);
         } catch (Exception exception) {
             throw new ValueFormatException(exception);
         }
@@ -61,7 +68,19 @@ public class OracleBFileTypeValueFormat extends LazyInitValueFormatBase<Object> 
     @Override
     protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Throwable {
         Object value = access.getValue(options);
-        return binary(value != null ? (byte[]) invokeMethodNoWrap(value, getBytes) : null);
+        byte[] bytes = null;
+        if (value != null) {
+            invokeMethodNoWrap(value, openFile);
+            InputStream input = null;
+            try {
+                input = invokeMethodNoWrap(value, getBinaryStream);
+                bytes = toByteArray(input);
+            } finally {
+                closeQuietly(input);
+                invokeMethodNoWrap(value, closeFile);
+            }
+        }
+        return binary(bytes);
     }
 
     @Override
