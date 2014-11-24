@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.context.ContextUtils.getMessages;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
@@ -69,9 +70,7 @@ import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 @SuppressWarnings("all")
 public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
-    public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
-
-    private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
+    public static final String EMPTY_DATABASE_ERROR = "com.nuodb.migrator.schema.empty.database.error";
 
     private Session sourceSession;
     private Session targetSession;
@@ -130,9 +129,12 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
     @Override
     public void execute() throws Exception {
         Collection<String> scripts = getScriptGeneratorManager().getScripts(inspect());
-        if (isFailOnEmptyScripts() && scripts.isEmpty()) {
-            throw new SchemaException(
-                    "Database is empty: no scripts to export. Verify connection & data inspection settings");
+        if (scripts.isEmpty()) {
+            if (isFailOnEmptyDatabase()) {
+                throw new SchemaException(getMessages().getMessage(EMPTY_DATABASE_ERROR));
+            } else if (logger.isWarnEnabled()) {
+                logger.warn(getMessages().getMessage(EMPTY_DATABASE_ERROR));
+            }
         }
         ScriptExporter scriptExporter = getScriptExporter();
         scriptExporter.open();
@@ -195,6 +197,10 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
         return getJobSpec().getMetaDataFilterManager();
     }
 
+    protected boolean isFailOnEmptyDatabase() {
+        return getJobSpec().isFailOnEmptyDatabase();
+    }
+
     protected ConnectionSpec getSourceSpec() {
         return getJobSpec().getSourceSpec();
     }
@@ -237,13 +243,5 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     protected void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
         this.scriptGeneratorManager = scriptGeneratorManager;
-    }
-
-    public boolean isFailOnEmptyScripts() {
-        return failOnEmptyScripts;
-    }
-
-    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
-        this.failOnEmptyScripts = failOnEmptyScripts;
     }
 }

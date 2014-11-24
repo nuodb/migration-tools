@@ -37,6 +37,9 @@ import com.nuodb.migrator.spec.SchemaJobSpec;
 import java.util.Map;
 
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
+import static com.nuodb.migrator.spec.SchemaJobSpec.FAIL_ON_EMPTY_DATABASE_DEFAULT;
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
+import static java.lang.Boolean.parseBoolean;
 
 /**
  * @author Sergey Bushik
@@ -78,6 +81,21 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
     }
 
     @Override
+    protected Group createSchemaMigrationGroup() {
+        Group group = super.createSchemaMigrationGroup();
+        Option failOnEmptyDatabase = newBasicOptionBuilder().
+                withName(FAIL_ON_EMPTY_DATABASE).
+                withDescription(getMessage(FAIL_ON_EMPTY_DATABASE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(FAIL_ON_EMPTY_DATABASE_ARGUMENT_NAME)).build()
+                )
+                .build();
+        group.addOption(failOnEmptyDatabase);
+        return group;
+    }
+
+    @Override
     protected Group createOutputGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(SCHEMA_OUTPUT_GROUP_NAME));
         Option path = newBasicOptionBuilder().
@@ -92,6 +110,12 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
                 ).build();
         group.withOption(path);
         return group.build();
+    }
+
+    protected void parseSchemaMigrationGroup(OptionSet optionSet, SchemaJobSpec jobSpec, Option option) {
+        super.parseSchemaMigrationGroup(optionSet, jobSpec, option);
+        String value = (String)optionSet.getValue(FAIL_ON_EMPTY_DATABASE);
+        jobSpec.setFailOnEmptyDatabase(!isEmpty(value) ? parseBoolean(value) : FAIL_ON_EMPTY_DATABASE_DEFAULT);
     }
 
     @Override

@@ -86,6 +86,7 @@ public class CliSchemaJobTest {
                 "--group.scripts.by=meta.data",
                 "--identifier.quoting=always",
                 "--identifier.normalizer=standard",
+                "--fail.on.empty.database=false",
         };
         parser.parse(arguments, cliSchemaJob);
 
@@ -124,6 +125,7 @@ public class CliSchemaJobTest {
         schemaSpec.setGroupScriptsBy(GroupScriptsBy.META_DATA);
         schemaSpec.setIdentifierQuoting(IdentifierQuotings.ALWAYS);
         schemaSpec.setIdentifierNormalizer(IdentifierNormalizers.STANDARD);
+        schemaSpec.setFailOnEmptyDatabase(false);
         return schemaSpec;
     }
 }

@@ -34,6 +34,9 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import static java.util.Locale.getDefault;
+import static java.util.ResourceBundle.getBundle;
+
 /**
  * @author Sergey Bushik
  */
@@ -61,12 +64,12 @@ public class SimpleMessages implements Messages {
             String country = bundle.substring(second + 1);
             locale = new Locale(language, country);
         } else {
-            locale = Locale.getDefault();
+            locale = getDefault();
         }
         try {
-            this.bundle = ResourceBundle.getBundle(bundle, locale);
+            this.bundle = getBundle(bundle, locale);
         } catch (MissingResourceException exp) {
-            this.bundle = ResourceBundle.getBundle(DEFAULT_BUNDLE, locale);
+            this.bundle = getBundle(DEFAULT_BUNDLE, locale);
         }
     }
 

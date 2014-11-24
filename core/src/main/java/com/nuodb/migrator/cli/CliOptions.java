@@ -110,6 +110,7 @@ public interface CliOptions {
     final String INPUT_PATH = "input.path";
 
     final String META_DATA = "meta.data.*";
+    final String FAIL_ON_EMPTY_DATABASE = "fail.on.empty.database";
     final String NAMING_STRATEGY = "naming.strategy";
     final String SCRIPT_TYPE = "script.type";
     final String GROUP_SCRIPTS_BY = "group.scripts.by";

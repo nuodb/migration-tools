@@ -38,10 +38,21 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public class SchemaJobSpec extends ScriptGeneratorJobSpecBase {
 
+    public static final boolean FAIL_ON_EMPTY_DATABASE_DEFAULT = true;
+
+    private boolean failOnEmptyDatabase = FAIL_ON_EMPTY_DATABASE_DEFAULT;
     private BackupOps backupOps;
     private ConnectionSpec sourceSpec;
     private ResourceSpec outputSpec;
     private Collection<MigrationMode> migrationModes = newHashSet(MigrationMode.DATA);
+
+    public boolean isFailOnEmptyDatabase() {
+        return failOnEmptyDatabase;
+    }
+
+    public void setFailOnEmptyDatabase(boolean failOnEmptyDatabase) {
+        this.failOnEmptyDatabase = failOnEmptyDatabase;
+    }
 
     public BackupOps getBackupOps() {
         return backupOps;
@@ -83,6 +94,8 @@ public class SchemaJobSpec extends ScriptGeneratorJobSpecBase {
 
         SchemaJobSpec that = (SchemaJobSpec) o;
 
+        if (failOnEmptyDatabase != that.failOnEmptyDatabase) return false;
+        if (backupOps != null ? !backupOps.equals(that.backupOps) : that.backupOps != null) return false;
         if (migrationModes != null ? !migrationModes.equals(that.migrationModes) : that.migrationModes != null)
             return false;
         if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
@@ -94,6 +107,8 @@ public class SchemaJobSpec extends ScriptGeneratorJobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (failOnEmptyDatabase ? 1 : 0);
+        result = 31 * result + (backupOps != null ? backupOps.hashCode() : 0);
         result = 31 * result + (sourceSpec != null ? sourceSpec.hashCode() : 0);
         result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
         result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);

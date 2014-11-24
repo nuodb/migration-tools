@@ -546,7 +546,9 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(IDENTIFIER_QUOTING_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(IDENTIFIER_QUOTING_ARGUMENT_NAME)).build()
+                                withName(getMessage(IDENTIFIER_QUOTING_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
+
                 ).build();
         group.withOption(identifierQuoting);
 
@@ -555,7 +557,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(IDENTIFIER_NORMALIZER_ARGUMENT_NAME)).build()
+                                withName(getMessage(IDENTIFIER_NORMALIZER_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(identifierNormalizer);
 

@@ -145,6 +145,9 @@ public interface CliMessages {
     final String NAMING_STRATEGY_OPTION_DESCRIPTION = "com.nuodb.migrator.naming.strategy.option.description";
     final String NAMING_STRATEGY_ARGUMENT_NAME = "com.nuodb.migrator.naming.strategy.argument.name";
 
+    final String FAIL_ON_EMPTY_DATABASE_OPTION_DESCRIPTION = "com.nuodb.migrator.schema.fail.on.empty.database.option.description";
+    final String FAIL_ON_EMPTY_DATABASE_ARGUMENT_NAME = "com.nuodb.migrator.schema.fail.on.empty.database.argument.name";
+
     final String SCRIPT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migrator.script.type.option.description";
     final String SCRIPT_TYPE_ARGUMENT_NAME = "com.nuodb.migrator.script.type.argument.name";
 
