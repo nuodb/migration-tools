@@ -155,7 +155,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
         [--naming.strategy=[naming strategy]]                           Naming strategy to use, either qualify, hash, auto or class name implementing com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy, default is auto
         [--identifier.quoting=[identifier quoting]]                     Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
         [--identifier.normalizer=[identifier normalizer]]               Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
-        [--fail.on.empty.database=[true | false]]                       If an empty source database migrated an error will be raised or warn message printed to logs depending on the value of this switch. Default is true, which raises error.
+        [--fail.on.empty.database=[true | false]]                       If an empty source database is migrated an error will be raised or warn message will be printed to logs depending on the value of this switch. Default is true, which raises error.
 
 #### Override database types ####
 
