@@ -48,8 +48,6 @@ import com.nuodb.migrator.utils.StringUtils;
  * @author Sergey Bushik
  */
 public class MySQLIndexInspector extends SimpleIndexInspector {
-	
-	protected transient final Logger logger = getLogger(getClass());
 
     private static final String PRIMARY = "PRIMARY";
     
@@ -74,8 +72,8 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
         SelectQuery statisticsIndex = new SelectQuery();
         Collection<String> parameters = newArrayList();
         statisticsIndex.columns("S.TABLE_CATALOG ", "S.TABLE_SCHEMA AS TABLE_CAT ","NULL AS TABLE_SCHEM " , "S.TABLE_NAME", "S.NON_UNIQUE",
-                "S.INDEX_SCHEMA", "S.INDEX_NAME", "S.COLUMN_NAME","1 AS TYPE","S.COLLATION AS ASC_OR_DESC",
-                "S.CARDINALITY", "S.SUB_PART","S.INDEX_TYPE"," C.ORDINAL_POSITION" ,"NULL AS FILTER_CONDITION");
+                "S.INDEX_SCHEMA","S.INDEX_NAME","S.INDEX_TYPE","1 AS TYPE" ," C.ORDINAL_POSITION" , "S.COLUMN_NAME" ,"S.COLLATION AS ASC_OR_DESC",
+                "S.CARDINALITY", "S.SUB_PART","NULL AS FILTER_CONDITION");
         statisticsIndex.from("INFORMATION_SCHEMA.STATISTICS S");
         statisticsIndex.join("INFORMATION_SCHEMA.COLUMNS C",
                 "C.TABLE_NAME = S.TABLE_NAME AND C.COLUMN_NAME = S.COLUMN_NAME");
