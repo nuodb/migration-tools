@@ -163,7 +163,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                     nonRepeatingIndex.isUnique() && size(nonRepeatingIndex.getColumns()) == 1 &&
                             !get(nonRepeatingIndex.getColumns(), 0).isNullable() &&
                             dialect.supportsUniqueInCreateTable() && addIndexesInCreateTable;
-            if (!nonRepeatingIndex.isPrimary() || !uniqueInCreateTable) {
+            if (!nonRepeatingIndex.isPrimary() && !uniqueInCreateTable) {
                 if (dialect.supportsCreateMultipleIndexes()) {
                     multipleIndexes.add(nonRepeatingIndex);
                 } else {
