@@ -25,22 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.value;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
+
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.Query;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED;
 
 /**
- * @author Sergey Bushik
+ * @author Mukund
  */
-public class OracleValueFormatRegistry extends SimpleValueFormatRegistry {
+public class SimpleUserDefinedInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public OracleValueFormatRegistry() {
-        addValueFormat(BFILE_DESC, new OracleBFileTypeValueFormat());
-        addValueFormat(ANYDATA_DESC, new OracleAnyDataValueFormat());
-        addValueFormat(ANYTYPE_DESC, new OracleAnyTypeValueFormat());
-        addValueFormat(XMLTYPE_DESC, new OracleXmlTypeValueFormat());
-        addValueFormat(USER_DEFINED_VARRAY_DESC, new OracleVarrayTypeValueFormat());
-        addValueFormat(USER_DEFINED_STRUCT_DESC, new OracleStructTypeValueFormat());
-        addValueFormat(USER_DEFINED_REF_DESC, new OracleRefTypeValueFormat());
+    public SimpleUserDefinedInspector() {
+        super(USER_DEFINED, TableInspectionScope.class);
+    }
+
+    @Override
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        return null;
+    }
+
+    @Override
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet userDefineds) throws SQLException {
     }
 }

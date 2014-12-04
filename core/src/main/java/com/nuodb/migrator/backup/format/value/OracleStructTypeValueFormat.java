@@ -27,20 +27,46 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
+
+import java.util.Map;
+
+import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
+import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
+import static com.nuodb.migrator.utils.ReflectionUtils.*;
 
 /**
- * @author Sergey Bushik
+ * @author Mukund
  */
-public class OracleValueFormatRegistry extends SimpleValueFormatRegistry {
+public class OracleStructTypeValueFormat extends LazyInitValueFormatBase<Object> {
 
-    public OracleValueFormatRegistry() {
-        addValueFormat(BFILE_DESC, new OracleBFileTypeValueFormat());
-        addValueFormat(ANYDATA_DESC, new OracleAnyDataValueFormat());
-        addValueFormat(ANYTYPE_DESC, new OracleAnyTypeValueFormat());
-        addValueFormat(XMLTYPE_DESC, new OracleXmlTypeValueFormat());
-        addValueFormat(USER_DEFINED_VARRAY_DESC, new OracleVarrayTypeValueFormat());
-        addValueFormat(USER_DEFINED_STRUCT_DESC, new OracleStructTypeValueFormat());
-        addValueFormat(USER_DEFINED_REF_DESC, new OracleRefTypeValueFormat());
+    private static final String STRUCT = "oracle.sql.STRUCT";
+    private Class<?> structClass;
+
+    @Override
+    protected void doLazyInit() {
+        ClassLoader classLoader = getClassLoader();
+        try {
+            structClass = classLoader.loadClass(STRUCT);
+        } catch (Exception exception) {
+            throw new ValueFormatException(exception);
+        }
+    }
+
+    @Override
+    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Throwable {
+        return string(null);
+    }
+
+    @Override
+    protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options)
+            throws Throwable {
+        access.setValue("BLOB", options);
+    }
+
+    @Override
+    public ValueType getValueType(Field field) {
+        return STRING;
     }
 }

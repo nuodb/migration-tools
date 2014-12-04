@@ -6,6 +6,7 @@ com.nuodb.migrator.backup.XmlDatabaseInfoHandler
 com.nuodb.migrator.backup.XmlCatalogHandler
 com.nuodb.migrator.backup.XmlSchemaHandler
 com.nuodb.migrator.backup.XmlSequenceHandler
+com.nuodb.migrator.backup.XmlUserDefinedHandler
 com.nuodb.migrator.backup.XmlTableHandler
 com.nuodb.migrator.backup.XmlCheckHandler
 com.nuodb.migrator.backup.XmlIndexHandler

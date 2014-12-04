@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.UserDefined;
 import com.nuodb.migrator.jdbc.metadata.inspector.SchemaInspectionScope;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -47,6 +48,7 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
 
     private static final String TABLE_ELEMENT = "table";
     private static final String SEQUENCE_ELEMENT = "sequence";
+    private static final String USER_DEFINED = "userDefined";
 
     public XmlSchemaHandler() {
         super(Schema.class);
@@ -67,6 +69,8 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
             schema.addTable(context.read(input, Table.class));
         } else if (SEQUENCE_ELEMENT.equals(element)) {
             schema.addSequence(context.read(input, Sequence.class));
+        } else if (USER_DEFINED.equals(element)) {
+            schema.addUserDefined(context.read(input, UserDefined.class));
         }
     }
 
@@ -74,6 +78,9 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
     protected void writeElements(Schema schema, OutputNode output, final XmlWriteContext context) throws Exception {
         for (Sequence sequence : schema.getSequences()) {
             context.writeElement(output, SEQUENCE_ELEMENT, sequence);
+        }
+        for (UserDefined userDefined : schema.getUserDefined()) {
+            context.writeElement(output, USER_DEFINED, userDefined);
         }
         for (Table table : schema.getTables()) {
             context.writeElement(output, TABLE_ELEMENT, table);

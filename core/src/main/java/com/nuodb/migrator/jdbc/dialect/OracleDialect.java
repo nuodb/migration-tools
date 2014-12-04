@@ -65,6 +65,9 @@ public class OracleDialect extends SimpleDialect {
     public static final JdbcTypeDesc TIMESTAMP_WITH_LOCAL_TIME_ZONE_DESC = new JdbcTypeDesc(-102);
     public static final JdbcTypeDesc INTERVAL_YEAR_TO_MONTH_DESC = new JdbcTypeDesc(-103);
     public static final JdbcTypeDesc INTERVAL_DAY_TO_SECOND_DESC = new JdbcTypeDesc(-104);
+    public static final JdbcTypeDesc USER_DEFINED_VARRAY_DESC = new JdbcTypeDesc(OTHER, "ARRAY");
+    public static final JdbcTypeDesc USER_DEFINED_STRUCT_DESC = new JdbcTypeDesc(OTHER, "STRUCT");
+    public static final JdbcTypeDesc USER_DEFINED_REF_DESC = new JdbcTypeDesc(OTHER, "REF");
 
     private static final Regex TIMESTAMP_REGEX = INSTANCE.compile("TIMESTAMP(*)");
     private static final Regex TIMESTAMP_WITH_TIME_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH TIME ZONE");

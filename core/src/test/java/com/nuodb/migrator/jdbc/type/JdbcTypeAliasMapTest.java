@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import static java.sql.Types.OTHER;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -44,29 +46,48 @@ public class JdbcTypeAliasMapTest {
 
 	private DialectResolver dialectResolver;
 	private Dialect dialectMSSQL;
+	private Dialect dialectNuoDB;
 
 	@BeforeMethod
 	public void init() {
 		dialectResolver = new SimpleDialectResolver();
 		dialectMSSQL = dialectResolver.resolve(new DatabaseInfo(
 				"Microsoft SQL Server"));
+		dialectNuoDB = dialectResolver.resolve(new DatabaseInfo(
+                "NuoDB"));
 	}
 
-	@Test(dataProvider = "getTypeAliasName")
-	public void testJdbcTypeAlias(JdbcType jdbcType, String expected) {
+	@Test(dataProvider = "getTypeAliasNameMSSQL")
+	public void testJdbcTypeAliasMSSQL(JdbcType jdbcType, String expected) {
 
 		String actual = dialectMSSQL.getTypeName(new DatabaseInfo(
 				"Microsoft SQL Server"), jdbcType);
 		Assert.assertEquals(expected, actual);
 	}
 
-	@DataProvider(name = "getTypeAliasName")
-	public Object[][] createGetTypeNameData() {
+	@Test(dataProvider = "getTypeAliasNameOracle")
+	public void testJdbcTypeAliasOracle(JdbcType jdbcType) {
+
+	    String actual = dialectNuoDB.getTypeName(new DatabaseInfo("Oracle"), jdbcType);
+        Assert.assertEquals(actual,"BLOB" );
+	}
+
+	@DataProvider(name = "getTypeAliasNameMSSQL")
+	public Object[][] createGetTypeNameDataMSSQL() {
 		return new Object[][] {
 				{ getJdbcType(12, "UNIQUEIDENTIFIER", 36), "VARCHAR(36)" },
 				{ getJdbcType(2005, "NTEXT", 0), "CLOB" } 
 		};
 	}
+
+	   @DataProvider(name = "getTypeAliasNameOracle")
+	    public Object[][] createGetTypeNameDataOracle() {
+	       return new Object[][] {
+	                { getJdbcType(OTHER,"ARRAY")},
+	                { getJdbcType(OTHER, "STRUCT")},
+	                { getJdbcType(OTHER, "REF")}
+	        };
+	    }
 
 	private JdbcType getJdbcType(int typeCode, String typeName, int size) {
 		JdbcType jdbcType = new JdbcType();
@@ -77,4 +98,11 @@ public class JdbcTypeAliasMapTest {
 		return jdbcType;
 
 	}
+
+    private JdbcType getJdbcType(int typeCode, String typeName) {
+        JdbcType jdbcType = new JdbcType();
+        jdbcType.setTypeCode(typeCode);
+        jdbcType.setTypeName(typeName);
+        return jdbcType;
+    }
 }

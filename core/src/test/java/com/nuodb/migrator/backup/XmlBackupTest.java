@@ -37,6 +37,7 @@ import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.UserDefined;
 import com.nuodb.migrator.jdbc.type.JdbcEnumType;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
@@ -134,6 +135,10 @@ public class XmlBackupTest {
         sequence.setOrder(true);
         sequence.setTemporary(false);
         schema.addSequence(sequence);
+        UserDefined userDefined = new UserDefined();
+        userDefined.setUserDefinedName("MTYPE");
+        userDefined.setTypeCode("ARRAY");
+        schema.addUserDefined(userDefined);
 
         // table read
         Table table = new Table("table1");
@@ -194,6 +199,7 @@ public class XmlBackupTest {
                 "<sequence name=\"sequence1\" start-with=\"6\" last-value=\"6\" " +
                 "increment-by=\"3\" min-value=\"0\" max-value=\"2147483647\" " +
                 "cycle=\"false\" order=\"true\" temporary=\"false\" cache=\"50\"/>\n" +
+                "<userDefined object_name=\"MTYPE\" typecode=\"ARRAY\"/>" +
                 "<table name=\"table1\" type=\"TABLE\">" +
                 "<column name=\"column1\" nullable=\"true\">\n" +
                 "<type code=\"12\" name=\"VARCHAR\" size=\"20\" precision=\"20\" scale=\"0\"/>\n" +
@@ -231,6 +237,10 @@ public class XmlBackupTest {
 
         Schema schema = new Schema("schema1");
         schema.addSequence(new Sequence("sequence1"));
+        UserDefined userDefined = new UserDefined();
+        userDefined.setUserDefinedName("MTYPE");
+        userDefined.setTypeCode("ARRAY");
+        schema.addUserDefined(userDefined);
         schema.addTable("table1");
 
         Table table = new Table("table1");
@@ -277,6 +287,7 @@ public class XmlBackupTest {
                 schema,
                 "<schema name=\"schema1\">" +
                 "<sequence name=\"sequence1\"/>" +
+                "<userDefined object_name=\"MTYPE\" typecode=\"ARRAY\"/>" +
                 "<table name=\"table1\" type=\"TABLE\"/>" +
                 "</schema>"
         }, {

@@ -37,4 +37,7 @@ public interface HasTables extends MetaData {
     Collection<Table> getTables();
 
     Collection<Sequence> getSequences();
+
+    Collection<UserDefined> getUserDefined();
+
 }
