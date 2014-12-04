@@ -28,13 +28,23 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.UserDefined;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Collection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /**
@@ -43,6 +53,8 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @author Sergey Bushik
  */
 public class OracleColumnInspector extends SimpleColumnInspector {
+
+    private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * Fetches LONG or LONG RAW columns first, as these kind of columns are read as stream, if not read in a proper
@@ -63,6 +75,26 @@ public class OracleColumnInspector extends SimpleColumnInspector {
                 columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
         column.setTypeCode(typeDescAlias.getTypeCode());
         column.setTypeName(typeDescAlias.getTypeName());
+
+        if(columns.getInt("DATA_TYPE") == Types.OTHER ) {
+            Schema schema = inspectionContext.getInspectionResults().getObject(SCHEMA);
+            UserDefined userDefined = schema.getUserDefined(columns.getString("TYPE_NAME"));
+            column.setTypeCode(columns.getInt("DATA_TYPE"));
+            column.setTypeName(userDefined.getTypeCode());
+
+            Collection<String> typeInfo = newArrayList();
+            typeInfo.add(format("type name %s", columns.getString("TYPE_NAME")));
+            typeInfo.add(format("type code %s", columns.getInt("DATA_TYPE")));
+            typeInfo.add(format("length %d", column.getSize()));
+            if (column.getPrecision() != null) {
+                typeInfo.add(format("precision %d", column.getPrecision()));
+            }
+            if (column.getScale() != null) {
+                typeInfo.add(format("scale %d", column.getScale()));
+            }
+            logger.warn(format("Unsupported type on table %s column %s: %s",
+                            column.getTable().getName(), column.getName(), join(typeInfo, ", ")));
+        }
 
         int columnSize = columns.getInt("COLUMN_SIZE");
         column.setSize((long)columnSize);

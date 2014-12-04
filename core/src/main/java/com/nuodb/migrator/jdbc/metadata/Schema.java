@@ -42,6 +42,7 @@ public class Schema extends IdentifiableBase implements HasTables {
     private Database database;
     private Catalog catalog;
     private final Collection<Sequence> sequences = newArrayList();
+    private final Map<Identifier, UserDefined> userDefinedTypes = newLinkedHashMap();
     private final Map<Identifier, Table> tables = newLinkedHashMap();
 
     public Schema() {
@@ -103,6 +104,25 @@ public class Schema extends IdentifiableBase implements HasTables {
     @Override
     public Collection<Sequence> getSequences() {
         return sequences;
+    }
+
+    public void addUserDefined(UserDefined userDefined) {
+        userDefined.setSchema(this);
+        userDefinedTypes.put(userDefined.getIdentifier(),userDefined);
+    }
+
+    public UserDefined getUserDefined(String name) {
+        return userDefinedTypes.get(valueOf(name)) ;
+    }
+    
+
+    public UserDefined getUserDefined(Identifier identifier) {
+        return userDefinedTypes.get(identifier) ;
+    }
+    
+    @Override
+    public Collection<UserDefined> getUserDefined() {
+        return userDefinedTypes.values();
     }
 
     public Table getTable(String name) {

@@ -25,22 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.value;
+package com.nuodb.migrator.backup;
 
-import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
+
+import com.nuodb.migrator.jdbc.metadata.UserDefined;
+import com.nuodb.migrator.utils.xml.XmlReadContext;
+import com.nuodb.migrator.utils.xml.XmlWriteContext;
+
+import org.simpleframework.xml.stream.InputNode;
+import org.simpleframework.xml.stream.OutputNode;
 
 /**
- * @author Sergey Bushik
+ * @author Mukund
  */
-public class OracleValueFormatRegistry extends SimpleValueFormatRegistry {
+public class XmlUserDefinedHandler extends XmlIdentifiableHandlerBase<UserDefined> {
 
-    public OracleValueFormatRegistry() {
-        addValueFormat(BFILE_DESC, new OracleBFileTypeValueFormat());
-        addValueFormat(ANYDATA_DESC, new OracleAnyDataValueFormat());
-        addValueFormat(ANYTYPE_DESC, new OracleAnyTypeValueFormat());
-        addValueFormat(XMLTYPE_DESC, new OracleXmlTypeValueFormat());
-        addValueFormat(USER_DEFINED_VARRAY_DESC, new OracleVarrayTypeValueFormat());
-        addValueFormat(USER_DEFINED_STRUCT_DESC, new OracleStructTypeValueFormat());
-        addValueFormat(USER_DEFINED_REF_DESC, new OracleRefTypeValueFormat());
+    private static final String TYPE_NAME = "object_name";
+    private static final String TYPE_CODE = "typecode";
+
+    public XmlUserDefinedHandler() {
+        super(UserDefined.class);
+    }
+
+    @Override
+    protected void readAttributes(InputNode input, UserDefined userDefined, XmlReadContext context) throws Exception {
+        userDefined.setUserDefinedName(context.readAttribute(input, TYPE_NAME, String.class));
+        userDefined.setTypeCode(context.readAttribute(input, TYPE_CODE, String.class));
+    }
+
+    @Override
+    protected void writeAttributes(UserDefined userDefined, OutputNode output, XmlWriteContext context) throws Exception {
+        if (!userDefined.getUserDefinedName().equalsIgnoreCase(null) && !userDefined.getTypeCode().equalsIgnoreCase(null)) {
+            context.writeAttribute(output, TYPE_NAME, userDefined.getUserDefinedName());
+            context.writeAttribute(output, TYPE_CODE, userDefined.getTypeCode());
+        }
     }
 }

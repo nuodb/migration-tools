@@ -198,6 +198,15 @@ public class Database extends IdentifiableBase implements HasSchemas {
         return sequences;
     }
 
+    @Override
+    public Collection<UserDefined> getUserDefined() {
+        Collection<UserDefined> userDefineds = newArrayList();
+        for (Schema schema : getSchemas()) {
+            userDefineds.addAll(schema.getUserDefined());
+        }
+        return userDefineds;
+    }
+
     public Collection<Table> getTables(String tableName) {
         final Identifier tableId = valueOf(tableName);
         return newArrayList(filter(getTables(), new Predicate<Table>() {

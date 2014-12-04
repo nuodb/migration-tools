@@ -134,6 +134,15 @@ public class Catalog extends IdentifiableBase implements HasSchemas {
     }
 
     @Override
+    public Collection<UserDefined> getUserDefined() {
+        Collection<UserDefined> userDefineds = newArrayList();
+        for (Schema schema : getSchemas()) {
+            userDefineds.addAll(schema.getUserDefined());
+        }
+        return userDefineds;
+    }
+
+    @Override
     public void output(int indent, StringBuilder buffer) {
         super.output(indent, buffer);
 
