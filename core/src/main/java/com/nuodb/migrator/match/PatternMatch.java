@@ -27,11 +27,11 @@
  */
 package com.nuodb.migrator.match;
 
-import com.google.common.collect.Lists;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
@@ -46,12 +46,12 @@ public class PatternMatch implements Match {
 
     @Override
     public boolean test() {
-        return matcher.find();
+        return matcher.matches();
     }
 
     @Override
     public String[] matches() {
-        List<String> matches = Lists.newArrayList();
+        List<String> matches = newArrayList();
         if (matcher.matches()) {
             int count = matcher.groupCount();
             for (int index = 0; index <= count; index++) {
