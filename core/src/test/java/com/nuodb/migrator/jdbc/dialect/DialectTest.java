@@ -186,37 +186,37 @@ public class DialectTest {
         // #12 test TINYINT
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(-6, "TINYINT"), newOptions(6, 6, 0)), "TINYINT"});
-        // #13 test TEXT
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(2005, "TEXT"), newOptions(65535, 65535, 0)), "TEXT"});
-        // #14 test DATE
+        // #13 test DATE
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(91, "DATE"), newOptions(10, 10, 0)), "DATE"});
-        // #15 test SMALLINT
+        // #14 test SMALLINT
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(5, "SMALLINT")), "SMALLINT"});
+        // #15 test BIGINT UNSIGNED
+        data.add(new Object[]{dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(-5, "BIGINT UNSIGNED"), newOptions(20, 20, 0)), "BIGINT(20) UNSIGNED"});
         // #16 test TINYBLOB
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(-2, "TINYBLOB"), newOptions(255, 255, 0)), "TINYBLOB"});
-        // #17 test BIGINT UNSIGNED
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(-5, "BIGINT UNSIGNED"), newOptions(20, 20, 0)), "BIGINT(20) UNSIGNED"});
-        // #18 test TINYTEXT
+        // #17 test TINYTEXT
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(12, "TINYTEXT"), newOptions(255, 255, 0)), "TINYTEXT"});
-        // #19 test BLOB
+        // #18 test BLOB
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(2004, "BLOB"), newOptions(65535, 65535, 0)), "BLOB"});
+        // #19 test TEXT
+        data.add(new Object[]{dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(2005, "TEXT"), newOptions(65535, 65535, 0)), "TEXT"});
         // #20 test MEDIUMBLOB
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(2004, "MEDIUMBLOB"), newOptions(16777215, 16777215, 0)), "MEDIUMBLOB"});
-        // #20 test MEDIUMTEXT
+        // #21 test MEDIUMTEXT
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(2005, "MEDIUMTEXT"), newOptions(16777215, 16777215, 0)), "MEDIUMTEXT"});
-        // #20 test LONGBLOB
+        // #22 test LONGBLOB
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(-4, "LONGBLOB"), newOptions(2147483647, 2147483647, 0)), "LONGBLOB"});
-        // #20 test LONGTEXT
+        // #23 test LONGTEXT
         data.add(new Object[]{dialect, MYSQL,
                 new JdbcType(new JdbcTypeDesc(-1, "LONGTEXT"), newOptions(2147483647, 2147483647, 0)), "LONGTEXT"});
     }
