@@ -28,21 +28,29 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
+import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.TimeZone;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newSize;
+import static com.nuodb.migrator.utils.Priority.HIGH;
 import static java.lang.Integer.MIN_VALUE;
 import static java.lang.String.valueOf;
+import static java.sql.Types.*;
 
 /**
  * @author Sergey Bushik
@@ -54,22 +62,78 @@ public class MySQLDialect extends SimpleDialect {
     }
 
     @Override
+    public String getIdentityColumn(String sequence) {
+        return "AUTO_INCREMENT";
+    }
+
+    @Override
     protected void initJdbcTypes() {
         super.initJdbcTypes();
 
+        addJdbcType(MySQLYearValue.INSTANCE);
+        addJdbcType(MySQLSmallIntValue.INSTANCE);
+        addJdbcType(MySQLIntegerValue.INSTANCE);
+        addJdbcType(MySQLBigIntValue.INSTANCE);
         addJdbcType(MySQLSmallIntUnsigned.INSTANCE);
         addJdbcType(MySQLIntUnsignedValue.INSTANCE);
         addJdbcType(MySQLBigIntUnsignedValue.INSTANCE);
 
-        addJdbcTypeAlias(Types.LONGVARCHAR, "TINYTEXT", Types.CLOB);
-        addJdbcTypeAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
-        addJdbcTypeAlias(Types.LONGVARCHAR, "MEDIUMTEXT", Types.CLOB);
-        addJdbcTypeAlias(Types.LONGVARCHAR, "LONGTEXT", Types.CLOB);
+        addJdbcTypeName(TINYINT, "TINYINT");
+        addJdbcTypeName(SMALLINT, "SMALLINT");
+        addJdbcTypeName(INTEGER, "INT({P})");
+        addJdbcTypeName(BIGINT, "BIGINT({P})");
+        addJdbcTypeName(new JdbcTypeDesc(INTEGER, "MEDIUMINT"), "MEDIUMINT({P})");
 
-        addJdbcTypeAlias(Types.LONGVARBINARY, "TINYBLOB", Types.BLOB);
-        addJdbcTypeAlias(Types.LONGVARBINARY, "BLOB", Types.BLOB);
-        addJdbcTypeAlias(Types.LONGVARBINARY, "MEDIUMBLOB", Types.BLOB);
-        addJdbcTypeAlias(Types.LONGVARBINARY, "LONGBLOB", Types.BLOB);
+        addJdbcTypeName(new MySQLEnumTypeName(), HIGH);
+        addJdbcTypeName(new MySQLSetTypeName(), HIGH);
+        addJdbcTypeName(new JdbcTypeDesc(DATE, "YEAR"), "YEAR");
+
+        addJdbcTypeName(new JdbcTypeDesc(VARCHAR, "TINYTEXT"), "TINYTEXT");
+        addJdbcTypeName(new JdbcTypeDesc(LONGVARCHAR, "TEXT"), "TEXT");
+        addJdbcTypeName(new JdbcTypeDesc(LONGVARCHAR, "MEDIUMTEXT"), "MEDIUMTEXT");
+        addJdbcTypeName(new JdbcTypeDesc(LONGVARCHAR, "LONGTEXT"), "LONGTEXT");
+
+        addJdbcTypeName(new JdbcTypeDesc(BINARY, "TINYBLOB"), "TINYBLOB");
+        addJdbcTypeName(new JdbcTypeDesc(LONGVARBINARY, "BLOB"), "BLOB");
+        addJdbcTypeName(new JdbcTypeDesc(LONGVARBINARY, "MEDIUMBLOB"), "MEDIUMBLOB");
+        addJdbcTypeName(new JdbcTypeDesc(LONGVARBINARY, "LONGBLOB"), "LONGBLOB");
+
+        addJdbcTypeName(new JdbcTypeDesc(TIMESTAMP), "TIMESTAMP");
+        addJdbcTypeName(new JdbcTypeDesc(TIMESTAMP, "DATETIME"), "DATETIME", HIGH);
+
+        addJdbcTypeName(new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "SMALLINT({P}) UNSIGNED");
+        addJdbcTypeName(new JdbcTypeDesc(TINYINT, "TINYINT UNSIGNED"), "TINYINT({P}) UNSIGNED");
+        addJdbcTypeName(new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "INT({P}) UNSIGNED");
+        addJdbcTypeName(new JdbcTypeDesc(INTEGER, "MEDIUMINT UNSIGNED"), "MEDIUMINT({P}) UNSIGNED");
+        addJdbcTypeName(new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"), "BIGINT({P}) UNSIGNED");
+        // TINYTEXT - A CLOB column with a maximum length of 255 (2**8 - 1) characters.
+        // TEXT - A CLOB column with a maximum length of 65,535 (2**16 - 1) characters.
+        // MEDIUMTEXT - A CLOB column with a maximum length of 16,777,215 (2**24 - 1) characters.
+        // LONGTEXT - A CLOB column with a maximum length of 4,294,967,295 or 4GB (2**32 - 1) characters.
+        addJdbcTypeName(CLOB, "TEXT");
+        addJdbcTypeName(CLOB, newSize(255), "TINYTEXT");
+        addJdbcTypeName(CLOB, newSize(65535), "TEXT");
+        addJdbcTypeName(CLOB, newSize(16777215), "MEDIUMTEXT");
+        addJdbcTypeName(CLOB, newSize(4294967295L), "LONGTEXT");
+
+        addJdbcTypeName(BLOB, "BLOB");
+        addJdbcTypeName(BLOB, newSize(255), "TINYBLOB");
+        addJdbcTypeName(BLOB, newSize(65535), "BLOB");
+        addJdbcTypeName(BLOB, newSize(16777215), "MEDIUMBLOB");
+        addJdbcTypeName(BLOB, newSize(4294967295L), "LONGBLOB");
+
+        addJdbcTypeName(REAL, "FLOAT({P},{S})");
+        addJdbcTypeName(FLOAT, "FLOAT({P},{S})");
+        addJdbcTypeName(DOUBLE, "DOUBLE({P},{S})");
+    }
+
+    @Override
+    protected void initTranslations() {
+        addTranslator(new CurrentTimestampTranslator(NUODB,
+                newArrayList("NOW"), "CURRENT_TIMESTAMP", true));
+        addTranslator(new CurrentTimestampTranslator(MYSQL,
+                newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()", "LOCALTIME", "LOCALTIME()",
+                        "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "CURRENT_TIMESTAMP", true));
     }
 
     @Override
@@ -85,6 +149,16 @@ public class MySQLDialect extends SimpleDialect {
     @Override
     public String closeQuote() {
         return valueOf('`');
+    }
+
+    @Override
+    public String getInlineColumnTrigger(Session session, ColumnTrigger trigger) {
+        StringBuilder result = new StringBuilder("ON");
+        result.append(' ');
+        result.append(trigger.getTriggerEvent());
+        result.append(' ');
+        result.append(trigger.getTriggerBody());
+        return result.toString();
     }
 
     @Override
@@ -150,6 +224,23 @@ public class MySQLDialect extends SimpleDialect {
     @Override
     public void setFetchMode(Statement statement, FetchMode fetchMode) throws SQLException {
         statement.setFetchSize(fetchMode.isStream() ? MIN_VALUE : fetchMode.getFetchSize());
+    }
+
+    /**
+     * Will handle only MySQL triggers
+     *
+     * @param session source session
+     * @param trigger column trigger to inline
+     * @return result script
+     */
+    @Override
+    public boolean supportInlineColumnTrigger(Session session, ColumnTrigger trigger) {
+        return trigger != null && MYSQL.isAssignable(session.getDatabaseInfo());
+    }
+
+    @Override
+    public boolean supportsIfExistsBeforeDropTrigger() {
+        return true;
     }
 
     @Override

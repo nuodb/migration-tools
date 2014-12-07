@@ -34,6 +34,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.inspector.MySQLColumn.getValues;
+import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -51,11 +52,14 @@ public class MySQLColumnTest {
                 {"'in\\\\out', 'in', 'out'", newArrayList("in\\out", "in", "out")},
                 {"'\\\\'", newArrayList("\\")},
                 {"'\\,'", newArrayList(",")},
+                {"'abcd','check','sample test'", newArrayList("abcd", "check", "sample test")},
+                {"'one','two','','three'", newArrayList("one", "two", "", "three")}
         };
     }
 
     @Test(dataProvider = "getValues")
     public void testGetValues(String type, Collection<String> values) {
-        assertEquals(getValues(type), values);
+        assertEquals(getValues(type), values,
+                format("Expecting %s values parsed out from source type \"%s\"", values, type));
     }
 }

@@ -53,8 +53,8 @@ public class JdbcTypeNameTemplateDeltaOptions extends JdbcTypeNameTemplate {
     }
 
     @Override
-    protected String expandSize(String template, Integer size) {
-        Integer sizeDelta = getDeltaSize();
+    protected String expandSize(String template, Long size) {
+        Long sizeDelta = getDeltaSize();
         return super.expandSize(template, sizeDelta != null && size != null ? sizeDelta + size : size);
     }
 
@@ -64,7 +64,7 @@ public class JdbcTypeNameTemplateDeltaOptions extends JdbcTypeNameTemplate {
         return super.expandScale(template, scaleDelta != null && scale != null ? scaleDelta + scale : scale);
     }
 
-    protected Integer getDeltaSize() {
+    protected Long getDeltaSize() {
         return deltaOptions.getSize();
     }
 

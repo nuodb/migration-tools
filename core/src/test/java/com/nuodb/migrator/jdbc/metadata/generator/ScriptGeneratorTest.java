@@ -91,7 +91,7 @@ public class ScriptGeneratorTest {
         Column f1_2 = table1.addColumn("login");
         f1_2.setTypeCode(Types.VARCHAR);
         f1_2.setTypeName("VARCHAR");
-        f1_2.setSize(32);
+        f1_2.setSize(32L);
         f1_2.setNullable(false);
         f1_2.setPosition(2);
 
@@ -126,7 +126,7 @@ public class ScriptGeneratorTest {
         Column f2_3 = table2_2.addColumn("id");
         f2_3.setTypeCode(VARCHAR);
         f2_3.setTypeName("VARCHAR");
-        f2_3.setSize(100);
+        f2_3.setSize(100L);
         table2_2.addColumn(f2_3);
         catalog2.addSchema(valueOf("s2")).addTable(table2_2);
 

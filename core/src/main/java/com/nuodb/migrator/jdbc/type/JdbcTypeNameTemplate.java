@@ -82,7 +82,7 @@ public class JdbcTypeNameTemplate extends HasJdbcTypeHandlerBase implements Jdbc
         return expandVariable(template, PRECISION, precision);
     }
 
-    protected String expandSize(String template, Integer size) {
+    protected String expandSize(String template, Long size) {
         return expandVariable(template, SIZE, size);
     }
 
@@ -92,6 +92,10 @@ public class JdbcTypeNameTemplate extends HasJdbcTypeHandlerBase implements Jdbc
 
     protected String expandVariable(String template, String variable, Integer value) {
         return expandVariable(template, variable, value != null ? Integer.toString(value) : null);
+    }
+
+    protected String expandVariable(String template, String variable, Long value) {
+        return expandVariable(template, variable, value != null ? Long.toString(value) : null);
     }
 
     protected String expandVariable(String template, String variable, String value) {

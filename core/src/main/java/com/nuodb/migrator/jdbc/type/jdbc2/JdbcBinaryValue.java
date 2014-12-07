@@ -28,9 +28,9 @@
 package com.nuodb.migrator.jdbc.type.jdbc2;
 
 import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
 import com.nuodb.migrator.jdbc.type.JdbcTypeValueBase;
-import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,24 +41,24 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class JdbcBinaryValue extends JdbcTypeValueBase<byte[]> {
+public class JdbcBinaryValue extends JdbcTypeValueBase<Object> {
 
     public static final JdbcTypeValue INSTANCE = new JdbcBinaryValue();
 
     public JdbcBinaryValue() {
-        super(Types.BINARY, byte[].class);
+        super(Types.BINARY, Object.class);
     }
 
     public JdbcBinaryValue(int typeCode) {
-        super(typeCode, byte[].class);
+        super(typeCode, Object.class);
     }
 
     public JdbcBinaryValue(int typeCode, String typeName) {
-        super(typeCode, typeName, byte[].class);
+        super(typeCode, typeName, Object.class);
     }
 
     public JdbcBinaryValue(JdbcTypeDesc typeDesc) {
-        super(typeDesc, byte[].class);
+        super(typeDesc, Object.class);
     }
 
     @Override
@@ -68,8 +68,14 @@ public class JdbcBinaryValue extends JdbcTypeValueBase<byte[]> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, byte[] value, int index,
+    protected void setNullSafeValue(PreparedStatement statement, Object value, int index,
                                     Field field, Map<String, Object> options) throws SQLException {
-        statement.setBytes(index, value);
+        if (byte[].class.isInstance(value)) {
+            statement.setBytes(index, (byte[]) value);
+        } else if (String.class.isInstance(value)) {
+            statement.setString(index, (String) value);
+        } else {
+            statement.setObject(index, value);
+        }
     }
 }

@@ -30,7 +30,11 @@ package com.nuodb.migrator.jdbc.type.adapter;
 import com.nuodb.migrator.jdbc.type.JdbcTypeAdapter;
 import com.nuodb.migrator.jdbc.type.JdbcTypeAdapterBase;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -58,6 +62,8 @@ public class JdbcTimeTypeAdapter extends JdbcTypeAdapterBase<Time> {
             return new Time(((java.util.Date) value).getTime());
         } else if (Calendar.class.isInstance(value)) {
             return new Time(((Calendar) value).getTimeInMillis());
+        } else if (String.class.isInstance(value)) {
+            return Time.valueOf((String) value);
         } else {
             throw newWrapFailure(value);
         }

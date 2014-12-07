@@ -96,6 +96,7 @@ import static com.nuodb.migrator.backup.format.csv.CsvFormat.TYPE;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
 import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
+import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
@@ -110,6 +111,7 @@ import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
 import static java.sql.Connection.*;
@@ -382,6 +384,19 @@ public class CliRunSupport extends CliSupport {
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
+
+        Option driver = newBasicOptionBuilder().
+                withName(TARGET_DRIVER).
+                withDescription(getMessage(TARGET_DRIVER_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TARGET_DRIVER_ARGUMENT_NAME)).
+                                withRequired(true).
+                                withMinimum(1).
+                                withOptionFormat(optionFormat).build()
+                ).build();
+        group.withOption(driver);
+
         Option url = newBasicOptionBuilder().
                 withName(TARGET_URL).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
@@ -868,7 +883,7 @@ public class CliRunSupport extends CliSupport {
     protected DriverConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
         if (optionSet.hasOption(TARGET_URL)) {
             DriverConnectionSpec connection = new DriverConnectionSpec();
-            connection.setDriver(JdbcConstants.NUODB_DRIVER);
+            connection.setDriver((String) optionSet.getValue(TARGET_DRIVER, NUODB_DRIVER));
             connection.setUrl((String) optionSet.getValue(TARGET_URL));
             connection.setUsername((String) optionSet.getValue(TARGET_USERNAME));
             connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD));
@@ -925,7 +940,7 @@ public class CliRunSupport extends CliSupport {
             jdbcTypeSpec.setTypeName(typeName);
             Integer typeCodeInt = jdbcTypeCodes.getTypeCode(typeCode);
             jdbcTypeSpec.setTypeCode(typeCodeInt != null ? typeCodeInt : parseInt(typeCode));
-            jdbcTypeSpec.setSize(!StringUtils.isEmpty(size) ? parseInt(size) : null);
+            jdbcTypeSpec.setSize(!StringUtils.isEmpty(size) ? parseLong(size) : null);
             jdbcTypeSpec.setPrecision(!StringUtils.isEmpty(precision) ? parseInt(precision) : null);
             jdbcTypeSpec.setScale(!StringUtils.isEmpty(scale) ? parseInt(scale) : null);
             jdbcTypeSpecs.add(jdbcTypeSpec);

@@ -25,57 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.backup.format.value;
 
-import com.google.common.collect.Lists;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
-import java.util.Collection;
+import java.math.BigInteger;
+import java.util.Map;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
+import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcEnumType extends JdbcType {
+public class MySQLBigIntValueFormat extends ValueFormatBase<BigInteger> {
 
-    private Collection<String> values = newArrayList();
+    public static final ValueFormat INSTANCE = new MySQLBigIntValueFormat();
 
-    public JdbcEnumType() {
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc) {
-        super(jdbcTypeDesc);
-    }
-
-    public JdbcEnumType(JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeDesc, jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcType jdbcType, Collection<String> values) {
-        super(jdbcType);
-        this.values = values;
-    }
-
-    public void addValue(String value) {
-        values.add(value);
-    }
-
-    public Collection<String> getValues() {
-        return values;
-    }
-
-    public void setValues(Collection<String> values) {
-        this.values = values;
+    @Override
+    protected Value doGetValue(JdbcValueAccess<BigInteger> access, Map<String, Object> options) throws Throwable {
+        BigInteger value = access.getValue(options);
+        return string(value != null ? value.toString() : null);
     }
 
     @Override
-    protected JdbcType clone() {
-        JdbcEnumType jdbcType = (JdbcEnumType) super.clone();
-        jdbcType.setValues(newArrayList(getValues()));
-        return jdbcType;
+    protected void doSetValue(Value value, JdbcValueAccess<BigInteger> access, Map<String, Object> options)
+            throws Throwable {
+        access.setValue(value.asString() != null ? new BigInteger(value.asString()) : null, options);
+    }
+
+    @Override
+    public ValueType getValueType(Field field) {
+        return STRING;
     }
 }

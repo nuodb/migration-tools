@@ -97,11 +97,11 @@ public class SimpleField implements Field {
     }
 
     @Override
-    public Integer getSize() {
+    public Long getSize() {
         return jdbcType.getSize();
     }
 
-    public void setSize(Integer size) {
+    public void setSize(Long size) {
         jdbcType.setSize(size);
     }
 

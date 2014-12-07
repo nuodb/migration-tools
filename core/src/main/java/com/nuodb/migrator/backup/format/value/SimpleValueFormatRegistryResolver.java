@@ -41,6 +41,7 @@ public class SimpleValueFormatRegistryResolver extends SimpleCachingServiceResol
         super(SimpleValueFormatRegistry.class);
         register(DB2, new DB2ValueFormatRegistry());
         register(NUODB, new NuoDBValueFormatRegistry());
+        register(MYSQL, new MySQLValueFormatRegistry());
         register(ORACLE, new OracleValueFormatRegistry());
         register(POSTGRE_SQL, new PostgreSQLValueFormatRegistry());
         register(MSSQL_SERVER, new MSSQLServerValueFormatRegistry());

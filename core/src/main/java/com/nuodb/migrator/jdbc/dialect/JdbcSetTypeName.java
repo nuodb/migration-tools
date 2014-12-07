@@ -25,57 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.google.common.collect.Lists;
-
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
+import com.nuodb.migrator.jdbc.type.JdbcSetType;
+import com.nuodb.migrator.jdbc.type.JdbcType;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcEnumType extends JdbcType {
+public class JdbcSetTypeName extends JdbcEnumTypeName {
 
-    private Collection<String> values = newArrayList();
+    private static final String NAME = "SET";
 
-    public JdbcEnumType() {
+    public JdbcSetTypeName() {
+        this(NAME);
     }
 
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc) {
-        super(jdbcTypeDesc);
-    }
-
-    public JdbcEnumType(JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeDesc, jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcType jdbcType, Collection<String> values) {
-        super(jdbcType);
-        this.values = values;
-    }
-
-    public void addValue(String value) {
-        values.add(value);
-    }
-
-    public Collection<String> getValues() {
-        return values;
-    }
-
-    public void setValues(Collection<String> values) {
-        this.values = values;
+    public JdbcSetTypeName(String name) {
+        super(name);
     }
 
     @Override
-    protected JdbcType clone() {
-        JdbcEnumType jdbcType = (JdbcEnumType) super.clone();
-        jdbcType.setValues(newArrayList(getValues()));
-        return jdbcType;
+    public int getScore(JdbcType jdbcType) {
+        return jdbcType.getClass().equals(JdbcSetType.class) ? 0 : -1;
     }
 }

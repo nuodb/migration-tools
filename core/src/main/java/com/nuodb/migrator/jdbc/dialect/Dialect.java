@@ -71,7 +71,9 @@ public interface Dialect {
 
     boolean supportsDropConstraints();
 
-    boolean supportsDropTriggerIfExists();
+    boolean supportsIfExistsBeforeDropTrigger();
+
+    boolean supportsIfExistsAfterDropTrigger();
 
     boolean supportsStatementWithTimezone();
 
@@ -93,11 +95,15 @@ public interface Dialect {
 
     boolean supportsSchemas();
 
+    boolean supportInlineColumnTrigger(Session session, ColumnTrigger trigger);
+
     LimitHandler createLimitHandler(String query, QueryLimit queryLimit);
 
     boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType);
 
     RowCountHandler createRowCountHandler(Table table, Column column, String filter, RowCountType rowCountType);
+
+    boolean addScriptsInCreateTable(Table table);
 
     String getNullColumnString();
 
@@ -190,6 +196,8 @@ public interface Dialect {
     Script translate(Script script, Session session);
 
     Script translate(Script script, Session session, Map<Object, Object> context);
+
+    String getInlineColumnTrigger(Session session, ColumnTrigger trigger);
 
     SQLKeywords getSQLKeywords();
 

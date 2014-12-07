@@ -90,6 +90,7 @@ public interface CliOptions {
 
     final String QUERY = "query";
 
+    final String TARGET_DRIVER = "target.driver";
     final String TARGET_URL = "target.url";
     final String TARGET_USERNAME = "target.username";
     final String TARGET_PASSWORD = "target.password";

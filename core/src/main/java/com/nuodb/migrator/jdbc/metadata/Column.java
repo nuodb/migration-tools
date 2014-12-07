@@ -44,7 +44,7 @@ import static java.lang.String.format;
 @SuppressWarnings("unchecked")
 public class Column extends IdentifiableBase implements Field {
 
-    public static final int DEFAULT_SIZE = 0;
+    public static final long DEFAULT_SIZE = 0;
     public static final int DEFAULT_PRECISION = 38;
     public static final int DEFAULT_SCALE = 0;
 
@@ -121,12 +121,12 @@ public class Column extends IdentifiableBase implements Field {
     }
 
     @Override
-    public Integer getSize() {
+    public Long getSize() {
         return jdbcType.getSize();
     }
 
     @Override
-    public void setSize(Integer size) {
+    public void setSize(Long size) {
         jdbcType.setSize(size);
     }
 

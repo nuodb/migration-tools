@@ -25,57 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.backup.format.value;
 
-import com.google.common.collect.Lists;
-
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
+import com.nuodb.migrator.jdbc.dialect.MySQLBigIntValue;
+import com.nuodb.migrator.jdbc.dialect.MySQLIntegerValue;
+import com.nuodb.migrator.jdbc.dialect.MySQLSmallIntValue;
+import com.nuodb.migrator.jdbc.dialect.MySQLYearValue;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcEnumType extends JdbcType {
+public class MySQLValueFormatRegistry extends SimpleValueFormatRegistry {
 
-    private Collection<String> values = newArrayList();
-
-    public JdbcEnumType() {
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc) {
-        super(jdbcTypeDesc);
-    }
-
-    public JdbcEnumType(JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeDesc, jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcType jdbcType, Collection<String> values) {
-        super(jdbcType);
-        this.values = values;
-    }
-
-    public void addValue(String value) {
-        values.add(value);
-    }
-
-    public Collection<String> getValues() {
-        return values;
-    }
-
-    public void setValues(Collection<String> values) {
-        this.values = values;
-    }
-
-    @Override
-    protected JdbcType clone() {
-        JdbcEnumType jdbcType = (JdbcEnumType) super.clone();
-        jdbcType.setValues(newArrayList(getValues()));
-        return jdbcType;
+    public MySQLValueFormatRegistry() {
+        addValueFormat(MySQLSmallIntValue.INSTANCE, new MySQLSmallIntValueFormat());
+        addValueFormat(MySQLIntegerValue.INSTANCE, new MySQLIntegerValueFormat());
+        addValueFormat(MySQLBigIntValue.INSTANCE, new MySQLBigIntValueFormat());
     }
 }

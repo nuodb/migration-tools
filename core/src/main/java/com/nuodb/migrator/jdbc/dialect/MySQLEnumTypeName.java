@@ -25,57 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
-
-import com.google.common.collect.Lists;
-
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
+package com.nuodb.migrator.jdbc.dialect;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcEnumType extends JdbcType {
-
-    private Collection<String> values = newArrayList();
-
-    public JdbcEnumType() {
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc) {
-        super(jdbcTypeDesc);
-    }
-
-    public JdbcEnumType(JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeDesc, jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcType jdbcType, Collection<String> values) {
-        super(jdbcType);
-        this.values = values;
-    }
-
-    public void addValue(String value) {
-        values.add(value);
-    }
-
-    public Collection<String> getValues() {
-        return values;
-    }
-
-    public void setValues(Collection<String> values) {
-        this.values = values;
-    }
+public class MySQLEnumTypeName extends JdbcEnumTypeName {
 
     @Override
-    protected JdbcType clone() {
-        JdbcEnumType jdbcType = (JdbcEnumType) super.clone();
-        jdbcType.setValues(newArrayList(getValues()));
-        return jdbcType;
+    protected void getValue(StringBuilder buffer, String value) {
+        char[] symbols = value.toCharArray();
+        for (char symbol : symbols) {
+            switch (symbol) {
+                case '\\':
+                    buffer.append('\\');
+                    break;
+                case '\'':
+                    buffer.append('\'');
+                    break;
+            }
+            buffer.append(symbol);
+        }
     }
 }

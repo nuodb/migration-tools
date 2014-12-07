@@ -27,7 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
@@ -136,6 +141,20 @@ public class NuoDBDialect extends SimpleDialect {
 
         addJdbcTypeName(POSTGRE_SQL, BIT_DESC, "STRING");
         addJdbcTypeName(POSTGRE_SQL, BIT_VARYING_DESC, "STRING");
+
+        // TINYTEXT has a maximum length of 255
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(VARCHAR, "TINYTEXT"), "VARCHAR({N})");
+        // TEXT has a maximum length of 65,535
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(LONGVARCHAR, "TEXT"), "CLOB");
+        // MEDIUMTEXT has a maximum length of 16,777,215
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(LONGVARCHAR, "MEDIUMTEXT"), "CLOB");
+        // LONGTEXT has a maximum length of 4,294,967,295
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(LONGVARCHAR, "LONGTEXT"), "CLOB");
+
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(BINARY, "TINYBLOB"), "VARBINARY({N})");
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(LONGVARBINARY, "BLOB"), "BLOB");
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(LONGVARBINARY, "MEDIUMBLOB"), "BLOB");
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(LONGVARBINARY, "LONGBLOB"), "BLOB");
 
         addJdbcTypeName(MYSQL, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(MYSQL, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");
@@ -275,7 +294,7 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
-    public boolean supportsDropTriggerIfExists() {
+    public boolean supportsIfExistsAfterDropTrigger() {
         return true;
     }
 
@@ -322,6 +341,18 @@ public class NuoDBDialect extends SimpleDialect {
             default:
                 return null;
         }
+    }
+
+    /**
+     * Returns true if DDL scripts for a primary key, indexes and foreign keys should be generated as a separate
+     * statements to speed up performance of migration.
+     *
+     * @param table
+     * @return false for NuoDB
+     */
+    @Override
+    public boolean addScriptsInCreateTable(Table table) {
+        return false;
     }
 
     @Override

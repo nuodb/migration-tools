@@ -42,11 +42,18 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScrip
 
     private Collection<String> aliases = newTreeSet(CASE_INSENSITIVE_ORDER);
     private String timestamp;
+    private boolean literal;
 
     public CurrentTimestampTranslator(DatabaseInfo databaseInfo, Collection<String> aliases, String timestamp) {
+        this(databaseInfo, aliases, timestamp, false);
+    }
+
+    public CurrentTimestampTranslator(DatabaseInfo databaseInfo, Collection<String> aliases, String timestamp,
+                                      boolean literal) {
         super(databaseInfo);
         this.aliases.addAll(aliases);
         this.timestamp = timestamp;
+        this.literal = literal;
     }
 
     @Override
@@ -67,6 +74,6 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScrip
 
     @Override
     public Script translate(ColumnScript script, TranslationContext context) {
-        return new SimpleScript(timestamp);
+        return new SimpleScript(timestamp, literal);
     }
 }

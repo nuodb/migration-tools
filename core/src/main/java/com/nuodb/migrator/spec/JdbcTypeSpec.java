@@ -34,7 +34,7 @@ public class JdbcTypeSpec extends SpecBase {
 
     private String typeName;
     private int typeCode;
-    private Integer size;
+    private Long size;
     private Integer precision;
     private Integer scale;
 
@@ -54,11 +54,11 @@ public class JdbcTypeSpec extends SpecBase {
         this.typeCode = typeCode;
     }
 
-    public Integer getSize() {
+    public Long getSize() {
         return size;
     }
 
-    public void setSize(Integer size) {
+    public void setSize(Long size) {
         this.size = size;
     }
 

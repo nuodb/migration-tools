@@ -25,57 +25,69 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.google.common.collect.Lists;
+import com.nuodb.migrator.jdbc.type.JdbcEnumType;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeName;
 
 import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
+import java.util.Iterator;
 
 /**
+ * Generates enum type
+ *
  * @author Sergey Bushik
  */
-public class JdbcEnumType extends JdbcType {
+public class JdbcEnumTypeName implements JdbcTypeName {
 
-    private Collection<String> values = newArrayList();
+    private static final String NAME = "ENUM";
+    private final String name;
 
-    public JdbcEnumType() {
+    public JdbcEnumTypeName() {
+        this(NAME);
     }
 
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc) {
-        super(jdbcTypeDesc);
-    }
-
-    public JdbcEnumType(JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeDesc, jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcType jdbcType, Collection<String> values) {
-        super(jdbcType);
-        this.values = values;
-    }
-
-    public void addValue(String value) {
-        values.add(value);
-    }
-
-    public Collection<String> getValues() {
-        return values;
-    }
-
-    public void setValues(Collection<String> values) {
-        this.values = values;
+    public JdbcEnumTypeName(String name) {
+        this.name = name;
     }
 
     @Override
-    protected JdbcType clone() {
-        JdbcEnumType jdbcType = (JdbcEnumType) super.clone();
-        jdbcType.setValues(newArrayList(getValues()));
-        return jdbcType;
+    public String getTypeName(JdbcType jdbcType) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(getName());
+        buffer.append("(");
+        Collection<String> values = ((JdbcEnumType) jdbcType).getValues();
+        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
+            buffer.append("'");
+            getValue(buffer, iterator.next());
+            buffer.append("'");
+            if (iterator.hasNext()) {
+                buffer.append(",");
+            }
+        }
+        buffer.append(")");
+        return buffer.toString();
+    }
+
+    protected void getValue(StringBuilder buffer, String value) {
+        char[] symbols = value.toCharArray();
+        for (char symbol : symbols) {
+            switch (symbol) {
+                case '\'':
+                    buffer.append('\'');
+                    break;
+            }
+            buffer.append(symbol);
+        }
+    }
+
+    @Override
+    public int getScore(JdbcType jdbcType) {
+        return jdbcType.getClass().equals(JdbcEnumType.class) ? 0 : -1;
+    }
+
+    public String getName() {
+        return name;
     }
 }

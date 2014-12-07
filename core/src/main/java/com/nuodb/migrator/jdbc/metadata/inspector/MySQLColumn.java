@@ -67,9 +67,9 @@ public class MySQLColumn {
 
     public static Collection<String> getValues(String type) {
         Collection<String> values = newArrayList();
-        boolean start = true;
+        int count = 0;
+        boolean start = false;
         boolean escape = false;
-        int quotes = 0;
         int startIndex = 0;
         int index = 0;
         StringBuilder value = new StringBuilder();
@@ -81,16 +81,13 @@ public class MySQLColumn {
             boolean addValue = false;
             switch (symbol) {
                 case '\'':
-                    if (start && (lastSymbol == '\'' || index > startIndex)) {
-                        quotes++;
-                    }
-                    if (quotes == 2) {
+                    if (start && (lastSymbol == '\'' && index > startIndex)) {
                         addSymbol = true;
-                        quotes = 0;
                     }
                     if (!start) {
                         start = true;
-                        startIndex = index;
+                        startIndex = index + 1;
+                        count++;
                     }
                     break;
                 case ',':
@@ -108,7 +105,6 @@ public class MySQLColumn {
                     escape = !escape;
                     break;
                 default:
-                    quotes = 0;
                     addSymbol = true;
                     break;
             }
@@ -123,8 +119,9 @@ public class MySQLColumn {
             index++;
             lastSymbol = symbol;
         }
-        values.add(value.toString());
-        value.setLength(0);
+        if (count > values.size()) {
+            values.add(value.toString());
+        }
         return values;
     }
 }

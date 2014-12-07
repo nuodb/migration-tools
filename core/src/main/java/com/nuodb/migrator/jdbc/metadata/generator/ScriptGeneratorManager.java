@@ -70,7 +70,6 @@ public class ScriptGeneratorManager {
      * statements for primary key, indexes and foreign keys, default is false.
      */
     public static final String SCRIPTS_IN_CREATE_TABLE = "scripts.in.create.table";
-    public static final boolean SCRIPTS_IN_CREATE_TABLE_DEFAULT = false;
 
     private String sourceCatalog;
     private String sourceSchema;

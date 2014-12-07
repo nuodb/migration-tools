@@ -30,8 +30,11 @@ package com.nuodb.migrator.backup;
 import com.nuodb.migrator.jdbc.type.JdbcEnumType;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
+import org.apache.commons.lang3.StringUtils;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * @author Sergey Bushik
@@ -53,7 +56,7 @@ public class XmlJdbcEnumTypeHandler<T extends JdbcEnumType> extends XmlJdbcTypeH
     protected void readElement(InputNode input, T jdbcType, XmlReadContext context) throws Exception {
         final String element = input.getName();
         if (VALUE_ELEMENT.equals(element)) {
-            jdbcType.addValue(context.read(input, String.class));
+            jdbcType.addValue(context.read(input, String.class, EMPTY));
         } else {
             super.readElement(input, jdbcType, context);
         }

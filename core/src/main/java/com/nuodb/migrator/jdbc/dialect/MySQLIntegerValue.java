@@ -25,57 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.google.common.collect.Lists;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValueBase;
 
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcEnumType extends JdbcType {
+public class MySQLIntegerValue extends JdbcTypeValueBase<Long> {
 
-    private Collection<String> values = newArrayList();
+    public static JdbcTypeValue INSTANCE = new MySQLIntegerValue();
 
-    public JdbcEnumType() {
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc) {
-        super(jdbcTypeDesc);
-    }
-
-    public JdbcEnumType(JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeDesc, jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcType jdbcType, Collection<String> values) {
-        super(jdbcType);
-        this.values = values;
-    }
-
-    public void addValue(String value) {
-        values.add(value);
-    }
-
-    public Collection<String> getValues() {
-        return values;
-    }
-
-    public void setValues(Collection<String> values) {
-        this.values = values;
+    public MySQLIntegerValue() {
+        super(Types.INTEGER, Long.class);
     }
 
     @Override
-    protected JdbcType clone() {
-        JdbcEnumType jdbcType = (JdbcEnumType) super.clone();
-        jdbcType.setValues(newArrayList(getValues()));
-        return jdbcType;
+    public Long getValue(ResultSet resultSet, int index,
+                         Field field, Map<String, Object> options) throws SQLException {
+        return resultSet.getLong(index);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Long value, int index,
+                                    Field field, Map<String, Object> options) throws SQLException {
+        statement.setLong(index, value);
     }
 }

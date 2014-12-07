@@ -71,7 +71,9 @@ public class SessionObservers {
 
             @Override
             public void beforeClose(Session session) throws SQLException {
-                setSessionTimeZone(session, null);
+                if (!session.getConnection().isClosed()) {
+                    setSessionTimeZone(session, null);
+                }
             }
 
             private void setSessionTimeZone(Session session, TimeZone timeZone) throws SQLException {

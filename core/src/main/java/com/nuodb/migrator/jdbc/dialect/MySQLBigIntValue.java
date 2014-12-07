@@ -25,57 +25,40 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.google.common.collect.Lists;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValueBase;
 
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
+import java.math.BigInteger;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcEnumType extends JdbcType {
+public class MySQLBigIntValue extends JdbcTypeValueBase<BigInteger> {
 
-    private Collection<String> values = newArrayList();
+    public static JdbcTypeValue INSTANCE = new MySQLBigIntValue();
 
-    public JdbcEnumType() {
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc) {
-        super(jdbcTypeDesc);
-    }
-
-    public JdbcEnumType(JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
-        super(jdbcTypeDesc, jdbcTypeOptions);
-    }
-
-    public JdbcEnumType(JdbcType jdbcType, Collection<String> values) {
-        super(jdbcType);
-        this.values = values;
-    }
-
-    public void addValue(String value) {
-        values.add(value);
-    }
-
-    public Collection<String> getValues() {
-        return values;
-    }
-
-    public void setValues(Collection<String> values) {
-        this.values = values;
+    public MySQLBigIntValue() {
+        super(Types.BIGINT, BigInteger.class);
     }
 
     @Override
-    protected JdbcType clone() {
-        JdbcEnumType jdbcType = (JdbcEnumType) super.clone();
-        jdbcType.setValues(newArrayList(getValues()));
-        return jdbcType;
+    public BigInteger getValue(ResultSet resultSet, int index,
+                               Field field, Map<String, Object> options) throws SQLException {
+        String value = resultSet.getString(index);
+        return value != null ? new BigInteger(value) : null;
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, BigInteger value, int index,
+                                    Field field, Map<String, Object> options) throws SQLException {
+        statement.setObject(index, value);
     }
 }

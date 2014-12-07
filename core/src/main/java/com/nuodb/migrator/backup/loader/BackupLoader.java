@@ -88,7 +88,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
@@ -102,7 +102,9 @@ import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorUtils.ge
 import static com.nuodb.migrator.jdbc.query.InsertType.INSERT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
-import static com.nuodb.migrator.utils.Collections.*;
+import static com.nuodb.migrator.utils.Collections.contains;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static com.nuodb.migrator.utils.Collections.removeAll;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -294,7 +296,8 @@ public class BackupLoader {
     protected ScriptGeneratorManager createScriptGeneratorManager(
             BackupLoaderContext backupLoaderContext) throws SQLException {
         ScriptGeneratorManager scriptGeneratorManager = new ScriptGeneratorManager();
-        scriptGeneratorManager.getAttributes().put(GROUP_SCRIPTS_BY, getGroupScriptsBy());
+        Map<String, Object> attributes = scriptGeneratorManager.getAttributes();
+        attributes.put(GROUP_SCRIPTS_BY, getGroupScriptsBy());
         scriptGeneratorManager.setObjectTypes(getObjectTypes());
         scriptGeneratorManager.setScriptTypes(getScriptTypes());
         scriptGeneratorManager.setMetaDataFilterManager(getMetaDataFilterManager());
@@ -462,6 +465,7 @@ public class BackupLoader {
         boolean loadForeignKey = contains(getObjectTypes(), FOREIGN_KEY);
         Dialect dialect = backupLoaderContext.getTargetSession().getDialect();
         for (Table sourceTable : backupLoaderContext.getSourceTables()) {
+            boolean addScriptsInCreateTable = dialect.addScriptsInCreateTable(sourceTable);
             if (loadIndex) {
                 LoadIndexes loadIndexes = null;
                 Collection<Index> indexes = getNonRepeatingIndexes(sourceTable,
@@ -489,26 +493,34 @@ public class BackupLoader {
                     if (index.isPrimary()) {
                         continue;
                     }
-                    if (dialect.supportsCreateMultipleIndexes()) {
-                        if (loadIndexes == null) {
-                            loadIndexes = new LoadIndexes();
+                    boolean uniqueInCreateTable = index.isUnique() &&
+                            size(index.getColumns()) == 1 && !get(index.getColumns(),0).isNullable() &&
+                            dialect.supportsUniqueInCreateTable();
+                    boolean indexInCreateTable = dialect.supportsIndexInCreateTable();
+                    boolean addIndexInCreateTable =
+                            (uniqueInCreateTable || indexInCreateTable) && addScriptsInCreateTable;
+                    if (!index.isPrimary() && !addIndexInCreateTable) {
+                        if (dialect.supportsCreateMultipleIndexes()) {
+                            if (loadIndexes == null) {
+                                loadIndexes = new LoadIndexes();
+                            }
+                            loadIndexes.addIndex(index);
+                        } else {
+                            loadConstraints.addIndex(index);
                         }
-                        loadIndexes.addIndex(index);
-                    } else {
-                        loadConstraints.addIndex(index);
                     }
                 }
                 if (loadIndexes != null) {
                     loadConstraints.addLoadConstraint(loadIndexes);
                 }
             }
-            if (loadPrimaryKey) {
+            if (loadPrimaryKey && !addScriptsInCreateTable) {
                 PrimaryKey primaryKey = sourceTable.getPrimaryKey();
                 if (primaryKey != null) {
                     loadConstraints.addPrimaryKey(primaryKey);
                 }
             }
-            if (loadForeignKey) {
+            if (loadForeignKey && !addScriptsInCreateTable) {
                 for (ForeignKey foreignKey : sourceTable.getForeignKeys()) {
                     loadConstraints.addForeignKey(foreignKey);
                 }

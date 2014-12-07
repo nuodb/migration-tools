@@ -76,7 +76,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
         column.setTypeName(typeDescAlias.getTypeName());
 
         int columnSize = columns.getInt("COLUMN_SIZE");
-        column.setSize(columnSize);
+        column.setSize((long)columnSize);
         column.setPrecision(columnSize);
         column.setScale(columns.getInt("DECIMAL_DIGITS"));
 

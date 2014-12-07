@@ -31,11 +31,13 @@ import com.google.common.base.Function;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.utils.StringUtils;
 
 import java.util.Collection;
 
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Iterables.transform;
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -50,9 +52,9 @@ public class ScriptGeneratorUtils {
     public static String getUseSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
         String useSchema = null;
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
-        if (scriptGeneratorManager.getTargetSchema() != null) {
+        if (!isEmpty(scriptGeneratorManager.getTargetSchema())) {
             useSchema = dialect.getUseSchema(scriptGeneratorManager.getTargetSchema(), true);
-        } else if (scriptGeneratorManager.getTargetCatalog() != null) {
+        } else if (!isEmpty(scriptGeneratorManager.getTargetCatalog())) {
             useSchema = dialect.getUseSchema(scriptGeneratorManager.getTargetCatalog(), true);
         }
         if (useSchema == null) {

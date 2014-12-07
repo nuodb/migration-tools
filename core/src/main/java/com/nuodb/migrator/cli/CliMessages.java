@@ -111,6 +111,8 @@ public interface CliMessages {
 
     final String LOAD_GROUP_NAME = "com.nuodb.migrator.load.group.name";
     final String TARGET_GROUP_NAME = "com.nuodb.migrator.target.group.name";
+    final String TARGET_DRIVER_OPTION_DESCRIPTION = "com.nuodb.migrator.target.driver.option.description";
+    final String TARGET_DRIVER_ARGUMENT_NAME = "com.nuodb.migrator.target.driver.argument.name";
     final String TARGET_URL_OPTION_DESCRIPTION = "com.nuodb.migrator.target.url.option.description";
     final String TARGET_URL_ARGUMENT_NAME = "com.nuodb.migrator.target.url.argument.name";
     final String TARGET_USERNAME_OPTION_DESCRIPTION = "com.nuodb.migrator.target.username.option.description";

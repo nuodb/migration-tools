@@ -113,7 +113,7 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         Column column = createColumn(catalogName, schemaName, tableName, columnName);
         column.setTypeName(typeName);
         column.setTypeCode(typeCode);
-        column.setSize(columnSize);
+        column.setSize(columnSize.longValue());
         column.setPrecision(precision);
         column.setDefaultValue(valueOf(defaultValue));
         column.setScale(scale);

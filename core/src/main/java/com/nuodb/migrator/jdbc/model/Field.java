@@ -52,9 +52,9 @@ public interface Field {
 
     void setTypeName(String typeName);
 
-    Integer getSize();
+    Long getSize();
 
-    void setSize(Integer size);
+    void setSize(Long size);
 
     Integer getPrecision();
 

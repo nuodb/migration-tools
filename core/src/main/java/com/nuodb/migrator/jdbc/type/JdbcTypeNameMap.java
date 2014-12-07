@@ -53,6 +53,11 @@ public class JdbcTypeNameMap {
         addJdbcTypeName(jdbcTypeDesc, null, typeName);
     }
 
+    public void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName, int priority) {
+        JdbcTypeName jdbcTypeName = createTypeNameTemplate(jdbcTypeDesc, typeName);
+        addJdbcTypeName(jdbcTypeName, priority);
+    }
+
     public void addJdbcTypeName(int typeCode, JdbcTypeOptions jdbcTypeOptions, String typeName) {
         addJdbcTypeName(new JdbcTypeDesc(typeCode), jdbcTypeOptions, typeName);
     }
@@ -71,7 +76,7 @@ public class JdbcTypeNameMap {
     }
 
     public void addJdbcTypeName(JdbcTypeName jdbcTypeName, int priority) {
-        ((PrioritySet<JdbcTypeName>)getJdbcTypeNames()).add(jdbcTypeName, priority);
+        ((PrioritySet<JdbcTypeName>) getJdbcTypeNames()).add(jdbcTypeName, priority);
     }
 
     public String getTypeName(JdbcType jdbcType) {
@@ -79,7 +84,7 @@ public class JdbcTypeNameMap {
         JdbcTypeName targetJdbcTypeName = null;
         for (JdbcTypeName jdbcTypeName : getJdbcTypeNames()) {
             int score = jdbcTypeName.getScore(jdbcType);
-            if (score >=0 && (targetScore == null || score <= targetScore)) {
+            if (score >= 0 && (targetScore == null || score <= targetScore)) {
                 targetScore = score;
                 targetJdbcTypeName = jdbcTypeName;
             }

@@ -31,6 +31,7 @@ import static com.nuodb.migrator.integration.precision.MySQLPrecisions.getMySQLP
 import static com.nuodb.migrator.integration.precision.MySQLPrecisions.getMySQLPrecision2;
 import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -79,7 +80,7 @@ public class StructureTest extends MigrationTestBase {
 				sourceFound = true;
 				list1.add(rs1.getString(1).toUpperCase());
 			}
-			Assert.assertTrue(sourceFound);
+			assertTrue(sourceFound);
 			Assert.assertFalse(list1.isEmpty());
 
 			stmt2 = nuodbConnection.prepareStatement(sqlStr2);
@@ -92,11 +93,11 @@ public class StructureTest extends MigrationTestBase {
 				targetFound = true;
 				list2.add(rs2.getString(1).toUpperCase());
 			}
-			Assert.assertTrue(targetFound);
+			assertTrue(targetFound);
 			Assert.assertFalse(list2.isEmpty());
 
 			for (String tname : list1) {
-				Assert.assertTrue(list2.contains(tname));
+				assertTrue(list2.contains(tname));
 				verifyTableColumns(tname);
 			}
 
@@ -142,7 +143,7 @@ public class StructureTest extends MigrationTestBase {
 				tabColMap.put(tabColDetailsMap.get(colNames[0]),
 						tabColDetailsMap);
 			}
-			Assert.assertTrue(sourceFound);
+			assertTrue(sourceFound);
 			Assert.assertFalse(tabColMap.isEmpty(), tableName
 					+ " column details map empty at source");
 
@@ -196,7 +197,7 @@ public class StructureTest extends MigrationTestBase {
 				assertEquals(actualVal, expectedVal, "DEFAULTVALUE of column "
 						+ colName + " of table " + tableName + " did not match");
 			}
-			Assert.assertTrue(targetFound);
+			assertTrue(targetFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
@@ -250,11 +251,11 @@ public class StructureTest extends MigrationTestBase {
 							+ cName + " of table " + tName
 							+ " did not match with target column name ");
 				}
-				Assert.assertTrue(found);
+				assertTrue(found);
 				rs2.close();
 				stmt2.close();
 			}
-			Assert.assertTrue(sourceFound);
+			assertTrue(sourceFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
@@ -300,7 +301,7 @@ public class StructureTest extends MigrationTestBase {
 					map.put(tName, list);
 				}
 			}
-			Assert.assertTrue(sourceFound);
+			assertTrue(sourceFound);
 			Iterator<Entry<String, ArrayList>> uniKey = map.entrySet()
 					.iterator();
 			while (uniKey.hasNext()) {
@@ -320,8 +321,10 @@ public class StructureTest extends MigrationTestBase {
 						tarColList.add(rs2.getString(1));
 					}
 				}
-				Assert.assertTrue(found);
-				assertEquals(srcColList, tarColList);
+				assertTrue(found, format(
+                        "Expecting unique keys for %s table to be found", srcTname));
+				assertEquals(tarColList, srcColList, format(
+                        "Expecting unique keys for %s table to be equal", srcTname));
 				rs2.close();
 				stmt2.close();
 			}
@@ -410,11 +413,11 @@ public class StructureTest extends MigrationTestBase {
 									+ rs2.getString("PKTABLE_NAME")
 									+ "did not match");
 				}
-				Assert.assertTrue(found);
+				assertTrue(found);
 				rs2.close();
 				stmt2.close();
 			}
-			Assert.assertTrue(sourceFound);
+			assertTrue(sourceFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
@@ -462,12 +465,12 @@ public class StructureTest extends MigrationTestBase {
 					assertEquals(seqName.substring(0, 4).toLowerCase(), "seq_");
 					// TODO: Need to check start value - Don't know how yet
 				}
-				Assert.assertTrue(found);
+				assertTrue(found);
 				rs2.close();
 				stmt2.close();
 
 			}
-			Assert.assertTrue(sourceFound);
+			assertTrue(sourceFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
@@ -510,12 +513,12 @@ public class StructureTest extends MigrationTestBase {
 					Assert.assertNotNull(idxName);
 					assertEquals(idxName.substring(0, 4).toLowerCase(), "idx_");
 				}
-				Assert.assertTrue(found);
+				assertTrue(found);
 				rs2.close();
 				stmt2.close();
 
 			}
-			Assert.assertTrue(sourceFound);
+			assertTrue(sourceFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}

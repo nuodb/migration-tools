@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
@@ -71,6 +72,8 @@ import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
+import static java.sql.Types.*;
+import static java.sql.Types.DECIMAL;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 /**
@@ -115,10 +118,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         addJdbcTypeName(Types.SMALLINT, "SMALLINT");
         addJdbcTypeName(Types.INTEGER, "INTEGER");
         addJdbcTypeName(Types.BIGINT, "BIGINT");
-        addJdbcTypeName(Types.FLOAT, "FLOAT({P})");
-        addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
-        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
-        addJdbcTypeName(Types.REAL, "REAL");
+        addJdbcTypeName(REAL, "REAL");
+        addJdbcTypeName(FLOAT, "FLOAT");
+        addJdbcTypeName(DOUBLE, "DOUBLE");
+        addJdbcTypeName(NUMERIC, "NUMERIC({P},{S})");
+        addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
 
         addJdbcTypeName(Types.DATE, "DATE");
         addJdbcTypeName(Types.TIME, "TIME");
@@ -137,6 +141,10 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
         addJdbcTypeName(Types.CLOB, "CLOB");
         addJdbcTypeName(Types.NCLOB, "NCLOB");
+
+        addJdbcTypeName(BINARY, "BINARY({N})");
+        addJdbcTypeName(VARBINARY, "VARBINARY({N})");
+        addJdbcTypeName(LONGVARBINARY, "VARBINARY({N})");
     }
 
     protected void initTranslations() {
@@ -232,6 +240,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     @Override
     public Script translate(Script script, Session session, Map<Object, Object> context) {
         return getTranslationManager().translate(script, this, session, context);
+    }
+
+    @Override
+    public String getInlineColumnTrigger(Session session, ColumnTrigger trigger) {
+        return null;
     }
 
     @Override
@@ -416,6 +429,16 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return new SimpleTableRowCountHandler(this, table, column, filter, rowCountType);
     }
 
+    @Override
+    public boolean addScriptsInCreateTable(Table table) {
+        return true;
+    }
+
+    @Override
+    public boolean supportInlineColumnTrigger(Session Session, ColumnTrigger trigger) {
+        return false;
+    }
+
     /**
      * Supports LIMIT {row count} syntax.
      *
@@ -518,7 +541,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected boolean isQuotingDefaultValue(Column column, String script, boolean literal) {
-        boolean defaultValueQuoted = script != null;
+        boolean defaultValueQuoted = script != null && !literal;
         if (equalsIgnoreCase(script, NULL) && literal) {
             defaultValueQuoted = false;
         }
@@ -526,6 +549,9 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected String quoteDefaultValue(Column column, String script, boolean literal) {
+        if (script == null) {
+            return null;
+        }
         String defaultValue = script;
         boolean opening = false;
         if (script.startsWith("'")) {
@@ -690,7 +716,12 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public boolean supportsDropTriggerIfExists() {
+    public boolean supportsIfExistsBeforeDropTrigger() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsIfExistsAfterDropTrigger() {
         return false;
     }
 
@@ -739,6 +770,10 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName);
     }
 
+    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName, int priority) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName, priority);
+    }
+
     protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions, String typeName) {
         getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, jdbcTypeOptions, typeName);
     }
@@ -758,6 +793,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName) {
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, typeName);
+    }
+
+    protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,
+                                   int priority) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, typeName, priority);
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,

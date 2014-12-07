@@ -90,8 +90,12 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP TRIGGER ");
+        if (dialect.supportsIfExistsBeforeDropTrigger()) {
+            buffer.append(' ');
+            buffer.append("IF EXISTS");
+        }
         buffer.append(scriptGeneratorManager.getQualifiedName(trigger));
-        if (dialect.supportsDropTriggerIfExists()) {
+        if (dialect.supportsIfExistsAfterDropTrigger()) {
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }

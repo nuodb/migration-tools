@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
@@ -45,13 +47,13 @@ public abstract class JdbcTypeAdapterBase<T> implements JdbcTypeAdapter<T> {
 
     protected <X> JdbcTypeException newWrapFailure(X value) {
         return new JdbcTypeException(
-                String.format("Failed adapting %s to %s", value.getClass().getName(), getTypeClass().getName()));
+                format("Failed adapting %s to %s", value.getClass().getName(), getTypeClass().getName()));
     }
 
 
     protected <X> JdbcTypeException newUnwrapFailure(Class<X> valueClass) {
         return new JdbcTypeException(
-                String.format("Failed adapting %s to %s", valueClass.getName(), getTypeClass().getName())
+                format("Failed adapting %s to %s", valueClass.getName(), getTypeClass().getName())
         );
     }
 

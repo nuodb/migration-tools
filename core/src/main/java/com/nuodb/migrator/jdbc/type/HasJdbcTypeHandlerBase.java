@@ -88,6 +88,10 @@ public class HasJdbcTypeHandlerBase implements HasJdbcTypeHandler {
         return i1 != null && i2 != null ? i1.compareTo(i2) : 0;
     }
 
+    private static int compare(Long i1, Long i2) {
+        return i1 != null && i2 != null ? i1.compareTo(i2) : 0;
+    }
+
     @Override
     public JdbcType getJdbcType() {
         return jdbcType;

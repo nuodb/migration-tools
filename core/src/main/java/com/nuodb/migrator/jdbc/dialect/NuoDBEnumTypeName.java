@@ -27,51 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.type.JdbcEnumType;
-import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.jdbc.type.JdbcTypeName;
-
-import java.util.Collection;
-import java.util.Iterator;
-
 /**
- * Generates enum type
- *
  * @author Sergey Bushik
  */
-public class NuoDBEnumTypeName implements JdbcTypeName {
-
-    @Override
-    public String getTypeName(JdbcType jdbcType) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("ENUM(");
-        Collection<String> values = ((JdbcEnumType) jdbcType).getValues();
-        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-            buffer.append("'");
-            getValue(buffer, iterator.next());
-            buffer.append("'");
-            if (iterator.hasNext()) {
-                buffer.append(",");
-            }
-        }
-        buffer.append(")");
-        return buffer.toString();
-    }
-
-    protected void getValue(StringBuilder buffer, String value) {
-        char[] symbols = value.toCharArray();
-        for (char symbol : symbols) {
-            switch (symbol) {
-                case '\'':
-                    buffer.append('\'');
-                    break;
-            }
-            buffer.append(symbol);
-        }
-    }
-
-    @Override
-    public int getScore(JdbcType jdbcType) {
-        return jdbcType.getClass().equals(JdbcEnumType.class) ? 0 : -1;
-    }
+public class NuoDBEnumTypeName extends JdbcEnumTypeName {
 }

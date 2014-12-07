@@ -60,8 +60,8 @@ public class JdbcType implements Cloneable {
         JdbcTypeDesc jdbcTypeDesc = jdbcType.getJdbcTypeDesc();
         this.jdbcTypeDesc = new JdbcTypeDesc(jdbcTypeDesc.getTypeCode(), jdbcTypeDesc.getTypeName());
         JdbcTypeOptions jdbcTypeOptions = jdbcType.getJdbcTypeOptions();
-        this.jdbcTypeOptions = newOptions(
-                jdbcTypeOptions.getSize(), jdbcTypeOptions.getPrecision(), jdbcTypeOptions.getScale());
+        this.jdbcTypeOptions = jdbcTypeOptions != null ? newOptions(
+                jdbcTypeOptions.getSize(), jdbcTypeOptions.getPrecision(), jdbcTypeOptions.getScale()) : new JdbcTypeOptions();
     }
 
     public int getTypeCode() {
@@ -92,15 +92,15 @@ public class JdbcType implements Cloneable {
         return jdbcType;
     }
 
-    public Integer getSize() {
+    public Long getSize() {
         return jdbcTypeOptions.getSize();
     }
 
-    public void setSize(Integer size) {
+    public void setSize(Long size) {
         jdbcTypeOptions.setSize(size);
     }
 
-    public JdbcType withSize(Integer size) {
+    public JdbcType withSize(Long size) {
         JdbcType jdbcType = clone();
         jdbcType.setSize(size);
         return jdbcType;

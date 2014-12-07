@@ -364,7 +364,7 @@ public class BackupWriter {
         Database database = backupWriterContext.getDatabase();
         MetaDataFilter tableFilter = getMetaDataFilter(MetaDataType.TABLE);
         for (Table table : database.getTables()) {
-            if (tableFilter == null || tableFilter.supports(table)) {
+            if (tableFilter == null || tableFilter.accepts(table)) {
                 WriteQuery writeQuery = createWriteQuery(table, table.getColumns(), null, getQueryLimit());
                 writeQueries.add(writeQuery);
             }

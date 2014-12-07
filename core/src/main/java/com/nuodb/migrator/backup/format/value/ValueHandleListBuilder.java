@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migrator.jdbc.type.jdbc2.JdbcDateValueBase.TIMEZONE;
 
 /**
  * @author Sergey Bushik
@@ -143,7 +144,7 @@ public abstract class ValueHandleListBuilder {
             case Types.TIMESTAMP:
                 if (dialect.supportsStatementWithTimezone()) {
                     jdbcValueAccessOptions = newHashMap();
-                    jdbcValueAccessOptions.put(JdbcDateValueBase.TIMEZONE, getTimeZone());
+                    jdbcValueAccessOptions.put(TIMEZONE, getTimeZone());
                 }
                 break;
             default:

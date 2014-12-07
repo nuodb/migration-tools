@@ -73,7 +73,7 @@ public class XmlJdbcTypeHandler<T extends JdbcType> extends XmlReadWriteHandlerB
     protected void writeAttributes(T jdbcType, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, CODE_ATTRIBUTE, jdbcType.getTypeCode());
         context.writeAttribute(output, NAME_ATTRIBUTE, jdbcType.getTypeName());
-        final Integer size = jdbcType.getSize();
+        final Long size = jdbcType.getSize();
         if (size != null) {
             context.writeAttribute(output, SIZE_ATTRIBUTE, size);
         }

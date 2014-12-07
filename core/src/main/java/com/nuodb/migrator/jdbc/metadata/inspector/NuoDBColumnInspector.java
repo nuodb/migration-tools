@@ -83,7 +83,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             jdbcType.setTypeCode(typeDescAlias.getTypeCode());
             jdbcType.setTypeName(typeDescAlias.getTypeName());
 
-            jdbcType.setSize(columns.getInt("LENGTH"));
+            jdbcType.setSize((long)columns.getInt("LENGTH"));
             jdbcType.setPrecision(columns.getInt("PRECISION"));
             jdbcType.setScale(columns.getInt("SCALE"));
             column.setJdbcType(getJdbcType(jdbcType, columns.getString("ENUMERATION")));

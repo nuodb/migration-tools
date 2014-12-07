@@ -34,7 +34,7 @@ import com.nuodb.migrator.utils.ObjectUtils;
  */
 public class JdbcTypeOptions {
 
-    private Integer size;
+    private Long size;
     private Integer scale;
     private Integer precision;
 
@@ -47,11 +47,11 @@ public class JdbcTypeOptions {
         this.precision = jdbcTypeOptions.getPrecision();
     }
 
-    public Integer getSize() {
+    public Long getSize() {
         return size;
     }
 
-    public void setSize(Integer size) {
+    public void setSize(Long size) {
         this.size = size;
     }
 
@@ -73,6 +73,12 @@ public class JdbcTypeOptions {
 
     public static JdbcTypeOptions newSize(Integer size) {
         JdbcTypeOptions typeOptions = new JdbcTypeOptions();
+        typeOptions.setSize(size != null ? size.longValue() : null);
+        return typeOptions;
+    }
+
+    public static JdbcTypeOptions newSize(Long size) {
+        JdbcTypeOptions typeOptions = new JdbcTypeOptions();
         typeOptions.setSize(size);
         return typeOptions;
     }
@@ -90,6 +96,10 @@ public class JdbcTypeOptions {
     }
 
     public static JdbcTypeOptions newOptions(Integer size, Integer precision, Integer scale) {
+        return newOptions(size != null ? size.longValue() : null, precision, scale);
+    }
+
+    public static JdbcTypeOptions newOptions(Long size, Integer precision, Integer scale) {
         JdbcTypeOptions typeOptions = new JdbcTypeOptions();
         typeOptions.setSize(size);
         typeOptions.setScale(scale);

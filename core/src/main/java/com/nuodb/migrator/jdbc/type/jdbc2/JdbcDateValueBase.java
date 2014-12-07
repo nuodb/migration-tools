@@ -33,6 +33,8 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static java.util.Calendar.getInstance;
+
 /**
  * @author Sergey Bushik
  */
@@ -46,6 +48,10 @@ public abstract class JdbcDateValueBase<T> extends JdbcTypeValueBase<T> {
         super(typeCode, typeClass);
     }
 
+    protected JdbcDateValueBase(int typeCode, String typeName, Class<? extends T> valueClass) {
+        super(typeCode, typeName, valueClass);
+    }
+
     protected Calendar getCalendar(Map<String, Object> options) {
         if (options == null) {
             return null;
@@ -54,7 +60,7 @@ public abstract class JdbcDateValueBase<T> extends JdbcTypeValueBase<T> {
         if (calendar == null) {
             TimeZone timeZone = getOption(options, TIMEZONE);
             if (timeZone != null) {
-                calendar = Calendar.getInstance(timeZone);
+                calendar = getInstance(timeZone);
             }
         }
         return calendar;

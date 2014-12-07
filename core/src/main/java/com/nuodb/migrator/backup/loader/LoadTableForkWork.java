@@ -96,20 +96,26 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
 
     @Override
     public void execute() throws Exception {
-        Row row;
-        while ((row = rowReader.readRow()) != null && backupLoaderManager.canExecute(this)) {
-            backupLoaderManager.beforeLoadRow(this, loadTable, row);
-            int index = 0;
-            Value[] values = row.getValues();
-            initValueHandleList();
-            for (ValueHandle valueHandle : valueHandleList) {
-                valueHandle.getValueFormat().setValue(values[index++],
-                        valueHandle.getJdbcValueAccess(), valueHandle.getJdbcValueAccessOptions());
+        try {
+            Row row;
+            while ((row = rowReader.readRow()) != null && backupLoaderManager.canExecute(this)) {
+                backupLoaderManager.beforeLoadRow(this, loadTable, row);
+                int index = 0;
+                Value[] values = row.getValues();
+                initValueHandleList();
+                for (ValueHandle valueHandle : valueHandleList) {
+                    valueHandle.getValueFormat().setValue(values[index++],
+                            valueHandle.getJdbcValueAccess(), valueHandle.getJdbcValueAccessOptions());
+                }
+                commitExecutor.execute();
+                backupLoaderManager.afterLoadRow(this, loadTable, row);
             }
-            commitExecutor.execute();
-            backupLoaderManager.afterLoadRow(this, loadTable, row);
+            commitExecutor.finish();
+        } catch (Exception exception) {
+            System.out.println("--> LoadTableForkWork.execute: " + this.getLoadTable().getTable().getQualifiedName());
+            exception.printStackTrace();
+            throw exception;
         }
-        commitExecutor.finish();
     }
 
     protected void initValueHandleList() {
