@@ -32,8 +32,6 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collection;
-
 import static com.nuodb.migrator.jdbc.JdbcConstants.MYSQL_DRIVER;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;

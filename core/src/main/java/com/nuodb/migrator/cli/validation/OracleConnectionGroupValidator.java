@@ -32,8 +32,15 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.nuodb.migrator.cli.run.CliOptionValues.TRANSACTION_ISOLATION_READ_COMMITTED;
+import static com.nuodb.migrator.cli.run.CliOptionValues.TRANSACTION_ISOLATION_SERIALIZABLE;
 import static com.nuodb.migrator.jdbc.JdbcConstants.ORACLE_DRIVER;
 import static java.lang.String.format;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -57,5 +64,13 @@ public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
                     "use %s option to access user data", getCatalogOption(), getSchemaOption()), option
             );
         }
+    }
+
+    @Override
+    protected Map<String, Integer> getTransactionIsolations() {
+        Map<String, Integer> transactionIsolations = newLinkedHashMap();
+        transactionIsolations.put(TRANSACTION_ISOLATION_READ_COMMITTED, TRANSACTION_READ_COMMITTED);
+        transactionIsolations.put(TRANSACTION_ISOLATION_SERIALIZABLE, TRANSACTION_SERIALIZABLE);
+        return transactionIsolations;
     }
 }

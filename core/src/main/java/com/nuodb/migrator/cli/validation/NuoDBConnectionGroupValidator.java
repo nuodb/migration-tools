@@ -90,9 +90,10 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
     }
 
     /**
-     * http://doc.nuodb.com/plugins/viewsource/viewpagesrc.action?pageId=18319037
+     * Retrieves map of NuoDB transaction isolation levels, which consists of 2 standard levels read committed,
+     * serializable and 2 NuoDB specific write committed and consistent read.
      *
-     * @return
+     * @return map of NuoDB transaction isolations
      */
     @Override
     protected Map<String, Integer> getTransactionIsolations() {

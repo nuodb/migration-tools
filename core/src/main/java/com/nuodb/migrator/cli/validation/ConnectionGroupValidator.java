@@ -27,19 +27,18 @@
  */
 package com.nuodb.migrator.cli.validation;
 
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Maps;
 import com.nuodb.migrator.cli.parse.CommandLine;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.OptionValidator;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.nuodb.migrator.cli.run.CliOptionValues.INSTANCE;
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.nuodb.migrator.cli.run.CliOptionValues.*;
 import static java.lang.String.format;
+import static java.sql.Connection.*;
 
 /**
  * @author Sergey Bushik
@@ -96,12 +95,18 @@ public abstract class ConnectionGroupValidator implements OptionValidator {
     }
 
     /**
-     * Returns collection of supported transaction isolations
+     * Returns collection of standard transaction isolations
      *
-     * @return collection of supported transaction isolations
+     * @return collection of standard transaction isolations
      */
     protected Map<String, Integer> getTransactionIsolations() {
-        return null;
+        Map<String, Integer> transactionIsolations = newLinkedHashMap();
+        transactionIsolations.put(TRANSACTION_ISOLATION_NONE, TRANSACTION_NONE);
+        transactionIsolations.put(TRANSACTION_ISOLATION_READ_UNCOMMITTED, TRANSACTION_READ_UNCOMMITTED);
+        transactionIsolations.put(TRANSACTION_ISOLATION_READ_COMMITTED, TRANSACTION_READ_COMMITTED);
+        transactionIsolations.put(TRANSACTION_ISOLATION_REPEATABLE_READ, TRANSACTION_REPEATABLE_READ);
+        transactionIsolations.put(TRANSACTION_ISOLATION_SERIALIZABLE, TRANSACTION_SERIALIZABLE);
+        return transactionIsolations;
     }
 
     public String getDriverValue(CommandLine commandLine) {
