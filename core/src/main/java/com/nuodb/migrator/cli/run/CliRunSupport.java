@@ -39,10 +39,7 @@ import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.processor.JdbcTypeOptionProcessor;
 import com.nuodb.migrator.cli.processor.NuoDBTypesOptionProcessor;
 import com.nuodb.migrator.cli.validation.ConnectionGroupInfo;
-import com.nuodb.migrator.jdbc.JdbcConstants;
-import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
-import com.nuodb.migrator.jdbc.commit.SingleCommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
@@ -74,7 +71,6 @@ import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.ScriptGeneratorJobSpecBase;
 import com.nuodb.migrator.utils.PrioritySet;
 import com.nuodb.migrator.utils.ReflectionException;
-import com.nuodb.migrator.utils.ReflectionUtils;
 import com.nuodb.migrator.utils.StringUtils;
 import org.slf4j.Logger;
 
@@ -94,12 +90,12 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.backup.format.csv.CsvFormat.TYPE;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
+import static com.nuodb.migrator.cli.run.CliOptionValues.*;
 import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
-import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
 import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.*;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
 import static com.nuodb.migrator.match.AntRegexCompiler.isPattern;
@@ -107,14 +103,13 @@ import static com.nuodb.migrator.utils.Collections.*;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.Priority.HIGH;
 import static com.nuodb.migrator.utils.Priority.LOW;
+import static com.nuodb.migrator.utils.ReflectionUtils.loadClass;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
-import static java.sql.Connection.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.TimeZone.getTimeZone;
@@ -130,23 +125,7 @@ public class CliRunSupport extends CliSupport {
     protected Logger logger = getLogger(getClass());
 
     public static final TimeZone DEFAULT_TIME_ZONE = getTimeZone("UTC");
-    public static final String IDENTIFIER_QUOTING_MINIMAL = "minimal";
-    public static final String IDENTIFIER_QUOTING_ALWAYS = "always";
-    public static final String IDENTIFIER_NORMALIZER_NOOP = "noop";
-    public static final String IDENTIFIER_NORMALIZER_STANDARD = "standard";
-    public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lower.case";
-    public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "upper.case";
 
-    public static final String TRANSACTION_ISOLATION_NONE = "none";
-    public static final String TRANSACTION_ISOLATION_READ_UNCOMMITTED = "read.uncommitted";
-    public static final String TRANSACTION_ISOLATION_READ_COMMITTED = "read.committed";
-    public static final String TRANSACTION_ISOLATION_REPEATABLE_READ = "repeatable.read";
-    public static final String TRANSACTION_ISOLATION_SERIALIZABLE = "serializable";
-    public static final String NAMING_STRATEGY_QUALIFY = "qualify";
-    public static final String NAMING_STRATEGY_HASH = "hash";
-    public static final String NAMING_STRATEGY_AUTO = "auto";
-    public static final String COMMIT_STRATEGY_SINGLE = "single";
-    public static final String COMMIT_STRATEGY_BATCH = "batch";
     private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
 
     private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
@@ -262,7 +241,7 @@ public class CliRunSupport extends CliSupport {
 
         addConnectionGroupValidators(group, new ConnectionGroupInfo(
                 SOURCE_DRIVER, SOURCE_URL, SOURCE_USERNAME, SOURCE_PASSWORD,
-                SOURCE_CATALOG, SOURCE_SCHEMA, SOURCE_PROPERTIES));
+                SOURCE_CATALOG, SOURCE_SCHEMA, SOURCE_PROPERTIES, SOURCE_TRANSACTION_ISOLATION));
         return group.build();
     }
 
@@ -358,12 +337,7 @@ public class CliRunSupport extends CliSupport {
                 withOption(commitStrategyAttributes).build();
     }
 
-    protected Map<String, CommitStrategy> createCommitStrategyMapping() {
-        Map<String, CommitStrategy> commitStrategyMapping = new TreeMap<String, CommitStrategy>(CASE_INSENSITIVE_ORDER);
-        commitStrategyMapping.put(COMMIT_STRATEGY_SINGLE, new SingleCommitStrategy());
-        commitStrategyMapping.put(COMMIT_STRATEGY_BATCH, new BatchCommitStrategy());
-        return commitStrategyMapping;
-    }
+
 
     protected Option createTimeZoneOption() {
         return newBasicOptionBuilder().
@@ -453,7 +427,7 @@ public class CliRunSupport extends CliSupport {
 
         addConnectionGroupValidators(group, new ConnectionGroupInfo(
                 null, TARGET_URL, TARGET_USERNAME, TARGET_PASSWORD,
-                null, TARGET_SCHEMA, TARGET_PROPERTIES));
+                null, TARGET_SCHEMA, TARGET_PROPERTIES, null));
         return group.build();
     }
 
@@ -767,18 +741,8 @@ public class CliRunSupport extends CliSupport {
         if (optionSet.hasOption(SOURCE_AUTO_COMMIT)) {
             connectionSpec.setAutoCommit(Boolean.parseBoolean((String) optionSet.getValue(SOURCE_AUTO_COMMIT)));
         }
-        String transactionIsolationValue = (String) optionSet.getValue(SOURCE_TRANSACTION_ISOLATION);
-        Integer transactionIsolation = null;
-        if (transactionIsolationValue != null) {
-            transactionIsolation = getTransactionIsolations().get(transactionIsolationValue);
-            if (transactionIsolation == null) {
-                try {
-                    transactionIsolation = parseInt(transactionIsolationValue);
-                } catch (NumberFormatException exception) {
-                    throw new OptionException(exception.getMessage(), exception, option);
-                }
-            }
-        }
+        Integer transactionIsolation = INSTANCE.getTransactionIsolation(option,
+                (String) optionSet.getValue(SOURCE_TRANSACTION_ISOLATION));
         connectionSpec.setTransactionIsolation(transactionIsolation);
         return connectionSpec;
     }
@@ -840,7 +804,7 @@ public class CliRunSupport extends CliSupport {
     }
 
     protected CommitStrategy parseCommitGroup(OptionSet optionSet, Option option) {
-        Map<String, CommitStrategy> commitStrategyMapping = createCommitStrategyMapping();
+        Map<String, CommitStrategy> commitStrategyMapping = INSTANCE.getCommitStrategyMap();
         String commitStrategyValue = (String) optionSet.getValue(COMMIT_STRATEGY, COMMIT_STRATEGY_BATCH);
         CommitStrategy commitStrategy = commitStrategyMapping.get(commitStrategyValue);
         if (commitStrategy == null) {
@@ -1000,7 +964,7 @@ public class CliRunSupport extends CliSupport {
             namingStrategies.add(new TriggerAutoNamingStrategy(), HIGH);
         } else if (isNotEmpty(namingStrategy)) {
             try {
-                namingStrategies.add((NamingStrategy) ReflectionUtils.newInstance(namingStrategy), HIGH);
+                namingStrategies.add((NamingStrategy) newInstance(namingStrategy), HIGH);
             } catch (ReflectionException exception) {
                 optionUnexpected(optionSet.getOption(NAMING_STRATEGY), namingStrategy);
             }
@@ -1012,11 +976,11 @@ public class CliRunSupport extends CliSupport {
         String identifierQuotingValue = (String) optionSet.getValue(IDENTIFIER_QUOTING);
         IdentifierQuoting identifierQuoting = null;
         if (identifierQuotingValue != null) {
-            identifierQuoting = getIdentifierQuotings().get(identifierQuotingValue);
+            identifierQuoting = INSTANCE.getIdentifierQuotingMap().get(identifierQuotingValue);
             if (identifierQuoting == null) {
-                Class<IdentifierQuoting> identifierQuotingClass = ReflectionUtils.loadClass(
+                Class<IdentifierQuoting> identifierQuotingClass = loadClass(
                         identifierQuotingValue);
-                identifierQuoting = ReflectionUtils.newInstance(identifierQuotingClass);
+                identifierQuoting = newInstance(identifierQuotingClass);
             }
         }
         return identifierQuoting != null ? identifierQuoting : ALWAYS;
@@ -1026,12 +990,12 @@ public class CliRunSupport extends CliSupport {
         String identifierNormalizerValue = (String) optionSet.getValue(IDENTIFIER_NORMALIZER);
         IdentifierNormalizer identifierNormalizer = null;
         if (identifierNormalizerValue != null) {
-            identifierNormalizer = getIdentifierNormalizers().get(identifierNormalizerValue);
+            identifierNormalizer = CliOptionValues.INSTANCE.getIdentifierNormalizerMap().get(identifierNormalizerValue);
             if (identifierNormalizer == null) {
                 Class<IdentifierNormalizer> identifierNormalizerClass =
-                        ReflectionUtils.loadClass(identifierNormalizerValue);
+                        loadClass(identifierNormalizerValue);
                 identifierNormalizer =
-                        ReflectionUtils.newInstance(identifierNormalizerClass);
+                        newInstance(identifierNormalizerClass);
             }
         }
         return identifierNormalizer != null ? identifierNormalizer : NOOP;
@@ -1073,34 +1037,6 @@ public class CliRunSupport extends CliSupport {
         return !StringUtils.isEmpty(threadsValue) ? parseInt(threadsValue) : null;
     }
 
-    protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {
-        Map<String, IdentifierNormalizer> identifierNormalizers =
-                new TreeMap<String, IdentifierNormalizer>(CASE_INSENSITIVE_ORDER);
-        identifierNormalizers.put(IDENTIFIER_NORMALIZER_NOOP, NOOP);
-        identifierNormalizers.put(IDENTIFIER_NORMALIZER_STANDARD, STANDARD);
-        identifierNormalizers.put(IDENTIFIER_NORMALIZER_LOWERCASE, LOWER_CASE);
-        identifierNormalizers.put(IDENTIFIER_NORMALIZER_UPPERCASE, UPPER_CASE);
-        return identifierNormalizers;
-    }
-
-    protected Map<String, IdentifierQuoting> getIdentifierQuotings() {
-        Map<String, IdentifierQuoting> identifierQuotings =
-                new TreeMap<String, IdentifierQuoting>(CASE_INSENSITIVE_ORDER);
-        identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, MINIMAL);
-        identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, ALWAYS);
-        return identifierQuotings;
-    }
-
-    protected Map<String, Integer> getTransactionIsolations() {
-        Map<String, Integer> transactionIsolations =
-                new TreeMap<String, Integer>(CASE_INSENSITIVE_ORDER);
-        transactionIsolations.put(TRANSACTION_ISOLATION_NONE, TRANSACTION_NONE);
-        transactionIsolations.put(TRANSACTION_ISOLATION_READ_UNCOMMITTED, TRANSACTION_READ_UNCOMMITTED);
-        transactionIsolations.put(TRANSACTION_ISOLATION_READ_COMMITTED, TRANSACTION_READ_COMMITTED);
-        transactionIsolations.put(TRANSACTION_ISOLATION_REPEATABLE_READ, TRANSACTION_REPEATABLE_READ);
-        transactionIsolations.put(TRANSACTION_ISOLATION_SERIALIZABLE, TRANSACTION_SERIALIZABLE);
-        return transactionIsolations;
-    }
 
     public TimeZone getDefaultTimeZone() {
         return defaultTimeZone;

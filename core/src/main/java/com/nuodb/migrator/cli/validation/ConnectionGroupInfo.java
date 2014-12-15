@@ -39,9 +39,11 @@ public class ConnectionGroupInfo {
     private String catalogOption;
     private String schemaOption;
     private String propertiesOption;
+    private String transactionIsolationOption;
 
     public ConnectionGroupInfo(String driverOption, String urlOption, String usernameOption, String passwordOption,
-                               String catalogOption, String schemaOption, String propertiesOption) {
+                               String catalogOption, String schemaOption, String propertiesOption,
+                               String transactionIsolationOption) {
         this.driverOption = driverOption;
         this.urlOption = urlOption;
         this.usernameOption = usernameOption;
@@ -49,6 +51,7 @@ public class ConnectionGroupInfo {
         this.catalogOption = catalogOption;
         this.schemaOption = schemaOption;
         this.propertiesOption = propertiesOption;
+        this.transactionIsolationOption = transactionIsolationOption;
     }
 
     public String getDriverOption() {
@@ -77,5 +80,9 @@ public class ConnectionGroupInfo {
 
     public String getPropertiesOption() {
         return propertiesOption;
+    }
+
+    public String getTransactionIsolationOption() {
+        return transactionIsolationOption;
     }
 }

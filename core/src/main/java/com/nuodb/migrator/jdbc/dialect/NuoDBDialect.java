@@ -218,9 +218,16 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     public boolean supportsTransactionIsolation(int level) {
-        return newArrayList(
-                WRITE_COMMITTED, CONSISTENT_READ, TRANSACTION_READ_COMMITTED, TRANSACTION_SERIALIZABLE
-        ).contains(level);
+        boolean supports = false;
+        switch (level) {
+            case WRITE_COMMITTED:
+            case CONSISTENT_READ:
+            case TRANSACTION_READ_COMMITTED:
+            case TRANSACTION_SERIALIZABLE:
+                supports = true;
+                break;
+        }
+        return supports;
     }
 
     @Override

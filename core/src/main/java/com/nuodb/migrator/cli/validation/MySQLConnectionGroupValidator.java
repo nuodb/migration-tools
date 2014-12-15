@@ -32,6 +32,8 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collection;
+
 import static com.nuodb.migrator.jdbc.JdbcConstants.MYSQL_DRIVER;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -51,8 +53,7 @@ public class MySQLConnectionGroupValidator extends ConnectionGroupValidator {
     }
 
     @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String schema = getSchemaValue(commandLine);
+    protected void validateSchema(CommandLine commandLine, Option option, String schema) {
         if (!isEmpty(schema)) {
             throw new OptionException(
                     format("Unexpected option %s. MySQL supports catalogs only, not schemas", getSchemaOption()), option

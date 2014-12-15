@@ -125,7 +125,14 @@ public class OracleDialect extends SimpleDialect {
 
     @Override
     public boolean supportsTransactionIsolation(int level) {
-        return newArrayList(TRANSACTION_READ_COMMITTED, TRANSACTION_SERIALIZABLE).contains(level);
+        boolean supports = false;
+        switch (level) {
+            case TRANSACTION_READ_COMMITTED:
+            case TRANSACTION_SERIALIZABLE:
+                supports = true;
+                break;
+        }
+        return supports;
     }
 
     @Override

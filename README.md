@@ -45,7 +45,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--source.catalog=[catalog]]                                Default database catalog name to use
             [--source.schema=[schema]]                                  Default database schema name to use
             [--source.auto.commit=[true | false]]                       If set to true each individual statement is treated as a transaction and is automatically committed after it is executed, false by default
-            [--source.transaction.isolation=[transaction isolation]]    Sets transaction isolation level, none, read.uncommitted, read.committed, repeatable.read, serializable or vendor dependent integer for the level
+            [--source.transaction.isolation=[transaction isolation]]    Sets transaction isolation level, it's a symbolic name or an integer constant of the required level from JDBC standard: none or 0, read.uncommitted or 1, read.committed or 2, repeatable.read or 4, serializable or 8. NuoDB does not support all of the levels, only read.committed or 2, serializable or 8 and also supports two additional levels that are not in the JDBC standard: write.committed or 5, consistent.read or 7
         [output specification, optional]
             [--output.type=[output type]]                               Output type (csv, xml, bson), default is csv
             [--output.path=[output path]]                               Path on the file system
@@ -129,7 +129,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--source.catalog=[catalog]]                                Default database catalog name to use
             [--source.schema=[schema]]                                  Default database schema name to use
             [--source.auto.commit=[true | false]]                       If set to true each individual statement is treated as a transaction and is automatically committed after it is executed, false by default
-            [--source.transaction.isolation=[transaction isolation]]    Sets transaction isolation level, none, read.uncommitted, read.committed, repeatable.read, serializable or vendor dependent integer for the level
+            [--source.transaction.isolation=[transaction isolation]]    Sets transaction isolation level, it's a symbolic name or an integer constant of the required level from JDBC standard: none or 0, read.uncommitted or 1, read.committed or 2, repeatable.read or 4, serializable or 8. NuoDB does not support all of the levels, only read.committed or 2, serializable or 8 and also supports two additional levels that are not in the JDBC standard: write.committed or 5, consistent.read or 7
         [target database connection, optional]                         
             [--target.url=url]                                          Target database connection URL in the format jdbc:com.nuodb://{broker}:{port}/{database}
             [--target.username=[username]]                              Target database username

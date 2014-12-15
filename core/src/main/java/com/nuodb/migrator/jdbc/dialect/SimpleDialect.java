@@ -288,10 +288,17 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public boolean supportsTransactionIsolation(int level) {
-        return newArrayList(
-                TRANSACTION_NONE, TRANSACTION_READ_UNCOMMITTED, TRANSACTION_READ_COMMITTED,
-                TRANSACTION_REPEATABLE_READ, TRANSACTION_SERIALIZABLE
-        ).contains(level);
+        boolean supports = false;
+        switch (level) {
+            case TRANSACTION_NONE:
+            case TRANSACTION_READ_UNCOMMITTED:
+            case TRANSACTION_READ_COMMITTED:
+            case TRANSACTION_REPEATABLE_READ:
+            case TRANSACTION_SERIALIZABLE:
+                supports = true;
+                break;
+        }
+        return supports;
     }
 
     @Override

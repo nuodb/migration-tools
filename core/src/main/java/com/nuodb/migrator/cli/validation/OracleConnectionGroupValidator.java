@@ -51,8 +51,7 @@ public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
     }
 
     @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalogValue(commandLine);
+    protected void validateCatalog(CommandLine commandLine, Option option, String catalog) {
         if (!isEmpty(catalog)) {
             throw new OptionException(format("Unexpected option %s. Oracle catalog is equal to database name, " +
                     "use %s option to access user data", getCatalogOption(), getSchemaOption()), option

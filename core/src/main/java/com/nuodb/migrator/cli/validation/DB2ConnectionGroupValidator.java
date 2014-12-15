@@ -50,8 +50,7 @@ public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
     }
 
     @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalogValue(commandLine);
+    protected void validateCatalog(CommandLine commandLine, Option option, String catalog) {
         if (!isEmpty(catalog)) {
             throw new OptionException(format("Unexpected option %s. DB2 doesn't supports catalogs", getCatalogOption()),
                     option

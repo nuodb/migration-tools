@@ -33,10 +33,16 @@ import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.nuodb.migrator.cli.run.CliOptionValues.*;
 import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
 import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.NUODB_SUB_PROTOCOL;
 import static com.nuodb.migrator.jdbc.url.JdbcUrlParsers.getInstance;
 import static java.lang.String.format;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -56,24 +62,45 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
     }
 
     @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalogValue(commandLine);
+    protected void validateCatalog(CommandLine commandLine, Option option, String catalog) {
         if (!isEmpty(catalog)) {
             throw new OptionException(
                     format("Unexpected option %s. NuoDB doesn't supports catalogs", getCatalogOption()), option
             );
         }
-        String username = getUsernameValue(commandLine);
+    }
+
+    @Override
+    protected void validateUsername(CommandLine commandLine, Option option, String username) {
         if (isEmpty(username)) {
-            throw new OptionException(format("Missing required option %s. The user name to authenticate with should be provided",
-                    getUsernameOption()), option
+            throw new OptionException(
+                    format("Missing required option %s. The user name to authenticate with should be provided",
+                            getUsernameOption()), option
             );
         }
-        String password = getPasswordValue(commandLine);
+    }
+
+    @Override
+    protected void validatePassword(CommandLine commandLine, Option option, String password) {
         if (isEmpty(password)) {
             throw new OptionException(format("Missing required option %s. The user's password should be provided",
                     getPasswordOption()), option
             );
         }
+    }
+
+    /**
+     * http://doc.nuodb.com/plugins/viewsource/viewpagesrc.action?pageId=18319037
+     *
+     * @return
+     */
+    @Override
+    protected Map<String, Integer> getTransactionIsolations() {
+        Map<String, Integer> transactionIsolations = newLinkedHashMap();
+        transactionIsolations.put(TRANSACTION_ISOLATION_READ_COMMITTED, TRANSACTION_READ_COMMITTED);
+        transactionIsolations.put(TRANSACTION_ISOLATION_SERIALIZABLE, TRANSACTION_SERIALIZABLE);
+        transactionIsolations.put(TRANSACTION_ISOLATION_WRITE_COMMITTED, 5);
+        transactionIsolations.put(TRANSACTION_ISOLATION_CONSISTENT_READ, 7);
+        return transactionIsolations;
     }
 }
