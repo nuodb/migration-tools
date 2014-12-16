@@ -88,7 +88,7 @@ public abstract class ConnectionGroupValidator implements OptionValidator {
                 }
             }
             throw new OptionException(
-                    format("Unexpected option value %s. The database supports the following transaction isolations %s",
+                    format("Unexpected option value for %s. The database supports the following transaction isolations %s",
                             getTransactionIsolationOption(), result.toString()), option
             );
         }
