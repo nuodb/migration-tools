@@ -31,6 +31,9 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.HasSchemas;
 import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
+import com.nuodb.migrator.jdbc.metadata.Table;
+
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
@@ -55,12 +58,39 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     public Collection<String> getScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
         Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
         for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
-            Collection<String> scripts = getScripts(schema, scriptGeneratorManager);
+            Collection<String> scripts = getNonReferredSequenceScripts(schema,scriptGeneratorManager);
+            scripts.addAll(getScripts(schema, scriptGeneratorManager));
+
             if (!scripts.isEmpty()) {
                 schemaScripts.put(schema, scripts);
             }
         }
         return getScripts(schemaScripts, scriptGeneratorManager, false, true);
+    }
+
+    public Collection<String> getNonReferredSequenceScripts(Schema schema, ScriptGeneratorManager scriptGeneratorManager){        
+        Collection<Table> tables = schema.getTables();
+        Collection<Sequence> allSequences = schema.getSequences();
+        
+        for (Table table : tables){
+            Collection<Sequence> tableSequences = table.getSequences();
+            for (Sequence tableSequence : tableSequences){
+                allSequences.remove(tableSequence);
+            }
+        }
+        return getSequenceScripts(allSequences,scriptGeneratorManager);
+    }
+    
+
+    public Collection<String> getSequenceScripts(Collection<Sequence> sequences, ScriptGeneratorManager scriptGeneratorManager){        
+        Collection<String> allSequenceScripts = newArrayList();
+        for (Sequence sequence : sequences){
+            Collection<String> sequenceScripts = scriptGeneratorManager.getScripts(sequence);
+            
+            if(!sequenceScripts.isEmpty())
+                allSequenceScripts.addAll(sequenceScripts);
+        }
+        return allSequenceScripts;
     }
 
     protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,

@@ -56,8 +56,10 @@ public class SequenceSourceNamingStrategy extends SourceNamingStrategy<Sequence>
         Collection<Column> columns = sequence.getColumns();
         String tableName = columns.size() == 1 ?
                 scriptGeneratorManager.getName(get(columns, 0).getTable(), false) : null;
-        buffer.append(tableName);
-        buffer.append(getDelimiter(sequence, scriptGeneratorManager));
+        if( tableName!=null ){
+            buffer.append(tableName);
+            buffer.append(getDelimiter(sequence, scriptGeneratorManager));
+        }
         buffer.append(nonPrefixedName);
         if (isLowerCase(tableName)) {
             nonPrefixedName = lowerCase(buffer);
