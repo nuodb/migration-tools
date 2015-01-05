@@ -2,6 +2,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.POSTGRE_SQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSequence;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
 import static java.sql.Types.INTEGER;
@@ -16,7 +17,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.nuodb.migrator.backup.loader.BackupLoader;
-import com.nuodb.migrator.jdbc.dialect.MySQLDialect;
+import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.dialect.PostgreSQLDialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Schema;
@@ -32,8 +33,8 @@ public class SequenceScriptGeneratorTest {
     @BeforeMethod
     public void setUp() throws SQLException {
         scriptGeneratorManager = new ScriptGeneratorManager();
-        scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(POSTGRE_SQL)));
-        scriptGeneratorManager.setTargetDialect(new PostgreSQLDialect(POSTGRE_SQL));
+        scriptGeneratorManager.setSourceSession(createSession(new PostgreSQLDialect(POSTGRE_SQL)));
+        scriptGeneratorManager.setTargetDialect(new NuoDBDialect(NUODB));
         backupLoader = new BackupLoader();
         schemasScriptGenerator = new HasSchemasScriptGenerator();
     }
@@ -56,7 +57,7 @@ public class SequenceScriptGeneratorTest {
         allSequences1.add(s2);
         Collection<String> expected1 = newArrayList(
                 "DROP SEQUENCE IF EXISTS \"seq2\"",
-                "CREATE SEQUENCE \"seq2\" NO MINVALUE NO MAXVALUE NO CYCLE"
+                "CREATE SEQUENCE \"seq2\""
         );
         
         Table t2 = new Table("t2");
@@ -105,7 +106,7 @@ public class SequenceScriptGeneratorTest {
         schema1.addTable(t1);
         Collection<String> expected1 = newArrayList(
                 "DROP SEQUENCE IF EXISTS \"seq2\"",
-                "CREATE SEQUENCE \"seq2\" NO MINVALUE NO MAXVALUE NO CYCLE"
+                "CREATE SEQUENCE \"seq2\""
         );
         
         Schema schema2 = new Schema("schema2");
@@ -123,9 +124,9 @@ public class SequenceScriptGeneratorTest {
         schema2.addTable(t2);
         Collection<String> expected2 = newArrayList(
                 "DROP SEQUENCE IF EXISTS \"seq3\"",
-                "CREATE SEQUENCE \"seq3\" NO MINVALUE NO MAXVALUE NO CYCLE",
+                "CREATE SEQUENCE \"seq3\"",
                 "DROP SEQUENCE IF EXISTS \"seq4\"",
-                "CREATE SEQUENCE \"seq4\" NO MINVALUE NO MAXVALUE NO CYCLE"
+                "CREATE SEQUENCE \"seq4\""
         );
         
         Schema schema3 = new Schema("schema3");
