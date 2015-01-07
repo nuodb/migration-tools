@@ -27,17 +27,35 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataAllOfFilters;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFiltersBase;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataInvertAcceptFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataNameEqualsFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataNameMatchesFilter;
 import com.nuodb.migrator.match.Regex;
+import com.nuodb.migrator.spec.MetaDataSpec;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
+import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.io.FileUtils.*;
 import static org.apache.commons.io.IOUtils.closeQuietly;
@@ -159,6 +177,7 @@ public abstract class BackupOpsBase implements BackupOps {
 
     @Override
     public void write(Backup backup, Map context) {
+        validateTableFilter(backup,context);
         OutputStream output = openBackupOutput();
         try {
             write(backup, output, context);
@@ -184,6 +203,69 @@ public abstract class BackupOpsBase implements BackupOps {
     @Override
     public void write(Backup backup, OutputStream output) {
         write(backup, output, null);
+    }
+
+    protected void validateTableFilter(Backup backup, Map context) {
+        MetaDataSpec metaDataSpec = ((MetaDataSpec) context.get(META_DATA_SPEC));
+        MetaDataFilter<Table> metaDataTablesFilter = metaDataSpec.getMetaDataFilter(MetaDataType.TABLE);
+        if(!(metaDataTablesFilter == null)) {
+            Collection<String> tables = new ArrayList<String>();
+            for(Catalog catalog : backup.getDatabase().getCatalogs()) {
+                for(Table table : catalog.getTables()) {
+                    tables.add(table.getName());
+                }
+            }
+            if(!tables.isEmpty()) {
+                verifyFilter(tables , metaDataTablesFilter);
+            }
+        }
+    }
+
+    protected void verifyFilter(Collection<String> tables , MetaDataFilter<Table> metaDataTablesFilter) {
+        Collection<MetaDataFilter<Table>> metaDataAll = ((MetaDataAllOfFilters)metaDataTablesFilter).getFilters();
+        Iterator iterator = null;
+        for(MetaDataFilter metaDataTableFilter : metaDataAll) {
+            iterator = ((MetaDataFiltersBase) metaDataTableFilter).getFilters().iterator();
+            while(iterator!=null && iterator.hasNext()) {
+                MetaDataFilter metaDataFilter = (MetaDataFilter) iterator.next();
+                if(metaDataFilter instanceof MetaDataNameEqualsFilter) {
+                    acceptFilter(tables,metaDataFilter);
+                }
+                else if(metaDataFilter instanceof MetaDataInvertAcceptFilter) {
+                    MetaDataFilter<Table> filter = ((MetaDataInvertAcceptFilter)metaDataFilter).getFilter();
+                    acceptFilter(tables,filter);
+                }
+                else if(metaDataFilter instanceof MetaDataNameMatchesFilter) {
+                    acceptFilter(tables, metaDataFilter);
+                }
+            }
+        }
+    }
+
+    private void acceptFilter(Collection<String> tables, MetaDataFilter<Table> filter) {
+        Identifier identifier = valueOf(StringUtils.EMPTY);
+        boolean accept = false;
+        for(String table : tables) {
+            if(filter instanceof MetaDataNameEqualsFilter) { 
+                identifier = ((MetaDataNameEqualsFilter) filter).getIdentifier();
+                accept = ((MetaDataNameEqualsFilter) filter).accepts(table);
+            }
+            if(filter instanceof MetaDataNameMatchesFilter) { 
+                identifier = ((MetaDataNameMatchesFilter) filter).getIdentifier();
+                accept = ((MetaDataNameMatchesFilter) filter).accepts(table);
+            }
+            if(accept)
+                return;
+        }
+        if(!accept) {
+            logWarnMessage(identifier);
+        }
+    }
+
+    protected void logWarnMessage(Identifier identifier) {
+        if (logger.isTraceEnabled()) {
+            logger.warn(format("Table %s does not exists in the source database " , identifier.value()));
+        }
     }
 
     @Override

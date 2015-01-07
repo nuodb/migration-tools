@@ -48,8 +48,12 @@ public class MetaDataNameEqualsFilter<T extends Identifiable> extends MetaDataNa
     }
 
     @Override
-    protected boolean accepts(String name) {
+    public boolean accepts(String name) {
         return ObjectUtils.equals(identifier, valueOf(name));
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
     }
 
     @Override

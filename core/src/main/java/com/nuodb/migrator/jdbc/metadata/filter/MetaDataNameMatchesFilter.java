@@ -28,10 +28,12 @@
 package com.nuodb.migrator.jdbc.metadata.filter;
 
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.match.Regex;
 
 import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 
 /**
  * @author Sergey Bushik
@@ -47,8 +49,12 @@ public class MetaDataNameMatchesFilter<T extends Identifiable> extends MetaDataN
     }
 
     @Override
-    protected boolean accepts(String name) {
+    public boolean accepts(String name) {
         return name != null && regex.test(name);
+    }
+
+    public Identifier getIdentifier() {
+        return valueOf(regex.regex());
     }
 
     @Override
