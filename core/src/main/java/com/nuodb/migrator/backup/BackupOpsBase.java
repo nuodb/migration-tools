@@ -264,7 +264,7 @@ public abstract class BackupOpsBase implements BackupOps {
 
     protected void logWarnMessage(Identifier identifier) {
         if (logger.isTraceEnabled()) {
-            logger.warn(format("Table %s does not exists in the source database " , identifier.value()));
+            logger.warn(format("Table %s does not exist in the source database " , identifier.value()));
         }
     }
 
