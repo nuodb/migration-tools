@@ -79,6 +79,7 @@ import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.spec.MigrationMode;
 import com.nuodb.migrator.utils.PrioritySet;
+import com.nuodb.migrator.utils.SequenceUtils;
 import com.nuodb.migrator.utils.concurrent.ForkJoinPool;
 import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 import org.slf4j.Logger;
@@ -384,17 +385,15 @@ public class BackupLoader {
                             newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX)));
             Collection<Table> tables = backupLoaderContext.getSourceTables();
             Database database = backupLoaderContext.getBackup().getDatabase();
-            Collection<Sequence> allSequences = database.getSequences(); 
+            Collection<Sequence> standaloneSequences = SequenceUtils.getStandaloneSequences(database, scriptGeneratorManager);
             if (isEmpty(tables)) {
                 scriptExporter.exportScripts(scriptGeneratorManager.getScripts(database));
             } else {
                 for (Table table : tables) {
                     scriptExporter.exportScript(getUseSchema(table.getSchema(), scriptGeneratorManager));
                     scriptExporter.exportScripts(scriptGeneratorManager.getScripts(table));
-                    verifyReferredSequences(allSequences,table);
                 }
-                scriptExporter.exportScripts(getNonReferredSequenceScripts(allSequences, scriptGeneratorManager));
-                
+                scriptExporter.exportScripts(getStandaloneSequenceScripts(standaloneSequences, scriptGeneratorManager));
             }
             Session targetSession = backupLoaderContext.getTargetSession();
             targetSession.getConnection().commit();
@@ -405,22 +404,16 @@ public class BackupLoader {
         backupLoaderManager.loadSchemaDone();
     }
 
-    public void verifyReferredSequences(Collection<Sequence> allSequences, Table table){        
-        Collection<Sequence> tableSequences = table.getSequences();
-        for (Sequence tableSequence : tableSequences){
-            allSequences.remove(tableSequence);
-        }        
-    }
-
-    public Collection<String> getNonReferredSequenceScripts(Collection<Sequence> sequences, ScriptGeneratorManager scriptGeneratorManager){        
+    public Collection<String> getStandaloneSequenceScripts(Collection<Sequence> sequences, ScriptGeneratorManager scriptGeneratorManager) {
         Collection<String> allSequenceScripts = newArrayList();
         Collection<String> sequenceScripts = newArrayList();
-        
-        for (Sequence sequence : sequences){
+
+        for (Sequence sequence : sequences) {
             sequenceScripts = scriptGeneratorManager.getScripts(sequence);
-            
-            if(!sequenceScripts.isEmpty())
+
+            if (!sequenceScripts.isEmpty()) {
                 allSequenceScripts.addAll(sequenceScripts);
+            }
         }
         return allSequenceScripts;
     }
