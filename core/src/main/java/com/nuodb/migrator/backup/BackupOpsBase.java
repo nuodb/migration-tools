@@ -208,14 +208,14 @@ public abstract class BackupOpsBase implements BackupOps {
     protected void validateTableFilter(Backup backup, Map context) {
         MetaDataSpec metaDataSpec = ((MetaDataSpec) context.get(META_DATA_SPEC));
         MetaDataFilter<Table> metaDataTablesFilter = metaDataSpec.getMetaDataFilter(MetaDataType.TABLE);
-        if(!(metaDataTablesFilter == null)) {
+        if (!(metaDataTablesFilter == null)) {
             Collection<String> tables = new ArrayList<String>();
-            for(Catalog catalog : backup.getDatabase().getCatalogs()) {
-                for(Table table : catalog.getTables()) {
+            for (Catalog catalog : backup.getDatabase().getCatalogs()) {
+                for (Table table : catalog.getTables()) {
                     tables.add(table.getName());
                 }
             }
-            if(!tables.isEmpty()) {
+            if (!tables.isEmpty()) {
                 verifyFilter(tables , metaDataTablesFilter);
             }
         }
@@ -224,18 +224,18 @@ public abstract class BackupOpsBase implements BackupOps {
     protected void verifyFilter(Collection<String> tables , MetaDataFilter<Table> metaDataTablesFilter) {
         Collection<MetaDataFilter<Table>> metaDataAll = ((MetaDataAllOfFilters)metaDataTablesFilter).getFilters();
         Iterator iterator = null;
-        for(MetaDataFilter metaDataTableFilter : metaDataAll) {
+        for (MetaDataFilter metaDataTableFilter : metaDataAll) {
             iterator = ((MetaDataFiltersBase) metaDataTableFilter).getFilters().iterator();
-            while(iterator!=null && iterator.hasNext()) {
+            while (iterator!=null && iterator.hasNext()) {
                 MetaDataFilter metaDataFilter = (MetaDataFilter) iterator.next();
-                if(metaDataFilter instanceof MetaDataNameEqualsFilter) {
+                if (metaDataFilter instanceof MetaDataNameEqualsFilter) {
                     acceptFilter(tables,metaDataFilter);
                 }
-                else if(metaDataFilter instanceof MetaDataInvertAcceptFilter) {
+                else if (metaDataFilter instanceof MetaDataInvertAcceptFilter) {
                     MetaDataFilter<Table> filter = ((MetaDataInvertAcceptFilter)metaDataFilter).getFilter();
                     acceptFilter(tables,filter);
                 }
-                else if(metaDataFilter instanceof MetaDataNameMatchesFilter) {
+                else if (metaDataFilter instanceof MetaDataNameMatchesFilter) {
                     acceptFilter(tables, metaDataFilter);
                 }
             }
@@ -245,25 +245,25 @@ public abstract class BackupOpsBase implements BackupOps {
     private void acceptFilter(Collection<String> tables, MetaDataFilter<Table> filter) {
         Identifier identifier = valueOf(StringUtils.EMPTY);
         boolean accept = false;
-        for(String table : tables) {
-            if(filter instanceof MetaDataNameEqualsFilter) { 
+        for (String table : tables) {
+            if (filter instanceof MetaDataNameEqualsFilter) { 
                 identifier = ((MetaDataNameEqualsFilter) filter).getIdentifier();
                 accept = ((MetaDataNameEqualsFilter) filter).accepts(table);
             }
-            if(filter instanceof MetaDataNameMatchesFilter) { 
+            if (filter instanceof MetaDataNameMatchesFilter) { 
                 identifier = ((MetaDataNameMatchesFilter) filter).getIdentifier();
                 accept = ((MetaDataNameMatchesFilter) filter).accepts(table);
             }
-            if(accept)
+            if (accept)
                 return;
         }
-        if(!accept) {
+        if (!accept) {
             logWarnMessage(identifier);
         }
     }
 
     protected void logWarnMessage(Identifier identifier) {
-        if (logger.isTraceEnabled()) {
+        if (logger.isWarnEnabled()) {
             logger.warn(format("Table %s does not exist in the source database " , identifier.value()));
         }
     }
