@@ -77,8 +77,7 @@ public class BackupOpsValidateTableFilterTest {
         MetaDataFilter<Table> metaDataTablesFilter = newEitherOfFilters(MetaDataType.TABLE, filters);
         MetaDataFilter<Table> all = newAllOfFilters(MetaDataType.TABLE, metaDataTablesFilter);
 
-        XmlBackupOps backupOps = new XmlBackupOps();
-        XmlBackupOps backupOps1 = spy(backupOps);
+        XmlBackupOps backupOps1 = spy(new XmlBackupOps());
         backupOps1.verifyFilter(databaseTable, all);
         verify(backupOps1,times(1)).logWarnMessage(valueOf(anyString()));
     }
@@ -102,8 +101,7 @@ public class BackupOpsValidateTableFilterTest {
         MetaDataFilter<Table> metaDataTablesFilter = newEitherOfFilters(MetaDataType.TABLE, filters);
         MetaDataFilter<Table> all = newAllOfFilters(MetaDataType.TABLE, metaDataTablesFilter);
 
-        XmlBackupOps backupOps = new XmlBackupOps();
-        XmlBackupOps backupOps1 = spy(backupOps);
+        XmlBackupOps backupOps1 = spy(new XmlBackupOps());
         backupOps1.verifyFilter(databaseTable, all);
         verify(backupOps1,times(1)).logWarnMessage(valueOf(anyString()));
     }
