@@ -34,8 +34,6 @@ import java.util.Collection;
 
 import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.utils.StringUtils.*;
-import static com.nuodb.migrator.utils.StringUtils.isUpperCase;
-import static com.nuodb.migrator.utils.StringUtils.upperCase;
 
 /**
  * @author Sergey Bushik
@@ -56,7 +54,7 @@ public class SequenceSourceNamingStrategy extends SourceNamingStrategy<Sequence>
         Collection<Column> columns = sequence.getColumns();
         String tableName = columns.size() == 1 ?
                 scriptGeneratorManager.getName(get(columns, 0).getTable(), false) : null;
-        if( tableName!=null ){
+        if (tableName != null) {
             buffer.append(tableName);
             buffer.append(getDelimiter(sequence, scriptGeneratorManager));
         }

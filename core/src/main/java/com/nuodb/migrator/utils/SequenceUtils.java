@@ -27,50 +27,25 @@
  */
 package com.nuodb.migrator.utils;
 
-import java.util.Collection;
-
-import com.nuodb.migrator.jdbc.metadata.HasSchemas;
 import com.nuodb.migrator.jdbc.metadata.HasTables;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
+
+import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 
 /**
  * @author Mukund
  */
-
 public class SequenceUtils {
 
-    public static boolean supportsSequence(ScriptGeneratorManager generatorManager) {
-        return generatorManager.getObjectTypes().contains(SEQUENCE) &&
-                generatorManager.getTargetDialect().supportsSequence();
-    }
-
-    public static Collection<Sequence> getStandaloneSequences(HasSchemas schemas, ScriptGeneratorManager scriptGeneratorManager) {
-        if (!supportsSequence(scriptGeneratorManager)) {
-            return newArrayList();
-        }
-        Collection<Sequence> filteredSequences = newArrayList();
-        for (Sequence sequence : schemas.getSequences()) {
-            if (sequence.getColumns().isEmpty()) {
-                filteredSequences.add(sequence);
-            }
-        }
-        return filteredSequences;
-    }
-
-    public static Collection<Sequence> getStandaloneSequences(HasTables tables, ScriptGeneratorManager scriptGeneratorManager) {
-        if(!supportsSequence(scriptGeneratorManager)) {
-            return newArrayList();
-        }
-        Collection<Sequence> filteredSequences = newArrayList();
+    public static Collection<Sequence> getStandaloneSequences(HasTables tables) {
+        Collection<Sequence> sequences = newArrayList();
         for (Sequence sequence : tables.getSequences()) {
             if (sequence.getColumns().isEmpty()) {
-                filteredSequences.add(sequence);
+                sequences.add(sequence);
             }
         }
-        return filteredSequences;
+        return sequences;
     }
 }

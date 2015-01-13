@@ -50,6 +50,4 @@ public abstract class QueryBase implements Query {
         append(query);
         return query.toString();
     }
-
-
 }

@@ -33,8 +33,12 @@ import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.HasTables;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.filter.HasTablesFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
+import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
+import com.nuodb.migrator.utils.SequenceUtils;
 
 import java.util.Collection;
 
@@ -43,6 +47,7 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager.FOREIGN_KEYS;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager.TABLES;
+import static com.nuodb.migrator.utils.SequenceUtils.getStandaloneSequences;
 import static java.util.Collections.singleton;
 
 /**
@@ -71,6 +76,16 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<String> scripts = newArrayList();
+            boolean addSequences = scriptGeneratorManager.getObjectTypes().contains(SEQUENCE);
+            if (addSequences) {
+                MetaDataFilterManager filterManager = scriptGeneratorManager.getMetaDataFilterManager();
+                MetaDataFilter sequenceFilter = filterManager.getMetaDataFilter(SEQUENCE);
+                for (Sequence sequence : getStandaloneSequences(tables)) {
+                    if (sequenceFilter == null || sequenceFilter.accepts(sequence)) {
+                        scripts.addAll(scriptGeneratorManager.getScripts(sequence));
+                    }
+                }
+            }
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:

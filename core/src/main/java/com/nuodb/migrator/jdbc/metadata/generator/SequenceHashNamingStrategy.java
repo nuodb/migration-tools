@@ -40,6 +40,7 @@ import static java.lang.Integer.toHexString;
  * @author Sergey Bushik
  */
 public class SequenceHashNamingStrategy extends SequenceQualifyNamingStrategy {
+
     @Override
     protected String getNonPrefixedName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
         String nonPrefixedName = toHexString(super.getNonPrefixedName(sequence, scriptGeneratorManager).hashCode());

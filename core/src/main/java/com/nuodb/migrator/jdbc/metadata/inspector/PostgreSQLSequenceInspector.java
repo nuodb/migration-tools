@@ -123,8 +123,11 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
                                    ResultSet sequences)
             throws SQLException {
         if (sequences.next()) {
-            Sequence sequence = new Sequence();
-            sequence.setName(sequences.getString("SEQUENCE_NAME"));
+            String name = sequences.getString("SEQUENCE_NAME");
+            Sequence sequence = schema.getSequence(name);
+            if (sequence == null) {
+                schema.addSequence(sequence = new Sequence(name));
+            }
             sequence.setLastValue(sequences.getLong("LAST_VALUE"));
             sequence.setStartWith(sequences.getLong("START_VALUE"));
             sequence.setMinValue(sequences.getLong("MIN_VALUE"));
@@ -132,7 +135,6 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
             sequence.setIncrementBy(sequences.getLong("INCREMENT_BY"));
             sequence.setCache(sequences.getInt("CACHE_VALUE"));
             sequence.setCycle("T".equalsIgnoreCase(sequences.getString("IS_CYCLED")));
-            schema.addSequence(sequence);
             if (column != null) {
                 column.setSequence(sequence);
             }

@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -88,6 +89,15 @@ public class Schema extends IdentifiableBase implements HasTables {
         if (sequences.remove(sequence)) {
             sequence.setSchema(null);
         }
+    }
+
+    public Sequence getSequence(String name) {
+        for (Sequence sequence : sequences) {
+            if (sequence.getName().equals(name)) {
+                return sequence;
+            }
+        }
+        return null;
     }
 
     @Override

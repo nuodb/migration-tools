@@ -27,10 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Iterables;
-
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;

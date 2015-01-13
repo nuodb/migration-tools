@@ -113,7 +113,14 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             return;
         }
         for (Sequence sequence : table.getSequences()) {
-            scripts.addAll(scriptGeneratorManager.getCreateScripts(sequence));
+            boolean addSequence = false;
+            for (Column column : sequence.getColumns()) {
+                addSequence = table.equals(column.getTable());
+                break;
+            }
+            if (addSequence) {
+                scripts.addAll(scriptGeneratorManager.getCreateScripts(sequence));
+            }
         }
     }
 
@@ -408,7 +415,15 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             return;
         }
         for (Sequence sequence : table.getSequences()) {
-            scripts.addAll(scriptGeneratorManager.getDropScripts(sequence));
+            // will drop sequence if it's for declaration
+            boolean dropSequence = false;
+            for (Column column : sequence.getColumns()) {
+                dropSequence = table.equals(column.getTable());
+                break;
+            }
+            if (dropSequence) {
+                scripts.addAll(scriptGeneratorManager.getDropScripts(sequence));
+            }
         }
     }
 

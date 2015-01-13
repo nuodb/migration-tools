@@ -31,9 +31,6 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.HasSchemas;
 import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.metadata.Sequence;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.utils.SequenceUtils;
 
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -43,7 +40,6 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorUtils.getDropSchema;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorUtils.getUseSchema;
 
@@ -60,36 +56,12 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     public Collection<String> getScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
         Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
         for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
-            Collection<String> scripts = getNonReferredSequenceScripts(schema,scriptGeneratorManager);
-            scripts.addAll(getScripts(schema, scriptGeneratorManager));
-
+            Collection<String> scripts = getScripts(schema, scriptGeneratorManager);
             if (!scripts.isEmpty()) {
                 schemaScripts.put(schema, scripts);
             }
         }
         return getScripts(schemaScripts, scriptGeneratorManager, false, true);
-    }
-
-    public Collection<String> getNonReferredSequenceScripts(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
-        boolean dropSequences = scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
-                scriptGeneratorManager.getTargetDialect().supportsSequence();
-        if (!dropSequences) {
-            return newArrayList();
-        }
-        Collection<Sequence> allSequences = SequenceUtils.getStandaloneSequences(schema, scriptGeneratorManager);
-        return getSequenceScripts(allSequences,scriptGeneratorManager);
-    }
-
-    public Collection<String> getSequenceScripts(Collection<Sequence> sequences, ScriptGeneratorManager scriptGeneratorManager) {
-        Collection<String> allSequenceScripts = newArrayList();
-        for (Sequence sequence : sequences) {
-            Collection<String> sequenceScripts = scriptGeneratorManager.getScripts(sequence);
-
-            if (!sequenceScripts.isEmpty()) {
-                allSequenceScripts.addAll(sequenceScripts);
-            }
-        }
-        return allSequenceScripts;
     }
 
     protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,
