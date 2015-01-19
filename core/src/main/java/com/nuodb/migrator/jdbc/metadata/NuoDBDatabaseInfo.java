@@ -99,6 +99,12 @@ public class NuoDBDatabaseInfo extends DatabaseInfo {
         setPlatformVersion(platformVersion);
     }
 
+    public NuoDBDatabaseInfo(DatabaseInfo databaseInfo, Integer platformVersion) {
+        super(databaseInfo.getProductName(), databaseInfo.getProductVersion(), databaseInfo.getMajorVersion(),
+                databaseInfo.getMinorVersion());
+        setPlatformVersion(platformVersion);
+    }
+
     public Integer getPlatformVersion() {
         return platformVersion;
     }
