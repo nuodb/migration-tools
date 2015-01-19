@@ -112,7 +112,7 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
 
     @Override
     public boolean canRead(InputNode input, Class type, XmlReadContext context) {
-        return this.type.equals(type);
+        return getType().equals(type);
     }
 
     @Override
@@ -170,6 +170,10 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
 
     @Override
     public boolean canWrite(Object source, Class type, OutputNode output, XmlWriteContext context) {
-        return this.type.equals(type);
+        return getType().equals(type);
+    }
+
+    public Class getType() {
+        return type;
     }
 }

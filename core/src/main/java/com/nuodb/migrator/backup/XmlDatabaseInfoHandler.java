@@ -28,7 +28,9 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.NuoDBDatabaseInfo;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
+import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
@@ -37,12 +39,14 @@ import org.simpleframework.xml.stream.OutputNode;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("all")
 public class XmlDatabaseInfoHandler extends XmlReadWriteHandlerBase<DatabaseInfo> {
 
     private static final String PRODUCT_NAME_ELEMENT = "product-name";
     private static final String PRODUCT_VERSION_ELEMENT = "product-version";
     private static final String MAJOR_VERSION_ELEMENT = "major-version";
     private static final String MINOR_VERSION_ELEMENT = "minor-version";
+    private static final String PLATFORM_VERSION_ELEMENT = "platform-version";
 
     public XmlDatabaseInfoHandler() {
         super(DatabaseInfo.class);
@@ -59,6 +63,9 @@ public class XmlDatabaseInfoHandler extends XmlReadWriteHandlerBase<DatabaseInfo
             databaseInfo.setMajorVersion(context.read(input, int.class));
         } else if (MINOR_VERSION_ELEMENT.equals(element)) {
             databaseInfo.setMinorVersion(context.read(input, int.class));
+        } else if (PLATFORM_VERSION_ELEMENT.equals(element)) {
+            ((XmlReadTargetAwareContext) context).setTarget(
+                    databaseInfo = new NuoDBDatabaseInfo(databaseInfo, context.read(input, int.class)));
         }
     }
 
@@ -69,5 +76,14 @@ public class XmlDatabaseInfoHandler extends XmlReadWriteHandlerBase<DatabaseInfo
         context.writeElement(output, PRODUCT_VERSION_ELEMENT, databaseInfo.getProductVersion());
         context.writeElement(output, MAJOR_VERSION_ELEMENT, databaseInfo.getMajorVersion());
         context.writeElement(output, MINOR_VERSION_ELEMENT, databaseInfo.getMinorVersion());
+        if (databaseInfo instanceof NuoDBDatabaseInfo) {
+            Integer platformVersion = ((NuoDBDatabaseInfo) databaseInfo).getPlatformVersion();
+            context.writeElement(output, PLATFORM_VERSION_ELEMENT, platformVersion);
+        }
+    }
+
+    @Override
+    public boolean canWrite(Object source, Class type, OutputNode output, XmlWriteContext context) {
+        return type != null && getType().isAssignableFrom(type);
     }
 }
