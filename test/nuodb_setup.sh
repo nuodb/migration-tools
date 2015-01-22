@@ -10,9 +10,9 @@ sudo dpkg -i /var/tmp/nuodb.deb
 
 sudo cp ./test/default.properties /opt/nuodb/etc/.
 
-/opt/nuodb/etc/nuoagent start
-/opt/nuodb/etc/nuorestsvc start
-/opt/nuodb/etc/nuowebconsole start
+sudo /opt/nuodb/etc/nuoagent start
+sudo /opt/nuodb/etc/nuorestsvc start
+sudo /opt/nuodb/etc/nuowebconsole start
 
 ${NUODB_HOME}/bin/nuodbmgr --broker localhost --password bird --command "start process sm host localhost database test archive /var/tmp/nuodb initialize true"
 ${NUODB_HOME}/bin/nuodbmgr --broker localhost --password bird --command "start process te host localhost database test options '--dba-user ${NUODB_USERNAME} --dba-password ${NUODB_PASSWORD}'"
