@@ -25,23 +25,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata;
+package com.nuodb.migrator.utils;
 
-import com.nuodb.migrator.utils.EnumAlias;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * @author Sergey Bushik
+ * @author Mukund
  */
-public enum TriggerEvent {
-    INSERT, DELETE, UPDATE,COMMIT;
+public class RegexUtils {
 
-    private static final EnumAlias<TriggerEvent> TRIGGER_EVENTS = new EnumAlias<TriggerEvent>(TriggerEvent.class);
-
-    public static String toAlias(TriggerEvent valueType) {
-        return TRIGGER_EVENTS.toAlias(valueType);
-    }
-
-    public static TriggerEvent fromAlias(String alias) {
-        return TRIGGER_EVENTS.fromAlias(alias);
+    public static String getRegexGroup(String regex, String value, int group) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.matches()) {
+            if (!StringUtils.isEmpty(matcher.group(group)))
+                return matcher.group(group);
+        }
+        return null;
     }
 }
