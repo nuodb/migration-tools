@@ -51,7 +51,12 @@ public class MySQLIntegerValue extends JdbcTypeValueBase<Long> {
     @Override
     public Long getValue(ResultSet resultSet, int index,
                          Field field, Map<String, Object> options) throws SQLException {
-        return resultSet.getLong(index);
+        Long value = null;
+        Object object = resultSet.getObject(index);
+        if (object != null) {
+            value = ((Integer) object).longValue();
+        }
+        return value;
     }
 
     @Override
