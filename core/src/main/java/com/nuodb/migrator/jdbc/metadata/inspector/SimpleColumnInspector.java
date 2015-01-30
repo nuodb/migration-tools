@@ -50,7 +50,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     }
 
     @Override
-    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+    protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
         return inspectionContext.getConnection().getMetaData().getColumns(
                 tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),

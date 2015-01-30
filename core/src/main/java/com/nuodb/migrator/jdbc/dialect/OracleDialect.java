@@ -35,13 +35,11 @@ import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.match.Regex;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.TimeZone;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
@@ -99,6 +97,13 @@ public class OracleDialect extends SimpleDialect {
         addJdbcTypeAlias(BINARY_DOUBLE_DESC, DOUBLE);
         addJdbcTypeAlias(TIMESTAMP_WITH_TIME_ZONE_DESC, TIMESTAMP);
         addJdbcTypeAlias(TIMESTAMP_WITH_LOCAL_TIME_ZONE_DESC, TIMESTAMP);
+    }
+
+    @Override
+    public Integer getMaxOpenCursors(Connection connection) throws SQLException {
+        Statement statement = connection.createStatement();
+        ResultSet result = statement.executeQuery("SELECT VALUE FROM V$PARAMETER WHERE NAME = 'open_cursors'");
+        return result.next() ? result.getInt(1) : null;
     }
 
     @Override

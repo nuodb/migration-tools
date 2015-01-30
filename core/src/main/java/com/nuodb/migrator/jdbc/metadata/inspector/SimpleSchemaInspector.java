@@ -54,7 +54,7 @@ public class SimpleSchemaInspector extends ManagedInspectorBase<Catalog, SchemaI
     }
 
     @Override
-    protected ResultSet createResultSet(InspectionContext inspectionContext, SchemaInspectionScope schemaInspectionScope)
+    protected ResultSet openResultSet(InspectionContext inspectionContext, SchemaInspectionScope schemaInspectionScope)
             throws SQLException {
         DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
         return schemaInspectionScope.getCatalog() != null ?

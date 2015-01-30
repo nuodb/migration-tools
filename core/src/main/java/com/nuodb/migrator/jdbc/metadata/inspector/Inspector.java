@@ -29,8 +29,11 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandler;
+import com.nuodb.migrator.jdbc.query.Query;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 
 /**
@@ -46,7 +49,17 @@ public interface Inspector<M extends MetaData, I extends InspectionScope> extend
 
     void inspectScope(InspectionContext inspectionContext, I inspectionScope) throws SQLException;
 
-    void inspectScopes(InspectionContext inspectionContext, Collection<? extends I> inspectionScopes) throws SQLException;
+    void inspectScopes(InspectionContext inspectionContext, Collection<? extends I> inspectionScopes)
+            throws SQLException;
 
     boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException;
+
+    Statement createStatement(InspectionContext inspectionContext, I inspectionScope,
+                              Query query) throws SQLException;
+
+    ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope,
+                            Query query, Statement statement) throws SQLException;
+
+    void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query,
+                        Statement statement) throws SQLException;
 }

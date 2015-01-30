@@ -46,7 +46,7 @@ import static com.nuodb.migrator.utils.StringUtils.equalsIgnoreCase;
 public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
 
     @Override
-    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+    protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
         return inspectionContext.getConnection().getMetaData().getImportedKeys(
                 tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(), tableInspectionScope.getTable());

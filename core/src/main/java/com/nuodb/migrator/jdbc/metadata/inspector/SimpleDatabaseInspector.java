@@ -32,10 +32,13 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.DriverInfo;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
+import com.nuodb.migrator.jdbc.query.Query;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addDatabase;
@@ -110,5 +113,23 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope)
             throws SQLException {
         return true;
+    }
+
+    @Override
+    public Statement createStatement(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query)
+            throws SQLException {
+        return null;
+    }
+
+    @Override
+    public ResultSet openResultSet(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query,
+                                   Statement statement) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void closeStatement(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query,
+                               Statement statement) throws SQLException {
+        System.out.println("SimpleDatabaseInspector.closeStatement");
     }
 }

@@ -47,7 +47,7 @@ public class SimplePrimaryKeyInspector extends TableInspectorBase<Table, TableIn
     }
 
     @Override
-    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+    protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
         return inspectionContext.getConnection().getMetaData().getPrimaryKeys(
                 tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(), tableInspectionScope.getTable());

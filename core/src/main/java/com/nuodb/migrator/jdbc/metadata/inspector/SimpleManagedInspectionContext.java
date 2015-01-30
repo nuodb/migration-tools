@@ -34,12 +34,15 @@ import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
 /**
@@ -48,21 +51,61 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 public class SimpleManagedInspectionContext<M extends MetaData, I extends InspectionScope> implements
         ManagedInspectionContext<I> {
 
-    private Map<Query, Statement> statements = newHashMap();
+//    public static final String MAX_OPEN_CURSORS = "max.open.cursors";
+    private LinkedHashMap<Query, Statement> statements = newLinkedHashMap();
     private ManagedInspector<M, I> managedInspector;
     private InspectionContext inspectionContext;
+//    private Integer maxOpenCursors;
+    private boolean init;
 
     public SimpleManagedInspectionContext(ManagedInspector<M, I> managedInspector,
-                                          InspectionContext inspectionContext) {
+                                          InspectionContext inspectionContext) throws SQLException {
         this.managedInspector = managedInspector;
         this.inspectionContext = inspectionContext;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return inspectionContext.getAttributes();
+    }
+
+    @Override
+    public void setAttributes(Map<String, Object> attributes) {
+        inspectionContext.setAttributes(attributes);
+    }
+
+    @Override
+    public void init() throws SQLException {
+        if (!init) {
+            inspectionContext.init();
+//            Map<String, Object> attributes = getAttributes();
+//            if (!attributes.containsKey(MAX_OPEN_CURSORS)) {
+//                maxOpenCursors = getDialect().getMaxOpenCursors(getConnection());
+//            } else {
+//                maxOpenCursors = (Integer) attributes.get(MAX_OPEN_CURSORS);
+//            }
+//            attributes.put(MAX_OPEN_CURSORS, maxOpenCursors);
+            init = true;
+        }
+    }
+
+    @Override
+    public ResultSet openResultSet(I inspectionScope, Query query, Statement statement) throws SQLException {
+//        if (maxOpenCursors != null && statements.size() == maxOpenCursors - 1) {
+//            Iterator<Map.Entry<Query, Statement>> iterator = statements.entrySet().iterator();
+//            if (iterator.hasNext()) {
+//                Map.Entry<Query, Statement> entry = iterator.next();
+//                closeStatement(entry.getKey(), entry.getValue());
+//            }
+//        }
+        return managedInspector.openResultSet(this, inspectionScope, query, statement);
     }
 
     @Override
     public Statement createStatement(I inspectionScope, Query query) throws SQLException {
         Statement statement;
         if (query instanceof ParameterizedQuery) {
-            statement = createStatement(inspectionScope, (ParameterizedQuery)query);
+            statement = createStatement(inspectionScope, (ParameterizedQuery) query);
         } else {
             statement = managedInspector.createStatement(this, inspectionScope, query);
         }
@@ -85,7 +128,13 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
 
     @Override
     public void closeStatements() throws SQLException {
-        for (Statement statement : statements.values()) {
+        for (Map.Entry<Query, Statement> entry : newHashMap(statements).entrySet()) {
+            closeStatement(entry.getKey(), entry.getValue());
+        }
+    }
+
+    protected void closeStatement(Query query, Statement statement) {
+        if (statements.remove(query) != null) {
             closeQuietly(statement);
         }
     }
@@ -132,6 +181,9 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
 
     @Override
     public void close() throws SQLException {
-        inspectionContext.close();
+        if (init) {
+            inspectionContext.close();
+            init = false;
+        }
     }
 }

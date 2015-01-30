@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.query.Query;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -36,6 +37,8 @@ import java.sql.Statement;
  * @author Sergey Bushik
  */
 public interface ManagedInspectionContext<I extends InspectionScope> extends InspectionContext {
+
+    ResultSet openResultSet(I inspectionScope, Query query, Statement statement) throws SQLException;
 
     Statement createStatement(I inspectionScope, Query query) throws SQLException;
 
