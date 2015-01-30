@@ -128,7 +128,12 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
             if (sequence == null) {
                 schema.addSequence(sequence = new Sequence(name));
             }
-            sequence.setLastValue(sequences.getLong("LAST_VALUE"));
+
+            /**
+             * increment the LAST_VALUE by 1, as PostgresDB sequence LAST_VALUE value
+             * points to a value which is already used by a table
+             */
+            sequence.setLastValue((sequences.getLong("LAST_VALUE")+1L));
             sequence.setStartWith(sequences.getLong("START_VALUE"));
             sequence.setMinValue(sequences.getLong("MIN_VALUE"));
             sequence.setMaxValue(sequences.getLong("MAX_VALUE"));
