@@ -30,7 +30,6 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
-import com.nuodb.migrator.utils.Collections;
 import com.nuodb.migrator.utils.StringUtils;
 
 import java.util.Collection;
@@ -39,6 +38,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Table.SYNONYM;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.eqOrIn;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.union;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static java.util.Arrays.fill;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
@@ -52,7 +52,7 @@ public class OracleTableInspector extends SimpleTableInspector {
         boolean includeSynonyms;
         boolean includeNotSynonyms;
         Collection<String> tableTypes;
-        if (Collections.isEmpty(tableInspectionScope.getTableTypes())) {
+        if (isEmpty(tableInspectionScope.getTableTypes())) {
             tableTypes = null;
             includeSynonyms = false;
             includeNotSynonyms = true;
@@ -110,7 +110,7 @@ public class OracleTableInspector extends SimpleTableInspector {
             query.where(containsAny(schema, "%") ? "O.OBJECT_NAME LIKE ? ESCAPE '/'" : "O.OBJECT_NAME=?");
             parameters.add(table);
         }
-        if (!Collections.isEmpty(tableTypes)) {
+        if (!isEmpty(tableTypes)) {
             String[] objectTypes = new String[tableTypes.size()];
             fill(objectTypes, "?");
             query.where(eqOrIn("O.OBJECT_TYPE", objectTypes));

@@ -34,17 +34,24 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
 public interface InspectionContext {
 
+    Map<String, Object> getAttributes();
+
+    void setAttributes(Map<String, Object> attributes);
+
     Dialect getDialect() throws SQLException;
 
     Connection getConnection() throws SQLException;
 
     InspectionResults getInspectionResults();
+
+    void init() throws SQLException;
 
     void inspect(InspectionScope scope) throws SQLException;
 

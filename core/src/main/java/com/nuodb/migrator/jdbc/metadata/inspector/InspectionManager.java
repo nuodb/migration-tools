@@ -180,8 +180,9 @@ public class InspectionManager {
 
     public void inspect(Connection connection, InspectionResults inspectionResults, Collection<MetaData> objects,
                         MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
+        InspectionContext inspectionContext = null;
         try {
+            inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Inspecting objects %s", asList(objectTypes)));
             }
@@ -196,12 +197,17 @@ public class InspectionManager {
     }
 
     protected InspectionContext createInspectionContext(Connection connection, InspectionResults inspectionResults,
-                                                        MetaDataType... objectTypes) {
-        return new SimpleInspectionContext(this, connection, inspectionResults, objectTypes);
+                                                        MetaDataType... objectTypes) throws SQLException {
+        InspectionContext inspectionContext = new SimpleInspectionContext(
+                this, connection, inspectionResults, objectTypes);
+        inspectionContext.init();
+        return inspectionContext;
     }
 
     protected void closeInspectionContext(InspectionContext inspectionContext) throws SQLException {
-        inspectionContext.close();
+        if (inspectionContext != null) {
+            inspectionContext.close();
+        }
     }
 
     public void addInspector(Inspector inspector) {

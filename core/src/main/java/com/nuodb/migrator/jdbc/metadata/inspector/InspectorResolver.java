@@ -33,9 +33,12 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.resolver.ServiceResolver;
 import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.query.Query;
 
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 
 /**
@@ -101,9 +104,28 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector<
     }
 
     @Override
-    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
+    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope)
+            throws SQLException {
         Inspector inspector = resolve(inspectionContext);
         return inspector != null && inspector.supportsScope(inspectionContext, inspectionScope);
+    }
+
+    @Override
+    public Statement createStatement(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query)
+            throws SQLException {
+        return null;
+    }
+
+    @Override
+    public ResultSet openResultSet(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query,
+                                   Statement statement) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void closeStatement(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query,
+                               Statement statement) throws SQLException {
+        System.out.println("InspectorResolver.closeStatement");
     }
 
     public void register(String productName, Inspector inspector) {

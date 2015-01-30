@@ -165,6 +165,8 @@ public interface Dialect {
 
     String getIdentifier(String identifier, Identifiable identifiable);
 
+    Integer getMaxOpenCursors(Connection connection) throws SQLException;
+
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
 
     void setFetchMode(Statement statement, FetchMode fetchMode) throws SQLException;

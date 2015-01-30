@@ -53,7 +53,7 @@ public class SimpleTableInspector extends TableInspectorBase<Schema, TableInspec
     }
 
     @Override
-    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+    protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
         return inspectionContext.getConnection().getMetaData().getTables(
                 tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),

@@ -149,7 +149,8 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     protected void closeInspectionContext(InspectionContext inspectionContext) throws SQLException {
     }
 
-    protected Statement createStatement(InspectionContext inspectionContext, I inspectionScope, Query query)
+    @Override
+    public Statement createStatement(InspectionContext inspectionContext, I inspectionScope, Query query)
             throws SQLException {
         Statement statement = null;
         if (query instanceof ParameterizedQuery) {
@@ -188,7 +189,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
 
     protected void processStatement(InspectionContext inspectionContext, I inspectionScope,
                                     Query query, Statement statement) throws SQLException {
-        ResultSet resultSet = createResultSet(inspectionContext, inspectionScope, query, statement);
+        ResultSet resultSet = openResultSet(inspectionContext, inspectionScope, query, statement);
         try {
             processResultSet(inspectionContext, inspectionScope, query, resultSet);
         } finally {
@@ -196,26 +197,28 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
         }
     }
 
-    protected void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query,
-                                  Statement statement) throws SQLException {
+    @Override
+    public void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query,
+                               Statement statement) throws SQLException {
         closeQuietly(statement);
     }
 
-    protected ResultSet createResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,
-                                        Statement statement) throws SQLException {
+    @Override
+    public ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,
+                                   Statement statement) throws SQLException {
         ResultSet resultSet;
         if (statement instanceof PreparedStatement) {
-            resultSet = createResultSet(inspectionContext, inspectionScope, (PreparedStatement) statement, query);
+            resultSet = openResultSet(inspectionContext, inspectionScope, (PreparedStatement) statement, query);
         } else if (statement != null) {
-            resultSet = createResultSet(inspectionContext, inspectionScope, (Statement) statement, query);
+            resultSet = openResultSet(inspectionContext, inspectionScope, (Statement) statement, query);
         } else {
-            resultSet = createResultSet(inspectionContext, inspectionScope, query);
+            resultSet = openResultSet(inspectionContext, inspectionScope, query);
         }
         return resultSet;
     }
 
-    protected ResultSet createResultSet(InspectionContext inspectionContext, I inspectionScope,
-                                        PreparedStatement statement, Query query) throws SQLException {
+    protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope,
+                                      PreparedStatement statement, Query query) throws SQLException {
         int index = 1;
         if (query instanceof ParameterizedQuery) {
             for (Object parameter : ((ParameterizedQuery) query).getParameters()) {
@@ -225,17 +228,17 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
         return statement.executeQuery();
     }
 
-    protected ResultSet createResultSet(InspectionContext inspectionContext, I inspectionScope,
-                                        Statement statement, Query query) throws SQLException {
+    protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope,
+                                      Statement statement, Query query) throws SQLException {
         return statement.executeQuery(query.toString());
     }
 
-    protected ResultSet createResultSet(InspectionContext inspectionContext, I inspectionScope,
-                                        Query query) throws SQLException {
-        return createResultSet(inspectionContext, inspectionScope);
+    protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope,
+                                      Query query) throws SQLException {
+        return openResultSet(inspectionContext, inspectionScope);
     }
 
-    protected ResultSet createResultSet(InspectionContext inspectionContext, I inspectionScope) throws SQLException {
+    protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope) throws SQLException {
         return null;
     }
 

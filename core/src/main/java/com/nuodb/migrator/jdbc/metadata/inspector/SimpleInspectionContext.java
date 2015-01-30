@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
@@ -36,7 +37,9 @@ import org.slf4j.Logger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.getHandler;
@@ -52,6 +55,7 @@ public class SimpleInspectionContext implements InspectionContext {
 
     protected final transient Logger logger = getLogger(getClass());
 
+    private Map<String, Object> attributes = newHashMap();
     private InspectionManager inspectionManager;
     private Connection connection;
     private InspectionResults inspectionResults;
@@ -64,6 +68,16 @@ public class SimpleInspectionContext implements InspectionContext {
         this.connection = connection;
         this.inspectionResults = inspectionResults;
         this.objectTypes = objectTypes;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
     }
 
     @Override
@@ -84,6 +98,10 @@ public class SimpleInspectionContext implements InspectionContext {
     @Override
     public InspectionResults getInspectionResults() {
         return inspectionResults;
+    }
+
+    @Override
+    public void init() throws SQLException {
     }
 
     @Override

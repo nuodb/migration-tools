@@ -37,7 +37,6 @@ import java.sql.SQLException;
  */
 public class NuoDBDatabaseInspector extends SimpleDatabaseInspector {
 
-
     @Override
     protected DatabaseInfo getDatabaseInfo(InspectionContext inspectionContext)
             throws SQLException {

@@ -184,6 +184,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public Integer getMaxOpenCursors(Connection connection) throws SQLException {
+        return null;
+    }
+
+    @Override
     public boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
         return !isAllowedIdentifier(identifier, identifiable) || isSQLKeyword(identifier, identifiable);
     }

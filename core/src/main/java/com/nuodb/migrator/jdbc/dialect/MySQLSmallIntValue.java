@@ -51,7 +51,8 @@ public class MySQLSmallIntValue extends JdbcTypeValueBase<Integer> {
     @Override
     public Integer getValue(ResultSet resultSet, int index,
                             Field field, Map<String, Object> options) throws SQLException {
-        return resultSet.getInt(index);
+        int value = resultSet.getInt(index);
+        return resultSet.wasNull() ? null : value;
     }
 
     @Override

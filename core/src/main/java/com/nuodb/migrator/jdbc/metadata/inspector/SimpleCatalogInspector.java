@@ -28,9 +28,11 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.query.Query;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CATALOG;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addCatalog;
@@ -45,7 +47,7 @@ public class SimpleCatalogInspector extends ManagedInspectorBase<Database, Inspe
     }
 
     @Override
-    protected ResultSet createResultSet(InspectionContext inspectionContext, InspectionScope inspectionScope)
+    protected ResultSet openResultSet(InspectionContext inspectionContext, InspectionScope inspectionScope)
             throws SQLException {
         return inspectionContext.getConnection().getMetaData().getCatalogs();
     }

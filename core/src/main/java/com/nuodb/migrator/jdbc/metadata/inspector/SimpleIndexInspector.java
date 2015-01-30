@@ -51,7 +51,7 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
     }
 
     @Override
-    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+    protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
         return inspectionContext.getConnection().getMetaData().getIndexInfo(
                 tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),
