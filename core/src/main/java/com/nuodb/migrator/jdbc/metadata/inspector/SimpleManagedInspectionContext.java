@@ -38,7 +38,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
@@ -51,11 +51,14 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 public class SimpleManagedInspectionContext<M extends MetaData, I extends InspectionScope> implements
         ManagedInspectionContext<I> {
 
-//    public static final String MAX_OPEN_CURSORS = "max.open.cursors";
-    private LinkedHashMap<Query, Statement> statements = newLinkedHashMap();
+    /**
+     * Context attribute name under which number of max open cursors is stored.
+     */
+    public static final String MAX_OPEN_CURSORS = "max.open.cursors";
+    private Map<Query, Statement> statements = newLinkedHashMap();
     private ManagedInspector<M, I> managedInspector;
     private InspectionContext inspectionContext;
-//    private Integer maxOpenCursors;
+    private Integer maxOpenCursors;
     private boolean init;
 
     public SimpleManagedInspectionContext(ManagedInspector<M, I> managedInspector,
@@ -78,27 +81,19 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
     public void init() throws SQLException {
         if (!init) {
             inspectionContext.init();
-//            Map<String, Object> attributes = getAttributes();
-//            if (!attributes.containsKey(MAX_OPEN_CURSORS)) {
-//                maxOpenCursors = getDialect().getMaxOpenCursors(getConnection());
-//            } else {
-//                maxOpenCursors = (Integer) attributes.get(MAX_OPEN_CURSORS);
-//            }
-//            attributes.put(MAX_OPEN_CURSORS, maxOpenCursors);
+            Map<String, Object> attributes = getAttributes();
+            if (!attributes.containsKey(MAX_OPEN_CURSORS)) {
+                maxOpenCursors = getMaxOpenCursors();
+            } else {
+                maxOpenCursors = (Integer) attributes.get(MAX_OPEN_CURSORS);
+            }
+            attributes.put(MAX_OPEN_CURSORS, maxOpenCursors);
             init = true;
         }
     }
 
-    @Override
-    public ResultSet openResultSet(I inspectionScope, Query query, Statement statement) throws SQLException {
-//        if (maxOpenCursors != null && statements.size() == maxOpenCursors - 1) {
-//            Iterator<Map.Entry<Query, Statement>> iterator = statements.entrySet().iterator();
-//            if (iterator.hasNext()) {
-//                Map.Entry<Query, Statement> entry = iterator.next();
-//                closeStatement(entry.getKey(), entry.getValue());
-//            }
-//        }
-        return managedInspector.openResultSet(this, inspectionScope, query, statement);
+    protected Integer getMaxOpenCursors() throws SQLException {
+        return getDialect().getMaxOpenCursors(getConnection());
     }
 
     @Override
@@ -123,6 +118,24 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
     }
 
     @Override
+    public ResultSet openResultSet(I inspectionScope, Query query, Statement statement) throws SQLException {
+        if (maxOpenCursors != null && statements.size() == maxOpenCursors - 1) {
+            Iterator<Map.Entry<Query, Statement>> iterator = statements.entrySet().iterator();
+            if (iterator.hasNext()) {
+                Map.Entry<Query, Statement> entry = iterator.next();
+                closeStatement(entry.getKey(), entry.getValue());
+            }
+        }
+        return managedInspector.openResultSet(this, inspectionScope, query, statement);
+    }
+
+    protected void closeStatement(Query query, Statement statement) {
+        if (statements.remove(query) != null) {
+            closeQuietly(statement);
+        }
+    }
+
+    @Override
     public void closeStatement(I inspectionScope, Query query, Statement statement) throws SQLException {
     }
 
@@ -130,12 +143,6 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
     public void closeStatements() throws SQLException {
         for (Map.Entry<Query, Statement> entry : newHashMap(statements).entrySet()) {
             closeStatement(entry.getKey(), entry.getValue());
-        }
-    }
-
-    protected void closeStatement(Query query, Statement statement) {
-        if (statements.remove(query) != null) {
-            closeQuietly(statement);
         }
     }
 
