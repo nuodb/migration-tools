@@ -1,0 +1,1 @@
+mvn -f ${NUODB_MIGRATOR_ROOT}/pom.xml -Pdb2-integration-tests test

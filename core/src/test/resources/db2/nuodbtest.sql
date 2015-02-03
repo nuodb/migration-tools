@@ -1,4 +1,4 @@
-connect to test;
+connect to sample;
 
 SET CURRENT SCHEMA = 'nuodbtest';
 
@@ -45,8 +45,8 @@ create table datatypes3(
 	"c5" blob);
 alter table datatypes3 add foreign key ("fk1") references datatypes2;
 
-insert into datatypes3 values(5,29.7,45.1,82.5,'G',blob('™ôx½¾nµŽ2BÂêN§cÍ•ŸSò>oU…í¼_cçû6{9ûNW?ÓË6Ë¶Ì5ÌµÍ5ÍµÎ6Î¶Ï7Ï¸Ð9ÐºÑ<Ñ¾Ò?ÒÁÓDÓÆÔIÔËÕNÕÑÖUà'));
-insert into datatypes3 values(6,71.8,49.2,34.3,'A',blob('õÀpÀìÁgÁã¶èñtgëtÑ4Îæ*Öætf¦ZZ[ª9â*g@ŒÞ4±Å—v£¼û3z2ëßxá+|Þ}Yt¢±4ÕÊ©Bh~]e§eé®T®ŽGE÷=~·æL'));
+insert into datatypes3 values(5,29.7,45.1,82.5,'G',blob('ï¿½ï¿½ï¿½xï¿½ï¿½nï¿½ï¿½2Bï¿½ï¿½Nï¿½cÍ•ï¿½Sï¿½>oUï¿½ï¿½_cï¿½ï¿½6{9ï¿½NW?ï¿½ï¿½6Ë¶ï¿½5Ìµï¿½5Íµï¿½6Î¶ï¿½7Ï¸ï¿½9Ðºï¿½<Ñ¾ï¿½?ï¿½ï¿½ï¿½Dï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½Uï¿½'));
+insert into datatypes3 values(6,71.8,49.2,34.3,'A',blob('ï¿½ï¿½pï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½tgï¿½tï¿½4ï¿½ï¿½*ï¿½ï¿½tï¿½fï¿½ZZ[ï¿½9ï¿½*g@ï¿½ï¿½4ï¿½Å—vï¿½ï¿½ï¿½3z2ï¿½ï¿½xï¿½+|ï¿½}Ytï¿½ï¿½ï¿½4ï¿½Ê©Bh~]eï¿½eï¿½Tï¿½ï¿½GEï¿½=~ï¿½ï¿½L'));
 
 /*drop index "idxc5";*/
 create index "idxc5" ON datatypes2("c5");
