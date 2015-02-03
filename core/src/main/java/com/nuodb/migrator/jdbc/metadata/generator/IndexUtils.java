@@ -40,6 +40,7 @@ import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -52,12 +53,15 @@ public class IndexUtils {
 
     public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
-        return singleton(join(transform(indexes, new Function<Index, String>() {
-            @Override
-            public String apply(Index index) {
-                return get(scriptGeneratorManager.getCreateScripts(index), 0);
+        Collection<String> multipleIndexesScripts = newArrayList();
+        for (Index index : indexes) {
+            Collection<String> indexScripts = scriptGeneratorManager.getCreateScripts(index);
+            // indexScripts might be empty if index is a full-text or expression based index
+            if (indexScripts.size() > 0) {
+                multipleIndexesScripts.add(get(indexScripts, 0));
             }
-        }), COMMA));
+        }
+        return singleton(join(multipleIndexesScripts, COMMA));
     }
 
     public static Collection<Index> getNonRepeatingIndexes(Table table) {
