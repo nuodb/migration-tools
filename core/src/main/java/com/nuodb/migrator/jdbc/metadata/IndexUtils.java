@@ -28,17 +28,40 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.base.Predicate;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singleton;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Sergey Bushik
  */
 public class IndexUtils {
+
+    private static final String COMMA = ", ";
+
+    public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
+                                                              final ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<String> multipleIndexesScripts = newArrayList();
+        for (Index index : indexes) {
+            Collection<String> indexScripts = scriptGeneratorManager.getCreateScripts(index);
+            // indexScripts might be empty if index is a full-text or expression based index
+            if (indexScripts.size() > 0) {
+                multipleIndexesScripts.add(get(indexScripts, 0));
+            }
+        }
+        return singleton(join(multipleIndexesScripts, COMMA));
+    }
 
     public static Collection<Index> getNonRepeatingIndexes(Table table) {
         return getNonRepeatingIndexes(table, null);
