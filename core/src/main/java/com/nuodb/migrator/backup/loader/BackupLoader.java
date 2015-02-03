@@ -489,6 +489,9 @@ public class BackupLoader {
                     if (index.isPrimary()) {
                         continue;
                     }
+                    if ((index.getType() != null) && (!index.isBtree())) {
+                        continue;
+                    }
                     if (dialect.supportsCreateMultipleIndexes()) {
                         if (loadIndexes == null) {
                             loadIndexes = new LoadIndexes();
