@@ -1,0 +1,1 @@
+mvn -f ${NUODB_MIGRATOR_ROOT}/pom.xml -Poracle-integration-tests test

@@ -79,3 +79,6 @@ CREATE INDEX  "idxfk1" ON  datatypes3 ("fk1");
 DROP INDEX "idxc5";
 
 CREATE INDEX  "idxc5" ON  datatypes2 ("c5");
+
+commit;
+exit;

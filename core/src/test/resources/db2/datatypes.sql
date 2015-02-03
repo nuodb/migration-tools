@@ -1,4 +1,4 @@
-connect to test;
+connect to sample;
 SET CURRENT SCHEMA = 'nuodbtest';
 
 DROP TABLE testdata_smallint;
