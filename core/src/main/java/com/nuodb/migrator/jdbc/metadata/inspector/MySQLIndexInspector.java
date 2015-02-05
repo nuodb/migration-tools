@@ -77,11 +77,16 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
         statisticsIndex.from("INFORMATION_SCHEMA.STATISTICS S");
         statisticsIndex.join("INFORMATION_SCHEMA.COLUMNS C",
                 "C.TABLE_NAME = S.TABLE_NAME AND C.COLUMN_NAME = S.COLUMN_NAME");
+        String schema = tableInspectionScope.getCatalog();
+        if (!isEmpty(schema)) {
+            statisticsIndex.where("S.TABLE_SCHEMA=?");
+            parameters.add(schema);
+        }
         String table = tableInspectionScope.getTable();
         if (!isEmpty(table)) {
             statisticsIndex.where("S.TABLE_NAME=?");
             parameters.add(table);
-         }
+        }
          return new ParameterizedQuery(union(statisticsIndex, null), parameters);
     }
 }
