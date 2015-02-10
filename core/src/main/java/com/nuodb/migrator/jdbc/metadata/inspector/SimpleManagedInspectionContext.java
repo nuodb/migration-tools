@@ -51,10 +51,6 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 public class SimpleManagedInspectionContext<M extends MetaData, I extends InspectionScope> implements
         ManagedInspectionContext<I> {
 
-    /**
-     * Context attribute name under which number of max open cursors is stored.
-     */
-    public static final String MAX_OPEN_CURSORS = "max.open.cursors";
     private Map<Query, Statement> statements = newLinkedHashMap();
     private ManagedInspector<M, I> managedInspector;
     private InspectionContext inspectionContext;

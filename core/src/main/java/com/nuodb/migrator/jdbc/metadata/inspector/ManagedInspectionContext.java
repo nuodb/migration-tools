@@ -38,6 +38,11 @@ import java.sql.Statement;
  */
 public interface ManagedInspectionContext<I extends InspectionScope> extends InspectionContext {
 
+    /**
+     * Context attribute name under which number of max open cursors is stored.
+     */
+    final String MAX_OPEN_CURSORS = "max.open.cursors";
+
     ResultSet openResultSet(I inspectionScope, Query query, Statement statement) throws SQLException;
 
     Statement createStatement(I inspectionScope, Query query) throws SQLException;

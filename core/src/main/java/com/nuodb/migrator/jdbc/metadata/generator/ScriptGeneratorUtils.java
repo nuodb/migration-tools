@@ -27,16 +27,15 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.google.common.base.Function;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.utils.StringUtils;
 
 import java.util.Collection;
 
 import static com.google.common.collect.Iterables.get;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -83,11 +82,15 @@ public class ScriptGeneratorUtils {
 
     public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
-        return singleton(join(transform(indexes, new Function<Index, String>() {
-            @Override
-            public String apply(Index index) {
-                return get(scriptGeneratorManager.getCreateScripts(index), 0);
+        Collection<String> multipleIndexesScripts = newArrayList();
+        for (Index index : indexes) {
+            Collection<String> indexScripts =
+                    scriptGeneratorManager.getCreateScripts(index);
+            if (size(indexScripts) > 0) {
+                multipleIndexesScripts.add(get(indexScripts, 0));
             }
-        }), COMMA));
+
+        }
+        return singleton(join(multipleIndexesScripts, COMMA));
     }
 }

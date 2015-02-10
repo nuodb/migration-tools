@@ -42,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("PrimitiveArrayArgumentToVariableArgMethod")
+@SuppressWarnings("all")
 public class NuoDBIndex {
 
     private static final String QUERY =
