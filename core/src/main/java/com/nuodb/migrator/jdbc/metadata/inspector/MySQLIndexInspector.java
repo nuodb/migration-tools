@@ -76,7 +76,7 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
                 "S.CARDINALITY", "S.SUB_PART","NULL AS FILTER_CONDITION");
         statisticsIndex.from("INFORMATION_SCHEMA.STATISTICS S");
         statisticsIndex.join("INFORMATION_SCHEMA.COLUMNS C",
-                "C.TABLE_NAME = S.TABLE_NAME AND C.COLUMN_NAME = S.COLUMN_NAME");
+                "C.COLUMN_NAME = S.COLUMN_NAME AND C.TABLE_NAME = S.TABLE_NAME AND S.TABLE_SCHEMA = C.TABLE_SCHEMA");
         String schema = tableInspectionScope.getCatalog();
         if (!isEmpty(schema)) {
             statisticsIndex.where("S.TABLE_SCHEMA=?");

@@ -88,6 +88,6 @@ public class MySQLIndexInspectorTest extends InspectorTestBase {
         index.addColumn(table.addColumn(columnName), position);
         index.setUnique(true);
         index.setType(Index.BTREE);
-        assertEquals(get(indexes, 0).getType(), index.getType());    
+        assertEquals(get(indexes, 0).getType(), index.getType());
         }
 }
