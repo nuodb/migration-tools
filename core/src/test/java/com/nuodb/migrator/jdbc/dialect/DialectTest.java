@@ -141,7 +141,6 @@ public class DialectTest {
         };
     }
 
-    static int i = 0;
     @Test(dataProvider = "getDefaultValue")
     public void testGetDefaultValue(Session session, Column column, String defaultValue) {
         assertEquals(dialect.getDefaultValue(column, session), defaultValue);
