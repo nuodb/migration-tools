@@ -130,13 +130,18 @@ public class DialectTest {
         Column timestamp = new Column();
         timestamp.setJdbcType(new JdbcType(new JdbcTypeDesc(TIMESTAMP, "timestamp")));
         timestamp.setDefaultValue(valueOf("0000-00-00 00:00:00"));
+        Column varchar = new Column();
+        varchar.setJdbcType(new JdbcType(new JdbcTypeDesc(VARCHAR, "varchar")));
+        varchar.setDefaultValue(valueOf("NULL"));
         return new Object[][]{
                 {session, date, "NULL"},
                 {session, time, "NULL"},
-                {session, timestamp, "NULL"}
+                {session, timestamp, "NULL"},
+                {session, varchar, "NULL"}
         };
     }
 
+    static int i = 0;
     @Test(dataProvider = "getDefaultValue")
     public void testGetDefaultValue(Session session, Column column, String defaultValue) {
         assertEquals(dialect.getDefaultValue(column, session), defaultValue);

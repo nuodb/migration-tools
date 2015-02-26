@@ -548,19 +548,15 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     private String getDefaultValue(Column column, String script, boolean literal) {
-        return isQuotingDefaultValue(column, script, literal) ? quoteDefaultValue(column,
-                script, literal) : script;
+        return isDefaultValueQuoted(column, script, literal) ? getDefaultValueQuoted(column,
+                script, literal) : getDefaultValueNotQuoted(column, script, literal);
     }
 
-    protected boolean isQuotingDefaultValue(Column column, String script, boolean literal) {
-        boolean defaultValueQuoted = script != null && !literal;
-        if (equalsIgnoreCase(script, NULL) && literal) {
-            defaultValueQuoted = false;
-        }
-        return defaultValueQuoted;
+    protected boolean isDefaultValueQuoted(Column column, String script, boolean literal) {
+        return equalsIgnoreCase(script, NULL) ? false : script != null && !literal;
     }
 
-    protected String quoteDefaultValue(Column column, String script, boolean literal) {
+    protected String getDefaultValueQuoted(Column column, String script, boolean literal) {
         if (script == null) {
             return null;
         }
@@ -575,6 +571,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         }
         defaultValue = getScriptEscapeUtils().escapeDefaultValue(defaultValue);
         return "'" + defaultValue + "'";
+    }
+
+    protected String getDefaultValueNotQuoted(Column column, String script, boolean literal) {
+        // return NULL in uppercase
+        return equalsIgnoreCase(script, NULL) ? NULL : script;
     }
 
     protected String quoteScript(String script) {
