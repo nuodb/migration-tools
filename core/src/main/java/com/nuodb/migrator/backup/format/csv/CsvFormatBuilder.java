@@ -29,7 +29,7 @@ package com.nuodb.migrator.backup.format.csv;
 
 import com.nuodb.migrator.backup.format.Format;
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.Quote;
+import org.apache.commons.csv.QuoteMode;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -79,8 +79,8 @@ class CsvFormatBuilder implements CsvFormat {
         quote = initQuote();
         quoting = initQuoting();
         if (quoting) {
-            format = format.withQuotePolicy(Quote.MINIMAL);
-            format = format.withQuoteChar(quote);
+            format = format.withQuoteMode(QuoteMode.MINIMAL);
+            format = format.withQuote(quote);
         }
         return format;
     }
