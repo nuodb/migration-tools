@@ -139,7 +139,7 @@ public class ArgumentTest {
      */
     @Test(expectedExceptions = OptionException.class)
     public void testPostProcessMinimum() {
-        argument.setMinimum(1);
+        argument.setMinimumValue(1);
 
         CommandLine commandLine = createCommandLineMock();
         when(commandLine.getValues(argument)).thenReturn(EMPTY_LIST);
@@ -152,7 +152,7 @@ public class ArgumentTest {
      */
     @Test(expectedExceptions = OptionException.class)
     public void testPostProcessMaximum() {
-        argument.setMaximum(1);
+        argument.setMaximumValue(1);
 
         CommandLine commandLine = createCommandLineMock();
         when(commandLine.getValues(argument)).thenReturn(Lists.<Object>newArrayList("value1", "value2"));

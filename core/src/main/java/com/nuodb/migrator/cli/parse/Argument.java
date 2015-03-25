@@ -33,6 +33,14 @@ public interface Argument extends Option {
 
     void setMaximum(int maximum);
 
+    int getMinimumValue();
+
+    void setMinimumValue(int minimum);
+
+    int getMaximumValue();
+
+    void setMaximumValue(int maximum);
+
     Collection<String> getHelpValues();
 
     void setHelpValues(Collection<String> helpValues);

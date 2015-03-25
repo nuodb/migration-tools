@@ -35,6 +35,7 @@ import java.util.StringTokenizer;
 
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.*;
 import static java.util.Collections.singletonList;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  * An implementation of an argument
@@ -45,6 +46,9 @@ public class ArgumentImpl extends OptionBase implements Argument {
 
     private int minimum = 0;
     private int maximum = 1;
+    private int minimumValue = 0;
+    private int maximumValue = MAX_VALUE;
+
     private Collection<String> helpValues;
     private List<Object> defaultValues;
 
@@ -78,6 +82,26 @@ public class ArgumentImpl extends OptionBase implements Argument {
     @Override
     public void setMaximum(int maximum) {
         this.maximum = maximum;
+    }
+
+    @Override
+    public int getMinimumValue() {
+        return minimumValue;
+    }
+
+    @Override
+    public void setMinimumValue(int minimum) {
+        this.minimumValue = minimum;
+    }
+
+    @Override
+    public int getMaximumValue() {
+        return maximumValue;
+    }
+
+    @Override
+    public void setMaximumValue(int maximum) {
+        this.maximumValue = maximum;
     }
 
     @Override
@@ -145,7 +169,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
             if (separator != null && value.length() > 0) {
                 StringTokenizer values = new StringTokenizer(value, separator);
                 arguments.remove();
-                while (values.hasMoreTokens() && (count < maximum)) {
+                while (values.hasMoreTokens() && (count < maximumValue)) {
                     count++;
                     value = values.nextToken();
                     commandLine.addValue(option, value);
@@ -193,11 +217,11 @@ public class ArgumentImpl extends OptionBase implements Argument {
 
     protected void postProcessInternal(CommandLine commandLine, Option option) {
         List<Object> values = commandLine.getValues(option);
-        int minimum = getMinimum();
+        int minimum = getMinimumValue();
         if (values.size() < minimum) {
             argumentMinimum(option, this);
         }
-        int maximum = getMaximum();
+        int maximum = getMaximumValue();
         if (values.size() > maximum) {
             argumentMaximum(option, this);
         }

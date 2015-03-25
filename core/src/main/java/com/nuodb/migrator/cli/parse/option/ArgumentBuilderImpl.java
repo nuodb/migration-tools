@@ -36,6 +36,8 @@ import com.nuodb.migrator.cli.parse.Trigger;
 import java.util.Collection;
 import java.util.List;
 
+import static java.lang.Integer.MAX_VALUE;
+
 /**
  * Default argument builder implementation.
  *
@@ -46,6 +48,9 @@ public class ArgumentBuilderImpl<O extends Argument>
 
     private int minimum = 0;
     private int maximum = 1;
+    private int minimumValue = 0;
+    private int maximumValue = MAX_VALUE;
+    
     private List<Object> defaultValues = Lists.newArrayList();
     private Collection<String> helpValues;
 
@@ -106,6 +111,18 @@ public class ArgumentBuilderImpl<O extends Argument>
     }
 
     @Override
+    public ArgumentBuilder withValueMinimum(int minimum) {
+        this.minimumValue = minimum;
+        return this;
+    }
+
+    @Override
+    public ArgumentBuilder withValueMaximum(int maximum) {
+        this.maximumValue = maximum;
+        return this;
+    }
+
+    @Override
     public ArgumentBuilder withDefaultValue(Object defaultValue) {
         this.defaultValues.add(defaultValue);
         return this;
@@ -122,9 +139,10 @@ public class ArgumentBuilderImpl<O extends Argument>
         O option = super.build();
         option.setMinimum(minimum);
         option.setMaximum(maximum);
+        option.setMinimumValue(minimumValue);
+        option.setMaximumValue(maximumValue);
         option.setDefaultValues(defaultValues);
         option.setHelpValues(helpValues);
         return option;
     }
 }
-

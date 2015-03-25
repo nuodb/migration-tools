@@ -566,7 +566,9 @@ public class CliRunSupport extends CliSupport {
                         newArgumentBuilder().
                                 withName(getMessage(TABLE_ARGUMENT_NAME)).
                                 withMinimum(1).
-                                withMaximum(MAX_VALUE).
+                                withMaximum(1).
+                                withValueMinimum(1).
+                                withValueMaximum(MAX_VALUE).
                                 withRequired(true).build()
                 ).build();
         group.withOption(table);

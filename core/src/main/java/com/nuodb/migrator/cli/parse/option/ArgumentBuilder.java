@@ -61,6 +61,10 @@ public interface ArgumentBuilder<O extends Argument> extends OptionBuilder<O> {
 
     ArgumentBuilder withMaximum(int maximum);
 
+    ArgumentBuilder withValueMinimum(int minimum);
+
+    ArgumentBuilder withValueMaximum(int maximum);
+
     ArgumentBuilder withDefaultValue(Object defaultValue);
 
     ArgumentBuilder withHelpValues(Collection<String> helpValues);
