@@ -61,7 +61,7 @@ public class NuoDBColumnTriggerInspector extends TableInspectorBase<Table, Table
                 "TYPE_MASK", "POSITION", "ACTIVE", "TRIGGER_TEXT");
         triggers.from("SYSTEM.TRIGGERS");
 
-        String table = "t1";
+        String table = tableInspectionScope.getTable();
         if (!isEmpty(table)) {
             triggers.where("TABLENAME=?");
             parameters.add(table);
