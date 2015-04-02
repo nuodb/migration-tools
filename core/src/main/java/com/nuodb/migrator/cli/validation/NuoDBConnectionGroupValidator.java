@@ -72,6 +72,7 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
 
     @Override
     protected void validateUsername(CommandLine commandLine, Option option, String username) {
+        super.validateUsername(commandLine, option, username);
         if (isEmpty(username)) {
             throw new OptionException(
                     format("Missing required option %s. The user name to authenticate with should be provided",

@@ -95,6 +95,47 @@ public class JdbcUrlParserTest {
         assertEquals(jdbcUrl.getParameters(), properties);
     }
 
+    @DataProvider(name = "userPasswordData")
+    public Object[][] createUserPasswordData() {
+        return new Object[][]{
+                {"jdbc:jtds:sqlserver://localhost:1433/test;user=admin;password=root",
+                        "jtds", new PropertiesBuilder("user", "admin").put("password", "root").build()},
+                {"jdbc:sqlserver://localhost:1433;user=admin;password=root",
+                        "sqlserver", new PropertiesBuilder("user", "admin").put("password", "root").build()},
+                {"jdbc:mysql://localhost:3306/database?user=admin&password=root",
+                         "mysql", 
+                         new PropertiesBuilder("user", "admin").put("password", "root").put(ZERO_DATE_TIME_BEHAVIOR, DEFAULT_BEHAVIOR).build()},
+                {"jdbc:postgresql:localhost?user=admin&&password=root",
+                         "postgresql", new PropertiesBuilder("user", "admin").put("password", "root").build()},
+                {"jdbc:oracle:thin:scott/tiger@//localhost:1521/sid",
+                         "oracle", new PropertiesBuilder("user", "scott").put("password", "tiger").build()},               
+                {"jdbc:oracle:thin:scott@//localhost:1521/sid",
+                         "oracle", new PropertiesBuilder("user", "scott").build()},
+                {"jdbc:oracle:thin:@//localhost:1521/sid",
+                         "oracle",EMPTY_PROPERTIES},
+                {"jdbc:com.nuodb://localhost/database?schema=test&user=admin&password=root",
+                         "com.nuodb", new PropertiesBuilder("user", "admin").put("password", "root").put("schema", "test").build()},
+                {"jdbc:db2://localhost:5000/database:user=admin;password=root;",
+                         "db2", new PropertiesBuilder("user", "admin").put("password", "root").build()},
+                {"jdbc:db2://localhost:5000/database",
+                         "db2", EMPTY_PROPERTIES}
+                         //jdbc:db2://127.0.0.1:50000/SAMPLE:user=root;password=root;  
+        };
+    }
+
+    @Test(dataProvider = "userPasswordData")
+    public void testUserPasswordParseUrl(String url, String subProtocol, Map<String, Object> properties) {
+        JdbcUrlParser jdbcUrlParser = JdbcUrlParsers.getInstance().getParser(url);
+
+        assertNotNull(jdbcUrlParser);
+        assertTrue(jdbcUrlParser.canParse(url));
+
+        JdbcUrl jdbcUrl = jdbcUrlParser.parse(url, null);
+
+        assertNotNull(jdbcUrl);
+        assertEquals(jdbcUrl.getParameters(), properties);
+    }
+
     static class PropertiesBuilder {
 
         private Map<String, Object> properties = new HashMap<String, Object>();

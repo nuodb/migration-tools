@@ -29,41 +29,21 @@ package com.nuodb.migrator.cli.validation;
 
 import com.nuodb.migrator.cli.parse.CommandLine;
 import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionException;
 import org.apache.commons.lang3.StringUtils;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static com.nuodb.migrator.jdbc.JdbcConstants.MS_SQLSERVER_DRIVER;
 
 /**
- * @author Sergey Bushik
+ * @author Mukund
  */
-public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
+public class MSSQLConnectionGroupValidator extends ConnectionGroupValidator {
 
-    public DB2ConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
+    public MSSQLConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
         super(connectionGroupInfo);
     }
 
     @Override
     public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.startsWith(getUrlValue(commandLine), "jdbc:db2");
-    }
-
-    @Override
-    protected void validateCatalog(CommandLine commandLine, Option option, String catalog) {
-        if (!isEmpty(catalog)) {
-            throw new OptionException(format("Unexpected option %s. DB2 doesn't supports catalogs", getCatalogOption()),
-                    option
-            );
-        }
-    }
-
-    @Override
-    protected void dbUserWarnMessage(String jdbcUsername, String jdbcPassword, String optionUsername, String optionPasssword) {
-        if (!StringUtils.equals(optionUsername, jdbcUsername) || !StringUtils.equals(optionPasssword, jdbcPassword)){
-            logger.warn(format("JDBC URL parameters user: %s passowrd: %s are not matching with commandline options --source.username %s --source.password %s.",jdbcUsername, jdbcPassword, optionUsername,optionPasssword));
-            logger.warn(format("JDBC URL parameters user: %s password: %s are used for database connection", jdbcUsername, jdbcPassword));
-        }
+        return StringUtils.equals(getDriverValue(commandLine), MS_SQLSERVER_DRIVER);
     }
 }
-

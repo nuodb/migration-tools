@@ -31,20 +31,30 @@ import com.nuodb.migrator.cli.parse.CommandLine;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.OptionValidator;
+import com.nuodb.migrator.jdbc.url.JdbcUrl;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Iterator;
 import java.util.Map;
+
+import org.slf4j.Logger;
 
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.cli.run.CliOptionValues.*;
 import static java.lang.String.format;
 import static java.sql.Connection.*;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.USER;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PASSWORD;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlParsers.getInstance;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("all")
 public abstract class ConnectionGroupValidator implements OptionValidator {
+
+    protected transient final Logger logger = getLogger(getClass());
 
     private ConnectionGroupInfo connectionGroupInfo;
 
@@ -68,6 +78,29 @@ public abstract class ConnectionGroupValidator implements OptionValidator {
     }
 
     protected void validateUsername(CommandLine commandLine, Option option, String value) {
+        JdbcUrl jdbcUrl = getInstance().parse(getUrlValue(commandLine));
+        if (jdbcUrl==null) return;
+
+        String jdbcUsername = (String)jdbcUrl.getParameters().get(USER);
+        String jdbcPassword = (String)jdbcUrl.getParameters().get(PASSWORD);
+
+        if (StringUtils.isBlank(jdbcUsername) && StringUtils.isBlank(jdbcPassword)) 
+            return;
+
+        String optionUsername = getUsernameValue(commandLine);
+        String optionPasssword = getPasswordValue(commandLine);
+
+        if (StringUtils.isBlank(optionUsername) && StringUtils.isBlank(optionPasssword)) 
+            return;
+
+        dbUserWarnMessage(jdbcUsername, jdbcPassword, optionUsername, optionPasssword);
+    }
+
+    protected void dbUserWarnMessage(String jdbcUsername, String jdbcPassword, String optionUsername, String optionPasssword) {
+        if (!StringUtils.equals(optionUsername, jdbcUsername) || !StringUtils.equals(optionPasssword, jdbcPassword)){
+            logger.warn(format("JDBC URL parameters user: %s passowrd: %s are not matching with commandline options --source.username %s --source.password %s.",jdbcUsername, jdbcPassword, optionUsername,optionPasssword));
+            logger.warn(format("Commandline option values --source.username %s --source.password %s are used for database connection.", optionUsername, optionPasssword));
+        }
     }
 
     protected void validatePassword(CommandLine commandLine, Option option, String value) {

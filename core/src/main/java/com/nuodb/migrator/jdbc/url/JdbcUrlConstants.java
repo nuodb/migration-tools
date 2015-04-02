@@ -47,4 +47,10 @@ public interface JdbcUrlConstants {
     final String ORACLE_SUB_PROTOCOL = "oracle";
 
     final String POSTGRESQL_PROTOCOL = "postgresql";
+
+    final String DB2_SUB_PROTOCOL = "db2";
+
+    final String USER = "user";
+
+    final String PASSWORD = "password";
 }

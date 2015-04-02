@@ -56,6 +56,7 @@ public class JdbcUrlParsers {
         addParser(NuoDBJdbcUrl.getParser());
         addParser(OracleJdbcUrl.getParser());
         addParser(PostgreSQLJdbcUrl.getParser());
+        addParser(DB2JdbcUrl.getParser());
     }
 
     public JdbcUrl parse(String url) {

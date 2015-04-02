@@ -27,56 +27,38 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.ORACLE_SUB_PROTOCOL;
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.USER;
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PASSWORD;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.nuodb.migrator.utils.StringUtils;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.DB2_SUB_PROTOCOL;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * @author Sergey Bushik
+ * @author Mukund
  */
-public class OracleJdbcUrl extends JdbcUrlBase {
-
-    private static final String ORACLE_JDBC_REG_EXPRESSION = "(.*?):(.*?):(.*?):((.*?)(\\/(.*?))?)?@(.*)";
+public class DB2JdbcUrl extends JdbcUrlBase {
 
     public static JdbcUrlParser getParser() {
-        return new JdbcUrlParserBase(ORACLE_SUB_PROTOCOL) {
+        return new JdbcUrlParserBase(DB2_SUB_PROTOCOL) {
             @Override
             protected JdbcUrl createJdbcUrl(String url) {
-                return new OracleJdbcUrl(url);
+                return new DB2JdbcUrl(url);
             }
         };
     }
 
     private String qualifier;
 
-    protected OracleJdbcUrl(String url) {
-        super(url, ORACLE_SUB_PROTOCOL);
+    protected DB2JdbcUrl(String url) {
+        super(url, DB2_SUB_PROTOCOL);
     }
 
     @Override
     protected void parseSubName(String subName) {
-        qualifier = substringBefore(subName, ":");
-    }
-
-    @Override
-    protected void addParameters() {
-        Pattern jdbcPattern = Pattern.compile(ORACLE_JDBC_REG_EXPRESSION);
-        Matcher jdbcMatcher = jdbcPattern.matcher(getUrl());
-        if (jdbcMatcher.matches()) {
-            if (!StringUtils.isEmpty(jdbcMatcher.group(5))) 
-                addParameter(USER, jdbcMatcher.group(5));
-            if (!StringUtils.isEmpty(jdbcMatcher.group(7))) 
-                addParameter(PASSWORD, jdbcMatcher.group(7));
+        if (!isEmpty(substringAfterLast(subName, ":")) && substringAfterLast(subName, ":").indexOf("/") < 0){
+            parseParameters(getParameters(), substringAfterLast(subName, ":"), ";");
         }
     }
 
+    @Override
     public String getQualifier() {
         return qualifier;
     }

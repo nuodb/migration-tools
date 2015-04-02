@@ -34,19 +34,20 @@ import org.apache.commons.lang3.StringUtils;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static com.nuodb.migrator.jdbc.JdbcConstants.JTDS_SQLSERVER_DRIVER;
 
 /**
- * @author Sergey Bushik
+ * @author Mukund
  */
-public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
+public class JTDSConnectionGroupValidator extends ConnectionGroupValidator {
 
-    public DB2ConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
+    public JTDSConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
         super(connectionGroupInfo);
     }
 
     @Override
     public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.startsWith(getUrlValue(commandLine), "jdbc:db2");
+        return StringUtils.equals(getDriverValue(commandLine), JTDS_SQLSERVER_DRIVER);
     }
 
     @Override

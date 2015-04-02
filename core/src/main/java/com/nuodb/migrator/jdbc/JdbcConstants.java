@@ -36,4 +36,6 @@ public interface JdbcConstants {
     final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
     final String POSTGRESQL_DRIVER = "org.postgresql.Driver";
     final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
+    final String MS_SQLSERVER_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+    final String JTDS_SQLSERVER_DRIVER = "net.sourceforge.jtds.jdbc.Driver";
 }

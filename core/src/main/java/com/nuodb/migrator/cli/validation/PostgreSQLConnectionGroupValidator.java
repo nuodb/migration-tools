@@ -59,4 +59,12 @@ public class PostgreSQLConnectionGroupValidator extends ConnectionGroupValidator
             );
         }
     }
+
+    @Override
+    protected void dbUserWarnMessage(String jdbcUsername, String jdbcPassword, String optionUsername, String optionPasssword) {
+        if(!StringUtils.equals(optionUsername, jdbcUsername) || !StringUtils.equals(optionPasssword, jdbcPassword)){
+            logger.warn(format("JDBC URL parameters user: %s passowrd: %s are not matching with commandline options --source.username %s --source.password %s.",jdbcUsername, jdbcPassword, optionUsername,optionPasssword));
+            logger.warn(format("JDBC URL parameters user: %s password: %s are used for database connection", jdbcUsername, jdbcPassword));
+        }
+    }
 }

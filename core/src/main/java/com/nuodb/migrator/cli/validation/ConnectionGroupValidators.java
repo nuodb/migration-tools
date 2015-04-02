@@ -40,5 +40,7 @@ public class ConnectionGroupValidators {
         connection.withOptionValidator(new PostgreSQLConnectionGroupValidator(connectionGroupInfo));
         connection.withOptionValidator(new OracleConnectionGroupValidator(connectionGroupInfo));
         connection.withOptionValidator(new DB2ConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new MSSQLConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new JTDSConnectionGroupValidator(connectionGroupInfo));
     }
 }
