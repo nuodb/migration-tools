@@ -47,6 +47,7 @@ import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static java.sql.Types.*;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -70,6 +71,8 @@ public class OracleDialect extends SimpleDialect {
     private static final Regex TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH LOCAL TIME ZONE");
     private static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
     private static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND");
+
+    public static final int DEFAULT_MAX_OPEN_CURSOR = 300;
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -101,9 +104,23 @@ public class OracleDialect extends SimpleDialect {
 
     @Override
     public Integer getMaxOpenCursors(Connection connection) throws SQLException {
+        ResultSet result = null;
+        String userName = null;
         Statement statement = connection.createStatement();
-        ResultSet result = statement.executeQuery("SELECT VALUE FROM V$PARAMETER WHERE NAME = 'open_cursors'");
-        return result.next() ? result.getInt(1) : null;
+        try {
+            userName = connection.getMetaData().getUserName();
+            result = statement.executeQuery("SELECT VALUE FROM V$PARAMETER WHERE NAME = 'open_cursors'");
+        } catch(Exception e) {
+            if (logger.isWarnEnabled()) {
+                logger.warn((format(" Oracle user %s don't have permission to access V$PARAMETER view, please contact Database Administrator ",userName)));
+                logger.warn((format(" Migrator default value for max_open_cursor set to 300.")));
+            }
+        }
+        if (!(result == null)) {
+            return result.next() ? result.getInt(1) : null;
+        } else {
+            return DEFAULT_MAX_OPEN_CURSOR;
+        }
     }
 
     @Override
