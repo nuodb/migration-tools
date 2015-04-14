@@ -72,7 +72,7 @@ public class OracleDialect extends SimpleDialect {
     private static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
     private static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND");
 
-    public static final int DEFAULT_MAX_OPEN_CURSOR = 300;
+    public static final int DEFAULT_MAX_OPEN_CURSORS = 300;
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -113,13 +113,13 @@ public class OracleDialect extends SimpleDialect {
         } catch(Exception e) {
             if (logger.isWarnEnabled()) {
                 logger.warn((format(" Oracle user %s don't have permission to access V$PARAMETER view, please contact Database Administrator ",userName)));
-                logger.warn((format(" Migrator default value for max_open_cursor set to 300.")));
+                logger.warn((format(" Value for max_open_cursors set to %d. This might result in ORA-01000: maximum open cursors exceeded exception",DEFAULT_MAX_OPEN_CURSORS)));
             }
         }
         if (!(result == null)) {
             return result.next() ? result.getInt(1) : null;
         } else {
-            return DEFAULT_MAX_OPEN_CURSOR;
+            return DEFAULT_MAX_OPEN_CURSORS;
         }
     }
 
