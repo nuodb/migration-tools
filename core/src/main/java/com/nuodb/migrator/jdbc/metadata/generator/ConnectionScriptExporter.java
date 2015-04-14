@@ -32,6 +32,8 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import com.nuodb.migrator.utils.StringUtils;
+
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static java.lang.String.format;
 
@@ -57,7 +59,9 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
         if (statement == null) {
             throw new GeneratorException("Connection is not opened");
         }
-        statement.executeUpdate(script);
+        if (!StringUtils.isEmpty(script)) {
+            statement.executeUpdate(script);
+        }
         processWarnings(statement.getWarnings());
     }
 
