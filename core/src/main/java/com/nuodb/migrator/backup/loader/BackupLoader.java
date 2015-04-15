@@ -522,6 +522,9 @@ public class BackupLoader {
                     if (index.isPrimary()) {
                         continue;
                     }
+                    if ((index.getType() != null) && (!index.isBtree())) {
+                        continue;
+                    }
                     boolean uniqueInCreateTable = index.isUnique() &&
                             size(index.getColumns()) == 1 && !get(index.getColumns(),0).isNullable() &&
                             dialect.supportsUniqueInCreateTable();
