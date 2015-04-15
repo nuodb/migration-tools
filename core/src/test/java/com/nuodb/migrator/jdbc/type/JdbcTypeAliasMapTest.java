@@ -72,7 +72,7 @@ public class JdbcTypeAliasMapTest {
 		JdbcType jdbcType = new JdbcType();
 		jdbcType.setTypeCode(typeCode);
 		jdbcType.setTypeName(typeName);
-		jdbcType.setSize(size);
+		jdbcType.setSize((long)size);
 		jdbcType.setPrecision(size);
 		return jdbcType;
 
