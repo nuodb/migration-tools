@@ -67,6 +67,15 @@ public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
     }
 
     @Override
+    protected void validateSchema(CommandLine commandLine, Option option, String schema) {
+        if (isEmpty(schema)) {
+            throw new OptionException(
+                    format("No schema option is passed. Please provide --source.schema option", getSchemaOption()), option
+            );
+        }
+    }
+
+    @Override
     protected Map<String, Integer> getTransactionIsolations() {
         Map<String, Integer> transactionIsolations = newLinkedHashMap();
         transactionIsolations.put(TRANSACTION_ISOLATION_READ_COMMITTED, TRANSACTION_READ_COMMITTED);
