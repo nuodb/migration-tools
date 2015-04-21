@@ -310,7 +310,7 @@ public class MySQLTypes implements DatabaseTypes {
 			return defaultValue == null ? null : "'" + defaultValue + "'";
 		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
 			if ("0000-00-00 00:00:00".equals(defaultValue)) {
-				return "'NULL'";
+				return "'0000-00-00 00:00:00'";
 			}
 			return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW'" : "'"
 					+ defaultValue + "'";
