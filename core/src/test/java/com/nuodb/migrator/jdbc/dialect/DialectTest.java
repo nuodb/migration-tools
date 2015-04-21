@@ -71,9 +71,9 @@ public class DialectTest {
         Session round = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=round");
         return new Object[][]{
-                {createScript("00:00:00", Types.TIME, "TIME"), convertToNull, "NULL"},
-                {createScript("0000-00-00", DATE, "DATE"), convertToNull, "NULL"},
-                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), convertToNull, "NULL"},
+                {createScript("00:00:00", Types.TIME, "TIME"), convertToNull, "'00:00:00'"},
+                {createScript("0000-00-00", DATE, "DATE"), convertToNull, "'0000-00-00'"},
+                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), convertToNull, "'0000-00-00 00:00:00'"},
                 {createScript("00:00:00", Types.TIME, "TIME"), round, "00:00:00"},
                 {createScript("0000-00-00", DATE, "DATE"), round, "0001-01-01"},
                 {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), round, "0001-01-01 00:00:00"},
@@ -130,13 +130,28 @@ public class DialectTest {
         Column timestamp = new Column();
         timestamp.setJdbcType(new JdbcType(new JdbcTypeDesc(TIMESTAMP, "timestamp")));
         timestamp.setDefaultValue(valueOf("0000-00-00 00:00:00"));
+        Column timestamp1 = new Column();
+        timestamp1.setJdbcType(new JdbcType(new JdbcTypeDesc(TIMESTAMP, "timestamp")));
+        timestamp1.setDefaultValue(null);
+        timestamp1.setNullable(true);
+        Column timestamp2 = new Column();
+        timestamp2.setJdbcType(new JdbcType(new JdbcTypeDesc(TIMESTAMP, "timestamp")));
+        timestamp2.setDefaultValue(null);
+        timestamp2.setNullable(false);
+        Column timestamp3 = new Column();
+        timestamp3.setJdbcType(new JdbcType(new JdbcTypeDesc(TIMESTAMP, "timestamp")));
+        timestamp3.setDefaultValue(valueOf("0000-00-00 00:00:00"));
+        timestamp3.setNullable(true);
         Column varchar = new Column();
         varchar.setJdbcType(new JdbcType(new JdbcTypeDesc(VARCHAR, "varchar")));
         varchar.setDefaultValue(valueOf("NULL"));
         return new Object[][]{
-                {session, date, "NULL"},
-                {session, time, "NULL"},
-                {session, timestamp, "NULL"},
+                {session, date, "'0000-00-00'"},
+                {session, time, "'00:00:00'"},
+                {session, timestamp, "'0000-00-00 00:00:00'"},
+                {session, timestamp1, null},
+                {session, timestamp2, null},
+                {session, timestamp3, "NULL"},
                 {session, varchar, "NULL"}
         };
     }

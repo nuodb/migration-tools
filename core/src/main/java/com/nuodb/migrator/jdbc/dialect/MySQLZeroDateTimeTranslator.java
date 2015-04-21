@@ -105,6 +105,10 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
                 default:
                     target = null;
             }
+        } else if (!script.getColumn().isNullable() && CONVERT_TO_NULL.equals(behavior)) {
+            //tagret value can't be NULL with column is 'NOT NULL'. Retain the script value 
+            //to escape NuoDB syntax error.
+            target = "'".concat(script.getScript().concat("'"));
         } else if (CONVERT_TO_NULL.equals(behavior)) {
             target = NULL;
         } else if (EXCEPTION.equals(behavior)) {
