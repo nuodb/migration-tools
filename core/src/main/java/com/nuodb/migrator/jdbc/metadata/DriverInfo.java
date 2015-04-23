@@ -27,19 +27,30 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
+
+
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+import org.slf4j.Logger;
+
 /**
  * @author Sergey Bushik
  */
 public class DriverInfo implements Serializable {
 
+    private transient final Logger logger = getLogger(getClass());
+
     private String name;
     private String version;
+    private static final String MySQL = "mysql";
+    private static final String PostgreSQL = "postgresql";
+    private static final int DRIVER_ERROR = 1;
     private int majorVersion;
     private int minorVersion;
 
@@ -58,6 +69,32 @@ public class DriverInfo implements Serializable {
         this.version = metaData.getDriverVersion();
         this.majorVersion = metaData.getDriverMajorVersion();
         this.minorVersion = metaData.getDriverMinorVersion();
+        validateDriverVersion(metaData);
+    }
+
+    private void validateDriverVersion(DatabaseMetaData metaData) {
+        String url;
+        try {
+            url = metaData.getURL();
+            if (!url.equalsIgnoreCase(null) && url.contains(MySQL)) {
+                if (metaData.getDriverMajorVersion() <= 5 && metaData.getDriverMinorVersion() <= 0) {
+                    logErrorMessage(metaData.getDriverName() ,metaData.getDriverMajorVersion(),metaData.getDriverMinorVersion());
+                }
+            }else if (!url.equalsIgnoreCase(null) && url.contains(PostgreSQL)) {
+                if (metaData.getJDBCMajorVersion() <= 3 && metaData.getJDBCMinorVersion() <= 0) {
+                    logErrorMessage(metaData.getDriverName() ,metaData.getDriverMajorVersion(),metaData.getDriverMinorVersion());
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void logErrorMessage(String dname , int dMaxv , int dMinv) {
+        if (logger.isErrorEnabled()) {
+            logger.error((format( dname+" "+dMaxv+"."+dMinv+" Version is not applicable for Migrator , Use Latest version of Driver ")));
+        }
+        System.exit(DRIVER_ERROR);
     }
 
     public String getName() {
