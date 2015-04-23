@@ -374,6 +374,10 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         String typeName = dialect.getTypeName(databaseInfo, jdbcType);
         JdbcTypeDesc jdbcTypeDesc = jdbcType.getJdbcTypeDesc();
         JdbcTypeOptions jdbcTypeOptions = jdbcType.getJdbcTypeOptions();
+        String sourceTypename = jdbcType.getTypeName();
+        if (!(sourceTypename == null) && !(typeName == null)) {
+            datatypes.put(sourceTypename, typeName);
+        }
         if (typeName == null) {
             String tableName = scriptGeneratorManager.getQualifiedName(column.getTable(),
                     column.getTable().getSchema().getName(), column.getTable().getCatalog().getName(), false);

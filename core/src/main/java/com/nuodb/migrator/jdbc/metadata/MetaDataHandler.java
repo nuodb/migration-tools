@@ -27,10 +27,19 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * @author Sergey Bushik
  */
 public interface MetaDataHandler {
+
+    public Map<String, String> datatypes = newHashMap();
+    public Collection<String> tableNames = newArrayList();
 
     boolean supports(MetaData object);
 
