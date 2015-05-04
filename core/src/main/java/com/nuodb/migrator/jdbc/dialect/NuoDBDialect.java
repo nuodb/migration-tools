@@ -98,6 +98,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(DOUBLE, "DOUBLE");
         addJdbcTypeName(NUMERIC, "NUMERIC({P},{S})");
         addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
+        addJdbcTypeName(new JdbcTypeDesc(DECIMAL, "NUMBER"), "NUMBER");
 
         addJdbcTypeName(CHAR, newSize(0), "CHAR");
         addJdbcTypeName(CHAR, "CHAR({N})");
