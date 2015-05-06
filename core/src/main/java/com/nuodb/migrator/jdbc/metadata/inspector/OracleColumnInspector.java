@@ -79,8 +79,10 @@ public class OracleColumnInspector extends SimpleColumnInspector {
         if(columns.getInt("DATA_TYPE") == Types.OTHER ) {
             Schema schema = inspectionContext.getInspectionResults().getObject(SCHEMA);
             UserDefined userDefined = schema.getUserDefined(columns.getString("TYPE_NAME"));
-            column.setTypeCode(columns.getInt("DATA_TYPE"));
-            column.setTypeName(userDefined.getTypeCode());
+            if (userDefined != null) {
+                column.setTypeCode(columns.getInt("DATA_TYPE"));
+                column.setTypeName(userDefined.getTypeCode());
+            }
 
             Collection<String> typeInfo = newArrayList();
             typeInfo.add(format("type name %s", columns.getString("TYPE_NAME")));
