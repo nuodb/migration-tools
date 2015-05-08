@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -186,7 +187,7 @@ public class StructureTest extends MigrationTestBase {
 
 				// normalize null values
 				if (actualVal == null || "'NULL'".equalsIgnoreCase(actualVal)
-						|| "NULL".equalsIgnoreCase(actualVal)) {
+						|| "NULL".equalsIgnoreCase(actualVal) || StringUtils.isEmpty(actualVal)) {
 					actualVal = "'NULL'";
 				}
 				if (expectedVal == null
