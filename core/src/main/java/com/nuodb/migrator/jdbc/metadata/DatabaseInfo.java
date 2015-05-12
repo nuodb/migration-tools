@@ -30,7 +30,9 @@ package com.nuodb.migrator.jdbc.metadata;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.nuodb.migrator.utils.ObjectUtils;
+
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
@@ -39,11 +41,16 @@ import java.sql.SQLException;
 import static com.google.common.collect.ComparisonChain.start;
 import static com.google.common.collect.Ordering.natural;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
+import static org.slf4j.LoggerFactory.getLogger;
+import static java.lang.String.format;
 
 public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
 
+    private transient final Logger logger = getLogger(getClass());
+
     protected static final int ASSIGNABLE = 0;
     protected static final int NOT_ASSIGNABLE = 1;
+    private static final int DRIVER_ERROR = 1;
 
     private String productName;
     private String productVersion;
@@ -77,8 +84,17 @@ public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
     }
 
     public DatabaseInfo(DatabaseMetaData metaData) throws SQLException {
-        this(metaData.getDatabaseProductName(), metaData.getDatabaseProductVersion(),
-                metaData.getDatabaseMajorVersion(), metaData.getDatabaseMinorVersion());
+        try {
+            this.productName = metaData.getDatabaseProductName();
+            this.productVersion = metaData.getDatabaseProductVersion();
+            this.minorVersion = metaData.getDatabaseMinorVersion();
+            this.majorVersion = metaData.getDatabaseMajorVersion();
+        }catch(Error e) {
+            if (logger.isErrorEnabled()) {
+                logger.error((format("JDBC Driver %s version is not applicable for Migrator, use latest version of the driver",metaData.getDriverVersion())));
+            }
+            System.exit(DRIVER_ERROR);
+        }
     }
 
     public String getProductName() {
