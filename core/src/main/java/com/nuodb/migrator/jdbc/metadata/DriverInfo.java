@@ -49,7 +49,6 @@ public class DriverInfo implements Serializable {
     private String name;
     private String version;
     private static final String MySQL = "mysql";
-    private static final String PostgreSQL = "postgresql";
     private static final int DRIVER_ERROR = 1;
     private int majorVersion;
     private int minorVersion;
@@ -77,22 +76,22 @@ public class DriverInfo implements Serializable {
         try {
             url = metaData.getURL();
             if (!url.equalsIgnoreCase(null) && url.contains(MySQL)) {
-                if (metaData.getDriverMajorVersion() <= 5 && metaData.getDriverMinorVersion() <= 0) {
-                    logErrorMessage(metaData.getDriverName() ,metaData.getDriverMajorVersion(),metaData.getDriverMinorVersion());
-                }
-            }else if (!url.equalsIgnoreCase(null) && url.contains(PostgreSQL)) {
-                if (metaData.getJDBCMajorVersion() <= 3 && metaData.getJDBCMinorVersion() <= 0) {
-                    logErrorMessage(metaData.getDriverName() ,metaData.getDriverMajorVersion(),metaData.getDriverMinorVersion());
-                }
+                validateJdbcDriverVersion(metaData.getDriverVersion(), metaData.getJDBCMajorVersion(), metaData.getJDBCMinorVersion());
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    protected void logErrorMessage(String dname , int dMaxv , int dMinv) {
+    private void validateJdbcDriverVersion(String dName, int dMaxv, int dMinv) {
+        if (dMaxv <= 3 && dMinv <= 0) {
+            logErrorMessage(dName);
+        }
+    }
+
+    protected void logErrorMessage(String dname) {
         if (logger.isErrorEnabled()) {
-            logger.error((format( dname+" "+dMaxv+"."+dMinv+" Version is not applicable for Migrator , Use Latest version of Driver ")));
+            logger.error((format( "JDBC Driver "+dname+" "+" version is not applicable for Migrator , Use latest version of the driver ")));
         }
         System.exit(DRIVER_ERROR);
     }
