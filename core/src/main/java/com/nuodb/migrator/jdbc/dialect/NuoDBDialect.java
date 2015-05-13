@@ -98,7 +98,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(DOUBLE, "DOUBLE");
         addJdbcTypeName(NUMERIC, "NUMERIC({P},{S})");
         addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
-        addJdbcTypeName(new JdbcTypeDesc(DECIMAL, "NUMBER"), "NUMBER");
+        addJdbcTypeName(new JdbcTypeDesc(DECIMAL, "NUMBER"),newScale(0), "NUMBER");
 
         addJdbcTypeName(CHAR, newSize(0), "CHAR");
         addJdbcTypeName(CHAR, "CHAR({N})");
@@ -115,6 +115,10 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(BINARY, "BINARY({N})");
         addJdbcTypeName(VARBINARY, "VARBINARY({N})");
         addJdbcTypeName(LONGVARBINARY, "VARBINARY({N})");
+
+        //For NuoDB 'binary' and 'binary varying' datatypes
+        addJdbcTypeName(new JdbcTypeDesc(BLOB, "BINARY"), "BINARY({N})");
+        addJdbcTypeName(new JdbcTypeDesc(BLOB, "BINARY VARYING"), "VARBINARY({N})");
 
         addJdbcTypeName(NULL, "NULL");
         addJdbcTypeName(BLOB, "BLOB");
