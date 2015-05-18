@@ -244,6 +244,9 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
         buffer.append(' ').append(scriptGeneratorManager.getName(table)).append(" (");
+        if (table != null) {
+            tableNames.add(table.getName());
+        }
         Collection<Column> columns = table.getColumns();
         Collection<Index> indexes = getNonRepeatingIndexes(table);
         Collection<Table> tables = (Collection<Table>) scriptGeneratorManager.getAttributes().get(TABLES);

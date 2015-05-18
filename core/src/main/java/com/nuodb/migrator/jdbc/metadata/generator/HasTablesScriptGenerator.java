@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.HasTables;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
@@ -41,9 +40,9 @@ import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
 import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.utils.SequenceUtils;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map.Entry;
-
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
@@ -95,7 +94,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
                 case TABLE:
                     for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
                         scripts.addAll(scriptGeneratorManager.getScripts(table));
-                        tableNames.add(table.getName());
                     }
                     migratorSummary(scriptGeneratorManager);
                     addCreateForeignKeysScripts(scripts, true, scriptGeneratorManager);
@@ -146,39 +144,48 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
         }
     }
 
-    protected void migratorSummary(ScriptGeneratorManager scriptGeneratorManager) {
-        DatabaseInfo databaseInfo = scriptGeneratorManager.getSourceSession().getDatabaseInfo();
+    public void migratorSummary(ScriptGeneratorManager scriptGeneratorManager) {
         String catalog = scriptGeneratorManager.getSourceCatalog();
         String schema = scriptGeneratorManager.getSourceSchema();
-        String tables[] = tableNames.toArray(new String[tableNames.size()]);
-        String pname = databaseInfo.getProductName();
-        logger.info("\n\n");
-        logger.info("*****************************");
-        logger.info("***** Migration Summary *****");
-        logger.info("*****************************");
-        if (!(catalog == null) || !(schema == null)) {
-            logger.info(format(" Catalog = %s",catalog));
-            logger.info(format(" Schema = %s\n",schema));
-            logger.info("*****************************");
-            logger.info(format("******** Tables *************"));
-            logger.info("*****************************");
-            for (int i=0; i < tables.length-1; i+=3) {
-                    logger.info(format(" %s\t%s\t%s",tables[i],tables[i+1],tables[i+2]));
+        if (!tableNames.isEmpty() && !datatypes.isEmpty()) {
+            String tables[] = tableNames.toArray(new String[tableNames.size()]);
+            Arrays.sort(tables);
+            String table = org.apache.commons.lang3.StringUtils.EMPTY;
+            int count = 0;
+            if (!(catalog == null) || !(schema == null)) {
+                logger.info("\n\n");
+                logger.info("*****************************");
+                logger.info("***** Migration Summary *****");
+                logger.info("*****************************");
+                logger.info(format(" Catalog = %s",catalog));
+                logger.info(format(" Schema = %s\n",schema));
+                logger.info("*****************************");
+                logger.info(format("******** Tables *************"));
+                logger.info("*****************************");
+                for (int i=0; i < tables.length; i++) {
+                    table = table + tables[i] + "  |  ";
+                    count++;
+                    if ((count%3 == 0) || (count%2 == 0 && tables.length == count) || (count%1 == 0 && tables.length == count)) {
+                        logger.info(format(" %s",table));
+                        table = org.apache.commons.lang3.StringUtils.EMPTY;
+                    }
+                }
             }
-        }
-        if (!(pname == null) && !(datatypes.isEmpty())) {
-            logger.info("\n");
-            logger.info("***********************************");
-            logger.info("**** Datatypes Mapping Summary ****");
-            logger.info("***********************************");
-            logger.info(format(" "+pname +" Datatypes \t" + " NuoDB Datatypes"));
-            logger.info(" ---------------- \t ----------------");
-            for (Entry<String, String> entry : datatypes.entrySet()) {
-                logger.info(format(" "+entry.getKey()+"\t\t "+entry.getValue()));
+            if (!(datatypes.isEmpty())) {
+                logger.info("\n");
+                logger.info("***********************************");
+                logger.info("**** Datatypes Mapping Summary ****");
+                logger.info("***********************************");
+                logger.info(format(" Source"+" Datatypes \t" + " NuoDB Datatypes"));
+                logger.info(" ---------------- \t ----------------");
+                for (Entry<String, String> entry : datatypes.entrySet()) {
+                    logger.info(format(" "+entry.getKey()+"\t\t "+entry.getValue()));
+                }
+                logger.info("\n\n");
             }
-            logger.info("\n\n");
         }
     }
+
     protected void initScriptGeneratorContext(ScriptGeneratorManager scriptGeneratorManager) {
         scriptGeneratorManager.addAttribute(TABLES, newLinkedHashSet());
         scriptGeneratorManager.addAttribute(FOREIGN_KEYS, HashMultimap.create());

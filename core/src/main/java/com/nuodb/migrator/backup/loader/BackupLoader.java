@@ -59,6 +59,7 @@ import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilter;
 import com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilterManager;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ProxyScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
@@ -353,6 +354,7 @@ public class BackupLoader {
     }
 
     protected Backup load(BackupLoaderManager backupLoaderManager) throws Exception {
+        HasTablesScriptGenerator hasTablesScriptGenerator = new HasTablesScriptGenerator<HasTables>();
         try {
             if (backupLoaderManager.isLoadSchema()) {
                 loadSchema(backupLoaderManager);
@@ -370,6 +372,7 @@ public class BackupLoader {
         } finally {
             backupLoaderManager.close();
         }
+        hasTablesScriptGenerator.migratorSummary(backupLoaderManager.getBackupLoaderContext().getScriptGeneratorManager());
         return backupLoaderManager.getBackupLoaderContext().getBackup();
     }
 
