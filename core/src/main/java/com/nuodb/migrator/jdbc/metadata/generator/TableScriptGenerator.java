@@ -379,7 +379,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         JdbcTypeOptions jdbcTypeOptions = jdbcType.getJdbcTypeOptions();
         String sourceTypename = jdbcType.getTypeName();
         if (!(sourceTypename == null) && !(typeName == null)) {
-            datatypes.put(sourceTypename, typeName);
+            datatypes.put(sourceTypename, tpyeNameFormat(typeName));
         }
         if (typeName == null) {
             String tableName = scriptGeneratorManager.getQualifiedName(column.getTable(),
@@ -400,6 +400,19 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                             tableName, columnName, join(typeInfo, ", ")));
         }
         return typeName;
+    }
+
+    protected String tpyeNameFormat(String typeName) {
+        StringBuffer sBuffer = new StringBuffer(typeName);
+        if (typeName.contains(",") && !typeName.contains("ENUM")) {
+            sBuffer.replace(typeName.indexOf("(") + 1, typeName.indexOf(","), "p");
+            sBuffer.replace(sBuffer.indexOf(",") + 1, sBuffer.indexOf(")"), "s");
+            return sBuffer.toString();
+        }else if ((typeName.contains("(")) && (typeName.contains(")")) && !typeName.contains("ENUM")) {
+            return sBuffer.replace(typeName.indexOf("(") + 1, typeName.indexOf(")"), "n").toString();
+        }else {
+            return typeName;
+        }
     }
 
     @Override

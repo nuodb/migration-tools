@@ -153,6 +153,8 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
             String table = org.apache.commons.lang3.StringUtils.EMPTY;
             int count = 0;
             if (!(catalog == null) || !(schema == null)) {
+                catalog = (catalog == null ? "<"+catalog+">" : catalog);
+                schema = (schema == null ? "<"+schema+">" : schema);
                 logger.info("\n\n");
                 logger.info("*****************************");
                 logger.info("***** Migration Summary *****");
