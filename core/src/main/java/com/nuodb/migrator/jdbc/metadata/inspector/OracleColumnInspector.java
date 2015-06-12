@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
+import static com.nuodb.migrator.jdbc.dialect.OracleDialect.INTERVAL_DAY_TO_SECOND_REGEX;
+import static com.nuodb.migrator.jdbc.dialect.OracleDialect.INTERVAL_YEAR_TO_MATCH_REGEX;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 import static java.lang.String.format;
@@ -55,6 +57,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 public class OracleColumnInspector extends SimpleColumnInspector {
 
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
+    private static final long cSize = 24;
 
     /**
      * Fetches LONG or LONG RAW columns first, as these kind of columns are read as stream, if not read in a proper
@@ -100,6 +103,11 @@ public class OracleColumnInspector extends SimpleColumnInspector {
 
         int columnSize = columns.getInt("COLUMN_SIZE");
         column.setSize((long)columnSize);
+        if (columns.getInt("DATA_TYPE") == -104 || columns.getInt("DATA_TYPE") == -103 
+                || INTERVAL_DAY_TO_SECOND_REGEX.test(columns.getString("TYPE_NAME")) 
+                || INTERVAL_YEAR_TO_MATCH_REGEX.test(columns.getString("TYPE_NAME"))) {
+            column.setSize(cSize);
+        }
         column.setPrecision(columnSize);
         column.setScale(columns.getInt("DECIMAL_DIGITS"));
 

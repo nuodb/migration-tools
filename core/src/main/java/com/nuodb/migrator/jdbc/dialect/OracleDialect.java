@@ -76,8 +76,8 @@ public class OracleDialect extends SimpleDialect {
     private static final Regex TIMESTAMP_REGEX = INSTANCE.compile("TIMESTAMP(*)");
     private static final Regex TIMESTAMP_WITH_TIME_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH TIME ZONE");
     private static final Regex TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH LOCAL TIME ZONE");
-    private static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
-    private static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND");
+    public static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
+    public static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND(*)");
 
     private static  int CL_MAX_OPEN_CURSORS = 0;
     private static final int DEFAULT_MAX_OPEN_CURSORS = 300;
@@ -109,6 +109,8 @@ public class OracleDialect extends SimpleDialect {
         addJdbcTypeAlias(BINARY_DOUBLE_DESC, DOUBLE);
         addJdbcTypeAlias(TIMESTAMP_WITH_TIME_ZONE_DESC, TIMESTAMP);
         addJdbcTypeAlias(TIMESTAMP_WITH_LOCAL_TIME_ZONE_DESC, TIMESTAMP);
+        addJdbcTypeAlias(INTERVAL_DAY_TO_SECOND_DESC, VARCHAR);
+        addJdbcTypeAlias(INTERVAL_YEAR_TO_MONTH_DESC, VARCHAR);
     }
 
     @Override
