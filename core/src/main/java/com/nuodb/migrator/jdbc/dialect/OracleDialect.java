@@ -27,23 +27,27 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.type.*;
+import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import com.nuodb.migrator.match.Regex;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static java.sql.Types.*;
@@ -75,7 +79,9 @@ public class OracleDialect extends SimpleDialect {
     private static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
     private static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND");
 
-    public static final int DEFAULT_MAX_OPEN_CURSORS = 300;
+    private static  int CL_MAX_OPEN_CURSORS = 0;
+    private static final int DEFAULT_MAX_OPEN_CURSORS = 300;
+    private static final String MAX_OPEN_CURSORS = "maxopencursors"; 
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -110,19 +116,46 @@ public class OracleDialect extends SimpleDialect {
         ResultSet result = null;
         String userName = null;
         Statement statement = connection.createStatement();
+        JdbcUrl jdbcUrl = JdbcUtils.getJdbcUrl(connection);
+        Map<String, Object> properties = jdbcUrl.getParameters();
+        if (!isEmpty(properties) && properties.containsKey(MAX_OPEN_CURSORS)) {
+            if (Integer.valueOf(String.valueOf(properties.get(MAX_OPEN_CURSORS))) > 0) {
+                CL_MAX_OPEN_CURSORS = Integer.valueOf(String.valueOf(properties.get(MAX_OPEN_CURSORS)));
+            }
+        }
         try {
             userName = connection.getMetaData().getUserName();
             result = statement.executeQuery("SELECT VALUE FROM V$PARAMETER WHERE NAME = 'open_cursors'");
         } catch(Exception e) {
+            int MAX = CL_MAX_OPEN_CURSORS == 0 ? DEFAULT_MAX_OPEN_CURSORS : CL_MAX_OPEN_CURSORS; 
             if (logger.isWarnEnabled()) {
                 logger.warn((format(" Oracle user %s don't have permission to access V$PARAMETER view, please contact Database Administrator ",userName)));
-                logger.warn((format(" Value for max_open_cursors set to %d. This might result in ORA-01000: maximum open cursors exceeded exception",DEFAULT_MAX_OPEN_CURSORS)));
+                logger.warn((format(" Value for max_open_cursors set to %d. This might result in ORA-01000: maximum open cursors exceeded exception",MAX)));
             }
         }
-        if (!(result == null)) {
-            return result.next() ? result.getInt(1) : null;
+        if (!(result == null) && result.next()) {
+            return maxOpenCursorsValue(result.getInt(1),CL_MAX_OPEN_CURSORS,DEFAULT_MAX_OPEN_CURSORS);
         } else {
-            return DEFAULT_MAX_OPEN_CURSORS;
+            return maxOpenCursorsValue(0,CL_MAX_OPEN_CURSORS,DEFAULT_MAX_OPEN_CURSORS);
+        }
+    }
+
+    public Integer maxOpenCursorsValue(int sMax ,int clMax, int defMax) {
+        if (clMax != 0) {
+            if (sMax != 0 && sMax < clMax) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn((format("Oracle max_open_cursors value is %d and command line passing value is %d. This might result in ORA-01000: maximum open cursors exceeded exception ",sMax,clMax)));
+                }
+                return clMax;
+            }else {
+                return clMax;
+            }
+        }else {
+            if (sMax != 0) {
+                return sMax;
+            }else {
+                return defMax;
+            }
         }
     }
 
