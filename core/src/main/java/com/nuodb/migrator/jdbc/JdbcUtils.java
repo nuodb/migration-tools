@@ -27,8 +27,12 @@
  */
 package com.nuodb.migrator.jdbc;
 
+import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptProcessor;
 import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.url.JdbcUrl;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
+
 import org.slf4j.Logger;
 
 import java.sql.Connection;
@@ -46,6 +50,10 @@ public class JdbcUtils {
     private static transient final Logger logger = getLogger(JdbcUtils.class);
 
     private JdbcUtils() {
+    }
+
+    public static JdbcUrl getJdbcUrl(Connection connection) {
+        return ((ConnectionProxy<DriverConnectionSpec>)connection).getConnectionSpec().getJdbcUrl();
     }
 
     public static void closeQuietly(ResultSet resultSet) {
