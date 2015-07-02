@@ -61,8 +61,8 @@ echo "Setup migrator"
 echo "Setup source database"
 . ${BASE_DIR}/database/${DATABASE_NAME}/setup_source.sh
 
-echo "Setup target database"
-. ${BASE_DIR}/common/setup_nuodb.sh
+#echo "Setup target database"
+#. ${BASE_DIR}/common/setup_nuodb.sh
 
 echo "Running migration"
 . ${BASE_DIR}/database/${DATABASE_NAME}/migrate_data.sh
