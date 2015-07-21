@@ -72,8 +72,8 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
         SelectQuery statisticsIndex = new SelectQuery();
         Collection<String> parameters = newArrayList();
         statisticsIndex.columns("S.TABLE_CATALOG ", "S.TABLE_SCHEMA AS TABLE_CAT ","NULL AS TABLE_SCHEM " , "S.TABLE_NAME", "S.NON_UNIQUE",
-                "S.INDEX_SCHEMA","S.INDEX_NAME","S.INDEX_TYPE","1 AS TYPE" ," C.ORDINAL_POSITION" , "S.COLUMN_NAME" ,"S.COLLATION AS ASC_OR_DESC",
-                "S.CARDINALITY", "S.SUB_PART","NULL AS FILTER_CONDITION");
+                "S.INDEX_SCHEMA","S.INDEX_NAME","S.INDEX_TYPE","1 AS TYPE", "S.SEQ_IN_INDEX AS ORDINAL_POSITION", "S.COLUMN_NAME", "S.COLLATION AS ASC_OR_DESC",
+                "S.CARDINALITY", "S.SUB_PART", "NULL AS FILTER_CONDITION");
         statisticsIndex.from("INFORMATION_SCHEMA.STATISTICS S");
         statisticsIndex.join("INFORMATION_SCHEMA.COLUMNS C",
                 "C.COLUMN_NAME = S.COLUMN_NAME AND C.TABLE_NAME = S.TABLE_NAME AND S.TABLE_SCHEMA = C.TABLE_SCHEMA");
@@ -87,7 +87,8 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
             statisticsIndex.where("S.TABLE_NAME=?");
             parameters.add(table);
         }
-         return new ParameterizedQuery(union(statisticsIndex, null), parameters);
+        statisticsIndex.orderBy("INDEX_NAME", "SEQ_IN_INDEX");
+        return new ParameterizedQuery(union(statisticsIndex, null), parameters);
     }
 }
 
