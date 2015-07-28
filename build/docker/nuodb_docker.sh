@@ -5,13 +5,8 @@ CONTAINER='nuodb-cdmt-cont'
 IMAGE='nuodb-cdmt-img'
 
 echo "Nuodb Docker Process Starting"
-rm -rf nuodb-dev-docker
-git clone git://github.com/mgodekere/nuodb-dev-docker.git 
+docker build -t $IMAGE docker/nuodb_dev_docker/ # building docker image
 
-# Temporary fix for bug in the script, it will be removed once below fix is added in github repo for above script.
-sed -i 's/PATH=${NUODB_HOME}/PATH ${NUODB_HOME}/' nuodb-dev-docker/Dockerfile
-docker build -t $IMAGE ./nuodb-dev-docker/ # building docker image
-rm -rf nuodb-dev-docker
 echo "NuoDB Image Creation is done.";
 
 # Running new container with the following ports forwarded to the host system.
