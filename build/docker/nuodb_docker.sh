@@ -5,6 +5,7 @@ CONTAINER='nuodb-cdmt-cont'
 IMAGE='nuodb-cdmt-img'
 
 echo "Nuodb Docker Process Starting"
+
 docker build -t $IMAGE docker/nuodb_dev_docker/ # building docker image
 
 echo "NuoDB Image Creation is done.";
