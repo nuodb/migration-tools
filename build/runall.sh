@@ -15,7 +15,7 @@ echo "Setup Target NuoDB Database Docker ";
 . ${BASE_DIR}/docker/nuodb_docker.sh
 
 echo "Setup MySQL Docker"
-. ${BASE_DIR}/docker/mysql_docker.sh
+. ${BASE_DIR}/docker/docker-mysql-5.1/mysql_docker.sh
 
 # Geting mysql jar from maven repo
 wget  -O ../core/mysql.jar http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.35/mysql-connector-java-5.1.35.jar
