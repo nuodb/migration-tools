@@ -1,7 +1,4 @@
-mysql -u${SOURCE_USERNAME} -e "drop database ${SOURCE_CATALOG};"
-mysql -u${SOURCE_USERNAME} -e "create database ${SOURCE_CATALOG};"
-mysql -u${SOURCE_USERNAME} ${SOURCE_CATALOG} < ${NUODB_MIGRATOR_ROOT}/core/src/test/resources/mysql/nuodbtest.sql
-mysql -u${SOURCE_USERNAME} ${SOURCE_CATALOG} < ${NUODB_MIGRATOR_ROOT}/core/src/test/resources/mysql/precision.sql
-mysql -u${SOURCE_USERNAME} ${SOURCE_CATALOG} < ${NUODB_MIGRATOR_ROOT}/core/src/test/resources/mysql/datatypes.sql
+docker exec mysql-cdmt-cont chmod 770 /migsql/mysql_init.sh
+docker exec mysql-cdmt-cont sh /migsql/mysql_init.sh
 sleep 1
 
