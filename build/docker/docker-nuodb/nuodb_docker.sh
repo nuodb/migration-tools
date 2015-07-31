@@ -22,7 +22,7 @@ echo "OK - $CONTAINER is running.  StartedAt: $STARTED"
 # Docker mounting
  
 docker cp $CONTAINER:/opt/nuodb/jar/nuodbjdbc.jar ${JDBC_DRIVERS}/nuodb
-chmod 770 common
+
 
 echo "NuoDB Docker Container Creation Process Is Done";
 sleep 40s
