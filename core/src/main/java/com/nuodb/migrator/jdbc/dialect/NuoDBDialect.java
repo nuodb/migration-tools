@@ -178,6 +178,8 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected void initTranslations() {
+        addTranslator(new CurrentTimestampTranslator(NUODB,
+                newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()"), "CURRENT_TIMESTAMP", true));
         addTranslator(new CurrentTimestampTranslator(MYSQL,
                 newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()", "LOCALTIME", "LOCALTIME()",
                         "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW"));
