@@ -424,7 +424,7 @@ public class StructureTest extends MigrationTestBase {
 					found = true;
 					String idxName = rs2.getString("INDEXNAME");
 					Assert.assertNotNull(idxName);
-					Assert.assertEquals(idxName.substring(0, 4), "IDX_");
+					Assert.assertEquals(idxName.substring(0, 4), "idx_");
 				}
 				Assert.assertTrue(found);
 				rs2.close();

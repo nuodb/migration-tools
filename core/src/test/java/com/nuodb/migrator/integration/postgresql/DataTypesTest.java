@@ -46,12 +46,12 @@ public class DataTypesTest extends BaseDataTypeTest {
 				{ "testdata_serial" }, { "testdata_smallserial" },
 				{ "testdata_bigserial" }, { "testdata_char" },
 				{ "testdata_character" }, { "testdata_charactervarying" },
-				{ "testdata_varchar" }, { "testdata_text" },
+				{ "testdata_varchar" }/*, { "testdata_text" },
 				{ "testdata_bytea" }, { "testdata_boolean" },
 				{ "testdata_timewithtimezone" },
 				{ "testdata_timewithouttimezone" },
 				{ "testdata_timestampwithtimezone" },
-				{ "testdata_timestampwithouttimezone" } };
+				{ "testdata_timestampwithouttimezone" }*/ };
 	}
 
 	@Test(dataProvider = "dataTypePostgre")

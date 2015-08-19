@@ -20,3 +20,14 @@ echo "Setup MySQL Docker"
 ${BASE_DIR}/run.sh bson --database mysql_5.1.71 --driver ${JDBC_DRIVERS}/mysql/mysql-connector-java-5.1.28-bin.jar
 ${BASE_DIR}/run.sh xml --database mysql_5.1.71 --driver ${JDBC_DRIVERS}/mysql/mysql-connector-java-5.1.28-bin.jar
 ${BASE_DIR}/run.sh csv --database mysql_5.1.71 --driver ${JDBC_DRIVERS}/mysql/mysql-connector-java-5.1.28-bin.jar
+
+
+echo "Setup Postgresql Docker"
+. ${BASE_DIR}/docker/docker-postgresql/postgresql_docker.sh
+
+export POSTGRESQL_PATH=${JDBC_DRIVERS}/postgresql/postgresql-9.3-1100.jdbc4.jar;
+
+${BASE_DIR}/run.sh bson --database  postgresql --driver  ${JDBC_DRIVERS}/postgresql/postgresql-9.3-1100.jdbc4.jar
+${BASE_DIR}/run.sh xml --database   postgresql --driver  ${JDBC_DRIVERS}/postgresql/postgresql-9.3-1100.jdbc3.jar
+${BASE_DIR}/run.sh csv --database   postgresql --driver  ${JDBC_DRIVERS}/postgresql/postgresql-9.3-1100.jdbc3.jar
+
