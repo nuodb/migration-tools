@@ -32,7 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.UserDefined;
+import com.nuodb.migrator.jdbc.metadata.UserDefinedType;
 import com.nuodb.migrator.jdbc.metadata.inspector.SchemaInspectionScope;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -48,7 +48,7 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
 
     private static final String TABLE_ELEMENT = "table";
     private static final String SEQUENCE_ELEMENT = "sequence";
-    private static final String USER_DEFINED = "userDefined";
+    private static final String USER_DEFINED_TYPE_ELEMENT = "user-defined-type";
 
     public XmlSchemaHandler() {
         super(Schema.class);
@@ -69,8 +69,8 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
             schema.addTable(context.read(input, Table.class));
         } else if (SEQUENCE_ELEMENT.equals(element)) {
             schema.addSequence(context.read(input, Sequence.class));
-        } else if (USER_DEFINED.equals(element)) {
-            schema.addUserDefined(context.read(input, UserDefined.class));
+        } else if (USER_DEFINED_TYPE_ELEMENT.equals(element)) {
+            schema.addUserDefinedType(context.read(input, UserDefinedType.class));
         }
     }
 
@@ -79,8 +79,8 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
         for (Sequence sequence : schema.getSequences()) {
             context.writeElement(output, SEQUENCE_ELEMENT, sequence);
         }
-        for (UserDefined userDefined : schema.getUserDefined()) {
-            context.writeElement(output, USER_DEFINED, userDefined);
+        for (UserDefinedType userDefinedType : schema.getUserDefinedTypes()) {
+            context.writeElement(output, USER_DEFINED_TYPE_ELEMENT, userDefinedType);
         }
         for (Table table : schema.getTables()) {
             context.writeElement(output, TABLE_ELEMENT, table);

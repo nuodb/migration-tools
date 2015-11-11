@@ -29,22 +29,21 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.metadata.UserDefined;
+import com.nuodb.migrator.jdbc.metadata.UserDefinedType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.dialect.OracleDialect.INTERVAL_DAY_TO_SECOND_REGEX;
 import static com.nuodb.migrator.jdbc.dialect.OracleDialect.INTERVAL_YEAR_TO_MATCH_REGEX;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -79,12 +78,12 @@ public class OracleColumnInspector extends SimpleColumnInspector {
         column.setTypeCode(typeDescAlias.getTypeCode());
         column.setTypeName(typeDescAlias.getTypeName());
 
-        if(columns.getInt("DATA_TYPE") == Types.OTHER ) {
+        if (columns.getInt("DATA_TYPE") == Types.OTHER) {
             Schema schema = inspectionContext.getInspectionResults().getObject(SCHEMA);
-            UserDefined userDefined = schema.getUserDefined(columns.getString("TYPE_NAME"));
-            if (userDefined != null) {
+            UserDefinedType userDefinedType = schema.getUserDefinedType(columns.getString("TYPE_NAME"));
+            if (userDefinedType != null) {
                 column.setTypeCode(columns.getInt("DATA_TYPE"));
-                column.setTypeName(userDefined.getTypeCode());
+                column.setTypeName(userDefinedType.getTypeCode());
             }
 
             Collection<String> typeInfo = newArrayList();
@@ -98,13 +97,13 @@ public class OracleColumnInspector extends SimpleColumnInspector {
                 typeInfo.add(format("scale %d", column.getScale()));
             }
             logger.warn(format("Unsupported type on table %s column %s: %s",
-                            column.getTable().getName(), column.getName(), join(typeInfo, ", ")));
+                    column.getTable().getName(), column.getName(), join(typeInfo, ", ")));
         }
 
         int columnSize = columns.getInt("COLUMN_SIZE");
-        column.setSize((long)columnSize);
-        if (columns.getInt("DATA_TYPE") == -104 || columns.getInt("DATA_TYPE") == -103 
-                || INTERVAL_DAY_TO_SECOND_REGEX.test(columns.getString("TYPE_NAME")) 
+        column.setSize((long) columnSize);
+        if (columns.getInt("DATA_TYPE") == -104 || columns.getInt("DATA_TYPE") == -103
+                || INTERVAL_DAY_TO_SECOND_REGEX.test(columns.getString("TYPE_NAME"))
                 || INTERVAL_YEAR_TO_MATCH_REGEX.test(columns.getString("TYPE_NAME"))) {
             column.setSize(cSize);
         }

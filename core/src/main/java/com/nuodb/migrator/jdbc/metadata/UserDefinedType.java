@@ -30,14 +30,13 @@ package com.nuodb.migrator.jdbc.metadata;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED_TYPE;
 import static java.lang.String.format;
 
 /**
  * @author Mukund
  */
-
-public class UserDefined extends IdentifiableBase {
+public class UserDefinedType extends IdentifiableBase {
 
     private static final String COLLECTION = "COLLECTION";
     private static final String ARRAY = "ARRAY";
@@ -45,19 +44,19 @@ public class UserDefined extends IdentifiableBase {
     private static final String STRUCT = "STRUCT";
 
     private Schema schema;
-    private String userDefinedName;
+    private String typeName;
     private String typeCode;
 
-    public UserDefined() {
-        super(USER_DEFINED, true);
+    public UserDefinedType() {
+        super(USER_DEFINED_TYPE, true);
     }
 
-    public UserDefined(String name) {
-        super(USER_DEFINED, name, true);
+    public UserDefinedType(String name) {
+        super(USER_DEFINED_TYPE, name, true);
     }
 
-    public UserDefined(Identifier identifier) {
-        super(USER_DEFINED, identifier, true);
+    public UserDefinedType(Identifier identifier) {
+        super(USER_DEFINED_TYPE, identifier, true);
     }
 
     public Schema getSchema() {
@@ -68,12 +67,12 @@ public class UserDefined extends IdentifiableBase {
         this.schema = schema;
     }
 
-    public String getUserDefinedName() {
-        return userDefinedName;
+    public String getTypeName() {
+        return typeName;
     }
 
-    public void setUserDefinedName(String userDefinedName) {
-        this.userDefinedName = userDefinedName;
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public String getTypeCode() {
@@ -97,9 +96,9 @@ public class UserDefined extends IdentifiableBase {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        UserDefined u = (UserDefined) o;
+        UserDefinedType u = (UserDefinedType) o;
 
-        if (userDefinedName != null ? !userDefinedName.equals(u.userDefinedName) : u.userDefinedName != null) return false;
+        if (typeName != null ? !typeName.equals(u.typeName) : u.typeName != null) return false;
         if (typeCode != null ? !typeCode.equals(u.typeCode) : u.typeCode != null) return false;
         return true;
     }
@@ -107,7 +106,7 @@ public class UserDefined extends IdentifiableBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (userDefinedName != null ? userDefinedName.hashCode() : 0);
+        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
         result = 31 * result + (typeCode != null ? typeCode.hashCode() : 0);
         return result;
     }
@@ -118,8 +117,8 @@ public class UserDefined extends IdentifiableBase {
 
         buffer.append(' ');
         Collection<String> attributes = newArrayList();
-        if (userDefinedName != null) {
-            attributes.add(format("user defined=%s", userDefinedName));
+        if (typeName != null) {
+            attributes.add(format("user defined=%s", typeName));
         }
         if (typeCode != null) {
             attributes.add(format("typeCode=%s", typeCode));

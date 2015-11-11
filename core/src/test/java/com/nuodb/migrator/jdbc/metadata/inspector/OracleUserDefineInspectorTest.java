@@ -28,8 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import static com.google.common.collect.Iterables.get;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSchema;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED_TYPE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -37,20 +36,15 @@ import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Types;
 import java.util.Collection;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.metadata.UserDefined;
+import com.nuodb.migrator.jdbc.metadata.UserDefinedType;
 
 /**
  * @author Mukund
@@ -72,32 +66,32 @@ public class OracleUserDefineInspectorTest extends InspectorTestBase {
 
     @DataProvider(name = "getUserDefinedData")
     public Object[][] createGetTypeNameData() throws Exception{
-        UserDefined userDefined1 = new UserDefined("MTYPE");
-        userDefined1.setUserDefinedName("MTYPE");
-        userDefined1.setTypeCode("ARRAY");
+        UserDefinedType userDefinedType1 = new UserDefinedType("MTYPE");
+        userDefinedType1.setTypeName("MTYPE");
+        userDefinedType1.setTypeCode("ARRAY");
 
-        UserDefined userDefined2 = new UserDefined("DTYPE");
-        userDefined2.setUserDefinedName("DTYPE");
-        userDefined2.setTypeCode("STRUCT");
+        UserDefinedType userDefinedType2 = new UserDefinedType("DTYPE");
+        userDefinedType2.setTypeName("DTYPE");
+        userDefinedType2.setTypeCode("STRUCT");
 
         return new Object[][] {
-                { userDefined1 },
-                { userDefined2 } 
+                {userDefinedType1},
+                {userDefinedType2}
         };
     }
 
     @Test(dataProvider = "getUserDefinedData")
-    public void testUserDefinedType(UserDefined userDefined) throws Exception {
-        configureUserDefinedResultSet(userDefined.getTypeCode(), userDefined.getUserDefinedName());
+    public void testUserDefinedType(UserDefinedType userDefinedType) throws Exception {
+        configureUserDefinedResultSet(userDefinedType.getTypeCode(), userDefinedType.getTypeName());
 
         TableInspectionScope tableInspectionScope = new TableInspectionScope(catalogName,schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), tableInspectionScope,USER_DEFINED);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), tableInspectionScope, USER_DEFINED_TYPE);
         verifyInspectScope(getInspector(), tableInspectionScope);
 
-        Collection<UserDefined> userDefineds = inspectionResults.getObjects(USER_DEFINED);
-        assertNotNull(userDefineds);
-        assertEquals(userDefineds.size(), 1);
-        assertEquals(get(userDefineds, 0).getUserDefinedName(), userDefined.getUserDefinedName());
+        Collection<UserDefinedType> userDefinedTypes = inspectionResults.getObjects(USER_DEFINED_TYPE);
+        assertNotNull(userDefinedTypes);
+        assertEquals(userDefinedTypes.size(), 1);
+        assertEquals(get(userDefinedTypes, 0).getTypeName(), userDefinedType.getTypeName());
     }
 
     private ResultSet configureUserDefinedResultSet(String typeCode, String typeName) throws Exception{
@@ -105,14 +99,14 @@ public class OracleUserDefineInspectorTest extends InspectorTestBase {
         given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
         given(getConnection().prepareStatement(anyString())).willReturn(query);
 
-        ResultSet udResultSet = mock(ResultSet.class);
-        given(udResultSet.next()).willReturn(true, false);
-        given(udResultSet.getString("OWNER")).willReturn("ROOT");
-        given(udResultSet.getString("TYPE_NAME")).willReturn(typeName);
-        given(udResultSet.getString("TYPE_NAME")).willReturn(typeName);
-        given(udResultSet.getString("TYPECODE")).willReturn(typeCode);
-        given(query.executeQuery()).willReturn(udResultSet);
+        ResultSet resultSet = mock(ResultSet.class);
+        given(resultSet.next()).willReturn(true, false);
+        given(resultSet.getString("OWNER")).willReturn("ROOT");
+        given(resultSet.getString("TYPE_NAME")).willReturn(typeName);
+        given(resultSet.getString("TYPE_NAME")).willReturn(typeName);
+        given(resultSet.getString("TYPECODE")).willReturn(typeCode);
+        given(query.executeQuery()).willReturn(resultSet);
 
-        return udResultSet;
+        return resultSet;
     }
 }

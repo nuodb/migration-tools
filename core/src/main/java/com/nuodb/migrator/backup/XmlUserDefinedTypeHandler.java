@@ -28,7 +28,7 @@
 package com.nuodb.migrator.backup;
 
 
-import com.nuodb.migrator.jdbc.metadata.UserDefined;
+import com.nuodb.migrator.jdbc.metadata.UserDefinedType;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 
@@ -38,26 +38,26 @@ import org.simpleframework.xml.stream.OutputNode;
 /**
  * @author Mukund
  */
-public class XmlUserDefinedHandler extends XmlIdentifiableHandlerBase<UserDefined> {
+public class XmlUserDefinedTypeHandler extends XmlIdentifiableHandlerBase<UserDefinedType> {
 
-    private static final String TYPE_NAME = "object_name";
-    private static final String TYPE_CODE = "typecode";
+    private static final String NAME_ATTRIBUTE = "name";
+    private static final String CODE_ATTRIBUTE = "code";
 
-    public XmlUserDefinedHandler() {
-        super(UserDefined.class);
+    public XmlUserDefinedTypeHandler() {
+        super(UserDefinedType.class);
     }
 
     @Override
-    protected void readAttributes(InputNode input, UserDefined userDefined, XmlReadContext context) throws Exception {
-        userDefined.setUserDefinedName(context.readAttribute(input, TYPE_NAME, String.class));
-        userDefined.setTypeCode(context.readAttribute(input, TYPE_CODE, String.class));
+    protected void readAttributes(InputNode input, UserDefinedType userDefinedType, XmlReadContext context) throws Exception {
+        userDefinedType.setTypeName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
+        userDefinedType.setTypeCode(context.readAttribute(input, CODE_ATTRIBUTE, String.class));
     }
 
     @Override
-    protected void writeAttributes(UserDefined userDefined, OutputNode output, XmlWriteContext context) throws Exception {
-        if (!userDefined.getUserDefinedName().equalsIgnoreCase(null) && !userDefined.getTypeCode().equalsIgnoreCase(null)) {
-            context.writeAttribute(output, TYPE_NAME, userDefined.getUserDefinedName());
-            context.writeAttribute(output, TYPE_CODE, userDefined.getTypeCode());
+    protected void writeAttributes(UserDefinedType userDefinedType, OutputNode output, XmlWriteContext context) throws Exception {
+        if (!userDefinedType.getTypeName().equalsIgnoreCase(null) && !userDefinedType.getTypeCode().equalsIgnoreCase(null)) {
+            context.writeAttribute(output, NAME_ATTRIBUTE, userDefinedType.getTypeName());
+            context.writeAttribute(output, CODE_ATTRIBUTE, userDefinedType.getTypeCode());
         }
     }
 }

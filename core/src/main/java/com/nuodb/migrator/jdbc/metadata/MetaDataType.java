@@ -44,7 +44,7 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
     public static final MetaDataType DATABASE = new MetaDataType(Database.class);
     public static final MetaDataType CATALOG = new MetaDataType(Catalog.class);
-    public static final MetaDataType USER_DEFINED = new MetaDataType(UserDefined.class);
+    public static final MetaDataType USER_DEFINED_TYPE = new MetaDataType(UserDefinedType.class);
     public static final MetaDataType SCHEMA = new MetaDataType(Schema.class);
     public static final MetaDataType TABLE = new MetaDataType(Table.class);
     public static final MetaDataType COLUMN = new MetaDataType(Column.class);

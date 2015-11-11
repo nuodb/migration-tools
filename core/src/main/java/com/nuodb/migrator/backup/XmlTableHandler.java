@@ -55,7 +55,6 @@ import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.spec.MetaDataSpec.TABLE_TYPES;
-import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 
 /**

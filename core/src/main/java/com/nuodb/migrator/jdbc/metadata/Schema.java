@@ -1,19 +1,19 @@
 /**
  * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of NuoDB, Inc. nor the names of its contributors may
- *       be used to endorse or promote products derived from this software
- *       without specific prior written permission.
- *
+ * <p/>
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of NuoDB, Inc. nor the names of its contributors may
+ * be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -42,7 +41,7 @@ public class Schema extends IdentifiableBase implements HasTables {
     private Database database;
     private Catalog catalog;
     private final Collection<Sequence> sequences = newArrayList();
-    private final Map<Identifier, UserDefined> userDefinedTypes = newLinkedHashMap();
+    private final Map<Identifier, UserDefinedType> userDefinedTypes = newLinkedHashMap();
     private final Map<Identifier, Table> tables = newLinkedHashMap();
 
     public Schema() {
@@ -106,22 +105,21 @@ public class Schema extends IdentifiableBase implements HasTables {
         return sequences;
     }
 
-    public void addUserDefined(UserDefined userDefined) {
-        userDefined.setSchema(this);
-        userDefinedTypes.put(userDefined.getIdentifier(),userDefined);
+    public void addUserDefinedType(UserDefinedType userDefinedType) {
+        userDefinedType.setSchema(this);
+        userDefinedTypes.put(userDefinedType.getIdentifier(), userDefinedType);
     }
 
-    public UserDefined getUserDefined(String name) {
-        return userDefinedTypes.get(valueOf(name)) ;
+    public UserDefinedType getUserDefinedType(String name) {
+        return getUserDefinedType(valueOf(name));
     }
-    
 
-    public UserDefined getUserDefined(Identifier identifier) {
-        return userDefinedTypes.get(identifier) ;
+    public UserDefinedType getUserDefinedType(Identifier identifier) {
+        return userDefinedTypes.get(identifier);
     }
-    
+
     @Override
-    public Collection<UserDefined> getUserDefined() {
+    public Collection<UserDefinedType> getUserDefinedTypes() {
         return userDefinedTypes.values();
     }
 
