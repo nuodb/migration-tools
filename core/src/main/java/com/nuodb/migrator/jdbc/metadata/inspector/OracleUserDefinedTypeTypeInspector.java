@@ -1,19 +1,19 @@
 /**
  * Copyright (c) 2015, NuoDB, Inc.
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of NuoDB, Inc. nor the names of its contributors may
- *       be used to endorse or promote products derived from this software
- *       without specific prior written permission.
- *
+ * <p/>
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of NuoDB, Inc. nor the names of its contributors may
+ * be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -44,9 +44,9 @@ import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 /**
  * @author Mukund
  */
-public class OracleUserDefinedInspector extends SimpleUserDefinedInspector {
+public class OracleUserDefinedTypeTypeInspector extends SimpleUserDefinedTypeInspector {
 
-    public OracleUserDefinedInspector() {
+    public OracleUserDefinedTypeTypeInspector() {
         super();
     }
 
@@ -54,7 +54,7 @@ public class OracleUserDefinedInspector extends SimpleUserDefinedInspector {
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery query = new SelectQuery();
         Collection<String> parameters = newArrayList();
-        query.columns("TYPE_NAME" , "TYPECODE" , "OWNER");
+        query.columns("TYPE_NAME", "TYPECODE", "OWNER");
         query.from("ALL_TYPES");
         String schema = tableInspectionScope.getSchema();
         if (!isEmpty(schema)) {
@@ -65,13 +65,13 @@ public class OracleUserDefinedInspector extends SimpleUserDefinedInspector {
     }
 
     @Override
-    protected void processResultSet(InspectionContext inspectionContext, ResultSet userDefineds) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet resultSet) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        while (userDefineds.next()) {
-            Schema schema = addSchema(inspectionResults, null, userDefineds.getString("OWNER"));
-            UserDefinedType userDefinedType = new UserDefinedType(userDefineds.getString("TYPE_NAME"));
-            userDefinedType.setName(userDefineds.getString("TYPE_NAME"));
-            userDefinedType.setCode(userDefineds.getString("TYPECODE"));
+        while (resultSet.next()) {
+            Schema schema = addSchema(inspectionResults, null, resultSet.getString("OWNER"));
+            UserDefinedType userDefinedType = new UserDefinedType(resultSet.getString("TYPE_NAME"));
+            userDefinedType.setName(resultSet.getString("TYPE_NAME"));
+            userDefinedType.setCode(resultSet.getString("TYPECODE"));
             schema.addUserDefinedType(userDefinedType);
             inspectionResults.addObject(userDefinedType);
         }

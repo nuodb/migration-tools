@@ -39,9 +39,9 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED_TYPE;
 /**
  * @author Mukund
  */
-public class SimpleUserDefinedInspector extends TableInspectorBase<Table, TableInspectionScope> {
+public class SimpleUserDefinedTypeInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public SimpleUserDefinedInspector() {
+    public SimpleUserDefinedTypeInspector() {
         super(USER_DEFINED_TYPE, TableInspectionScope.class);
     }
 
