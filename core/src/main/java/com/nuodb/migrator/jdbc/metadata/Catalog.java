@@ -134,12 +134,12 @@ public class Catalog extends IdentifiableBase implements HasSchemas {
     }
 
     @Override
-    public Collection<UserDefined> getUserDefined() {
-        Collection<UserDefined> userDefineds = newArrayList();
+    public Collection<UserDefinedType> getUserDefinedTypes() {
+        Collection<UserDefinedType> userDefinedTypes = newArrayList();
         for (Schema schema : getSchemas()) {
-            userDefineds.addAll(schema.getUserDefined());
+            userDefinedTypes.addAll(schema.getUserDefinedTypes());
         }
-        return userDefineds;
+        return userDefinedTypes;
     }
 
     @Override

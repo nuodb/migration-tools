@@ -69,7 +69,7 @@ public class InspectionManager {
         schemaInspector.register(MSSQL_SERVER, new MSSQLServerSchemaInspector());
         addInspector(schemaInspector);
 
-        InspectorResolver userDefinedInspector = new InspectorResolver(USER_DEFINED, new SimpleUserDefinedInspector());
+        InspectorResolver userDefinedInspector = new InspectorResolver(USER_DEFINED_TYPE, new SimpleUserDefinedInspector());
         userDefinedInspector.register(ORACLE , new OracleUserDefinedInspector());
         addInspector(userDefinedInspector);
 

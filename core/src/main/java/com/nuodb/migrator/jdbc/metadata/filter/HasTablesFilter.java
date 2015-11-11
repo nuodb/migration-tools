@@ -32,7 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.HasTables;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.UserDefined;
+import com.nuodb.migrator.jdbc.metadata.UserDefinedType;
 
 import java.util.Collection;
 
@@ -78,13 +78,13 @@ public class HasTablesFilter implements HasTables {
     }
 
     @Override
-    public Collection<UserDefined> getUserDefined() {
+    public Collection<UserDefinedType> getUserDefinedTypes() {
         final MetaDataFilter filter = metaDataFilterManager != null ?
                 metaDataFilterManager.getMetaDataFilter(MetaDataType.TABLE) : null;
-        return newArrayList(filter(hasTables.getUserDefined(), new Predicate<UserDefined>() {
+        return newArrayList(filter(hasTables.getUserDefinedTypes(), new Predicate<UserDefinedType>() {
             @Override
-            public boolean apply(UserDefined userDefined) {
-                return filter == null || filter.accepts(userDefined);
+            public boolean apply(UserDefinedType userDefinedType) {
+                return filter == null || filter.accepts(userDefinedType);
             }
         }));
     }

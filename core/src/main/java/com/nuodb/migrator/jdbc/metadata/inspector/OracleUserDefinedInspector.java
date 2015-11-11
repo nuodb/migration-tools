@@ -28,7 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.metadata.UserDefined;
+import com.nuodb.migrator.jdbc.metadata.UserDefinedType;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
@@ -69,11 +69,11 @@ public class OracleUserDefinedInspector extends SimpleUserDefinedInspector {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (userDefineds.next()) {
             Schema schema = addSchema(inspectionResults, null, userDefineds.getString("OWNER"));
-            UserDefined userDefined = new UserDefined(userDefineds.getString("TYPE_NAME"));
-            userDefined.setUserDefinedName(userDefineds.getString("TYPE_NAME"));
-            userDefined.setTypeCode(userDefineds.getString("TYPECODE"));
-            schema.addUserDefined(userDefined);
-            inspectionResults.addObject(userDefined);
+            UserDefinedType userDefinedType = new UserDefinedType(userDefineds.getString("TYPE_NAME"));
+            userDefinedType.setTypeName(userDefineds.getString("TYPE_NAME"));
+            userDefinedType.setTypeCode(userDefineds.getString("TYPECODE"));
+            schema.addUserDefinedType(userDefinedType);
+            inspectionResults.addObject(userDefinedType);
         }
     }
 }

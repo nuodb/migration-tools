@@ -34,7 +34,7 @@ import com.nuodb.migrator.jdbc.query.Query;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED_TYPE;
 
 /**
  * @author Mukund
@@ -42,7 +42,7 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED;
 public class SimpleUserDefinedInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public SimpleUserDefinedInspector() {
-        super(USER_DEFINED, TableInspectionScope.class);
+        super(USER_DEFINED_TYPE, TableInspectionScope.class);
     }
 
     @Override
