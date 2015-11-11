@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, NuoDB, Inc.
+ * Copyright (c) 2015, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ public class OracleColumnInspector extends SimpleColumnInspector {
             UserDefinedType userDefinedType = schema.getUserDefinedType(columns.getString("TYPE_NAME"));
             if (userDefinedType != null) {
                 column.setTypeCode(columns.getInt("DATA_TYPE"));
-                column.setTypeName(userDefinedType.getTypeCode());
+                column.setTypeName(userDefinedType.getCode());
             }
 
             Collection<String> typeInfo = newArrayList();

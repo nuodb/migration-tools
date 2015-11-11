@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, NuoDB, Inc.
+ * Copyright (c) 2015, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,8 +70,8 @@ public class OracleUserDefinedInspector extends SimpleUserDefinedInspector {
         while (userDefineds.next()) {
             Schema schema = addSchema(inspectionResults, null, userDefineds.getString("OWNER"));
             UserDefinedType userDefinedType = new UserDefinedType(userDefineds.getString("TYPE_NAME"));
-            userDefinedType.setTypeName(userDefineds.getString("TYPE_NAME"));
-            userDefinedType.setTypeCode(userDefineds.getString("TYPECODE"));
+            userDefinedType.setName(userDefineds.getString("TYPE_NAME"));
+            userDefinedType.setCode(userDefineds.getString("TYPECODE"));
             schema.addUserDefinedType(userDefinedType);
             inspectionResults.addObject(userDefinedType);
         }

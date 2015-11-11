@@ -1,5 +1,5 @@
 @ECHO OFF
-@REM Copyright (c) 2014, NuoDB, Inc.
+@REM Copyright (c) 2015, NuoDB, Inc.
 @REM All rights reserved.
 @REM
 @REM Redistribution and use in source and binary forms, with or without

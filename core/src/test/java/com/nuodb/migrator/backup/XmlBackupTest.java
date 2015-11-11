@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, NuoDB, Inc.
+ * Copyright (c) 2015, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,8 +137,8 @@ public class XmlBackupTest {
         schema.addSequence(sequence);
 
         UserDefinedType userDefinedType = new UserDefinedType();
-        userDefinedType.setTypeName("MTYPE");
-        userDefinedType.setTypeCode("ARRAY");
+        userDefinedType.setName("MTYPE");
+        userDefinedType.setCode("ARRAY");
         schema.addUserDefinedType(userDefinedType);
 
         // table read
@@ -239,8 +239,8 @@ public class XmlBackupTest {
         Schema schema = new Schema("schema1");
         schema.addSequence(new Sequence("sequence1"));
         UserDefinedType userDefinedType = new UserDefinedType();
-        userDefinedType.setTypeName("MTYPE");
-        userDefinedType.setTypeCode("ARRAY");
+        userDefinedType.setName("MTYPE");
+        userDefinedType.setCode("ARRAY");
         schema.addUserDefinedType(userDefinedType);
         schema.addTable("table1");
 

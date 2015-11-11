@@ -1,19 +1,19 @@
 /**
- * Copyright (c) 2014, NuoDB, Inc.
+ * Copyright (c) 2015, NuoDB, Inc.
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of NuoDB, Inc. nor the names of its contributors may
- *       be used to endorse or promote products derived from this software
- *       without specific prior written permission.
- *
+ * <p/>
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of NuoDB, Inc. nor the names of its contributors may
+ * be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,9 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.USER_DEFINED_TYPE;
 import static java.lang.String.format;
 
@@ -44,8 +41,7 @@ public class UserDefinedType extends IdentifiableBase {
     private static final String STRUCT = "STRUCT";
 
     private Schema schema;
-    private String typeName;
-    private String typeCode;
+    private String code;
 
     public UserDefinedType() {
         super(USER_DEFINED_TYPE, true);
@@ -67,26 +63,29 @@ public class UserDefinedType extends IdentifiableBase {
         this.schema = schema;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public String getCode() {
+        return code;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
-    public String getTypeCode() {
-        return typeCode;
-    }
-
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
-        if(typeCode != null) {
-            if(typeCode.equalsIgnoreCase(COLLECTION)) {
-                this.typeCode = ARRAY;
-            }else if (typeCode.equalsIgnoreCase(OBJECT)) {
-                this.typeCode = STRUCT;
+    public void setCode(String code) {
+        this.code = code;
+        if (code != null) {
+            if (code.equalsIgnoreCase(COLLECTION)) {
+                this.code = ARRAY;
+            } else if (code.equalsIgnoreCase(OBJECT)) {
+                this.code = STRUCT;
             }
+        }
+    }
+
+    @Override
+    public void output(int indent, StringBuilder buffer) {
+        super.output(indent, buffer);
+
+        String code = getCode();
+        if (code != null) {
+            buffer.append(' ');
+            buffer.append(format("code=%s", code));
         }
     }
 
@@ -96,32 +95,18 @@ public class UserDefinedType extends IdentifiableBase {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        UserDefinedType u = (UserDefinedType) o;
+        UserDefinedType that = (UserDefinedType) o;
 
-        if (typeName != null ? !typeName.equals(u.typeName) : u.typeName != null) return false;
-        if (typeCode != null ? !typeCode.equals(u.typeCode) : u.typeCode != null) return false;
-        return true;
+        if (schema != null ? !schema.equals(that.schema) : that.schema != null) return false;
+        return !(code != null ? !code.equals(that.code) : that.code != null);
+
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
-        result = 31 * result + (typeCode != null ? typeCode.hashCode() : 0);
+        result = 31 * result + (schema != null ? schema.hashCode() : 0);
+        result = 31 * result + (code != null ? code.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    public void output(int indent, StringBuilder buffer) {
-        super.output(indent, buffer);
-
-        buffer.append(' ');
-        Collection<String> attributes = newArrayList();
-        if (typeName != null) {
-            attributes.add(format("user defined=%s", typeName));
-        }
-        if (typeCode != null) {
-            attributes.add(format("typeCode=%s", typeCode));
-        }
     }
 }

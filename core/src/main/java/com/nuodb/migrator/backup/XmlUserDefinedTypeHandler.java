@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, NuoDB, Inc.
+ * Copyright (c) 2015, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,15 +49,15 @@ public class XmlUserDefinedTypeHandler extends XmlIdentifiableHandlerBase<UserDe
 
     @Override
     protected void readAttributes(InputNode input, UserDefinedType userDefinedType, XmlReadContext context) throws Exception {
-        userDefinedType.setTypeName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
-        userDefinedType.setTypeCode(context.readAttribute(input, CODE_ATTRIBUTE, String.class));
+        userDefinedType.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
+        userDefinedType.setCode(context.readAttribute(input, CODE_ATTRIBUTE, String.class));
     }
 
     @Override
     protected void writeAttributes(UserDefinedType userDefinedType, OutputNode output, XmlWriteContext context) throws Exception {
-        if (!userDefinedType.getTypeName().equalsIgnoreCase(null) && !userDefinedType.getTypeCode().equalsIgnoreCase(null)) {
-            context.writeAttribute(output, NAME_ATTRIBUTE, userDefinedType.getTypeName());
-            context.writeAttribute(output, CODE_ATTRIBUTE, userDefinedType.getTypeCode());
+        if (!userDefinedType.getName().equalsIgnoreCase(null) && !userDefinedType.getCode().equalsIgnoreCase(null)) {
+            context.writeAttribute(output, NAME_ATTRIBUTE, userDefinedType.getName());
+            context.writeAttribute(output, CODE_ATTRIBUTE, userDefinedType.getCode());
         }
     }
 }

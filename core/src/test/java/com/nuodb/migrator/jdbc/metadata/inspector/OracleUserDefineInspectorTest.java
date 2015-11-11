@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, NuoDB, Inc.
+ * Copyright (c) 2015, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,12 +67,12 @@ public class OracleUserDefineInspectorTest extends InspectorTestBase {
     @DataProvider(name = "getUserDefinedData")
     public Object[][] createGetTypeNameData() throws Exception{
         UserDefinedType userDefinedType1 = new UserDefinedType("MTYPE");
-        userDefinedType1.setTypeName("MTYPE");
-        userDefinedType1.setTypeCode("ARRAY");
+        userDefinedType1.setName("MTYPE");
+        userDefinedType1.setCode("ARRAY");
 
         UserDefinedType userDefinedType2 = new UserDefinedType("DTYPE");
-        userDefinedType2.setTypeName("DTYPE");
-        userDefinedType2.setTypeCode("STRUCT");
+        userDefinedType2.setName("DTYPE");
+        userDefinedType2.setCode("STRUCT");
 
         return new Object[][] {
                 {userDefinedType1},
@@ -82,7 +82,7 @@ public class OracleUserDefineInspectorTest extends InspectorTestBase {
 
     @Test(dataProvider = "getUserDefinedData")
     public void testUserDefinedType(UserDefinedType userDefinedType) throws Exception {
-        configureUserDefinedResultSet(userDefinedType.getTypeCode(), userDefinedType.getTypeName());
+        configureUserDefinedResultSet(userDefinedType.getCode(), userDefinedType.getName());
 
         TableInspectionScope tableInspectionScope = new TableInspectionScope(catalogName,schemaName, tableName);
         InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), tableInspectionScope, USER_DEFINED_TYPE);
@@ -91,7 +91,7 @@ public class OracleUserDefineInspectorTest extends InspectorTestBase {
         Collection<UserDefinedType> userDefinedTypes = inspectionResults.getObjects(USER_DEFINED_TYPE);
         assertNotNull(userDefinedTypes);
         assertEquals(userDefinedTypes.size(), 1);
-        assertEquals(get(userDefinedTypes, 0).getTypeName(), userDefinedType.getTypeName());
+        assertEquals(get(userDefinedTypes, 0).getName(), userDefinedType.getName());
     }
 
     private ResultSet configureUserDefinedResultSet(String typeCode, String typeName) throws Exception{
