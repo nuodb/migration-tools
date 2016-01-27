@@ -28,39 +28,43 @@
 
 # JAVA_HOME can optionally be set here
 
+die () { echo "$*"; exit 1; }
+
 # NUODB_HOME & NUODB_MIGRATOR_LOG_DIR are set here
-: ${NUODB_HOME:="/opt/nuodb"}
-: ${NUODB_MIGRATOR_LOG_DIR:="/tmp"}
-: ${NUODB_MIGRATOR_LOG_DATE_PATTERN:="yyyy_MM_dd_HH_mm_ss"}
+: ${NUODB_HOME:=/opt/nuodb}
+: ${NUODB_MIGRATOR_LOG_DIR:=${TMPDIR:-/tmp}}
+: ${NUODB_MIGRATOR_LOG_DATE_PATTERN:=yyyy_MM_dd_HH_mm_ss}
 
 # Maximum heap size
 MAX_HEAP_SIZE="256M"
 
 # One level up
-if [ "x$NUODB_MIGRATOR_HOME" = "x" ]; then
-    NUODB_MIGRATOR_HOME=`dirname $0`/..
-fi
+CMD=${0##*/}
+DIR=$(cd "${0%$CMD}." && pwd) || die "Cannot resolve directory: ${0%$CMD}."
+: ${NUODB_MIGRATOR_HOME:=${DIR%/*}}
 
 # Expand java executable
-if [ -x $JAVA_HOME/bin/java ]; then
-    JAVA=$JAVA_HOME/bin/java
+if [ -x "$JAVA_HOME"/bin/java ]; then
+    JAVA="$JAVA_HOME"/bin/java
 else
     JAVA=`which java`
 fi
 
 # JAVA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y"
-# export JAVA_OPTS
 
-JAVA_OPTS="$JAVA_OPTS -Xmx$MAX_HEAP_SIZE"
-JAVA_OPTS="$JAVA_OPTS -Dnuodb.home=$NUODB_HOME"
-JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.home=$NUODB_MIGRATOR_HOME"
-JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.log.dir=$NUODB_MIGRATOR_LOG_DIR"
-JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.log.date.pattern=$NUODB_MIGRATOR_LOG_DATE_PATTERN"
-
-CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/conf"
+CLASSPATH="${CLASSPATH:+$CLASSPATH:}$NUODB_MIGRATOR_HOME/conf"
 CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/slf4j-api-${slf4j.version}.jar"
 CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/slf4j-log4j12-${slf4j.version}.jar"
 CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/log4j-${log4j.version}.jar"
 CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/nuodb-migrator-bootstrap-${project.version}.jar"
 
-$JAVA $JAVA_OPTS -cp $CLASSPATH com.nuodb.migrator.bootstrap.Bootstrap "$@"
+exec "$JAVA" $JAVA_OPTS \
+    -Xmx"$MAX_HEAP_SIZE" \
+    -Dnuodb.home="$NUODB_HOME" \
+    -Dnuodb.migrator.home="$NUODB_MIGRATOR_HOME" \
+    -Dnuodb.migrator.log.dir="$NUODB_MIGRATOR_LOG_DIR" \
+    -Dnuodb.migrator.log.date.pattern="$NUODB_MIGRATOR_LOG_DATE_PATTERN" \
+    -cp "$CLASSPATH" \
+    com.nuodb.migrator.bootstrap.Bootstrap "$@"
+
+die "Failed to execute Java '$JAVA'"
