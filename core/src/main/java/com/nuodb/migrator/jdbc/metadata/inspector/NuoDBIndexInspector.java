@@ -40,6 +40,7 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.KEY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.UNIQUE;
+import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.UNIQUECONSTRAINT;
 
 /**
  * @author Sergey Bushik
@@ -52,7 +53,7 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
-        return NuoDBIndex.createQuery(tableInspectionScope, UNIQUE, KEY);
+        return NuoDBIndex.createQuery(tableInspectionScope, UNIQUE, KEY, UNIQUECONSTRAINT);
     }
 
     @Override
@@ -65,7 +66,8 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
             Index index = table.getIndex(identifier);
             if (index == null) {
                 table.addIndex(index = new Index(identifier));
-                index.setUnique(indexes.getInt("INDEXTYPE") == UNIQUE);
+                index.setUnique(indexes.getInt("INDEXTYPE") == UNIQUE || indexes.getInt("INDEXTYPE") == UNIQUECONSTRAINT);
+                index.setUniqueConstraint(indexes.getInt("INDEXTYPE") == UNIQUECONSTRAINT);
             }
             index.addColumn(table.addColumn(indexes.getString("FIELD")), indexes.getInt("POSITION"));
             inspectionResults.addObject(index);

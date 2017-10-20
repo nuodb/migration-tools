@@ -32,13 +32,16 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.MySQLDialect;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect206;
+import com.nuodb.migrator.jdbc.dialect.NuoDBDialect256;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
+import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -50,6 +53,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager.SCRIPTS_IN_CREATE_TABLE;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.CREATE;
@@ -70,7 +74,6 @@ public class ScriptGeneratorTest {
     public void setUp() throws SQLException {
         scriptGeneratorManager = new ScriptGeneratorManager();
         scriptGeneratorManager.addAttribute(SCRIPTS_IN_CREATE_TABLE, true);
-        scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(MYSQL)));
     }
 
     @DataProvider(name = "getScripts")
@@ -105,7 +108,7 @@ public class ScriptGeneratorTest {
         data.add(new Object[]{table1, newArrayList(CREATE), null,
                 newArrayList(
                         "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, " +
-                                "\"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
+                                "\"login\" VARCHAR(32) NOT NULL, CONSTRAINT \"users_id\" PRIMARY KEY (\"id\"))")});
 
         // test db2 multiple schemas
         Database database2 = new Database();
@@ -158,16 +161,16 @@ public class ScriptGeneratorTest {
         f4_3.setTypeName("DATE");
         table4.addColumn(f4_3);
 
-        Index index4_1 = new Index("4_1");
+        Index index4_1 = new Index("idx_4_1");
         index4_1.addColumn(f4_1, 1);
         table4.addIndex(index4_1);
 
-        Index index4_2 = new Index("4_2");
+        Index index4_2 = new Index("idx_4_2");
         index4_2.addColumn(f4_1, 1);
         index4_2.addColumn(f4_3, 2);
         table4.addIndex(index4_2);
 
-        Index index4_3 = new Index("4_3");
+        Index index4_3 = new Index("idx_4_3");
         index4_3.addColumn(f4_3, 1);
         table4.addIndex(index4_3);
 
@@ -182,16 +185,195 @@ public class ScriptGeneratorTest {
                         "USE \"c1\"",
                         "CREATE TABLE \"t1\" (\"f1\" VARCHAR(0) NOT NULL, \"f2\" FLOAT NOT NULL, \"f3\" DATE NOT NULL)",
                         // comma concatenated indexes
-                        "CREATE INDEX \"idx_t1_4_1\" ON \"t1\" (\"f1\"), " +
-                        "CREATE INDEX \"idx_t1_4_2\" ON \"t1\" (\"f1\", \"f3\"), " +
-                        "CREATE INDEX \"idx_t1_4_3\" ON \"t1\" (\"f3\")"
+                        "CREATE INDEX \"idx_4_1\" ON \"t1\" (\"f1\"), " +
+                        "CREATE INDEX \"idx_4_2\" ON \"t1\" (\"f1\", \"f3\"), " +
+                        "CREATE INDEX \"idx_4_3\" ON \"t1\" (\"f3\")"
                 )});
+
+        Database nuodatabase = new Database();
+        Catalog nuocatalog = nuodatabase.addCatalog(valueOf(null));
+
+        // create table xxx (c1 int, c2 int, constraint idx1 unique (c1, c2));
+        Table nuotable1 = new Table("xxx");
+        nuotable1.setDatabase(nuodatabase);
+
+        Column nuoc1 = nuotable1.addColumn("c1");
+        nuoc1.setTypeCode(INTEGER);
+        nuoc1.setTypeName("INTEGER");
+        nuoc1.setNullable(true);
+        nuoc1.setPosition(1);
+
+        Column nuoc2 = nuotable1.addColumn("c2");
+        nuoc2.setTypeCode(INTEGER);
+        nuoc2.setTypeName("INTEGER");
+        nuoc2.setNullable(true);
+        nuoc2.setPosition(2);
+
+        Index nuoidx1 = new Index(valueOf("idx1"));
+        nuoidx1.addColumn(nuoc1, 1);
+        nuoidx1.addColumn(nuoc2, 2);
+        nuoidx1.setUnique(true);
+        nuoidx1.setUniqueConstraint(true);
+        nuotable1.addIndex(nuoidx1);
+
+        nuocatalog.addSchema(valueOf("USER")).addTable(nuotable1);
+        data.add(new Object[]{nuotable1, newArrayList(DROP), null,
+                newArrayList("DROP TABLE IF EXISTS \"xxx\" CASCADE")});
+        data.add(new Object[]{nuotable1, newArrayList(CREATE), null,
+                newArrayList(
+                        "CREATE TABLE \"xxx\" (\"c1\" INTEGER, " +
+                                "\"c2\" INTEGER, CONSTRAINT \"idx1\" UNIQUE (\"c1\", \"c2\"))")});
+
+        // create table xxx2 (c1 int check(c1 > 10), c2 int, constraint even check (c1 % 2 = 0));
+        Table nuotable2 = new Table("xxx2");
+        nuotable2.setDatabase(nuodatabase);
+
+        Column nuoc1_2 = nuotable2.addColumn("c1");
+        nuoc1_2.setTypeCode(INTEGER);
+        nuoc1_2.setTypeName("INTEGER");
+        nuoc1_2.setNullable(true);
+        nuoc1_2.setPosition(1);
+
+        Column nuoc2_2 = nuotable2.addColumn("c2");
+        nuoc2_2.setTypeCode(INTEGER);
+        nuoc2_2.setTypeName("INTEGER");
+        nuoc2_2.setNullable(true);
+        nuoc2_2.setPosition(2);
+
+        nuoc1_2.addCheck(new Check(valueOf("c1"), "c1 > 10"));
+        nuotable2.addCheck(new Check(valueOf("even"), "c1 % 2 = 0"));
+
+        nuocatalog.addSchema(valueOf("USER")).addTable(nuotable2);
+        data.add(new Object[]{nuotable2, newArrayList(DROP), null,
+                newArrayList("DROP TABLE IF EXISTS \"xxx2\" CASCADE")});
+        data.add(new Object[]{nuotable2, newArrayList(CREATE), null,
+                newArrayList(
+                        "CREATE TABLE \"xxx2\" (\"c1\" INTEGER CHECK(c1 > 10), " +
+                                "\"c2\" INTEGER, CONSTRAINT \"even\" CHECK(c1 % 2 = 0))")});
+
+        // create table xxx3 (c1 int, c2 int, constraint idx3 key abc(c1, c2));
+        Table nuotable3 = new Table("xxx3");
+        nuotable3.setDatabase(nuodatabase);
+
+        Column nuoc1_3 = nuotable3.addColumn("c1");
+        nuoc1_3.setTypeCode(INTEGER);
+        nuoc1_3.setTypeName("INTEGER");
+        nuoc1_3.setNullable(true);
+        nuoc1_3.setPosition(1);
+
+        Column nuoc2_3 = nuotable3.addColumn("c2");
+        nuoc2_3.setTypeCode(INTEGER);
+        nuoc2_3.setTypeName("INTEGER");
+        nuoc2_3.setNullable(true);
+        nuoc2_3.setPosition(2);
+
+        Index nuoidx3 = new Index(valueOf("idx3"));
+        nuoidx3.addColumn(nuoc1_3, 1);
+        nuoidx3.addColumn(nuoc2_3, 2);
+        // idx3 is neither a unique index nor unique constraint.
+        // it is a secondary index, i.e., a normal index
+        nuoidx3.setUnique(false);
+        nuoidx3.setUniqueConstraint(false);
+        nuotable3.addIndex(nuoidx3);
+
+        nuocatalog.addSchema(valueOf("USER")).addTable(nuotable3);
+        data.add(new Object[]{nuotable3, newArrayList(DROP), null,
+                newArrayList("DROP TABLE IF EXISTS \"xxx3\" CASCADE")});
+        data.add(new Object[]{nuotable3, newArrayList(CREATE), null,
+                newArrayList(
+                        "CREATE TABLE \"xxx3\" (\"c1\" INTEGER, " + "\"c2\" INTEGER)",
+                        "CREATE INDEX \"idx3\" ON \"xxx3\" (\"c1\", \"c2\")")});
+
+        // create table xxx4 (c1 int, c2 int, constraint idx4 unique key cdf(c1, c2), constraint idx4_2 unique (c2));
+        Table nuotable4 = new Table("xxx4");
+        nuotable4.setDatabase(nuodatabase);
+
+        Column nuoc1_4 = nuotable4.addColumn("c1");
+        nuoc1_4.setTypeCode(INTEGER);
+        nuoc1_4.setTypeName("INTEGER");
+        nuoc1_4.setNullable(true);
+        nuoc1_4.setPosition(1);
+
+        Column nuoc2_4 = nuotable4.addColumn("c2");
+        nuoc2_4.setTypeCode(INTEGER);
+        nuoc2_4.setTypeName("INTEGER");
+        nuoc2_4.setNullable(true);
+        nuoc2_4.setPosition(2);
+
+        Index nuoidx4 = new Index(valueOf("idx4"));
+        nuoidx4.addColumn(nuoc1_4, 1);
+        nuoidx4.addColumn(nuoc2_4, 2);
+        // idx4 is a unique index NOT unique constraint,
+        nuoidx4.setUnique(true);
+        nuoidx4.setUniqueConstraint(false);
+        nuotable4.addIndex(nuoidx4);
+
+        Index nuoidx4_2 = new Index(valueOf("idx4_2"));
+        nuoidx4_2.addColumn(nuoc2_4, 2);
+        // idx4_2 is a unique constraint NOT unique index.
+        // both unique constraint and unique index are Unique
+        nuoidx4_2.setUnique(true);
+        nuoidx4_2.setUniqueConstraint(true);
+        nuotable4.addIndex(nuoidx4_2);
+
+        nuocatalog.addSchema(valueOf("USER")).addTable(nuotable4);
+        data.add(new Object[]{nuotable4, newArrayList(DROP), null,
+                newArrayList("DROP TABLE IF EXISTS \"xxx4\" CASCADE")});
+        data.add(new Object[]{nuotable4, newArrayList(CREATE), null,
+                newArrayList(
+                        "CREATE TABLE \"xxx4\" (\"c1\" INTEGER, \"c2\" INTEGER, CONSTRAINT \"idx4_2\" UNIQUE (\"c2\"))",
+                        "CREATE UNIQUE INDEX \"idx4\" ON \"xxx4\" (\"c1\", \"c2\")")});
+
+        // create table xxx5 (c1_5 int, c2_5 int, constraint idx5 foreign key (c1_5, c2_5) references xxx4(c1, c2));
+        Table nuotable5 = new Table("xxx5");
+        nuotable3.setDatabase(nuodatabase);
+
+        Column nuoc1_5 = nuotable5.addColumn("c1_5");
+        nuoc1_5.setTypeCode(INTEGER);
+        nuoc1_5.setTypeName("INTEGER");
+        nuoc1_5.setNullable(true);
+        nuoc1_5.setPosition(1);
+
+        Column nuoc2_5 = nuotable5.addColumn("c2_5");
+        nuoc2_5.setTypeCode(INTEGER);
+        nuoc2_5.setTypeName("INTEGER");
+        nuoc2_5.setNullable(true);
+        nuoc2_5.setPosition(2);
+
+        ForeignKey nuoidx5 = new ForeignKey(valueOf("idx5"));
+        nuoidx5.setPrimaryTable(nuotable4);
+        nuoidx5.setForeignTable(nuotable5);
+        nuoidx5.addReference(nuoc1_4, nuoc1_5, 1);
+        nuoidx5.addReference(nuoc2_4, nuoc2_5, 2);
+        nuotable5.addForeignKey(nuoidx5);
+
+        nuocatalog.addSchema(valueOf("USER")).addTable(nuotable5);
+        data.add(new Object[]{nuotable5, newArrayList(DROP), null,
+                newArrayList("DROP TABLE IF EXISTS \"xxx5\" CASCADE")});
+        data.add(new Object[]{nuotable5, newArrayList(CREATE), null,
+                newArrayList(
+                        "CREATE TABLE \"xxx5\" (\"c1_5\" INTEGER, \"c2_5\" INTEGER, " +
+                                "CONSTRAINT \"idx5\" FOREIGN KEY (\"c1_5\", \"c2_5\") REFERENCES \"USER\".\"xxx4\" (\"c1\", \"c2\"))")});
+
         return data.toArray(new Object[][]{});
     }
 
     @Test(dataProvider = "getScripts")
-    public void testGetScripts(MetaData object, Collection<ScriptType> scriptTypes, Dialect targetDialect,
+    public void testGetScriptsMySQL(MetaData object, Collection<ScriptType> scriptTypes, Dialect targetDialect,
                                Collection<String> expected) throws Exception {
+        scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(MYSQL)));
+        scriptGeneratorManager.setTargetDialect(targetDialect == null ? createTargetDialect() : targetDialect);
+        scriptGeneratorManager.setScriptTypes(scriptTypes);
+
+        Collection<String> scripts = scriptGeneratorManager.getScripts(object);
+        assertNotNull(scripts);
+        assertEquals(newArrayList(expected), newArrayList(scripts));
+    }
+
+    @Test(dataProvider = "getScripts")
+    public void testGetScriptsNuoDB(MetaData object, Collection<ScriptType> scriptTypes, Dialect targetDialect,
+                               Collection<String> expected) throws Exception {
+        scriptGeneratorManager.setSourceSession(createSession(new NuoDBDialect256()));
         scriptGeneratorManager.setTargetDialect(targetDialect == null ? createTargetDialect() : targetDialect);
         scriptGeneratorManager.setScriptTypes(scriptTypes);
 
@@ -201,7 +383,7 @@ public class ScriptGeneratorTest {
     }
 
     private Dialect createTargetDialect() {
-        NuoDBDialect dialect = new NuoDBDialect();
+        NuoDBDialect dialect = new NuoDBDialect256();
         Database database = new Database();
         database.setDialect(dialect);
         return dialect;

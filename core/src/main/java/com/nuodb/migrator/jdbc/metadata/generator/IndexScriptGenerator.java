@@ -74,8 +74,9 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
             if (index.isUnique()) {
                 buffer.append(" UNIQUE");
             }
+            Dialect dialect = scriptGeneratorManager.getTargetDialect();
             buffer.append(" INDEX ");
-            buffer.append(scriptGeneratorManager.getName(index));
+            buffer.append(index.getName(dialect));
             buffer.append(" ON ");
             buffer.append(scriptGeneratorManager.getQualifiedName(index.getTable()));
             buffer.append(" (");
@@ -132,11 +133,15 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         if (index.isUnique()) {
-            buffer.append("UNIQUE");
-        } else {
-            buffer.append("INDEX");
+            buffer.append("UNIQUE ");
         }
-        buffer.append(" (");
+        if (!index.isUniqueConstraint()) {
+            // CONSATRINT + $NAME + UNIQUE -> UNIQUE CONSTRAINT (type 4)
+            // CONSTRAINT + $NAME + UNIQUE KEY $NAME -> UNIQUE INDEX (type 1)
+            buffer.append("KEY ");
+            buffer.append(index.getName(dialect));
+        }
+        buffer.append("(");
         boolean nullable = false;
         for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();

@@ -49,6 +49,7 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager.FOREIGN_KEYS;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager.TABLES;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager.SCRIPTS_IN_CREATE_TABLE;
 import static com.nuodb.migrator.utils.SequenceUtils.getStandaloneSequences;
 import static java.util.Collections.singleton;
 import static java.lang.String.format;
@@ -191,10 +192,12 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
     protected void initScriptGeneratorContext(ScriptGeneratorManager scriptGeneratorManager) {
         scriptGeneratorManager.addAttribute(TABLES, newLinkedHashSet());
         scriptGeneratorManager.addAttribute(FOREIGN_KEYS, HashMultimap.create());
+        scriptGeneratorManager.addAttribute(SCRIPTS_IN_CREATE_TABLE, true);
     }
 
     protected void releaseScriptGeneratorContext(ScriptGeneratorManager scriptGeneratorManager) {
         scriptGeneratorManager.removeAttribute(TABLES);
         scriptGeneratorManager.removeAttribute(FOREIGN_KEYS);
+        scriptGeneratorManager.removeAttribute(SCRIPTS_IN_CREATE_TABLE);
     }
 }

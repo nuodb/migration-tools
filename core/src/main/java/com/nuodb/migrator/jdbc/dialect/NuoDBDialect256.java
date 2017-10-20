@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, NuoDB, Inc.
+ * Copyright (c) 2017, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,30 +28,23 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB_206;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBDialect206 extends NuoDBDialect203 {
+public class NuoDBDialect256 extends NuoDBDialect206 {
 
-    public NuoDBDialect206() {
-        super(NUODB_206);
+    public NuoDBDialect256() {
+        super(NUODB);
     }
 
-    public NuoDBDialect206(DatabaseInfo databaseInfo) {
+    public NuoDBDialect256(DatabaseInfo databaseInfo) {
         super(databaseInfo);
     }
 
-    /**
-     * Checks whether groping of multiple CREATE INDEX statements, separated each by a comma (, ) is supported. Grouping
-     * of several statements will require only one table scan and performance time for the creation of the index will be
-     * improved.
-     *
-     * @return true
-     */
     @Override
-    public boolean supportsCreateMultipleIndexes() {
-        return true;
+    public boolean supportsIndexInCreateTable() {
+       return true;
     }
 }

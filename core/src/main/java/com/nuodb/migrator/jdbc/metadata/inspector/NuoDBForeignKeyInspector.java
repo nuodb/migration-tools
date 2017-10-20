@@ -52,6 +52,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             "SELECT PRIMARYTABLE.SCHEMA AS PKTABLE_SCHEM, PRIMARYTABLE.TABLENAME AS PKTABLE_NAME,\n" +
             "       PRIMARYFIELD.FIELD AS PKCOLUMN_NAME, FOREIGNTABLE.SCHEMA AS FKTABLE_SCHEM,\n" +
             "       FOREIGNTABLE.TABLENAME AS FKTABLE_NAME, FOREIGNFIELD.FIELD AS FKCOLUMN_NAME,\n" +
+            "       FOREIGNKEYS.FOREIGNKEYNAME AS FK_NAME,\n" +
             "       FOREIGNKEYS.POSITION+1 AS KEY_SEQ, FOREIGNKEYS.UPDATERULE AS UPDATE_RULE,\n" +
             "       FOREIGNKEYS.DELETERULE AS DELETE_RULE, FOREIGNKEYS.DEFERRABILITY AS DEFERRABILITY\n" +
             "FROM SYSTEM.FOREIGNKEYS\n" +
@@ -96,7 +97,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
 
             if (position == 1) {
-                foreignTable.addForeignKey(foreignKey = new ForeignKey(Identifier.EMPTY));
+                foreignTable.addForeignKey(foreignKey = new ForeignKey(foreignKeys.getString("FK_NAME")));
                 foreignKey.setPrimaryTable(primaryTable);
                 foreignKey.setForeignTable(foreignTable);
                 foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));

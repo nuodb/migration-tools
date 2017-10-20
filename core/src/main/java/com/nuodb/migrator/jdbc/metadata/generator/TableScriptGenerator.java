@@ -38,6 +38,7 @@ import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
@@ -174,7 +175,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                     nonRepeatingIndex.isUnique() && size(nonRepeatingIndex.getColumns()) == 1 &&
                             !get(nonRepeatingIndex.getColumns(), 0).isNullable() &&
                             dialect.supportsUniqueInCreateTable() && addIndexesInCreateTable;
-            if (!nonRepeatingIndex.isPrimary() && !uniqueInCreateTable) {
+            if (!nonRepeatingIndex.isPrimary() && !nonRepeatingIndex.isUniqueConstraint() && !uniqueInCreateTable) {
                 if (dialect.supportsCreateMultipleIndexes()) {
                     multipleIndexes.add(nonRepeatingIndex);
                 } else {
@@ -290,7 +291,9 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                     }
                 });
                 boolean unique = index.isPresent() && (!column.isNullable() || dialect.supportsNotNullUnique());
-                if (unique) {
+                boolean uniqueConstraint = index.isPresent() && index.get().isUniqueConstraint();
+                // Create the constraint inline with create table when possible
+                if (unique && !uniqueConstraint) {
                     if (dialect.supportsUniqueInCreateTable()) {
                         buffer.append(' ');
                         buffer.append("UNIQUE");
@@ -305,7 +308,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             }
             if (addChecks && dialect.supportsColumnCheck()) {
                 for (Check check : column.getChecks()) {
-                    buffer.append(", CHECK ");
+                    buffer.append(" CHECK");
                     buffer.append(dialect.getCheckClause(check.getText()));
                 }
             }
@@ -322,11 +325,17 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             if (primaryKey != null) {
                 ConstraintScriptGenerator<PrimaryKey> generator = (ConstraintScriptGenerator<PrimaryKey>)
                         scriptGeneratorManager.getScriptGenerator(primaryKey);
-                buffer.append(", ").append(generator.getConstraintScript(primaryKey, scriptGeneratorManager));
+                String constraint = generator.getConstraintScript(primaryKey, scriptGeneratorManager);
+                if (constraint != null) {
+                    buffer.append(", CONSTRAINT ");
+                    buffer.append(primaryKey.getName(dialect));
+                    buffer.append(" ");
+                    buffer.append(constraint);
+                }
             }
         }
         if (addIndexesInCreateTable &&
-                (dialect.supportsIndexInCreateTable() && !dialect.supportsCreateMultipleIndexes())) {
+                (dialect.supportsIndexInCreateTable() && dialect.supportsCreateMultipleIndexes())) {
             boolean primary = false;
             for (Index index : indexes) {
                 if (!primary && index.isPrimary()) {
@@ -336,10 +345,12 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 ConstraintScriptGenerator<Index> generator = (ConstraintScriptGenerator<Index>)
                         scriptGeneratorManager.getScriptGenerator(index);
                 String constraint = generator.getConstraintScript(index, scriptGeneratorManager);
-                if (constraint != null) {
-                    buffer.append(", ").append(constraint);
+                if (constraint != null && index.isUniqueConstraint()) {
+                    buffer.append(", CONSTRAINT ");
+                    buffer.append(index.getName(dialect));
+                    buffer.append(" ");
+                    buffer.append(constraint);
                 }
-
             }
         }
         if (addForeignKeysInCreateTable) {
@@ -348,13 +359,18 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                         scriptGeneratorManager.getScriptGenerator(foreignKey);
                 String constraint = generator.getConstraintScript(foreignKey, scriptGeneratorManager);
                 if (constraint != null) {
-                    buffer.append(", ").append(constraint);
+                    buffer.append(", CONSTRAINT ");
+                    buffer.append(foreignKey.getName(dialect));
+                    buffer.append(" ");
+                    buffer.append(constraint);
                 }
             }
         }
         if (addChecks && dialect.supportsTableCheck()) {
             for (Check check : table.getChecks()) {
-                buffer.append(", CHECK ");
+                buffer.append(", CONSTRAINT ");
+                buffer.append(check.getName(dialect));
+                buffer.append(" CHECK");
                 buffer.append(dialect.getCheckClause(check.getText()));
             }
         }
