@@ -1,7 +1,7 @@
 #!/bin/sh
 . ./test/.travis_env
 
-wget -q http://download.nuohub.org/nuodb_2.1.1.10_amd64.deb --output-document=/var/tmp/nuodb.deb
+wget -q http://download.nuohub.org/nuodb_3.0.0.8_amd64.deb --output-document=/var/tmp/nuodb.deb
 sudo dpkg -i /var/tmp/nuodb.deb
 
 /opt/nuodb/etc/nuoagent stop
@@ -9,6 +9,10 @@ sudo dpkg -i /var/tmp/nuodb.deb
 /opt/nuodb/etc/nuowebconsole stop
 
 sudo cp ./test/default.properties /opt/nuodb/etc/.
+
+# Ensure THP is not forced on
+echo madvise | sudo tee --append /sys/kernel/mm/transparent_hugepage/enabled
+echo madvise | sudo tee --append /sys/kernel/mm/transparent_hugepage/defrag
 
 sudo /opt/nuodb/etc/nuoagent start
 sudo /opt/nuodb/etc/nuorestsvc start

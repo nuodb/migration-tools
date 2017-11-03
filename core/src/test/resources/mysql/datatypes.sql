@@ -180,15 +180,13 @@ DROP TABLE IF EXISTS `testdata_decimal`;
 CREATE TABLE `testdata_decimal` (
   `c1` decimal,
   `c2` decimal NULL,
-  `c3` decimal(6,2) NOT NULL ,
-  `c4` decimal(65,30),
-  `c5` decimal(65,30) UNSIGNED
+  `c3` decimal(6,2) NOT NULL
 );
 
-insert into  `testdata_decimal` (`c1`,`c3`,`c4`) values(234.45,3465.65,2.2);
-insert into  `testdata_decimal` (`c1`,`c2`,`c3`,`c4`) values(591.267,73.50,3245.65,90.90);
-insert into  `testdata_decimal` (`c1`,`c3`,`c4`) values(88.71,21.85,20512129499011841052489035700441000.875973995982468783991433282094);
-insert into  `testdata_decimal` (`c3`,`c5`) values(3465.65,20512129499011841052489035700441000.875973995982468783991433282094);
+insert into  `testdata_decimal` (`c1`,`c3`) values(234.45,3465.65);
+insert into  `testdata_decimal` (`c1`,`c2`,`c3`) values(591.267,73.50,3245.65);
+insert into  `testdata_decimal` (`c1`,`c3`) values(88.71,21.85);
+insert into  `testdata_decimal` (`c3`) values(3465.65);
 
 DROP TABLE IF EXISTS `testdata_float`;
 
@@ -317,8 +315,8 @@ insert into `testdata_set` (`c1`,`c2`,`c3`) values ('sample test','test','byke\"
 DROP TABLE IF EXISTS testdata_year;
 
 CREATE TABLE testdata_year (
-	`c1` YEAR NOT NULL DEFAULT '1970',
-	y1 YEAR(2) NOT NULL,
+	`c1` YEAR(4) NOT NULL DEFAULT '1970',
+	y1 YEAR(4) NOT NULL,
 	y2 YEAR(4) DEFAULT '2010',
 	y3 YEAR(4) NOT NULL DEFAULT '2015'
  );
@@ -335,7 +333,7 @@ CREATE TABLE testdata_datetime (
 `c4` DATETIME
 );
 
-insert into testdata_datetime values('1000-01-01 00:00:00.000000','2010-12-31 23:59:59.9999','9999-12-31 23:59:59.999999','1989-12-31 23:59:59.954321');
+insert into testdata_datetime values('1000-01-01 00:00:00.000000','2010-12-31 23:59:59.9999','999-12-31 23:59:59.999999','1989-12-31 23:59:59.954321');
 
 DROP TABLE IF EXISTS testdata_date;
 
@@ -351,9 +349,9 @@ insert into testdata_date values('9999-12-31');
 DROP TABLE IF EXISTS testdata_timestamp;
 
 CREATE TABLE testdata_timestamp (
-`c1` TIMESTAMP,
-`c2` TIMESTAMP,
-`c3` TIMESTAMP
+`c1` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+`c2` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+`c3` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 # insert into testdata_timestamp values('2012-01-02 00:00:01.954321','1986-12-29 23:45:59','2038-01-19 03:14:07.999999');
