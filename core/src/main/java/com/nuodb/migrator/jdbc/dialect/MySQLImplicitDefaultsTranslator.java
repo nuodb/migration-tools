@@ -238,4 +238,9 @@ public class MySQLImplicitDefaultsTranslator extends ImplicitDefaultsTranslatorB
     public void setSqlModeQuery(String sqlModeQuery) {
         this.sqlModeQuery = sqlModeQuery;
     }
+
+    @Override
+    protected boolean supportsScript(Script script, TranslationContext context) {
+        return false;
+    }
 }

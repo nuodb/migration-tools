@@ -68,6 +68,17 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         buffer.append("ALTER TABLE ");
         buffer.append(getForeignTable(foreignKey, scriptGeneratorManager));
         buffer.append(" ADD ");
+
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        String fkName = foreignKey.getName(dialect);
+        if (fkName != null) {
+            // In NuoDB, the CONSTRAINT keyword is only necessary
+            // if you want to name the table constraint
+            buffer.append("CONSTRAINT ");
+            buffer.append(fkName);
+            buffer.append(" ");
+        }
+
         buffer.append(getConstraintScript(foreignKey, scriptGeneratorManager));
         return singleton(buffer.toString());
     }

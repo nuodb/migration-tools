@@ -70,6 +70,11 @@ public class ScriptGeneratorManager {
      * statements for primary key, indexes and foreign keys, default is false.
      */
     public static final String SCRIPTS_IN_CREATE_TABLE = "scripts.in.create.table";
+    /**
+     * Script generator manager attribute which accepts true or false value. If set to true results in in-lined
+     * statements for unique constraints, default is true. see {@code HasTablesScriptGenerator}
+     */
+    public static final String UNIQUE_CONSTRAINTS = "unique.constraints";
 
     private String sourceCatalog;
     private String sourceSchema;

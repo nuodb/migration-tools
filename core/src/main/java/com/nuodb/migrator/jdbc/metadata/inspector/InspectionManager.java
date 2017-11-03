@@ -87,6 +87,7 @@ public class InspectionManager {
         addInspector(indexIndex);
 
         InspectorResolver primaryKeyInspector = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());
+        primaryKeyInspector.register(MYSQL, new MySQLPrimaryKeyInspector());
         primaryKeyInspector.register(NUODB, new NuoDBPrimaryKeyInspector());
         primaryKeyInspector.register(ORACLE, new OraclePrimaryKeyInspector());
         addInspector(primaryKeyInspector);

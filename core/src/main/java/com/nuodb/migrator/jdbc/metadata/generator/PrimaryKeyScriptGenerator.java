@@ -65,6 +65,16 @@ public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> i
         buffer.append("ALTER TABLE ");
         buffer.append(scriptGeneratorManager.getName(primaryKey.getTable()));
         buffer.append(" ADD ");
+
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        String primaryKeyName = primaryKey.getName(dialect);
+        if (primaryKeyName != null) {
+            // In nuodb, the CONSTRAINT keyword is only necessary
+            // if you want to name the table constraint
+            buffer.append("CONSTRAINT ");
+            buffer.append(primaryKeyName);
+            buffer.append(" ");
+        }
         buffer.append(getConstraintScript(primaryKey, scriptGeneratorManager));
         return singleton(buffer.toString());
     }

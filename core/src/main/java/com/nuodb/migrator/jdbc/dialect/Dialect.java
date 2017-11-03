@@ -105,6 +105,8 @@ public interface Dialect {
 
     boolean addScriptsInCreateTable(Table table);
 
+    boolean addConstraintsInCreateTable();
+
     String getNullColumnString();
 
     String getNoColumnsInsert();

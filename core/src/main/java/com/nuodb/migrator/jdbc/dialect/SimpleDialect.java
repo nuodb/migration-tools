@@ -447,6 +447,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public boolean addConstraintsInCreateTable() {
+        return false;
+    }
+
+    @Override
     public boolean supportInlineColumnTrigger(Session Session, ColumnTrigger trigger) {
         return false;
     }

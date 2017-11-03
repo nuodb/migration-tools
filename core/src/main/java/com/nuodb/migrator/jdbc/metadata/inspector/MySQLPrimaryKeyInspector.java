@@ -25,31 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
+import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
-/**
- * @author Sergey Bushik
- */
-public class NuoDBDialect256 extends NuoDBDialect206 {
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-    public NuoDBDialect256() {
-        super(NUODB);
-    }
+import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 
-    public NuoDBDialect256(DatabaseInfo databaseInfo) {
-        super(databaseInfo);
-    }
+public class MySQLPrimaryKeyInspector extends SimplePrimaryKeyInspector {
 
     @Override
-    public boolean supportsIndexInCreateTable() {
-       return true;
-    }
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet primaryKeys) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        while (primaryKeys.next()) {
+            Table table = addTable(inspectionResults, primaryKeys.getString("TABLE_CAT"),
+                    primaryKeys.getString("TABLE_SCHEM"), primaryKeys.getString("TABLE_NAME"));
 
-    @Override
-    public boolean addConstraintsInCreateTable() {
-        return true;
+            final Identifier identifier = Identifier.EMPTY;
+            PrimaryKey primaryKey = table.getPrimaryKey();
+            if (primaryKey == null) {
+                table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));
+                inspectionResults.addObject(primaryKey);
+            }
+            primaryKey.addColumn(table.addColumn(primaryKeys.getString("COLUMN_NAME")),
+                    primaryKeys.getInt("KEY_SEQ"));
+        }
     }
 }
