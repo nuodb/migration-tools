@@ -139,9 +139,9 @@ public class IndexUtilsTest {
         indexes.add(index1_5);
         data.add(new Object[]{indexes, newArrayList(CREATE), targetDialect4,
                 newArrayList(
-                        "CREATE INDEX \"idx_1_2\" ON \"t1\" (\"c2\", \"c3\"), " +
-                        "CREATE INDEX \"idx_1_3\" ON \"t1\" (\"c3\"), " +
-                        "CREATE INDEX \"idx_1_5\" ON \"t1\" (\"c5\")"
+                        "CREATE INDEX \"idx_t1_idx_1_2\" ON \"t1\" (\"c2\", \"c3\"), " +
+                        "CREATE INDEX \"idx_t1_idx_1_3\" ON \"t1\" (\"c3\"), " +
+                        "CREATE INDEX \"idx_t1_idx_1_5\" ON \"t1\" (\"c5\")"
                 )});
         return data.toArray(new Object[][]{});
     }

@@ -338,7 +338,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 String constraint = generator.getConstraintScript(primaryKey, scriptGeneratorManager);
                 if (constraint != null) {
                     buffer.append(", ");
-                    String primaryKeyName = primaryKey.getName(dialect);
+                    String primaryKeyName = scriptGeneratorManager.getName(primaryKey);
                     if (primaryKeyName != null) {
                         // In NuoDB, the CONSTRAINT keyword is only necessary
                         // if you want to name the table constraint
@@ -363,7 +363,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 String constraint = generator.getConstraintScript(index, scriptGeneratorManager);
                 if (constraint != null && index.isUniqueConstraint()) {
                     buffer.append(", ");
-                    String indexName = index.getName(dialect);
+                    String indexName = scriptGeneratorManager.getName(index);
                     if (indexName != null) {
                         // In NuoDB, the CONSTRAINT keyword is only necessary
                         // if you want to name the table constraint

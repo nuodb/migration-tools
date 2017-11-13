@@ -74,9 +74,8 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
             if (index.isUnique()) {
                 buffer.append(" UNIQUE");
             }
-            Dialect dialect = scriptGeneratorManager.getTargetDialect();
             buffer.append(" INDEX ");
-            buffer.append(index.getName(dialect));
+            buffer.append(scriptGeneratorManager.getName(index));
             buffer.append(" ON ");
             buffer.append(scriptGeneratorManager.getQualifiedName(index.getTable()));
             buffer.append(" (");
@@ -139,7 +138,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
             // CONSATRINT + $NAME + UNIQUE -> UNIQUE CONSTRAINT (type 4)
             // CONSTRAINT + $NAME + UNIQUE KEY $NAME -> UNIQUE INDEX (type 1)
             buffer.append("KEY ");
-            buffer.append(index.getName(dialect));
+            buffer.append(scriptGeneratorManager.getName(index));
         }
         buffer.append("(");
         boolean nullable = false;

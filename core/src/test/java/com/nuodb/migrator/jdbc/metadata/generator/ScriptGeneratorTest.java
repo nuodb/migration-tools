@@ -188,9 +188,9 @@ public class ScriptGeneratorTest {
                                   "USE \"c1\"",
                                   "CREATE TABLE \"t1\" (\"f1\" VARCHAR(0) NOT NULL, \"f2\" FLOAT NOT NULL, \"f3\" DATE NOT NULL)",
                                   // comma concatenated indexes
-                                  "CREATE INDEX \"idx_4_1\" ON \"t1\" (\"f1\"), " +
-                                  "CREATE INDEX \"idx_4_2\" ON \"t1\" (\"f1\", \"f3\"), " +
-                                  "CREATE INDEX \"idx_4_3\" ON \"t1\" (\"f3\")")});
+                                  "CREATE INDEX \"idx_t1_idx_4_1\" ON \"t1\" (\"f1\"), " +
+                                  "CREATE INDEX \"idx_t1_idx_4_2\" ON \"t1\" (\"f1\", \"f3\"), " +
+                                  "CREATE INDEX \"idx_t1_idx_4_3\" ON \"t1\" (\"f3\")")});
 
         Database nuodatabase = new Database();
         Catalog nuocatalog = nuodatabase.addCatalog(valueOf(null));
@@ -224,7 +224,7 @@ public class ScriptGeneratorTest {
         data.add(new Object[]{nuotable1, newArrayList(CREATE), null,
                               newArrayList(
                                   "CREATE TABLE \"xxx\" (\"c1\" INTEGER, " +
-                                  "\"c2\" INTEGER, CONSTRAINT \"idx1\" UNIQUE (\"c1\", \"c2\"))")});
+                                  "\"c2\" INTEGER, CONSTRAINT \"idx_xxx_idx1\" UNIQUE (\"c1\", \"c2\"))")});
 
         // create table xxx2 (c1 int check(c1 > 10), c2 int, constraint even check (c1 % 2 = 0));
         Table nuotable2 = new Table("xxx2");
@@ -284,7 +284,7 @@ public class ScriptGeneratorTest {
         data.add(new Object[]{nuotable3, newArrayList(CREATE), null,
                               newArrayList(
                                   "CREATE TABLE \"xxx3\" (\"c1\" INTEGER, " + "\"c2\" INTEGER)",
-                                  "CREATE INDEX \"idx3\" ON \"xxx3\" (\"c1\", \"c2\")")});
+                                  "CREATE INDEX \"idx_xxx3_idx3\" ON \"xxx3\" (\"c1\", \"c2\")")});
 
         // create table xxx4 (c1 int, c2 int, constraint idx4 unique key cdf(c1, c2), constraint idx4_2 unique (c2));
         Table nuotable4 = new Table("xxx4");
@@ -323,8 +323,8 @@ public class ScriptGeneratorTest {
                               newArrayList("DROP TABLE IF EXISTS \"xxx4\" CASCADE")});
         data.add(new Object[]{nuotable4, newArrayList(CREATE), null,
                               newArrayList(
-                                  "CREATE TABLE \"xxx4\" (\"c1\" INTEGER, \"c2\" INTEGER, CONSTRAINT \"idx4_2\" UNIQUE (\"c2\"))",
-                                  "CREATE UNIQUE INDEX \"idx4\" ON \"xxx4\" (\"c1\", \"c2\")")});
+                                  "CREATE TABLE \"xxx4\" (\"c1\" INTEGER, \"c2\" INTEGER, CONSTRAINT \"idx_xxx4_idx4_2\" UNIQUE (\"c2\"))",
+                                  "CREATE UNIQUE INDEX \"idx_xxx4_idx4\" ON \"xxx4\" (\"c1\", \"c2\")")});
 
         Catalog nuocatalog2 = nuodatabase.addCatalog(valueOf("FKTest"));
 
