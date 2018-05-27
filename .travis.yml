@@ -1,5 +1,15 @@
 language: java
 
+env:
+  global:
+    - NUODB_HOME=/opt/nuodb
+    - TZ=America/New_York
+    - NUO_ADD_DOMAIN_PASS=yes
+    - NUO_START_AGENT=yes
+  matrix:
+    - NUO_VERSION=3.1.2.1
+    - NUO_VERSION=3.2.0.2
+
 jdk:
   - openjdk8
   - oraclejdk8
@@ -9,6 +19,13 @@ notifications:
     - migrator@nuodb.com
 
 before_install:
+  - echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled >/dev/null
+  - echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/defrag >/dev/null
+
+  # There's a bug in the Trusty images where this gives a syntax error
+  # See https://github.com/travis-ci/travis-ci/issues/8906
+  - sudo mv /opt/jdk_switcher/jdk_switcher.sh /tmp
+
   - ./test/mysql_setup.sh
   - ./test/nuodb_setup.sh
 
