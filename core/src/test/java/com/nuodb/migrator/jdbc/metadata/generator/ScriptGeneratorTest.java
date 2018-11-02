@@ -323,7 +323,7 @@ public class ScriptGeneratorTest {
                               newArrayList("DROP TABLE IF EXISTS \"xxx4\" CASCADE")});
         data.add(new Object[]{nuotable4, newArrayList(CREATE), null,
                               newArrayList(
-                                  "CREATE TABLE \"xxx4\" (\"c1\" INTEGER, \"c2\" INTEGER, CONSTRAINT \"idx_xxx4_idx4_2\" UNIQUE (\"c2\"))",
+                                  "CREATE TABLE \"xxx4\" (\"c1\" INTEGER, \"c2\" INTEGER UNIQUE)",
                                   "CREATE UNIQUE INDEX \"idx_xxx4_idx4\" ON \"xxx4\" (\"c1\", \"c2\")")});
 
         Catalog nuocatalog2 = nuodatabase.addCatalog(valueOf("FKTest"));
