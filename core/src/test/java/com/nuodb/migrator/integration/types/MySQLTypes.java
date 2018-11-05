@@ -253,7 +253,7 @@ public class MySQLTypes implements DatabaseTypes {
 			if (length != null && length.equalsIgnoreCase("255")) {
 				return "255";
 			} else {
-				return "20";
+				return length;
 			}
 		} else if ("TINYTEXT".equalsIgnoreCase(type)) {
 			return "255";
