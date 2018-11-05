@@ -47,7 +47,7 @@ public class ContinuityTest extends MigrationTestBase {
 	 * Verify Primary Key constraints are working
 	 */
 	public void testPrimaryKeyViolation() throws Exception {
-		String sqlStr = "insert into \"datatypes1\" (\"c2\",\"c6\",\"c15\") values (7,5,8)";
+		String sqlStr = "insert into \"datatypes1\" (\"c2\",\"c6\") values (7,5)";
 		Statement stmt1 = null;
 		try {
 			stmt1 = nuodbConnection.createStatement();
@@ -69,7 +69,7 @@ public class ContinuityTest extends MigrationTestBase {
 	 * Verify Unique Key constraints are working
 	 */
 	public void testUniqueKeyViolation() throws Exception {
-		String sqlStr = "insert into \"datatypes1\" (\"c2\",\"c6\",\"c15\") values ('1',20,9)";
+		String sqlStr = "insert into \"datatypes1\" (\"c2\",\"c6\") values ('1',20)";
 		Statement stmt1 = null;
 		try {
 			stmt1 = nuodbConnection.createStatement();
