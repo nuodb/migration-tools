@@ -250,11 +250,7 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("YEAR".equalsIgnoreCase(type)) {
 			return "2";
 		} else if ("CHAR".equalsIgnoreCase(type)) {
-			if (length != null && length.equalsIgnoreCase("255")) {
-				return "255";
-			} else {
-				return length;
-			}
+			return length;
 		} else if ("TINYTEXT".equalsIgnoreCase(type)) {
 			return "255";
 		} else if ("BLOB".equalsIgnoreCase(type)) {

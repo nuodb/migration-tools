@@ -246,14 +246,9 @@ public class StructureTest extends MigrationTestBase {
 				stmt2.setString(3, cName);
 				stmt2.setInt(4, MySQLTypes.getKeyType(cKey));
 				rs2 = stmt2.executeQuery();
-				boolean found = false;
-				while (rs2.next()) {
-					found = true;
-					assertEquals(rs2.getString(1), cName, "Source column name "
+				assertTrue(rs2.next(), "Source column name "
 							+ cName + " of table " + tName
 							+ " did not match with target column name ");
-				}
-				assertTrue(found);
 				rs2.close();
 				stmt2.close();
 			}

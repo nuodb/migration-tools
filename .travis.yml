@@ -7,7 +7,6 @@ env:
     - NUO_ADD_DOMAIN_PASS=yes
     - NUO_START_AGENT=yes
   matrix:
-    - NUO_VERSION=3.1.2.1
     - NUO_VERSION=3.2.0.2
     - NUO_VERSION=3.3.0.1
 
