@@ -31,13 +31,13 @@ CREATE TABLE `datatypes1` (
   `c6` mediumint(9) NOT NULL DEFAULT '0',
   `c7` int(11) DEFAULT NULL,
   `c8` bigint(20) DEFAULT NULL,
-  `c9` float(10,2) DEFAULT NULL,
+  -- `c9` float(10,2) DEFAULT NULL, // DB-23789
   `c10` double DEFAULT NULL,
   `c11` bit,
   `c12` varbinary(90),
   `c13` binary(90),
   `c14` tinyblob,
-  `c15` serial,
+ -- `c15` serial, // DB-24133
   PRIMARY KEY (`c6`),
   UNIQUE KEY `c2` (`c2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -50,7 +50,8 @@ CREATE TABLE `datatypes1` (
 
 LOCK TABLES `datatypes1` WRITE;
 /*!40000 ALTER TABLE `datatypes1` DISABLE KEYS */;
-INSERT INTO `datatypes1` VALUES ('test1',23,'sample text value','2012-09-29',45,345,67,8767,243.34,345.455,1,'^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk',10),('test 2',83,'','1995-03-19',454,3445,97,876765,123.54,235.565,0,'^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk',11);
+-- INSERT INTO `datatypes1` VALUES ('test1',23,'sample text value','2012-09-29',45,345,67,8767,243.34,345.455,1,'^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk',10),('test 2',83,'','1995-03-19',454,3445,97,876765,123.54,235.565,0,'^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk',11);
+INSERT INTO `datatypes1` VALUES ('test1',23,'sample text value','2012-09-29',45,345,67,8767,345.455,1,'^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk'),('test 2',83,'','1995-03-19',454,3445,97,876765,235.565,0,'^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk');
 /*!40000 ALTER TABLE `datatypes1` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;

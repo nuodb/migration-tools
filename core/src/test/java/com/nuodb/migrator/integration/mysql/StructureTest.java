@@ -223,7 +223,7 @@ public class StructureTest extends MigrationTestBase {
 				+ "AND C.COLUMN_KEY IN ('PRI')";
 		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES AS I INNER JOIN SYSTEM.INDEXFIELDS AS F ON "
 				+ "I.SCHEMA=F.SCHEMA AND I.TABLENAME=F.TABLENAME AND "
-				+ "I.INDEXNAME=F.INDEXNAME WHERE I.SCHEMA=? AND I.TABLENAME=? AND "
+				+ "I.INDEXNAME=F.INDEXNAME WHERE I.SCHEMA=? AND I.TABLENAME=? AND FIELD=? AND "
 				+ "I.INDEXTYPE=? AND I.INDEXNAME LIKE '%PRIMARY_KEY%'";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
@@ -243,16 +243,12 @@ public class StructureTest extends MigrationTestBase {
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 				stmt2.setString(1, nuodbSchemaUsed);
 				stmt2.setString(2, tName);
-				stmt2.setInt(3, MySQLTypes.getKeyType(cKey));
+				stmt2.setString(3, cName);
+				stmt2.setInt(4, MySQLTypes.getKeyType(cKey));
 				rs2 = stmt2.executeQuery();
-				boolean found = false;
-				while (rs2.next()) {
-					found = true;
-					assertEquals(rs2.getString(1), cName, "Source column name "
+				assertTrue(rs2.next(), "Source column name "
 							+ cName + " of table " + tName
 							+ " did not match with target column name ");
-				}
-				assertTrue(found);
 				rs2.close();
 				stmt2.close();
 			}
@@ -350,7 +346,7 @@ public class StructureTest extends MigrationTestBase {
 		String sqlStr1 = "select TC.TABLE_NAME, CU.COLUMN_NAME, CU.REFERENCED_TABLE_NAME, CU.REFERENCED_COLUMN_NAME "
 				+ "from information_schema.TABLE_CONSTRAINTS TC INNER JOIN information_schema.KEY_COLUMN_USAGE CU "
 				+ "on TC.CONSTRAINT_SCHEMA=? and CU.TABLE_SCHEMA = TC.CONSTRAINT_SCHEMA and "
-				+ "TC.TABLE_NAME = CU.TABLE_NAME AND TC.CONSTRAINT_TYPE = 'FOREIGN KEY';";
+				+ "TC.TABLE_NAME = CU.TABLE_NAME AND TC.CONSTRAINT_TYPE = 'FOREIGN KEY' AND TC.CONSTRAINT_NAME = CU.CONSTRAINT_NAME;";
 		String sqlStr2 = "SELECT PRIMARYTABLE.SCHEMA AS PKTABLE_SCHEM, PRIMARYTABLE.TABLENAME AS PKTABLE_NAME, "
 				+ " PRIMARYFIELD.FIELD AS PKCOLUMN_NAME, FOREIGNTABLE.SCHEMA AS FKTABLE_SCHEM, "
 				+ " FOREIGNTABLE.TABLENAME AS FKTABLE_NAME, FOREIGNFIELD.FIELD AS FKCOLUMN_NAME, "
@@ -365,7 +361,7 @@ public class StructureTest extends MigrationTestBase {
 				+ "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA "
 				+ "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME "
 				+ "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID "
-				+ "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, "
+				+ "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? AND PRIMARYTABLE.TABLENAME = ? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, "
 				+ "KEY_SEQ ASC";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
@@ -386,6 +382,7 @@ public class StructureTest extends MigrationTestBase {
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 				stmt2.setString(1, nuodbSchemaUsed);
 				stmt2.setString(2, tName);
+				stmt2.setString(3, rtName);
 				rs2 = stmt2.executeQuery();
 				boolean found = false;
 				while (rs2.next()) {
