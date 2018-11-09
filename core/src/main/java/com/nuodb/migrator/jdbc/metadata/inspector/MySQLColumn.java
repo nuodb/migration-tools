@@ -30,6 +30,10 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.type.JdbcEnumType;
 import com.nuodb.migrator.jdbc.type.JdbcSetType;
 import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+
+import static java.sql.Types.SMALLINT;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 
 import java.util.Collection;
 
@@ -42,6 +46,7 @@ public class MySQLColumn {
 
     public static String ENUM = "ENUM";
     public static String SET = "SET";
+    public static String YEAR = "YEAR";
 
     public static JdbcType getJdbcType(JdbcType baseType, String type) {
         JdbcType jdbcType;
@@ -49,6 +54,8 @@ public class MySQLColumn {
             jdbcType = new JdbcEnumType(baseType, getEnum(baseType, type));
         } else if (SET.equals(baseType.getTypeName())) {
             jdbcType = new JdbcSetType(baseType, getSet(baseType, type));
+        } else if (YEAR.equals(baseType.getTypeName())) {
+            jdbcType = new JdbcType(new JdbcTypeDesc(SMALLINT, "SMALLINT"), newOptions(0, 0, 0));
         } else {
             jdbcType = baseType;
         }

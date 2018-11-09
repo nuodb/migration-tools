@@ -92,7 +92,7 @@ public class MySQLTypes implements DatabaseTypes {
 				JDBCGetMethod.TIMESTAMP });
 		map.put("TIME", new JDBCGetMethod[] { JDBCGetMethod.DATE,
 				JDBCGetMethod.TIME, JDBCGetMethod.TIMESTAMP });
-		map.put("YEAR", new JDBCGetMethod[] { JDBCGetMethod.DATE });
+		map.put("YEAR", new JDBCGetMethod[] { JDBCGetMethod.SHORT });
 
 		map.put("BLOB", new JDBCGetMethod[] { JDBCGetMethod.BLOB });
 		map.put("TINYBLOB", new JDBCGetMethod[] { JDBCGetMethod.BLOB });
@@ -163,7 +163,7 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
 			return Types.TIMESTAMP;
 		} else if ("YEAR".equalsIgnoreCase(type)) {
-			return Types.DATE;
+			return Types.SMALLINT;
 		} else if ("CHAR".equalsIgnoreCase(type)) {
 			return Types.CHAR;
 		} else if ("TINYTEXT".equalsIgnoreCase(type)) {
@@ -248,13 +248,9 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
 			return "12";
 		} else if ("YEAR".equalsIgnoreCase(type)) {
-			return "8";
+			return "2";
 		} else if ("CHAR".equalsIgnoreCase(type)) {
-			if (length != null && length.equalsIgnoreCase("255")) {
-				return "255";
-			} else {
-				return "20";
-			}
+			return length;
 		} else if ("TINYTEXT".equalsIgnoreCase(type)) {
 			return "255";
 		} else if ("BLOB".equalsIgnoreCase(type)) {
