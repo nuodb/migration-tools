@@ -17,7 +17,7 @@ CREATE TABLE `precision2` (
   `c1` varchar(20) DEFAULT NULL,
   `c2` text(20),
   `c3` decimal(10,2) DEFAULT NULL,
-  `c4` float(10,2) DEFAULT NULL,
+  `c4` double(10,2) DEFAULT NULL, -- // Should be testing float, DB-23789
   `c5` double(10,2) DEFAULT NULL,
   `c6` bit,
   `c7` char(20) NOT NULL

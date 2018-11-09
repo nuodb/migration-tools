@@ -302,8 +302,10 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 });
                 boolean unique = index.isPresent() && (!column.isNullable() || dialect.supportsNotNullUnique());
                 boolean uniqueConstraint = index.isPresent() && index.get().isUniqueConstraint();
-                // Create the constraint inline with create table when possible
-                if (unique && !uniqueConstraint) {
+                // Create the constraint inline with create table when uniqueConstraint is True.
+                // uniqueConstraint is only set and possible to be True when migrating from nuodb,
+                // for other databases, it's false by default. Unique will always be created in a separate query.
+                if (unique && uniqueConstraint) {
                     if (dialect.supportsUniqueInCreateTable()) {
                         buffer.append(' ');
                         buffer.append("UNIQUE");
