@@ -56,7 +56,7 @@ public class MySQLPrecisions {
         values.add(new MySQLPrecision2("sample text", "sample data", 23.22, 4.6, 416.7,
                 "true", "1234567890"));
         values.add(new MySQLPrecision2("sample text length20", "total word lenght 20", 1.234567822E7,
-                9.876543266E7, 34567891.17, "false", "12345678900123456789"));
+                9.8765432E7, 34567891.17, "false", "12345678900123456789"));
         values.add(new MySQLPrecision2("", "sample data", 23.22, 4.6, 416.7, "true",
                 "5291"));
         return values;

@@ -188,7 +188,6 @@ insert into  `testdata_decimal` (`c1`,`c2`,`c3`) values(591.267,73.50,3245.65);
 insert into  `testdata_decimal` (`c1`,`c3`) values(88.71,21.85);
 insert into  `testdata_decimal` (`c3`) values(3465.65);
 
-/* DB-23789
 DROP TABLE IF EXISTS `testdata_float`;
 CREATE TABLE `testdata_float` (
   `c1` float,
@@ -202,7 +201,6 @@ insert into  `testdata_float` (`c1`,`c3`,`c4`) values(234.45,3465.65,2.2);
 insert into  `testdata_float` (`c1`,`c2`,`c3`,`c4`) values(591.267,73.50,3245.65,90.90);
 #insert into  `testdata_float` (`c1`,`c3`,`c4`) values(88.71,21.85,729080631997946385733442779936491199546469606487285224631581318586290994722058344345842388899801957634650998572214462675589672266928106542830144619850948823672845554764540620296986313159283048923070426088684408438322700506590.873243074052228547128472703744);
 #insert into  `testdata_float` (`c1`,`c3`,`c5`) values(88.71,21.85,97946385733442779936491199546469606487285224631581.97946385733442779936491199546469606487285224631581);
-*/
 DROP TABLE IF EXISTS `testdata_double`;
 
 CREATE TABLE `testdata_double` (
