@@ -48,8 +48,7 @@ public class DataTypesTest extends BaseDataTypeTest {
 				{ "testdata_varchar" }, { "testdata_varchar_max" },
 				{ "testdata_tinytext" }, { "testdata_text" },
 				{ "testdata_mediumtext" }, { "testdata_longtext" },
-				{ "testdata_decimal" },
-				//{ "testdata_float" }, DB-23789
+				{ "testdata_decimal" }, { "testdata_float" },
 				{ "testdata_double" }, { "testdata_tinyblob" },
 				{ "testdata_blob" }, { "testdata_mediumblob" },
 				{ "testdata_longblob" }, { "testdata_enum" },

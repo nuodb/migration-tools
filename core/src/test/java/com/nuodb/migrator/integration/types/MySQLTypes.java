@@ -147,7 +147,7 @@ public class MySQLTypes implements DatabaseTypes {
 				return Types.INTEGER;
 			}
 		} else if ("FLOAT".equalsIgnoreCase(type)) {
-			return Types.FLOAT;
+			return Types.DOUBLE; // in NuoDB, float is double internally
 		} else if ("DOUBLE".equalsIgnoreCase(type)) {
 			return Types.DOUBLE;
 		} else if ("DECIMAL".equalsIgnoreCase(type)) {
@@ -230,7 +230,7 @@ public class MySQLTypes implements DatabaseTypes {
 				return "4";
 			}
 		} else if ("FLOAT".equalsIgnoreCase(type)) {
-			return "4";
+			return "8"; // in NuoDB, float is double internally
 		} else if ("DOUBLE".equalsIgnoreCase(type)) {
 			return "8";
 		} else if ("DECIMAL".equalsIgnoreCase(type)) {
