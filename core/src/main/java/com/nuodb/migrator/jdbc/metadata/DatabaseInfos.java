@@ -41,7 +41,8 @@ public interface DatabaseInfos {
     final DatabaseInfo NUODB_204 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 30);
     final DatabaseInfo NUODB_205 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 31);
     final DatabaseInfo NUODB_206 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 32);
-    final DatabaseInfo NUODB = new NuoDBDatabaseInfo("NuoDB", null, 2, 5, 33);
+    final DatabaseInfo NUODB_250 = new NuoDBDatabaseInfo("NuoDB", null, 2, 5, 33);
+    final DatabaseInfo NUODB = new NuoDBDatabaseInfo("NuoDB", null, 3, 4, 34);
     final DatabaseInfo ORACLE = new DatabaseInfo("Oracle");
     final DatabaseInfo DB2 = new DatabaseInfo("DB2/") {
         @Override

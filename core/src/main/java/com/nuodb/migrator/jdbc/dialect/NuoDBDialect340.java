@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017, NuoDB, Inc.
+ * Copyright (c) 2018, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,28 +28,30 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB_250;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
-/**
- * @author Sergey Bushik
- */
-public class NuoDBDialect256 extends NuoDBDialect206 {
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.ORACLE;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newScale;
 
-    public NuoDBDialect256() {
-        super(NUODB_250);
+import static java.sql.Types.DECIMAL;
+
+public class NuoDBDialect340 extends NuoDBDialect {
+    public NuoDBDialect340() {
+        super(NUODB);
     }
 
-    public NuoDBDialect256(DatabaseInfo databaseInfo) {
+    public NuoDBDialect340(DatabaseInfo databaseInfo) {
         super(databaseInfo);
     }
 
     @Override
-    public boolean supportsIndexInCreateTable() {
-       return true;
+    protected void initJdbcTypeNames() {
+        super.initJdbcTypeNames();
+        removeJdbcTypeName(new JdbcTypeDesc(DECIMAL, "NUMBER"));
+        addJdbcTypeName(new JdbcTypeDesc(DECIMAL, "NUMBER"),newScale(0), "BIGINT");
+        removeJdbcTypeName(ORACLE, new JdbcTypeDesc(DECIMAL, "NUMBER"));
+        addJdbcTypeName(ORACLE, DECIMAL, "BIGINT");
     }
 
-    @Override
-    public boolean addConstraintsInCreateTable() {
-        return true;
-    }
 }
