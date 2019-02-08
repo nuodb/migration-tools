@@ -36,6 +36,7 @@ import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -78,8 +79,14 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
 
             Column column = table.addColumn(columns.getString("FIELD"));
             JdbcType jdbcType = new JdbcType();
+
+            // Get the field type from databaseMataData
+            DatabaseMetaData databaseMataData = inspectionContext.getConnection().getMetaData();
+            ResultSet rowMetaData = databaseMataData.getColumns(null, columns.getString("SCHEMA"), columns.getString("TABLENAME"), columns.getString("FIELD"));
+            rowMetaData.next();
             JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeAlias(
-                    columns.getInt("JDBCTYPE"), columns.getString("NAME"));
+                    rowMetaData.getInt("DATA_TYPE"), rowMetaData.getString("TYPE_NAME"));
+
             jdbcType.setTypeCode(typeDescAlias.getTypeCode());
             jdbcType.setTypeName(typeDescAlias.getTypeName());
 
