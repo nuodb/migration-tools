@@ -73,19 +73,22 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
     protected void processResultSet(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         Dialect dialect = inspectionContext.getDialect();
+        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
         while (columns.next()) {
-            Table table = addTable(inspectionResults, null, columns.getString("SCHEMA"),
-                    columns.getString("TABLENAME"));
+            String schema = columns.getString("SCHEMA");
+            String tableName = columns.getString("TABLENAME");
+            Table table = addTable(inspectionResults, null, schema, tableName);
 
             Column column = table.addColumn(columns.getString("FIELD"));
             JdbcType jdbcType = new JdbcType();
 
-            // Get the field type from databaseMataData
-            DatabaseMetaData databaseMataData = inspectionContext.getConnection().getMetaData();
-            ResultSet rowMetaData = databaseMataData.getColumns(null, columns.getString("SCHEMA"), columns.getString("TABLENAME"), columns.getString("FIELD"));
-            rowMetaData.next();
+            // Get the field type from databaseMetaData
+            ResultSet columnsFromDatabaseMetaData = databaseMetaData.getColumns(null, schema, tableName, columns.getString("FIELD"));
+            if (!columnsFromDatabaseMetaData.next()) {
+                throw new SQLException("Failed to get columns of table " + schema + "." + tableName + " from the database meta data");
+            }
             JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeAlias(
-                    rowMetaData.getInt("DATA_TYPE"), rowMetaData.getString("TYPE_NAME"));
+                    columnsFromDatabaseMetaData.getInt("DATA_TYPE"), columnsFromDatabaseMetaData.getString("TYPE_NAME"));
 
             jdbcType.setTypeCode(typeDescAlias.getTypeCode());
             jdbcType.setTypeName(typeDescAlias.getTypeName());
