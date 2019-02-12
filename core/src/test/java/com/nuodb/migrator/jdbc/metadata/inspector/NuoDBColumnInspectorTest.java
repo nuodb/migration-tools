@@ -98,11 +98,12 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         // Get the field type from databaseMataData
         DatabaseMetaData metaData = mock(DatabaseMetaData.class);
         given(getConnection().getMetaData()).willReturn(metaData);
-        ResultSet rowResultSet = mock(ResultSet.class);
-        given(metaData.getColumns(anyString(), anyString(), anyString(), anyString())).willReturn(rowResultSet);
-        given(rowResultSet.next()).willReturn(true, false);
-        given(rowResultSet.getInt("DATA_TYPE")).willReturn(typeCode);
-        given(rowResultSet.getString("TYPE_NAME")).willReturn(typeName);
+        ResultSet columnsResultSet = mock(ResultSet.class);
+        given(metaData.getColumns(anyString(), anyString(), anyString(), anyString())).willReturn(columnsResultSet);
+        given(columnsResultSet.next()).willReturn(true, false);
+        given(columnsResultSet.getInt("DATA_TYPE")).willReturn(typeCode);
+        given(columnsResultSet.getString("TYPE_NAME")).willReturn(typeName);
+        given(columnsResultSet.getString("COLUMN_NAME")).willReturn(columnName);
 
         given(resultSet.getInt("LENGTH")).willReturn(columnSize);
         given(resultSet.getString("DEFAULTVALUE")).willReturn(defaultValue);
