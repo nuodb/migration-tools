@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
@@ -93,6 +94,17 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         given(resultSet.getString("FIELD")).willReturn(columnName);
         given(resultSet.getInt("JDBCTYPE")).willReturn(typeCode);
         given(resultSet.getString("NAME")).willReturn(typeName);
+
+        // Get the field type from databaseMataData
+        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+        given(getConnection().getMetaData()).willReturn(metaData);
+        ResultSet columnsResultSet = mock(ResultSet.class);
+        given(metaData.getColumns(anyString(), anyString(), anyString(), anyString())).willReturn(columnsResultSet);
+        given(columnsResultSet.next()).willReturn(true, false);
+        given(columnsResultSet.getInt("DATA_TYPE")).willReturn(typeCode);
+        given(columnsResultSet.getString("TYPE_NAME")).willReturn(typeName);
+        given(columnsResultSet.getString("COLUMN_NAME")).willReturn(columnName);
+
         given(resultSet.getInt("LENGTH")).willReturn(columnSize);
         given(resultSet.getString("DEFAULTVALUE")).willReturn(defaultValue);
         given(resultSet.getInt("SCALE")).willReturn(scale);
