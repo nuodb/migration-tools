@@ -36,9 +36,12 @@ import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
@@ -55,6 +58,8 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
     private static final String QUERY =
             "SELECT * FROM SYSTEM.FIELDS AS F INNER JOIN SYSTEM.DATATYPES AS D ON F.DATATYPE = D.ID\n" +
                     "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
+    private String schema;
+    private String tableName;
 
     public NuoDBColumnInspector() {
         super(COLUMN, TableInspectionScope.class);
@@ -63,8 +68,10 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         Collection<Object> parameters = newArrayList();
-        parameters.add(tableInspectionScope.getSchema());
-        parameters.add(tableInspectionScope.getTable());
+        schema = tableInspectionScope.getSchema();
+        tableName = tableInspectionScope.getTable();
+        parameters.add(schema);
+        parameters.add(tableName);
         return new ParameterizedQuery(newQuery(QUERY), parameters);
     }
 
@@ -72,14 +79,33 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
     protected void processResultSet(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         Dialect dialect = inspectionContext.getDialect();
+
+        // Get the fields' type from databaseMetaData
+        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
+        Map<String, JdbcTypeDesc> fieldsType = new HashMap<String, JdbcTypeDesc>();
+        try(ResultSet columnsFromDatabaseMetaData = databaseMetaData.getColumns(null, schema, tableName, null)){
+            if (columnsFromDatabaseMetaData.next()) {
+                do {
+                    JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeAlias(
+                            columnsFromDatabaseMetaData.getInt("DATA_TYPE"), columnsFromDatabaseMetaData.getString("TYPE_NAME"));
+                    fieldsType.put(columnsFromDatabaseMetaData.getString("COLUMN_NAME"), typeDescAlias);
+                } while (columnsFromDatabaseMetaData.next());
+            } else {
+                throw new SQLException("Failed to get columns of table " + schema + "." + tableName + " from the database meta data");
+            }
+        }
+
         while (columns.next()) {
-            Table table = addTable(inspectionResults, null, columns.getString("SCHEMA"),
-                    columns.getString("TABLENAME"));
+            Table table = addTable(inspectionResults, null, schema, tableName);
 
             Column column = table.addColumn(columns.getString("FIELD"));
             JdbcType jdbcType = new JdbcType();
-            JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeAlias(
-                    columns.getInt("JDBCTYPE"), columns.getString("NAME"));
+
+            JdbcTypeDesc typeDescAlias = fieldsType.get(columns.getString("FIELD"));
+            if (typeDescAlias == null) {
+                throw new SQLException("The type of the field " + columns.getString("FIELD") + " of table " + schema + "." + tableName + " does not exist in the map of fields type: " + fieldsType.toString());
+            }
+
             jdbcType.setTypeCode(typeDescAlias.getTypeCode());
             jdbcType.setTypeName(typeDescAlias.getTypeName());
 
