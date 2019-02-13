@@ -100,7 +100,11 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
 
             Column column = table.addColumn(columns.getString("FIELD"));
             JdbcType jdbcType = new JdbcType();
+
             JdbcTypeDesc typeDescAlias = fieldsType.get(columns.getString("FIELD"));
+            if (typeDescAlias == null) {
+                throw new SQLException("The type of the field " + columns.getString("FIELD") + " of table " + schema + "." + tableName + " does not exist in the map of fields type: " + fieldsType.toString());
+            }
 
             jdbcType.setTypeCode(typeDescAlias.getTypeCode());
             jdbcType.setTypeName(typeDescAlias.getTypeName());
