@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.nuodb.migrator.jdbc.metadata.Table;
+
 import java.io.BufferedWriter;
 import java.io.Writer;
 
@@ -97,12 +99,24 @@ public abstract class StreamScriptExporterBase extends ScriptExporterBase implem
     }
 
     @Override
-    public void preLockRequiredDDL() throws Exception {
-        // TODO
+    public void preLockRequiredDDL(Table table) throws Exception {
+        writer.write("COMMIT;");
+        writer.newLine();
+        writer.write("SET ISOLATION LEVEL read committed;");
+        writer.newLine();
+        writer.write("COMMIT;");
+        writer.newLine();
+        writer.write(String.format("LOCK TABLE %s EXCLUSIVE;", table.getQualifiedName()));
+        writer.newLine();
     }
 
     @Override
     public void postLockRequiredDDL() throws Exception{
-        // TODO
+        writer.write("COMMIT;");
+        writer.newLine();
+        writer.write("SET ISOLATION LEVEL serializable;");
+        writer.newLine();
+        writer.write("COMMIT;");
+        writer.newLine();
     }
 }

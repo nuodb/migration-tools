@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.nuodb.migrator.jdbc.metadata.Table;
+
 import java.util.Collection;
 
 import static java.lang.String.format;
@@ -60,7 +62,7 @@ public abstract class ScriptExporterBase extends ScriptProcessorBase implements 
 
     protected abstract void doExportScript(Script script) throws Exception;
 
-    protected abstract void preLockRequiredDDL() throws Exception;
+    protected abstract void preLockRequiredDDL(Table table) throws Exception;
 
     protected abstract void postLockRequiredDDL() throws Exception;
 }

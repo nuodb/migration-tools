@@ -33,6 +33,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 
 import com.nuodb.migrator.utils.StringUtils;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static java.lang.String.format;
@@ -61,7 +62,7 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
         }
         if (!StringUtils.isEmpty(script.getSQL())) {
             if (script.requiresLock()) {
-                preLockRequiredDDL();
+                preLockRequiredDDL(script.getTableToLock());
             }
             statement.executeUpdate(script.getSQL());
             if (script.requiresLock()) {
@@ -92,11 +93,11 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
     }
 
     @Override
-    public void preLockRequiredDDL() throws SQLException {
+    public void preLockRequiredDDL(Table table) throws SQLException {
         getConnection().commit();
         getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         getConnection().commit();
-        statement.executeUpdate("LOCK TABLE public.test EXCLUSIVE;");
+        statement.executeUpdate(String.format("LOCK TABLE %s EXCLUSIVE;", table.getQualifiedName()));
     }
 
     @Override
