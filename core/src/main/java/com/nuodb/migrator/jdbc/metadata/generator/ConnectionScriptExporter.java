@@ -61,16 +61,11 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
         }
         if (!StringUtils.isEmpty(script.getSQL())) {
             if (script.requiresLock()) {
-                getConnection().commit();
-                getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-                getConnection().commit();
-                statement.executeUpdate("LOCK TABLE public.test EXCLUSIVE;");
+                preLockRequiredDDL();
             }
             statement.executeUpdate(script.getSQL());
             if (script.requiresLock()) {
-                getConnection().commit();
-                getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-                getConnection().commit();
+                postLockRequiredDDL();
             }
         }
         processWarnings(statement.getWarnings());
@@ -94,5 +89,20 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
 
     public Connection getConnection() {
         return connection;
+    }
+
+    @Override
+    public void preLockRequiredDDL() throws SQLException {
+        getConnection().commit();
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        getConnection().commit();
+        statement.executeUpdate("LOCK TABLE public.test EXCLUSIVE;");
+    }
+
+    @Override
+    public void postLockRequiredDDL() throws SQLException {
+        getConnection().commit();
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        getConnection().commit();
     }
 }

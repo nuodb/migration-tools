@@ -59,4 +59,8 @@ public abstract class ScriptExporterBase extends ScriptProcessorBase implements 
     }
 
     protected abstract void doExportScript(Script script) throws Exception;
+
+    protected abstract void preLockRequiredDDL() throws Exception;
+
+    protected abstract void postLockRequiredDDL() throws Exception;
 }

@@ -48,13 +48,13 @@ import static org.mockito.Mockito.when;
  */
 public class ScriptExporterTest {
 
-    private Collection<String> scripts;
+    private Collection<Script> scripts;
 
     @BeforeMethod
     public void setUp() {
         scripts = newArrayList(
-                "CREATE TABLE \"users\" (\"used_id\" INTEGER);",
-                "CREATE TABLE \"links\" (\"link_id\" INTEGER);"
+            new Script("CREATE TABLE \"users\" (\"used_id\" INTEGER);"),
+            new Script("CREATE TABLE \"links\" (\"link_id\" INTEGER);")
         );
     }
 

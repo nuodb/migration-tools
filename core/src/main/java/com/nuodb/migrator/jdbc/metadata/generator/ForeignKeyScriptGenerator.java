@@ -80,7 +80,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         }
 
         buffer.append(getConstraintScript(foreignKey, scriptGeneratorManager));
-        return singleton(new Script(buffer.toString(), true));
+        return singleton(new Script(buffer.toString(), foreignKey.getTable(), true));
     }
 
     /**
@@ -112,7 +112,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         buffer.append(" REFERENCES ");
         buffer.append(getPrimaryScriptGeneratorManager(foreignKey, scriptGeneratorManager).getQualifiedName(
                 foreignKey.getPrimaryTable()));
-        return singleton(new Script(buffer.toString(), true));
+        return singleton(new Script(buffer.toString(), foreignKey.getTable(), true));
     }
 
     protected String getForeignTable(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {

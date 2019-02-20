@@ -51,7 +51,7 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
         getCreateOn(trigger, scriptGeneratorManager, buffer);
         getCreateAttributes(trigger, scriptGeneratorManager, buffer);
         getCreateBody(trigger, scriptGeneratorManager, buffer);
-        return singleton(new Script(buffer.toString(), true));
+        return singleton(new Script(buffer.toString(), trigger.getTable(), true));
     }
 
     protected void getCreateOn(T trigger, ScriptGeneratorManager scriptGeneratorManager, StringBuilder buffer) {
@@ -99,6 +99,6 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }
-        return singleton(new Script(buffer.toString(), true));
+        return singleton(new Script(buffer.toString(), trigger.getTable(), true));
     }
 }

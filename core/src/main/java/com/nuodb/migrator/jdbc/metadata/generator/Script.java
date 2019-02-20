@@ -27,18 +27,22 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.nuodb.migrator.jdbc.metadata.Table;
+
 public class Script {
     protected String sql;
     protected boolean requiresLock;
+    protected Table tableToLock;
 
     public Script(String sql) {
         this.sql = sql;
         this.requiresLock = false;
     }
 
-    public Script(String sql, boolean requiresLock) {
+    public Script(String sql, Table tableToLock, boolean requiresLock) {
         this.sql = sql;
         this.requiresLock = requiresLock;
+        this.tableToLock = tableToLock;
     }
 
     public String getSQL() {
@@ -47,5 +51,9 @@ public class Script {
 
     public boolean requiresLock() {
         return requiresLock;
+    }
+
+    public Table getTableToLock() {
+        return tableToLock;
     }
 }

@@ -51,6 +51,7 @@ import org.testng.annotations.Test;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
+import java.util.ArrayList;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
@@ -424,9 +425,13 @@ public class ScriptGeneratorTest {
         scriptGeneratorManager.setTargetDialect(targetDialect == null ? createTargetDialect() : targetDialect);
         scriptGeneratorManager.setScriptTypes(scriptTypes);
 
-        Collection<String> scripts = scriptGeneratorManager.getScripts(object);
-        assertNotNull(scripts);
-        assertEquals(newArrayList(expected), newArrayList(scripts));
+        Collection<Script> actualScripts = scriptGeneratorManager.getScripts(object);
+        assertNotNull(actualScripts);
+        Collection<String> actual = new ArrayList();
+        for (Script script : actualScripts) {
+            actual.add(script.getSQL());
+        }
+        assertEquals(newArrayList(expected), actual);
     }
 
     @Test(dataProvider = "getScripts")
@@ -436,9 +441,13 @@ public class ScriptGeneratorTest {
         scriptGeneratorManager.setTargetDialect(targetDialect == null ? createTargetDialect() : targetDialect);
         scriptGeneratorManager.setScriptTypes(scriptTypes);
 
-        Collection<String> scripts = scriptGeneratorManager.getScripts(object);
-        assertNotNull(scripts);
-        assertEquals(newArrayList(expected), newArrayList(scripts));
+        Collection<Script> actualScripts = scriptGeneratorManager.getScripts(object);
+        assertNotNull(actualScripts);
+        Collection<String> actual = new ArrayList();
+        for (Script script : actualScripts) {
+            actual.add(script.getSQL());
+        }
+        assertEquals(newArrayList(expected), actual);
     }
 
     private Dialect createTargetDialect() {

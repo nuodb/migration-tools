@@ -75,7 +75,7 @@ public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> i
             buffer.append(" ");
         }
         buffer.append(getConstraintScript(primaryKey, scriptGeneratorManager));
-        return singleton(new Script(buffer.toString(), true));
+        return singleton(new Script(buffer.toString(), primaryKey.getTable(), true));
     }
 
     @Override
@@ -86,7 +86,7 @@ public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> i
             buffer.append("ALTER TABLE ");
             buffer.append(scriptGeneratorManager.getName(primaryKey.getTable()));
             buffer.append(" DROP PRIMARY KEY");
-            return singleton(new Script(buffer.toString(), true));
+            return singleton(new Script(buffer.toString(), primaryKey.getTable(), true));
         } else {
             return emptyList();
         }

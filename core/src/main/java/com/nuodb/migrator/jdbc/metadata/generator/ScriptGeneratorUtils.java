@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
 import java.util.Collection;
 
@@ -80,6 +81,7 @@ public class ScriptGeneratorUtils {
         return new Script(dropSchema);
     }
 
+    // TODO figure out this function
     public static Collection<Script> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
         Collection<Script> multipleIndexesScripts = newArrayList();
@@ -93,12 +95,14 @@ public class ScriptGeneratorUtils {
         }
         boolean requiresLock = false;
         Collection<String> sql = newArrayList();
+        Table tableToLock = null;
         for (Script script : multipleIndexesScripts) {
             if (script.requiresLock()) {
                 requiresLock = true;
+                tableToLock = script.getTableToLock();
             }
             sql.add(script.getSQL());
         }
-        return singleton(new Script(join(sql, COMMA), requiresLock));
+        return singleton(new Script(join(sql, COMMA), tableToLock, requiresLock));
     }
 }

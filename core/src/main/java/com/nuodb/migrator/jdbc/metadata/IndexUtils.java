@@ -51,7 +51,8 @@ public class IndexUtils {
 
     private static final String COMMA = ", ";
 
-    public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
+    // TODO figure out this function
+    public static Collection<Script> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
         Collection<Script> multipleIndexesScripts = newArrayList();
         for (Index index : indexes) {
@@ -61,7 +62,17 @@ public class IndexUtils {
                 multipleIndexesScripts.add(get(indexScripts, 0));
             }
         }
-        return singleton(join(multipleIndexesScripts, COMMA));
+        boolean requiresLock = false;
+        Collection<String> sql = newArrayList();
+        Table tableToLock = null;
+        for (Script script : multipleIndexesScripts) {
+            if (script.requiresLock()) {
+                requiresLock = true;
+                tableToLock = script.getTableToLock();
+            }
+            sql.add(script.getSQL());
+        }
+        return singleton(new Script(join(sql, COMMA), tableToLock, requiresLock));
     }
 
     public static Collection<Index> getNonRepeatingIndexes(Table table) {

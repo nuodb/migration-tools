@@ -95,4 +95,14 @@ public abstract class StreamScriptExporterBase extends ScriptExporterBase implem
     public void setCommentStart(String commentStart) {
         this.commentStart = commentStart;
     }
+
+    @Override
+    public void preLockRequiredDDL() throws Exception {
+        // TODO
+    }
+
+    @Override
+    public void postLockRequiredDDL() throws Exception{
+        // TODO
+    }
 }
