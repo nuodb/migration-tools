@@ -58,15 +58,15 @@ public class CompositeScriptExporter implements ScriptExporter {
     }
 
     @Override
-    public void exportScript(String script) throws Exception {
+    public void exportScript(Script script) throws Exception {
         for (ScriptExporter scriptExporter : getScriptExporters()) {
             scriptExporter.exportScript(script);
         }
     }
 
     @Override
-    public void exportScripts(Collection<String> scripts) throws Exception {
-        for (String script : scripts) {
+    public void exportScripts(Collection<Script> scripts) throws Exception {
+        for (Script script : scripts) {
             exportScript(script);
         }
     }

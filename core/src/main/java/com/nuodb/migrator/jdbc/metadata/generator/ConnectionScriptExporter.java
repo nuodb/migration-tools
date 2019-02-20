@@ -55,12 +55,23 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
     }
 
     @Override
-    public void doExportScript(String script) throws Exception {
+    public void doExportScript(Script script) throws Exception {
         if (statement == null) {
             throw new GeneratorException("Connection is not opened");
         }
-        if (!StringUtils.isEmpty(script)) {
-            statement.executeUpdate(script);
+        if (!StringUtils.isEmpty(script.getSQL())) {
+            if (script.requiresLock()) {
+                getConnection().commit();
+                getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                getConnection().commit();
+                statement.executeUpdate("LOCK TABLE public.test EXCLUSIVE;");
+            }
+            statement.executeUpdate(script.getSQL());
+            if (script.requiresLock()) {
+                getConnection().commit();
+                getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+                getConnection().commit();
+            }
         }
         processWarnings(statement.getWarnings());
     }

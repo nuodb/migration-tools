@@ -37,17 +37,17 @@ import static java.lang.String.format;
 public abstract class ScriptExporterBase extends ScriptProcessorBase implements ScriptExporter {
 
     @Override
-    public void exportScripts(Collection<String> scripts) throws Exception {
+    public void exportScripts(Collection<Script> scripts) throws Exception {
         if (scripts == null) {
             return;
         }
-        for (String script : scripts) {
+        for (Script script : scripts) {
             exportScript(script);
         }
     }
 
     @Override
-    public void exportScript(String script) throws Exception {
+    public void exportScript(Script script) throws Exception {
         try {
             doExportScript(script);
         } catch (Exception exception) {
@@ -58,5 +58,5 @@ public abstract class ScriptExporterBase extends ScriptProcessorBase implements 
         }
     }
 
-    protected abstract void doExportScript(String script) throws Exception;
+    protected abstract void doExportScript(Script script) throws Exception;
 }

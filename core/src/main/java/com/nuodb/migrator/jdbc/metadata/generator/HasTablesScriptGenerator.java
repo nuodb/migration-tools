@@ -75,11 +75,11 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
     }
 
     @Override
-    public Collection<String> getScripts(HasTables tables,
+    public Collection<Script> getScripts(HasTables tables,
                                          ScriptGeneratorManager scriptGeneratorManager) {
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
-            Collection<String> scripts = newArrayList();
+            Collection<Script> scripts = newArrayList();
             boolean addSequences = scriptGeneratorManager.getObjectTypes().contains(SEQUENCE);
             if (addSequences) {
                 MetaDataFilterManager filterManager = scriptGeneratorManager.getMetaDataFilterManager();
@@ -127,7 +127,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
         return groupScriptsBy != null ? groupScriptsBy : GroupScriptsBy.TABLE;
     }
 
-    protected void addCreateForeignKeysScripts(Collection<String> scripts, boolean force,
+    protected void addCreateForeignKeysScripts(Collection<Script> scripts, boolean force,
                                                ScriptGeneratorManager scriptGeneratorManager) {
         boolean createForeignKeys = scriptGeneratorManager.getObjectTypes().contains(FOREIGN_KEY);
         if (!createForeignKeys) {

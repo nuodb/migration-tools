@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
+import com.nuodb.migrator.jdbc.metadata.generator.Script;
 
 import java.util.Collection;
 import java.util.Map;
@@ -52,9 +53,9 @@ public class IndexUtils {
 
     public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
-        Collection<String> multipleIndexesScripts = newArrayList();
+        Collection<Script> multipleIndexesScripts = newArrayList();
         for (Index index : indexes) {
-            Collection<String> indexScripts = scriptGeneratorManager.getCreateScripts(index);
+            Collection<Script> indexScripts = scriptGeneratorManager.getCreateScripts(index);
             // indexScripts might be empty if index is a full-text or expression based index
             if (indexScripts.size() > 0) {
                 multipleIndexesScripts.add(get(indexScripts, 0));

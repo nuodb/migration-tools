@@ -60,7 +60,7 @@ public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> i
     }
 
     @Override
-    public Collection<String> getCreateScripts(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getCreateScripts(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
         buffer.append(scriptGeneratorManager.getName(primaryKey.getTable()));
@@ -75,18 +75,18 @@ public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> i
             buffer.append(" ");
         }
         buffer.append(getConstraintScript(primaryKey, scriptGeneratorManager));
-        return singleton(buffer.toString());
+        return singleton(new Script(buffer.toString(), true));
     }
 
     @Override
-    public Collection<String> getDropScripts(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getDropScripts(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         if (dialect.supportsDropPrimaryKey()) {
             StringBuilder buffer = new StringBuilder();
             buffer.append("ALTER TABLE ");
             buffer.append(scriptGeneratorManager.getName(primaryKey.getTable()));
             buffer.append(" DROP PRIMARY KEY");
-            return singleton(buffer.toString());
+            return singleton(new Script(buffer.toString(), true));
         } else {
             return emptyList();
         }
