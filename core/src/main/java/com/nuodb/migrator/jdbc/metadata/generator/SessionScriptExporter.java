@@ -31,6 +31,8 @@ import com.nuodb.migrator.jdbc.session.Session;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
+import com.nuodb.migrator.backup.loader.BackupLoaderContext;
+
 /**
  * @author Sergey Bushik
  */
@@ -38,8 +40,8 @@ public class SessionScriptExporter extends ConnectionScriptExporter {
 
     private final Session session;
 
-    public SessionScriptExporter(Session session) {
-        super(session.getConnection());
+    public SessionScriptExporter(Session session, BackupLoaderContext backupContext) {
+        super(session.getConnection(), backupContext);
         this.session = session;
     }
 

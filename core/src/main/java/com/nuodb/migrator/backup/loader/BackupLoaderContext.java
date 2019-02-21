@@ -154,4 +154,8 @@ public interface BackupLoaderContext {
     ValueFormatRegistry getValueFormatRegistry();
 
     void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
+
+    void setEnforceTableLocksForDDL(boolean enforceTableLocksForDDL);
+
+    boolean shouldEnforceTableLocksForDDL();
 }

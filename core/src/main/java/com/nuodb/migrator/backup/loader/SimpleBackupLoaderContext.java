@@ -84,6 +84,7 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private TimeZone timeZone;
     private ScriptGeneratorManager scriptGeneratorManager;
     private ValueFormatRegistry valueFormatRegistry;
+    private boolean enforceTableLocksForDDL;
 
     @Override
     public boolean isLoadData() {
@@ -342,5 +343,15 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public void setRowSetMapper(RowSetMapper rowSetMapper) {
         this.rowSetMapper = rowSetMapper;
+    }
+
+    @Override
+    public void setEnforceTableLocksForDDL(boolean enforceTableLocksForDDL) {
+        this.enforceTableLocksForDDL = enforceTableLocksForDDL;
+    }
+
+    @Override
+    public boolean shouldEnforceTableLocksForDDL() {
+        return this.enforceTableLocksForDDL;
     }
 }

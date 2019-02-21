@@ -33,6 +33,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 
 import com.nuodb.migrator.utils.StringUtils;
+import com.nuodb.migrator.backup.loader.BackupLoaderContext;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
@@ -45,9 +46,11 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
 
     protected Statement statement;
     protected Connection connection;
+    protected BackupLoaderContext backupContext;
 
-    public ConnectionScriptExporter(Connection connection) {
+    public ConnectionScriptExporter(Connection connection, BackupLoaderContext backupContext) {
         this.connection = connection;
+        this.backupContext = backupContext;
     }
 
     @Override
@@ -61,11 +64,11 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
             throw new GeneratorException("Connection is not opened");
         }
         if (!StringUtils.isEmpty(script.getSQL())) {
-            if (script.requiresLock()) {
+            if (script.requiresLock() && backupContext.shouldEnforceTableLocksForDDL()) {
                 preLockRequiredDDL(script.getTableToLock());
             }
             statement.executeUpdate(script.getSQL());
-            if (script.requiresLock()) {
+            if (script.requiresLock() && backupContext.shouldEnforceTableLocksForDDL()) {
                 postLockRequiredDDL();
             }
         }
