@@ -133,6 +133,11 @@
             <version>6.8</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.nuodb.jdbc</groupId>
+            <artifactId>nuodb-jdbc</artifactId>
+            <version>20.0.0</version>
+        </dependency>
     </dependencies>
 
     <profiles>
