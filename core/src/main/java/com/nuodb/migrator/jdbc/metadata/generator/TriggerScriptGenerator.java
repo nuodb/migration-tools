@@ -51,7 +51,8 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
         getCreateOn(trigger, scriptGeneratorManager, buffer);
         getCreateAttributes(trigger, scriptGeneratorManager, buffer);
         getCreateBody(trigger, scriptGeneratorManager, buffer);
-        return singleton(new Script(buffer.toString(), trigger.getTable(), true));
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        return singleton(new Script(buffer.toString(), trigger.getTable(), dialect.requiresTableLockForDDL()));
     }
 
     protected void getCreateOn(T trigger, ScriptGeneratorManager scriptGeneratorManager, StringBuilder buffer) {
@@ -99,6 +100,6 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }
-        return singleton(new Script(buffer.toString(), trigger.getTable(), true));
+        return singleton(new Script(buffer.toString(), trigger.getTable(), dialect.requiresTableLockForDDL()));
     }
 }

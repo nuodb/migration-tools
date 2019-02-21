@@ -87,8 +87,8 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
                 }
             }
             buffer.append(')');
-            System.out.println(buffer.toString());
-            return singleton(new Script(buffer.toString(), index.getTable(), true));
+            Dialect dialect = scriptGeneratorManager.getTargetDialect();
+            return singleton(new Script(buffer.toString(), index.getTable(), dialect.requiresTableLockForDDL()));
         }
     }
 
