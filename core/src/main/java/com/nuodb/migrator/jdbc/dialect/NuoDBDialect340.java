@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, NuoDB, Inc.
+ * Copyright (c) 2019, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,34 +28,20 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
-import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+public class NuoDBDialect340 extends NuoDBDialect320 {
 
-/**
- * @author Sergey Bushik
- */
-public class SimpleDialectResolver extends SimpleCachingServiceResolver<Dialect> implements DialectResolver {
+    public NuoDBDialect340() {
+        super(NUODB);
+    }
 
-    public SimpleDialectResolver() {
-        super(SimpleDialect.class);
-        register(DB2, DB2Dialect.class);
-        register(MYSQL, MySQLDialect.class);
-        register(NUODB_200, NuoDBDialect.class);
-        register(NUODB_203, NuoDBDialect203.class);
-        register(NUODB_206, NuoDBDialect206.class);
-        register(NUODB_256, NuoDBDialect256.class);
-        register(NUODB_320, NuoDBDialect320.class);
-        register(NUODB, NuoDBDialect340.class);
-        register(POSTGRE_SQL, PostgreSQLDialect.class);
-        register(ORACLE, OracleDialect.class);
-        register(MSSQL_SERVER, MSSQLServerDialect.class);
-        register(MSSQL_SERVER_2005, MSSQLServer2005Dialect.class);
+    public NuoDBDialect340(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
     }
 
     @Override
-    protected Dialect createService(Class<? extends Dialect> serviceClass, DatabaseInfo databaseInfo) {
-        return newInstance(serviceClass, databaseInfo);
+    public boolean requiresTableLockForDDL() {
+        return false;
     }
 }
