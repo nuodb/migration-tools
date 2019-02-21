@@ -82,22 +82,4 @@ public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHa
         Collection<ScriptType> scriptTypes = scriptGeneratorManager.getScriptTypes();
         return scriptTypes != null && scriptTypes.contains(scriptType);
     }
-
-    protected String generatePreDDL(Table table) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("SET ISOLATION LEVEL read committed; ");
-        buffer.append("SET AUTOCOMMIT OFF; ");
-        buffer.append("LOCK TABLE ");
-        buffer.append(table.getQualifiedName());
-        buffer.append("; ");
-        return buffer.toString();
-    }
-
-    protected String generatePostDDL() {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("COMMIT; ");
-        buffer.append("SET AUTOCOMMIT ON; ");
-        buffer.append("SET ISOLATION LEVEL serializable; ");
-        return buffer.toString();
-    }
 }
