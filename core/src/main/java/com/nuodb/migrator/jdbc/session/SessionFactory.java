@@ -30,6 +30,8 @@ package com.nuodb.migrator.jdbc.session;
 import java.sql.SQLException;
 import java.util.Map;
 
+import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
+
 /**
  * @author Sergey Bushik
  */
@@ -42,4 +44,5 @@ public interface SessionFactory {
     void addSessionObserver(SessionObserver sessionObserver);
 
     void removeSessionObserver(SessionObserver sessionObserver);
+
 }
