@@ -117,6 +117,11 @@ public class SessionFactories {
                 return rs.getBoolean("VALUE");
             }
         } catch (SQLException e) {
+            try {
+                connection.commit();
+            } catch (SQLException e1) {
+                return false;
+            }
             return false;
         }
         return false;
