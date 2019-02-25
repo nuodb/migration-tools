@@ -121,6 +121,7 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
     protected void initValueHandleList() {
         if (valueHandleList == null) {
             ValueHandleListBuilder builder = newBuilder(getSession().getConnection(), statement);
+            System.out.println(getSession().getDialect().getClass().getName());
             builder.withDialect(getSession().getDialect());
             builder.withFields(newArrayList(transform(loadTable.getRowSet().getColumns(),
                     new Function<Column, Field>() {
