@@ -40,8 +40,8 @@ public class SessionScriptExporter extends ConnectionScriptExporter {
 
     private final Session session;
 
-    public SessionScriptExporter(Session session, BackupLoaderContext backupContext) {
-        super(session.getConnection(), backupContext);
+    public SessionScriptExporter(Session session) {
+        super(session);
         this.session = session;
     }
 

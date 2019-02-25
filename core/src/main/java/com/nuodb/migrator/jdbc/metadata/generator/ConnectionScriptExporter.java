@@ -35,6 +35,7 @@ import java.sql.Statement;
 import com.nuodb.migrator.utils.StringUtils;
 import com.nuodb.migrator.backup.loader.BackupLoaderContext;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.session.Session;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static java.lang.String.format;
@@ -46,11 +47,11 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
 
     protected Statement statement;
     protected Connection connection;
-    protected BackupLoaderContext backupContext;
+    protected Session session;
 
-    public ConnectionScriptExporter(Connection connection, BackupLoaderContext backupContext) {
-        this.connection = connection;
-        this.backupContext = backupContext;
+    public ConnectionScriptExporter(Session session) {
+        this.connection = session.getConnection();
+        this.session = session;
     }
 
     @Override
@@ -64,11 +65,11 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
             throw new GeneratorException("Connection is not opened");
         }
         if (!StringUtils.isEmpty(script.getSQL())) {
-            if (script.requiresLock() && backupContext.shouldEnforceTableLocksForDDL()) {
+            if (script.requiresLock() && session.shouldEnforceTableLocksForDDL()) {
                 preLockRequiredDDL(script.getTableToLock());
             }
             statement.executeUpdate(script.getSQL());
-            if (script.requiresLock() && backupContext.shouldEnforceTableLocksForDDL()) {
+            if (script.requiresLock() && session.shouldEnforceTableLocksForDDL()) {
                 postLockRequiredDDL();
             }
         }
@@ -95,7 +96,6 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
         return connection;
     }
 
-    @Override
     public void preLockRequiredDDL(Table table) throws SQLException {
         getConnection().commit();
         getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
@@ -103,7 +103,6 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
         statement.executeUpdate(String.format("LOCK TABLE %s EXCLUSIVE;", table.getQualifiedName()));
     }
 
-    @Override
     public void postLockRequiredDDL() throws SQLException {
         getConnection().commit();
         getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);

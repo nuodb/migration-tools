@@ -105,7 +105,7 @@ public class LoadConstraintWork extends WorkBase {
             // will close underlying script exporter later manually
             scriptExporters.add(new ProxyScriptExporter(scriptExporter, false));
         }
-        scriptExporters.add(new SessionScriptExporter(getSession(), backupLoaderManager.getBackupLoaderContext()));
+        scriptExporters.add(new SessionScriptExporter(getSession()));
         return new CompositeScriptExporter(scriptExporters);
     }
 

@@ -33,19 +33,20 @@ import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.spec.ConnectionSpec;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
 public class SessionFactories {
-
     public static SessionFactory newSessionFactory(final Dialect dialect, final ConnectionSpec connectionSpec) {
         return new SessionFactoryBase() {
             @Override
             protected Session open(Map<Object, Object> context) throws SQLException {
-                return new SessionBase(this, null, dialect, context) {
+                return new SessionBase(this, null, dialect, context, false) {
                     @Override
                     public ConnectionSpec getConnectionSpec() {
                         return connectionSpec;
@@ -65,11 +66,11 @@ public class SessionFactories {
     }
 
     public static SessionFactory newSessionFactory(final ConnectionProvider connectionProvider,
-                                                   final Dialect dialect) {
+                                                   final Dialect dialect, boolean enforceTableLocksForDDL) {
         return new SessionFactoryBase() {
             @Override
             protected SessionBase open(Map<Object, Object> context) throws SQLException {
-                return new SessionBase(this, connectionProvider.getConnection(), dialect, context);
+                return new SessionBase(this, connectionProvider.getConnection(), dialect, context, enforceTableLocksForDDL);
             }
 
             @Override
@@ -96,7 +97,8 @@ public class SessionFactories {
                         throw exception;
                     }
                 }
-                return new SessionBase(this, connection, dialect, context);
+                boolean enforceTableLocksForDDL = checkEnforcedTableLocks(connection);
+                return new SessionBase(this, connection, dialect, context, enforceTableLocksForDDL);
             }
 
             @Override
@@ -104,5 +106,19 @@ public class SessionFactories {
                 connectionProvider.closeConnection(session.getConnection());
             }
         };
+    }
+
+    protected static boolean checkEnforcedTableLocks(Connection connection) {
+        Statement statement;
+        try {
+            statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT value FROM system.properties WHERE property='ENFORCE_TABLE_LOCKS_FOR_DDL';");
+            if (rs.next()) {
+                return rs.getBoolean("VALUE");
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+        return false;
     }
 }

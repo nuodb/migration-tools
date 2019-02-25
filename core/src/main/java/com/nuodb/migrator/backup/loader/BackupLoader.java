@@ -267,8 +267,6 @@ public class BackupLoader {
         SessionFactory targetSessionFactory = getTargetSessionFactory();
         backupLoaderContext.setTargetSessionFactory(targetSessionFactory);
         Session targetSession = targetSessionFactory.openSession();
-        boolean enforceTableLocksForDDL = checkEnforcedTableLocks(targetSession.getConnection());
-        backupLoaderContext.setEnforceTableLocksForDDL(enforceTableLocksForDDL);
         backupLoaderContext.setTargetSession(targetSession);
         backupLoaderContext.setTargetSpec(getTargetSpec());
         try {
@@ -299,7 +297,7 @@ public class BackupLoader {
             scriptExporters.add(scriptExporter);
         }
         scriptExporters.add(new ProxyScriptExporter(new SessionScriptExporter(
-                backupLoaderContext.getTargetSession(), backupLoaderContext), false));
+                backupLoaderContext.getTargetSession()), false));
         return new CompositeScriptExporter(scriptExporters);
     }
 
@@ -666,20 +664,6 @@ public class BackupLoader {
                     }
                 })));
         return builder.build();
-    }
-
-    protected boolean checkEnforcedTableLocks(Connection connection) {
-        Statement statement;
-        try {
-            statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT value FROM system.properties WHERE property='ENFORCE_TABLE_LOCKS_FOR_DDL';");
-            if (rs.next()) {
-                return rs.getBoolean("VALUE");
-            }
-        } catch (SQLException e) {
-            return false;
-        }
-        return false;
     }
 
     protected Collection<MetaDataType> getObjectTypes() {

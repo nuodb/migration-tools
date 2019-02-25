@@ -48,6 +48,8 @@ public interface Session extends Map {
 
     Dialect getDialect();
 
+    boolean shouldEnforceTableLocksForDDL();
+
     void execute(Work work, WorkManager workManager) throws Exception;
 
     void close() throws SQLException;
