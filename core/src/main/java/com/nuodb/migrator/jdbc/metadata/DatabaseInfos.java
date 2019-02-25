@@ -36,14 +36,14 @@ import org.apache.commons.lang3.StringUtils;
  */
 public interface DatabaseInfos {
     final DatabaseInfo MYSQL = new DatabaseInfo("MySQL");
-    final DatabaseInfo NUODB_200 = new NuoDBDatabaseInfo("NuoDB");
+    final DatabaseInfo NUODB_BASE = new NuoDBDatabaseInfo("NuoDB");
     final DatabaseInfo NUODB_203 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 29);
     final DatabaseInfo NUODB_204 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 30);
     final DatabaseInfo NUODB_205 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 31);
     final DatabaseInfo NUODB_206 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 32);
     final DatabaseInfo NUODB_256 = new NuoDBDatabaseInfo("NuoDB", null, 2, 5, 33);
     final DatabaseInfo NUODB_320 = new NuoDBDatabaseInfo("NuoDB", null, 3, 2, 34);
-    final DatabaseInfo NUODB = new NuoDBDatabaseInfo("NuoDB", null, 3, 4, 35);
+    final DatabaseInfo NUODB = new NuoDBDatabaseInfo("NuoDB", null, 3, 4, 34);
     final DatabaseInfo ORACLE = new DatabaseInfo("Oracle");
     final DatabaseInfo DB2 = new DatabaseInfo("DB2/") {
         @Override
