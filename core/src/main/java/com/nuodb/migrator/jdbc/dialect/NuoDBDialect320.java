@@ -28,12 +28,12 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB_320;
 
 public class NuoDBDialect320 extends NuoDBDialect256 {
 
     public NuoDBDialect320() {
-        super(NUODB);
+        super(NUODB_320);
     }
 
     public NuoDBDialect320(DatabaseInfo databaseInfo) {
