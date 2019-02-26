@@ -51,7 +51,6 @@ public class IndexUtils {
 
     private static final String COMMA = ", ";
 
-    // TODO figure out this function
     public static Collection<Script> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
         Collection<Script> multipleIndexesScripts = newArrayList();
