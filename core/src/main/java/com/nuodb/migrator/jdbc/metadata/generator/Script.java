@@ -56,4 +56,21 @@ public class Script {
     public Table getTableToLock() {
         return tableToLock;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null || other.getClass() != this.getClass()) {
+            return false;
+        }
+
+        Script script = (Script) other;
+
+        if (this.requiresLock()) {
+            return (this.getSQL().equals(script.getSQL()) && script.getTableToLock() != null
+                    && this.getTableToLock().getName().equals(script.getTableToLock().getName())
+                    && this.requiresLock() == script.requiresLock());
+        } else {
+            return this.getSQL().equals(script.getSQL());
+        }
+    }
 }
