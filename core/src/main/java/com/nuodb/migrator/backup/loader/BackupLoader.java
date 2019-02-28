@@ -86,10 +86,7 @@ import com.nuodb.migrator.utils.concurrent.ForkJoinPool;
 import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 import org.slf4j.Logger;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
