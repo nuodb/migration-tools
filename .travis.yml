@@ -11,7 +11,6 @@ env:
     - NUO_VERSION=3.2.4.1 TABLE_LOCK=false
     - NUO_VERSION=3.3.0.1 TABLE_LOCK=true
     - NUO_VERSION=3.3.0.1 TABLE_LOCK=false
-    - NUO_VERSION=3.4.0.1
 
 jdk:
   - openjdk8
