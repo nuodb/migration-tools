@@ -9,6 +9,7 @@ env:
   matrix:
     - NUO_VERSION=3.2.4.1
     - NUO_VERSION=3.3.0.1
+    - NUO_VERSION=3.4.0.1
 
 jdk:
   - openjdk8
