@@ -9,7 +9,7 @@ ${NUODB_MIGRATOR_HOME}/bin/nuodb-migrator dump --time.zone=EST --source.driver=$
 
 if [ "$TABLE_LOCK" = "true" ]; then
     echo "Enforcing table locks"
-    enforceLocks()
+    enforceLocks
 fi
 
 load()
