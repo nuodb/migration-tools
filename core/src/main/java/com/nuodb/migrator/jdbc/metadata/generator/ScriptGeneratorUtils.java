@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
 import java.util.Collection;
 
@@ -48,7 +49,7 @@ public class ScriptGeneratorUtils {
 
     private static final String COMMA = ", ";
 
-    public static String getUseSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
+    public static Script getUseSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
         String useSchema = null;
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         if (!isEmpty(scriptGeneratorManager.getTargetSchema())) {
@@ -61,10 +62,10 @@ public class ScriptGeneratorUtils {
                     dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
                     dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog()));
         }
-        return useSchema;
+        return new Script(useSchema);
     }
 
-    public static String getDropSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
+    public static Script getDropSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
         String dropSchema = null;
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         if (scriptGeneratorManager.getTargetSchema() != null) {
@@ -77,20 +78,30 @@ public class ScriptGeneratorUtils {
                     dialect.getDropSchema(scriptGeneratorManager.getName(schema)) :
                     dialect.getDropSchema(scriptGeneratorManager.getName(schema.getCatalog()));
         }
-        return dropSchema;
+        return new Script(dropSchema);
     }
 
-    public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
+    public static Collection<Script> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
-        Collection<String> multipleIndexesScripts = newArrayList();
+        Collection<Script> multipleIndexesScripts = newArrayList();
         for (Index index : indexes) {
-            Collection<String> indexScripts =
+            Collection<Script> indexScripts =
                     scriptGeneratorManager.getCreateScripts(index);
             if (size(indexScripts) > 0) {
                 multipleIndexesScripts.add(get(indexScripts, 0));
             }
 
         }
-        return singleton(join(multipleIndexesScripts, COMMA));
+        boolean requiresLock = false;
+        Collection<String> sql = newArrayList();
+        Table tableToLock = null;
+        for (Script script : multipleIndexesScripts) {
+            if (script.requiresLock()) {
+                requiresLock = true;
+                tableToLock = script.getTableToLock();
+            }
+            sql.add(script.getSQL());
+        }
+        return singleton(new Script(join(sql, COMMA), tableToLock, requiresLock));
     }
 }

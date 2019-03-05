@@ -174,17 +174,17 @@ public class ScriptGeneratorManager {
         return (ScriptGenerator) getHandler(scriptGenerators, object);
     }
 
-    public Collection<String> getScripts(MetaData object) {
+    public Collection<Script> getScripts(MetaData object) {
         return getScriptGenerator(object).getScripts(object, this);
     }
 
-    public Collection<String> getCreateScripts(MetaData object) {
+    public Collection<Script> getCreateScripts(MetaData object) {
         ScriptGeneratorManager context = new ScriptGeneratorManager(this);
         context.setScriptTypes(newHashSet(CREATE));
         return getScriptGenerator(object).getScripts(object, context);
     }
 
-    public Collection<String> getDropScripts(MetaData object) {
+    public Collection<Script> getDropScripts(MetaData object) {
         ScriptGeneratorManager context = new ScriptGeneratorManager(this);
         context.setScriptTypes(newHashSet(DROP));
         return getScriptGenerator(object).getScripts(object, context);
