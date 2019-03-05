@@ -28,7 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB_256;
 
 /**
  * @author Sergey Bushik
@@ -36,7 +36,7 @@ import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 public class NuoDBDialect256 extends NuoDBDialect206 {
 
     public NuoDBDialect256() {
-        super(NUODB);
+        super(NUODB_256);
     }
 
     public NuoDBDialect256(DatabaseInfo databaseInfo) {

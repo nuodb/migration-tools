@@ -52,9 +52,9 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     }
 
     @Override
-    public Collection<String> getCreateScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getCreateScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         /**
-         *  Drop all indexes other than BTREE 
+         *  Drop all indexes other than BTREE
          */
         if ((index.getType() != null) && (!index.isBtree())) {
             if (logger.isWarnEnabled()) {
@@ -87,14 +87,15 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
                 }
             }
             buffer.append(')');
-            return singleton(buffer.toString());
+            Dialect dialect = scriptGeneratorManager.getTargetDialect();
+            return singleton(new Script(buffer.toString(), index.getTable(), dialect.requiresTableLockForDDL()));
         }
     }
 
     @Override
-    public Collection<String> getDropScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getDropScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         /**
-         *  Drop all indexes other than BTREE 
+         *  Drop all indexes other than BTREE
          */
         if ((index.getType() != null) && (!index.isBtree())) {
             if (logger.isWarnEnabled()) {
@@ -124,7 +125,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
                 buffer.append(' ');
                 buffer.append("IF EXISTS");
             }
-            return singleton(buffer.toString());
+            return singleton(new Script(buffer.toString()));
         }
     }
 
@@ -156,4 +157,3 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
         return !nullable || dialect.supportsNotNullUnique() ? buffer.toString() : null;
     }
 }
-

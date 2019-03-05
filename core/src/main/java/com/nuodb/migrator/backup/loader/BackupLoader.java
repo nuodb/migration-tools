@@ -65,6 +65,7 @@ import com.nuodb.migrator.jdbc.metadata.generator.ProxyScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
+import com.nuodb.migrator.jdbc.metadata.generator.Script;
 import com.nuodb.migrator.jdbc.metadata.generator.SessionScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
@@ -322,7 +323,6 @@ public class BackupLoader {
         Session targetSession = backupLoaderContext.getTargetSession();
         Dialect dialect = targetSession != null ? dialectResolver.resolve(
                 targetSession.getDatabaseInfo()) : dialectResolver.resolve(NUODB);
-
         dialect.getTranslationManager().setTranslationConfig(getTranslationConfig());
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         Collection<JdbcTypeSpec> jdbcTypeSpecs = getJdbcTypeSpecs();
@@ -411,9 +411,9 @@ public class BackupLoader {
         backupLoaderManager.loadSchemaDone();
     }
 
-    protected Collection<String> getSequencesScripts(HasTables tables, ScriptGeneratorManager scriptGeneratorManager)
+    protected Collection<Script> getSequencesScripts(HasTables tables, ScriptGeneratorManager scriptGeneratorManager)
             throws Exception {
-        Collection<String> scripts = newArrayList();
+        Collection<Script> scripts = newArrayList();
         boolean addSequences = contains(scriptGeneratorManager.getObjectTypes(), SEQUENCE);
         if (addSequences) {
             Schema schema = null;
