@@ -154,4 +154,5 @@ public interface BackupLoaderContext {
     ValueFormatRegistry getValueFormatRegistry();
 
     void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
+
 }

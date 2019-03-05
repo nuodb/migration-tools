@@ -52,12 +52,12 @@ public class ProxyScriptExporter implements ScriptExporter {
     }
 
     @Override
-    public void exportScript(String script) throws Exception {
+    public void exportScript(Script script) throws Exception {
         scriptExporter.exportScript(script);
     }
 
     @Override
-    public void exportScripts(Collection<String> scripts) throws Exception {
+    public void exportScripts(Collection<Script> scripts) throws Exception {
         scriptExporter.exportScripts(scripts);
     }
 

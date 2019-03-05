@@ -37,5 +37,5 @@ import java.util.Collection;
  */
 public interface ScriptGenerator<T extends MetaData> extends MetaDataHandler {
 
-    Collection<String> getScripts(T object, ScriptGeneratorManager scriptGeneratorManager);
+    Collection<Script> getScripts(T object, ScriptGeneratorManager scriptGeneratorManager);
 }

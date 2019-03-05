@@ -42,4 +42,5 @@ public interface SessionFactory {
     void addSessionObserver(SessionObserver sessionObserver);
 
     void removeSessionObserver(SessionObserver sessionObserver);
+
 }
