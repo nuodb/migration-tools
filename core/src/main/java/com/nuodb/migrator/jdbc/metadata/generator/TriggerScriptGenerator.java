@@ -44,14 +44,15 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
     }
 
     @Override
-    protected Collection<String> getCreateScripts(T trigger, ScriptGeneratorManager scriptGeneratorManager) {
+    protected Collection<Script> getCreateScripts(T trigger, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE TRIGGER ");
         buffer.append(scriptGeneratorManager.getQualifiedName(trigger));
         getCreateOn(trigger, scriptGeneratorManager, buffer);
         getCreateAttributes(trigger, scriptGeneratorManager, buffer);
         getCreateBody(trigger, scriptGeneratorManager, buffer);
-        return singleton(buffer.toString());
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        return singleton(new Script(buffer.toString(), trigger.getTable(), dialect.requiresTableLockForDDL()));
     }
 
     protected void getCreateOn(T trigger, ScriptGeneratorManager scriptGeneratorManager, StringBuilder buffer) {
@@ -86,7 +87,7 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
     }
 
     @Override
-    protected Collection<String> getDropScripts(T trigger, ScriptGeneratorManager scriptGeneratorManager) {
+    protected Collection<Script> getDropScripts(T trigger, ScriptGeneratorManager scriptGeneratorManager) {
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP TRIGGER ");
@@ -99,6 +100,6 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }
-        return singleton(buffer.toString());
+        return singleton(new Script(buffer.toString(), trigger.getTable(), dialect.requiresTableLockForDDL()));
     }
 }

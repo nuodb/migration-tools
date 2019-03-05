@@ -44,7 +44,7 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
     }
 
     @Override
-    public Collection<String> getCreateScripts(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getCreateScripts(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE");
         buffer.append(' ');
@@ -98,11 +98,11 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
             buffer.append(' ');
             buffer.append(order);
         }
-        return singleton(buffer.toString());
+        return singleton(new Script(buffer.toString()));
     }
 
     @Override
-    public Collection<String> getDropScripts(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getDropScripts(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP SEQUENCE");
@@ -112,6 +112,6 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
         }
         buffer.append(' ');
         buffer.append(scriptGeneratorManager.getName(sequence));
-        return singleton(buffer.toString());
+        return singleton(new Script(buffer.toString()));
     }
 }

@@ -34,6 +34,8 @@ import com.nuodb.migrator.jdbc.dialect.MySQLDialect;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect206;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect256;
+import com.nuodb.migrator.jdbc.dialect.NuoDBDialect320;
+import com.nuodb.migrator.jdbc.dialect.NuoDBDialect340;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
@@ -51,6 +53,7 @@ import org.testng.annotations.Test;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
+import java.util.ArrayList;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
@@ -81,8 +84,7 @@ public class ScriptGeneratorTest {
         scriptGeneratorManager.addAttribute(UNIQUE_CONSTRAINTS, true);
     }
 
-    @DataProvider(name = "getScripts")
-    public Object[][] createGetScriptsData() {
+    public Object[][] createGetScriptsData(boolean checkTableLocks) {
         // create & drop scripts from a source mysql table
         Database database1 = new Database();
         database1.setDialect(new MySQLDialect(new DatabaseInfo("MySQL")));
@@ -109,11 +111,11 @@ public class ScriptGeneratorTest {
 
         Collection<Object[]> data = newArrayList();
         data.add(new Object[]{table1, newArrayList(DROP), null,
-                              newArrayList("DROP TABLE IF EXISTS \"users\" CASCADE")});
+                              newArrayList(new Script("DROP TABLE IF EXISTS \"users\" CASCADE"))});
         data.add(new Object[]{table1, newArrayList(CREATE), null,
                               newArrayList(
-                                  "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, \"login\" VARCHAR(32) NOT NULL)",
-                                  "ALTER TABLE \"users\" ADD CONSTRAINT \"users_id\" PRIMARY KEY (\"id\")")});
+                                  new Script("CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, \"login\" VARCHAR(32) NOT NULL)"),
+                                  new Script("ALTER TABLE \"users\" ADD CONSTRAINT \"users_id\" PRIMARY KEY (\"id\")", new Table("users"), checkTableLocks))});
 
         // test db2 multiple schemas
         Database database2 = new Database();
@@ -140,8 +142,10 @@ public class ScriptGeneratorTest {
 
         data.add(new Object[]{database2, newArrayList(CREATE), null,
                               newArrayList(
-                                  "USE \"s1\"", "CREATE TABLE \"t1\" (\"id\" BIGINT NOT NULL)",
-                                  "USE \"s2\"", "CREATE TABLE \"t2\" (\"id\" VARCHAR(100) NOT NULL)")});
+                                  new Script("USE \"s1\""),
+                                  new Script("CREATE TABLE \"t1\" (\"id\" BIGINT NOT NULL)"),
+                                  new Script("USE \"s2\""),
+                                  new Script("CREATE TABLE \"t2\" (\"id\" VARCHAR(100) NOT NULL)"))});
 
         // test create indexes grouping
         Database database4_11 = new Database();
@@ -185,12 +189,12 @@ public class ScriptGeneratorTest {
 
         data.add(new Object[]{database4_11, newArrayList(CREATE), targetDialect4,
                               newArrayList(
-                                  "USE \"c1\"",
-                                  "CREATE TABLE \"t1\" (\"f1\" VARCHAR(0) NOT NULL, \"f2\" FLOAT NOT NULL, \"f3\" DATE NOT NULL)",
+                                  new Script("USE \"c1\""),
+                                  new Script("CREATE TABLE \"t1\" (\"f1\" VARCHAR(0) NOT NULL, \"f2\" FLOAT NOT NULL, \"f3\" DATE NOT NULL)"),
                                   // comma concatenated indexes
-                                  "CREATE INDEX \"idx_t1_idx_4_1\" ON \"t1\" (\"f1\"), " +
+                                  new Script("CREATE INDEX \"idx_t1_idx_4_1\" ON \"t1\" (\"f1\"), " +
                                   "CREATE INDEX \"idx_t1_idx_4_2\" ON \"t1\" (\"f1\", \"f3\"), " +
-                                  "CREATE INDEX \"idx_t1_idx_4_3\" ON \"t1\" (\"f3\")")});
+                                  "CREATE INDEX \"idx_t1_idx_4_3\" ON \"t1\" (\"f3\")", new Table("t1"), checkTableLocks))});
 
         Database nuodatabase = new Database();
         Catalog nuocatalog = nuodatabase.addCatalog(valueOf(null));
@@ -220,11 +224,11 @@ public class ScriptGeneratorTest {
 
         nuocatalog.addSchema(valueOf("USER")).addTable(nuotable1);
         data.add(new Object[]{nuotable1, newArrayList(DROP), null,
-                              newArrayList("DROP TABLE IF EXISTS \"xxx\" CASCADE")});
+                              newArrayList(new Script("DROP TABLE IF EXISTS \"xxx\" CASCADE"))});
         data.add(new Object[]{nuotable1, newArrayList(CREATE), null,
                               newArrayList(
-                                  "CREATE TABLE \"xxx\" (\"c1\" INTEGER, " +
-                                  "\"c2\" INTEGER, CONSTRAINT \"idx_xxx_idx1\" UNIQUE (\"c1\", \"c2\"))")});
+                                  new Script("CREATE TABLE \"xxx\" (\"c1\" INTEGER, " +
+                                  "\"c2\" INTEGER, CONSTRAINT \"idx_xxx_idx1\" UNIQUE (\"c1\", \"c2\"))"))});
 
         // create table xxx2 (c1 int check(c1 > 10), c2 int, constraint even check (c1 % 2 = 0));
         Table nuotable2 = new Table("xxx2");
@@ -247,11 +251,11 @@ public class ScriptGeneratorTest {
 
         nuocatalog.addSchema(valueOf("USER")).addTable(nuotable2);
         data.add(new Object[]{nuotable2, newArrayList(DROP), null,
-                              newArrayList("DROP TABLE IF EXISTS \"xxx2\" CASCADE")});
+                              newArrayList(new Script("DROP TABLE IF EXISTS \"xxx2\" CASCADE"))});
         data.add(new Object[]{nuotable2, newArrayList(CREATE), null,
                               newArrayList(
-                                  "CREATE TABLE \"xxx2\" (\"c1\" INTEGER CHECK(c1 > 10), " +
-                                  "\"c2\" INTEGER, CONSTRAINT \"even\" CHECK(c1 % 2 = 0))")});
+                                  new Script("CREATE TABLE \"xxx2\" (\"c1\" INTEGER CHECK(c1 > 10), " +
+                                  "\"c2\" INTEGER, CONSTRAINT \"even\" CHECK(c1 % 2 = 0))"))});
 
         // create table xxx3 (c1 int, c2 int, constraint idx3 key abc(c1, c2));
         Table nuotable3 = new Table("xxx3");
@@ -280,11 +284,11 @@ public class ScriptGeneratorTest {
 
         nuocatalog.addSchema(valueOf("USER")).addTable(nuotable3);
         data.add(new Object[]{nuotable3, newArrayList(DROP), null,
-                              newArrayList("DROP TABLE IF EXISTS \"xxx3\" CASCADE")});
+                              newArrayList(new Script("DROP TABLE IF EXISTS \"xxx3\" CASCADE"))});
         data.add(new Object[]{nuotable3, newArrayList(CREATE), null,
                               newArrayList(
-                                  "CREATE TABLE \"xxx3\" (\"c1\" INTEGER, " + "\"c2\" INTEGER)",
-                                  "CREATE INDEX \"idx_xxx3_idx3\" ON \"xxx3\" (\"c1\", \"c2\")")});
+                                  new Script("CREATE TABLE \"xxx3\" (\"c1\" INTEGER, " + "\"c2\" INTEGER)"),
+                                  new Script("CREATE INDEX \"idx_xxx3_idx3\" ON \"xxx3\" (\"c1\", \"c2\")", new Table("xxx3"), checkTableLocks))});
 
         // create table xxx4 (c1 int, c2 int, constraint idx4 unique key cdf(c1, c2), constraint idx4_2 unique (c2));
         Table nuotable4 = new Table("xxx4");
@@ -320,11 +324,11 @@ public class ScriptGeneratorTest {
 
         nuocatalog.addSchema(valueOf("USER")).addTable(nuotable4);
         data.add(new Object[]{nuotable4, newArrayList(DROP), null,
-                              newArrayList("DROP TABLE IF EXISTS \"xxx4\" CASCADE")});
+                              newArrayList(new Script("DROP TABLE IF EXISTS \"xxx4\" CASCADE"))});
         data.add(new Object[]{nuotable4, newArrayList(CREATE), null,
                               newArrayList(
-                                  "CREATE TABLE \"xxx4\" (\"c1\" INTEGER, \"c2\" INTEGER UNIQUE)",
-                                  "CREATE UNIQUE INDEX \"idx_xxx4_idx4\" ON \"xxx4\" (\"c1\", \"c2\")")});
+                                  new Script("CREATE TABLE \"xxx4\" (\"c1\" INTEGER, \"c2\" INTEGER UNIQUE)"),
+                                  new Script("CREATE UNIQUE INDEX \"idx_xxx4_idx4\" ON \"xxx4\" (\"c1\", \"c2\")", new Table("xxx4"), checkTableLocks))});
 
         Catalog nuocatalog2 = nuodatabase.addCatalog(valueOf("FKTest"));
 
@@ -401,48 +405,72 @@ public class ScriptGeneratorTest {
         nuocatalog2.addSchema(valueOf("FKTest")).addTable(nuotable7);
         data.add(new Object[]{nuocatalog2, newArrayList(DROP, CREATE), null,
                               newArrayList(
-                                  "USE \"FKTest\"",
-                                  "DROP TABLE IF EXISTS \"xxx5\" CASCADE",
-                                  "CREATE TABLE \"xxx5\" (\"c1_5\" INTEGER, \"c2_5\" INTEGER)",
-                                  "ALTER TABLE \"xxx5\" ADD CONSTRAINT \"pk5\" PRIMARY KEY (\"c2_5\")",
-                                  "DROP TABLE IF EXISTS \"xxx6\" CASCADE",
-                                  "CREATE TABLE \"xxx6\" (\"c1_6\" INTEGER, \"c2_6\" INTEGER)",
-                                  "ALTER TABLE \"xxx6\" ADD CONSTRAINT \"pk6\" PRIMARY KEY (\"c1_6\")",
-                                  "ALTER TABLE \"xxx6\" ADD CONSTRAINT \"fk6\" FOREIGN KEY (\"c2_6\") REFERENCES \"FKTest\".\"xxx5\" (\"c2_5\")",
-                                  "DROP TABLE IF EXISTS \"xxx7\" CASCADE",
-                                  "CREATE TABLE \"xxx7\" (\"c1_7\" INTEGER)",
-                                  "ALTER TABLE \"xxx7\" ADD CONSTRAINT \"fk7\" FOREIGN KEY (\"c1_7\") REFERENCES \"FKTest\".\"xxx6\" (\"c1_6\")",
-                                  "ALTER TABLE \"xxx5\" ADD CONSTRAINT \"fk5\" FOREIGN KEY (\"c1_5\") REFERENCES \"FKTest\".\"xxx6\" (\"c1_6\")")});
+                                  new Script("USE \"FKTest\""),
+                                  new Script("DROP TABLE IF EXISTS \"xxx5\" CASCADE"),
+                                  new Script("CREATE TABLE \"xxx5\" (\"c1_5\" INTEGER, \"c2_5\" INTEGER)"),
+                                  new Script("ALTER TABLE \"xxx5\" ADD CONSTRAINT \"pk5\" PRIMARY KEY (\"c2_5\")", new Table("xxx5"), checkTableLocks),
+                                  new Script("DROP TABLE IF EXISTS \"xxx6\" CASCADE"),
+                                  new Script("CREATE TABLE \"xxx6\" (\"c1_6\" INTEGER, \"c2_6\" INTEGER)"),
+                                  new Script("ALTER TABLE \"xxx6\" ADD CONSTRAINT \"pk6\" PRIMARY KEY (\"c1_6\")", new Table("xxx6"), checkTableLocks),
+                                  new Script("ALTER TABLE \"xxx6\" ADD CONSTRAINT \"fk6\" FOREIGN KEY (\"c2_6\") REFERENCES \"FKTest\".\"xxx5\" (\"c2_5\")", new Table("xxx6"), checkTableLocks),
+                                  new Script("DROP TABLE IF EXISTS \"xxx7\" CASCADE"),
+                                  new Script("CREATE TABLE \"xxx7\" (\"c1_7\" INTEGER)"),
+                                  new Script("ALTER TABLE \"xxx7\" ADD CONSTRAINT \"fk7\" FOREIGN KEY (\"c1_7\") REFERENCES \"FKTest\".\"xxx6\" (\"c1_6\")", new Table("xxx7"), checkTableLocks),
+                                  new Script("ALTER TABLE \"xxx5\" ADD CONSTRAINT \"fk5\" FOREIGN KEY (\"c1_5\") REFERENCES \"FKTest\".\"xxx6\" (\"c1_6\")", new Table("xxx5"), checkTableLocks))});
 
         return data.toArray(new Object[][]{});
     }
 
-    @Test(dataProvider = "getScripts")
-    public void testGetScriptsMySQL(MetaData object, Collection<ScriptType> scriptTypes, Dialect targetDialect,
-                                    Collection<String> expected) throws Exception {
-        scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(MYSQL)));
-        scriptGeneratorManager.setTargetDialect(targetDialect == null ? createTargetDialect() : targetDialect);
-        scriptGeneratorManager.setScriptTypes(scriptTypes);
+    @Test
+    public void testGetScriptsMySQL() throws Exception {
+        boolean[] vals = { true, false };
+        for (boolean checkTableLocks : vals) {
+            Object[][] data = createGetScriptsData(checkTableLocks);
+            for (Object[] obj : data) {
+                MetaData object = (MetaData) obj[0];
+                Collection<ScriptType> scriptTypes = (Collection<ScriptType>) obj[1];
+                Dialect targetDialect = (Dialect) obj[2];
+                Collection<Script> expected = (Collection<Script>) obj[3];
 
-        Collection<String> scripts = scriptGeneratorManager.getScripts(object);
-        assertNotNull(scripts);
-        assertEquals(newArrayList(expected), newArrayList(scripts));
+                scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(MYSQL)));
+                scriptGeneratorManager.setTargetDialect(createTargetDialect(checkTableLocks));
+                scriptGeneratorManager.setScriptTypes(scriptTypes);
+
+                Collection<Script> actualScripts = scriptGeneratorManager.getScripts(object);
+                assertNotNull(actualScripts);
+                assertEquals(newArrayList(actualScripts), newArrayList(expected));
+            }
+        }
     }
 
-    @Test(dataProvider = "getScripts")
-    public void testGetScriptsNuoDB(MetaData object, Collection<ScriptType> scriptTypes, Dialect targetDialect,
-                                    Collection<String> expected) throws Exception {
-        scriptGeneratorManager.setSourceSession(createSession(new NuoDBDialect256()));
-        scriptGeneratorManager.setTargetDialect(targetDialect == null ? createTargetDialect() : targetDialect);
-        scriptGeneratorManager.setScriptTypes(scriptTypes);
+    @Test
+    public void testGetScriptsNuoDB() throws Exception {
+        boolean[] vals = { true, false };
+        for (boolean checkTableLocks : vals) {
+            Object[][] data = createGetScriptsData(checkTableLocks);
+            for (Object[] obj : data) {
+                MetaData object = (MetaData) obj[0];
+                Collection<ScriptType> scriptTypes = (Collection<ScriptType>) obj[1];
+                Dialect targetDialect = (Dialect) obj[2];
+                Collection<Script> expected = (Collection<Script>) obj[3];
+                scriptGeneratorManager.setSourceSession(createSession(new NuoDBDialect256()));
+                scriptGeneratorManager.setTargetDialect(createTargetDialect(checkTableLocks));
+                scriptGeneratorManager.setScriptTypes(scriptTypes);
 
-        Collection<String> scripts = scriptGeneratorManager.getScripts(object);
-        assertNotNull(scripts);
-        assertEquals(newArrayList(expected), newArrayList(scripts));
+                Collection<Script> actualScripts = scriptGeneratorManager.getScripts(object);
+                assertNotNull(actualScripts);
+                assertEquals(newArrayList(actualScripts), newArrayList(expected));
+            }
+        }
     }
 
-    private Dialect createTargetDialect() {
-        NuoDBDialect dialect = new NuoDBDialect256();
+    private Dialect createTargetDialect(boolean checkTableLocks) {
+        NuoDBDialect dialect;
+        if (checkTableLocks) {
+            dialect = new NuoDBDialect320();
+        } else {
+            dialect = new NuoDBDialect340();
+        }
         Database database = new Database();
         database.setDialect(dialect);
         return dialect;

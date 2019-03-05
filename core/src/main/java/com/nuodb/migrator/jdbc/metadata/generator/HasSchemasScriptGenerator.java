@@ -53,10 +53,10 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     }
 
     @Override
-    public Collection<String> getScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
-        Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
+    public Collection<Script> getScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
+        Map<Schema, Collection<Script>> schemaScripts = newLinkedHashMap();
         for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
-            Collection<String> scripts = getScripts(schema, scriptGeneratorManager);
+            Collection<Script> scripts = getScripts(schema, scriptGeneratorManager);
             if (!scripts.isEmpty()) {
                 schemaScripts.put(schema, scripts);
             }
@@ -64,12 +64,12 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
         return getScripts(schemaScripts, scriptGeneratorManager, false, true);
     }
 
-    protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,
+    protected Collection<Script> getScripts(Map<Schema, Collection<Script>> schemaScripts,
                                             ScriptGeneratorManager scriptGeneratorManager,
                                             boolean dropSchema, boolean useSchema) {
-        Collection<String> scripts = newArrayList();
+        Collection<Script> scripts = newArrayList();
         if (schemaScripts.size() == 1) {
-            Map.Entry<Schema, Collection<String>> schemaScript = schemaScripts.entrySet().iterator().next();
+            Map.Entry<Schema, Collection<Script>> schemaScript = schemaScripts.entrySet().iterator().next();
             Schema schema = schemaScript.getKey();
             if (dropSchema) {
                 scripts.add(getDropSchema(schema, scriptGeneratorManager));
@@ -79,7 +79,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
             }
             scripts.addAll(schemaScript.getValue());
         } else {
-            for (Map.Entry<Schema, Collection<String>> schemaScript : schemaScripts.entrySet()) {
+            for (Map.Entry<Schema, Collection<Script>> schemaScript : schemaScripts.entrySet()) {
                 Schema schema = schemaScript.getKey();
                 Dialect dialect = scriptGeneratorManager.getTargetDialect();
                 if (dropSchema) {
@@ -87,8 +87,8 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 }
                 if (useSchema) {
                     scripts.add(schema.getIdentifier() != null ?
-                            dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
-                            dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog())));
+                                new Script(dialect.getUseSchema(scriptGeneratorManager.getName(schema))) :
+                                new Script(dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog()))));
                 }
                 scripts.addAll(schemaScript.getValue());
             }

@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
 import java.util.Collection;
 
@@ -52,8 +53,8 @@ public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHa
     }
 
     @Override
-    public Collection<String> getScripts(T object, ScriptGeneratorManager scriptGeneratorManager) {
-        Collection<String> scripts;
+    public Collection<Script> getScripts(T object, ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<Script> scripts;
         if (isGenerateScript(DROP, scriptGeneratorManager) && isGenerateScript(CREATE, scriptGeneratorManager)) {
             scripts = getDropCreateScripts(object, scriptGeneratorManager);
         } else if (isGenerateScript(DROP, scriptGeneratorManager)) {
@@ -66,12 +67,12 @@ public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHa
         return scripts;
     }
 
-    protected abstract Collection<String> getDropScripts(T object, ScriptGeneratorManager scriptGeneratorManager);
+    protected abstract Collection<Script> getDropScripts(T object, ScriptGeneratorManager scriptGeneratorManager);
 
-    protected abstract Collection<String> getCreateScripts(T object, ScriptGeneratorManager scriptGeneratorManager);
+    protected abstract Collection<Script> getCreateScripts(T object, ScriptGeneratorManager scriptGeneratorManager);
 
-    protected Collection<String> getDropCreateScripts(T object, ScriptGeneratorManager scriptGeneratorManager) {
-        Collection<String> scripts = newArrayList();
+    protected Collection<Script> getDropCreateScripts(T object, ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<Script> scripts = newArrayList();
         scripts.addAll(getDropScripts(object, scriptGeneratorManager));
         scripts.addAll(getCreateScripts(object, scriptGeneratorManager));
         return scripts;

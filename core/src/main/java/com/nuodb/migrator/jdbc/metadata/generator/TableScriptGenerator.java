@@ -75,8 +75,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     @Override
-    public Collection<String> getCreateScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
-        Collection<String> scripts = newArrayList();
+    public Collection<Script> getCreateScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<Script> scripts = newArrayList();
         if (addScripts(table, scriptGeneratorManager)) {
             addCreateSequencesScripts(table, scripts, scriptGeneratorManager);
             addCreateTableScript(table, scripts, scriptGeneratorManager);
@@ -113,7 +113,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 .getTargetDialect().addConstraintsInCreateTable();
     }
 
-    protected void addCreateSequencesScripts(Table table, Collection<String> scripts,
+    protected void addCreateSequencesScripts(Table table, Collection<Script> scripts,
                                              ScriptGeneratorManager scriptGeneratorManager) {
         boolean createSequences = addCreateScripts(table, SEQUENCE, scriptGeneratorManager) &&
                 scriptGeneratorManager.getTargetDialect().supportsSequence();
@@ -132,7 +132,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
     }
 
-    protected void addCreatePrimaryKeyScript(Table table, Collection<String> scripts,
+    protected void addCreatePrimaryKeyScript(Table table, Collection<Script> scripts,
                                              ScriptGeneratorManager scriptGeneratorManager) {
         boolean createPrimaryKey = addCreateScripts(table, PRIMARY_KEY, scriptGeneratorManager) ?
                 !addScriptsInCreateTable(table, PRIMARY_KEY, scriptGeneratorManager) : false;
@@ -145,7 +145,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
     }
 
-    protected void addCreateIndexesScripts(Table table, Collection<String> scripts,
+    protected void addCreateIndexesScripts(Table table, Collection<Script> scripts,
                                            ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         boolean createIndexes = addCreateScripts(table, INDEX, scriptGeneratorManager);
@@ -153,7 +153,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             return;
         }
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
-        Collection<String> indexes = newLinkedHashSet();
+        Collection<Script> indexes = newLinkedHashSet();
         Collection<Index> nonRepeatingIndexes = getNonRepeatingIndexes(table,
                 new Predicate<Index>() {
                     @Override
@@ -197,7 +197,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         scripts.addAll(indexes);
     }
 
-    protected void addCreateTriggersScripts(Table table, Collection<String> scripts,
+    protected void addCreateTriggersScripts(Table table, Collection<Script> scripts,
                                             ScriptGeneratorManager scriptGeneratorManager) {
         boolean createTriggers = addCreateScripts(table, TRIGGER, scriptGeneratorManager);
         boolean createColumnTriggers = addCreateScripts(table, COLUMN_TRIGGER, scriptGeneratorManager);
@@ -217,7 +217,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
     }
 
-    protected void addCreateForeignKeysScripts(Table table, Collection<String> scripts,
+    protected void addCreateForeignKeysScripts(Table table, Collection<Script> scripts,
                                                ScriptGeneratorManager scriptGeneratorManager) {
         boolean createForeignKeys = addCreateScripts(table, FOREIGN_KEY, scriptGeneratorManager) ?
                 !addScriptsInCreateTable(table, FOREIGN_KEY, scriptGeneratorManager) : false;
@@ -246,7 +246,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
     }
 
-    protected void addCreateTableScript(Table table, Collection<String> scripts, ScriptGeneratorManager
+    protected void addCreateTableScript(Table table, Collection<Script> scripts, ScriptGeneratorManager
             scriptGeneratorManager) {
         boolean createTable = addCreateScripts(table, TABLE, scriptGeneratorManager);
         if (!createTable) {
@@ -409,7 +409,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         if (!isEmpty(comment)) {
             buffer.append(dialect.getTableComment(comment));
         }
-        scripts.add(buffer.toString());
+        scripts.add(new Script(buffer.toString()));
     }
 
     protected String getTypeName(Column column, ScriptGeneratorManager scriptGeneratorManager) {
@@ -462,8 +462,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     @Override
-    public Collection<String> getDropScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
-        Collection<String> scripts = newArrayList();
+    public Collection<Script> getDropScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<Script> scripts = newArrayList();
         if (addScripts(table, scriptGeneratorManager)) {
             addDropTriggersScripts(table, scripts, scriptGeneratorManager);
             addDropTableScript(table, scripts, scriptGeneratorManager);
@@ -472,7 +472,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         return scripts;
     }
 
-    protected void addDropSequencesScripts(Table table, Collection<String> scripts,
+    protected void addDropSequencesScripts(Table table, Collection<Script> scripts,
                                            ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         boolean dropSequences = objectTypes.contains(SEQUENCE) &&
@@ -493,7 +493,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
     }
 
-    protected void addDropTriggersScripts(Table table, Collection<String> scripts,
+    protected void addDropTriggersScripts(Table table, Collection<Script> scripts,
                                           ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         boolean dropTriggers = objectTypes.contains(TRIGGER);
@@ -514,7 +514,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
     }
 
-    protected void addDropTableScript(Table table, Collection<String> scripts,
+    protected void addDropTableScript(Table table, Collection<Script> scripts,
                                       ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         boolean dropTable = objectTypes.contains(TABLE);
@@ -539,6 +539,6 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }
-        scripts.add(buffer.toString());
+        scripts.add(new Script(buffer.toString()));
     }
 }

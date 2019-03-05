@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, NuoDB, Inc.
+ * Copyright (c) 2018, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,62 +27,50 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.util.Collection;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newLinkedHashSet;
+public class Script {
+    protected String sql;
+    protected boolean requiresLock;
+    protected Table tableToLock;
 
-/**
- * @author Sergey Bushik
- */
-public class CompositeScriptExporter implements ScriptExporter {
-
-    private Collection<ScriptExporter> scriptExporters = newLinkedHashSet();
-
-    public CompositeScriptExporter() {
+    public Script(String sql) {
+        this.sql = sql;
+        this.requiresLock = false;
     }
 
-    public CompositeScriptExporter(ScriptExporter... scriptExporters) {
-        this(newArrayList(scriptExporters));
+    public Script(String sql, Table tableToLock, boolean requiresLock) {
+        this.sql = sql;
+        this.requiresLock = requiresLock;
+        this.tableToLock = tableToLock;
     }
 
-    public CompositeScriptExporter(Collection<ScriptExporter> scriptExporters) {
-        this.scriptExporters = scriptExporters;
+    public String getSQL() {
+        return sql;
     }
 
-    @Override
-    public void open() throws Exception {
-        for (ScriptExporter scriptExporter : getScriptExporters()) {
-            scriptExporter.open();
-        }
+    public boolean requiresLock() {
+        return requiresLock;
     }
 
-    @Override
-    public void exportScript(Script script) throws Exception {
-        for (ScriptExporter scriptExporter : getScriptExporters()) {
-            scriptExporter.exportScript(script);
-        }
+    public Table getTableToLock() {
+        return tableToLock;
     }
 
     @Override
-    public void exportScripts(Collection<Script> scripts) throws Exception {
-        for (Script script : scripts) {
-            exportScript(script);
+    public boolean equals(Object other) {
+        if (other == null || other.getClass() != this.getClass()) {
+            return false;
         }
-    }
 
-    @Override
-    public void close() throws Exception {
-        for (ScriptExporter scriptExporter : getScriptExporters()) {
-            scriptExporter.close();
+        Script script = (Script) other;
+
+        if (this.requiresLock()) {
+            return (this.getSQL().equals(script.getSQL()) && script.getTableToLock() != null
+                    && this.getTableToLock().getName().equals(script.getTableToLock().getName())
+                    && this.requiresLock() == script.requiresLock());
+        } else {
+            return this.getSQL().equals(script.getSQL());
         }
-    }
-
-    public Collection<ScriptExporter> getScriptExporters() {
-        return scriptExporters;
-    }
-
-    public void setScriptExporters(Collection<ScriptExporter> scriptExporters) {
-        this.scriptExporters = scriptExporters;
     }
 }
