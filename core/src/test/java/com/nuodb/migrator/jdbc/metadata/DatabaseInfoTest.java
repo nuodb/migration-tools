@@ -68,7 +68,7 @@ public class DatabaseInfoTest {
 
                 {DB2, new DatabaseInfo("DB2/Darwin"), true},
                 {DB2, new DatabaseInfo("NuoDB", "2.0.1", 1, 27), false},
-                {NUODB_200, NUODB_203, true},
+                {NUODB_BASE, NUODB_203, true},
                 {NUODB_203, NUODB_206, true},
                 {NUODB_206, NUODB, true},
                 {MSSQL_SERVER, MSSQL_SERVER_2005, true},

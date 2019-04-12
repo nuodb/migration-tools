@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, NuoDB, Inc.
+ * Copyright (c) 2019, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,25 +25,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.value;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB_320;
 
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
+public class NuoDBDialect320 extends NuoDBDialect256 {
 
-/**
- * @author Sergey Bushik
- */
-public class SimpleValueFormatRegistryResolver extends SimpleCachingServiceResolver<ValueFormatRegistry>
-        implements ValueFormatRegistryResolver {
+    public NuoDBDialect320() {
+        super(NUODB_320);
+    }
 
-    public SimpleValueFormatRegistryResolver() {
-        super(SimpleValueFormatRegistry.class);
-        register(DB2, new DB2ValueFormatRegistry());
-        register(NUODB_BASE, new NuoDBValueFormatRegistry());
-        register(MYSQL, new MySQLValueFormatRegistry());
-        register(ORACLE, new OracleValueFormatRegistry());
-        register(POSTGRE_SQL, new PostgreSQLValueFormatRegistry());
-        register(MSSQL_SERVER, new MSSQLServerValueFormatRegistry());
+    public NuoDBDialect320(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
+    }
+
+    @Override
+    public boolean requiresTableLockForDDL() {
+        return true;
     }
 }

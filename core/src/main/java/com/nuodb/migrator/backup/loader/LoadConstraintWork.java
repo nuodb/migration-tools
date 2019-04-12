@@ -34,6 +34,7 @@ import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ProxyScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.Script;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.generator.SessionScriptExporter;
 import com.nuodb.migrator.jdbc.session.WorkBase;
@@ -114,7 +115,7 @@ public class LoadConstraintWork extends WorkBase {
             ScriptGeneratorManager scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
             Schema schema = getLoadConstraint().getTable().getSchema();
             scriptExporter.exportScript(getUseSchema(schema, scriptGeneratorManager));
-            Collection<String> scripts;
+            Collection<Script> scripts;
             if (loadConstraint instanceof LoadIndexes) {
                 Collection<Index> indexes = ((LoadIndexes) loadConstraint).getIndexes();
                 scripts = getCreateMultipleIndexes(indexes, scriptGeneratorManager);
