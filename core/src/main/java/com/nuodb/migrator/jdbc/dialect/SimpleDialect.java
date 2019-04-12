@@ -744,6 +744,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public boolean requiresTableLockForDDL() {
+        return false;
+    }
+
+    @Override
     public String getTypeName(DatabaseInfo databaseInfo, JdbcType jdbcType) {
         String typeName = getTypeName(getJdbcTypeNameMap(databaseInfo), jdbcType);
         if (typeName == null) {

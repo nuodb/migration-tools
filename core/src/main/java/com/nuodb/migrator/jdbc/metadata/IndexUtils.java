@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
+import com.nuodb.migrator.jdbc.metadata.generator.Script;
 
 import java.util.Collection;
 import java.util.Map;
@@ -50,17 +51,27 @@ public class IndexUtils {
 
     private static final String COMMA = ", ";
 
-    public static Collection<String> getCreateMultipleIndexes(Collection<Index> indexes,
+    public static Collection<Script> getCreateMultipleIndexes(Collection<Index> indexes,
                                                               final ScriptGeneratorManager scriptGeneratorManager) {
-        Collection<String> multipleIndexesScripts = newArrayList();
+        Collection<Script> multipleIndexesScripts = newArrayList();
         for (Index index : indexes) {
-            Collection<String> indexScripts = scriptGeneratorManager.getCreateScripts(index);
+            Collection<Script> indexScripts = scriptGeneratorManager.getCreateScripts(index);
             // indexScripts might be empty if index is a full-text or expression based index
             if (indexScripts.size() > 0) {
                 multipleIndexesScripts.add(get(indexScripts, 0));
             }
         }
-        return singleton(join(multipleIndexesScripts, COMMA));
+        boolean requiresLock = false;
+        Collection<String> sql = newArrayList();
+        Table tableToLock = null;
+        for (Script script : multipleIndexesScripts) {
+            if (script.requiresLock()) {
+                requiresLock = true;
+                tableToLock = script.getTableToLock();
+            }
+            sql.add(script.getSQL());
+        }
+        return singleton(new Script(join(sql, COMMA), tableToLock, requiresLock));
     }
 
     public static Collection<Index> getNonRepeatingIndexes(Table table) {

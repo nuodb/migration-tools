@@ -6,6 +6,7 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.generator.Script;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -13,6 +14,7 @@ import org.testng.annotations.Test;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.ArrayList;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
@@ -102,7 +104,11 @@ public class GetSequenceScriptsTest {
 
     @Test(dataProvider = "getSequencesScripts")
     public void testSchemaSeqScripts(Schema schema, Collection<String> expected) throws Exception {
-        Collection<String> actual = backupLoader.getSequencesScripts(schema, scriptGeneratorManager);
+        Collection<Script> actualScripts = backupLoader.getSequencesScripts(schema, scriptGeneratorManager);
+        Collection<String> actual = new ArrayList();
+        for (Script script : actualScripts) {
+            actual.add(script.getSQL());
+        }
         assertEquals(expected, actual);
     }
 }

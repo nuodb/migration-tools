@@ -226,5 +226,6 @@ public interface Dialect {
     ScriptEscapeUtils getScriptEscapeUtils();
 
     TranslationManager getTranslationManager();
-}
 
+    boolean requiresTableLockForDDL();
+}
