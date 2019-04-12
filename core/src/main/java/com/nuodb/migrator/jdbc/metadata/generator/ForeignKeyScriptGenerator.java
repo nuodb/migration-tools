@@ -63,7 +63,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
      * @return
      */
     @Override
-    public Collection<String> getCreateScripts(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getCreateScripts(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
         buffer.append(getForeignTable(foreignKey, scriptGeneratorManager));
@@ -80,7 +80,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         }
 
         buffer.append(getConstraintScript(foreignKey, scriptGeneratorManager));
-        return singleton(buffer.toString());
+        return singleton(new Script(buffer.toString(), foreignKey.getTable(), dialect.requiresTableLockForDDL()));
     }
 
     /**
@@ -92,7 +92,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
      * @return
      */
     @Override
-    public Collection<String> getDropScripts(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getDropScripts(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
@@ -112,7 +112,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         buffer.append(" REFERENCES ");
         buffer.append(getPrimaryScriptGeneratorManager(foreignKey, scriptGeneratorManager).getQualifiedName(
                 foreignKey.getPrimaryTable()));
-        return singleton(buffer.toString());
+        return singleton(new Script(buffer.toString(), foreignKey.getTable(), dialect.requiresTableLockForDDL()));
     }
 
     protected String getForeignTable(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {

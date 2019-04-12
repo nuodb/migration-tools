@@ -53,16 +53,18 @@ public class SessionBase implements Session {
     private Connection connection;
     private Dialect dialect;
     private Map context;
+    private boolean enforceTableLocksForDDL;
 
-    public SessionBase(SessionFactoryBase sessionFactoryBase, Connection connection, Dialect dialect) {
-        this(sessionFactoryBase, connection, dialect, null);
+    public SessionBase(SessionFactoryBase sessionFactoryBase, Connection connection, Dialect dialect, boolean enforceTableLocksForDDL) {
+        this(sessionFactoryBase, connection, dialect, null, enforceTableLocksForDDL);
     }
 
-    public SessionBase(SessionFactoryBase sessionFactoryBase, Connection connection, Dialect dialect, Map context) {
+    public SessionBase(SessionFactoryBase sessionFactoryBase, Connection connection, Dialect dialect, Map context, boolean enforceTableLocksForDDL) {
         this.sessionFactoryBase = sessionFactoryBase;
         this.connection = connection;
         this.dialect = dialect;
         this.context = context == null ? newHashMap() : context;
+        this.enforceTableLocksForDDL = enforceTableLocksForDDL;
     }
 
     @Override
@@ -143,6 +145,11 @@ public class SessionBase implements Session {
     @Override
     public Dialect getDialect() {
         return dialect;
+    }
+
+    @Override
+    public boolean shouldEnforceTableLocksForDDL() {
+        return enforceTableLocksForDDL;
     }
 
     @Override

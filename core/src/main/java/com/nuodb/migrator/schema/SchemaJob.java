@@ -38,6 +38,7 @@ import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.generator.SessionScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.Script;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.session.Session;
@@ -128,7 +129,7 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     @Override
     public void execute() throws Exception {
-        Collection<String> scripts = getScriptGeneratorManager().getScripts(inspect());
+        Collection<Script> scripts = getScriptGeneratorManager().getScripts(inspect());
         if (scripts.isEmpty()) {
             if (isFailOnEmptyDatabase()) {
                 throw new SchemaException(getMessages().getMessage(EMPTY_DATABASE_ERROR));

@@ -30,6 +30,9 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.google.common.io.Files;
 import com.google.common.io.NullOutputStream;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
+import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
+import com.nuodb.migrator.jdbc.session.SessionFactories;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -48,13 +51,13 @@ import static org.mockito.Mockito.when;
  */
 public class ScriptExporterTest {
 
-    private Collection<String> scripts;
+    private Collection<Script> scripts;
 
     @BeforeMethod
     public void setUp() {
         scripts = newArrayList(
-                "CREATE TABLE \"users\" (\"used_id\" INTEGER);",
-                "CREATE TABLE \"links\" (\"link_id\" INTEGER);"
+            new Script("CREATE TABLE \"users\" (\"used_id\" INTEGER);"),
+            new Script("CREATE TABLE \"links\" (\"link_id\" INTEGER);")
         );
     }
 
@@ -74,7 +77,7 @@ public class ScriptExporterTest {
 
         return new Object[][]{
                 {new FileScriptExporter(file)},
-                {new ConnectionScriptExporter(connectionProvider.getConnection())},
+                {new ConnectionScriptExporter(SessionFactories.newSessionFactory(connectionProvider, new NuoDBDialect(), false).openSession())},
                 {new WriterScriptExporter(new NullOutputStream())}
         };
     }

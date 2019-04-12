@@ -49,10 +49,10 @@ public abstract class StreamScriptExporterBase extends ScriptExporterBase implem
     protected abstract Writer openWriter() throws Exception;
 
     @Override
-    protected void doExportScript(String script) throws Exception {
-        writer.write(script);
+    protected void doExportScript(Script script) throws Exception {
+        writer.write(script.getSQL());
         String delimiter = getDelimiter();
-        if (!script.endsWith(delimiter)) {
+        if (!script.getSQL().endsWith(delimiter)) {
             writer.write(delimiter);
         }
         writer.newLine();

@@ -34,7 +34,7 @@ import java.util.Collection;
  */
 public interface ScriptExporter extends ScriptProcessor {
 
-    void exportScript(String script) throws Exception;
+    void exportScript(Script script) throws Exception;
 
-    void exportScripts(Collection<String> scripts) throws Exception;
+    void exportScripts(Collection<Script> scripts) throws Exception;
 }
