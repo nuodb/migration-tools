@@ -52,40 +52,40 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     @Override
     protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
-        return inspectionContext.getConnection().getMetaData().getColumns(
-                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),
-                tableInspectionScope.getTable(), null);
+        return inspectionContext.getConnection().getMetaData().getColumns(tableInspectionScope.getCatalog(),
+                tableInspectionScope.getSchema(), tableInspectionScope.getTable(), null);
     }
 
     @Override
     protected void processResultSet(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (columns.next()) {
-            Table table = addTable(inspectionResults, columns.getString("TABLE_CAT"),
-                    columns.getString("TABLE_SCHEM"), columns.getString("TABLE_NAME"));
+            Table table = addTable(inspectionResults, columns.getString("TABLE_CAT"), columns.getString("TABLE_SCHEM"),
+                    columns.getString("TABLE_NAME"));
             Column column = table.addColumn(columns.getString("COLUMN_NAME"));
             processColumn(inspectionContext, columns, column);
             inspectionResults.addObject(column);
         }
     }
 
-    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
-        JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeAlias(
-                columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
+    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column)
+            throws SQLException {
+        JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeAlias(columns.getInt("DATA_TYPE"),
+                columns.getString("TYPE_NAME"));
         column.setTypeCode(typeDescAlias.getTypeCode());
         column.setTypeName(typeDescAlias.getTypeName());
 
         int columnSize = columns.getInt("COLUMN_SIZE");
-        column.setSize((long)columnSize);
+        column.setSize((long) columnSize);
         column.setPrecision(columnSize);
         column.setScale(columns.getInt("DECIMAL_DIGITS"));
 
         String comment = columns.getString("REMARKS");
         column.setComment(isEmpty(comment) ? null : comment);
         column.setPosition(columns.getInt("ORDINAL_POSITION"));
-        String autoIncrement =
-                FieldFactory.newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
-                        columns.getString("IS_AUTOINCREMENT") : null;
+        String autoIncrement = FieldFactory.newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null
+                ? columns.getString("IS_AUTOINCREMENT")
+                : null;
         column.setAutoIncrement("YES".equals(autoIncrement));
         column.setNullable("YES".equals(columns.getString("IS_NULLABLE")));
         column.setDefaultValue(valueOf(columns.getString("COLUMN_DEF")));

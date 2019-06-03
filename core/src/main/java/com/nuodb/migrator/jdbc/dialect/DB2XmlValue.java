@@ -50,16 +50,14 @@ public class DB2XmlValue extends JdbcTypeValueBase<Object> {
     }
 
     @Override
-    public Object getValue(ResultSet resultSet, int index,
-                           Field field, Map<String, Object> options) throws SQLException {
+    public Object getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getObject(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Object value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Object value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setObject(index, value, OTHER);
     }
 }
-
-

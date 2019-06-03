@@ -40,11 +40,9 @@ import java.util.TreeMap;
 
 import org.testng.Assert;
 
-
 public class DatabaseUtil {
 
-    public static List<String> getWordsNumArray(String sqlStr,
-                                                Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<String> getWordsNumArray(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -64,8 +62,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Integer> getUnion(String sqlStr,
-                                         Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Integer> getUnion(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -85,9 +82,8 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Integer> getProjectionCompound(String sqlStr,
-                                                      Connection nuodbConnection, PreparedStatement stmt2)
-            throws Exception {
+    public static List<Integer> getProjectionCompound(String sqlStr, Connection nuodbConnection,
+            PreparedStatement stmt2) throws Exception {
         ResultSet rs2 = null;
         try {
             stmt2 = nuodbConnection.prepareStatement(sqlStr);
@@ -106,8 +102,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Integer> getIntReturn(String sqlStr,
-                                             Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Integer> getIntReturn(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -127,8 +122,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Integer> getNumCArray(String sqlStr,
-                                             Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Integer> getNumCArray(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -148,8 +142,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Integer> getNumBArray(String sqlStr,
-                                             Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Integer> getNumBArray(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -166,8 +159,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Integer> getVector(String sqlStr,
-                                          Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Integer> getVector(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -187,8 +179,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Integer> getRepeatNumArray(String sqlStr,
-                                                  Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Integer> getRepeatNumArray(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -208,8 +199,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<String> getJoinArray(Connection nuodbConnection,
-                                            PreparedStatement stmt2) throws Exception {
+    public static List<String> getJoinArray(Connection nuodbConnection, PreparedStatement stmt2) throws Exception {
         String sqlStr = "select * from array5";
         ResultSet rs2 = null;
         try {
@@ -229,8 +219,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static int getAggreNum(String sqlStr, Connection nuodbConnection,
-                                  PreparedStatement stmt2) throws Exception {
+    public static int getAggreNum(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2) throws Exception {
         ResultSet rs2 = null;
         try {
             int result = 0;
@@ -249,8 +238,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Double> getDoubArray(String sqlStr,
-                                            Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Double> getDoubArray(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -270,8 +258,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Integer> getNumArray(String sqlStr,
-                                            Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Integer> getNumArray(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -291,8 +278,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<String> getMixedWordsArray(String sqlStr,
-                                                  Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<String> getMixedWordsArray(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -312,8 +298,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<String> getSimWordsArray(String sqlStr,
-                                                Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<String> getSimWordsArray(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         try {
@@ -333,9 +318,8 @@ public class DatabaseUtil {
         }
     }
 
-    public static HashMap<String, Integer> getProductListGroupBy(String sqlStr,
-                                                                 Connection nuodbConnection, PreparedStatement stmt2)
-            throws Exception {
+    public static HashMap<String, Integer> getProductListGroupBy(String sqlStr, Connection nuodbConnection,
+            PreparedStatement stmt2) throws Exception {
         ResultSet rs2 = null;
         HashMap<String, Integer> map = new HashMap<String, Integer>();
         try {
@@ -353,9 +337,8 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<String> getDistinctProductList(String sqlStr,
-                                                      Connection nuodbConnection, PreparedStatement stmt2)
-            throws Exception {
+    public static List<String> getDistinctProductList(String sqlStr, Connection nuodbConnection,
+            PreparedStatement stmt2) throws Exception {
         ResultSet rs2 = null;
         List<String> list = new ArrayList<String>();
         try {
@@ -371,8 +354,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Product> getProductList(String sqlStr,
-                                               Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Product> getProductList(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         List<Product> list = new ArrayList<Product>();
@@ -380,12 +362,9 @@ public class DatabaseUtil {
             stmt2 = nuodbConnection.prepareStatement(sqlStr);
             rs2 = stmt2.executeQuery();
             while (rs2.next()) {
-                Product p1 = new Product(rs2.getInt("pid"),
-                        rs2.getString("pname"), rs2.getInt("stock"),
-                        rs2.getString("category"),
-                        rs2.getString("cheapestproduct"),
-                        rs2.getDouble("unitprice"), rs2.getInt("productcount"),
-                        rs2.getInt("unitinstock"));
+                Product p1 = new Product(rs2.getInt("pid"), rs2.getString("pname"), rs2.getInt("stock"),
+                        rs2.getString("category"), rs2.getString("cheapestproduct"), rs2.getDouble("unitprice"),
+                        rs2.getInt("productcount"), rs2.getInt("unitinstock"));
                 list.add(p1);
             }
             Assert.assertNotNull(rs2);
@@ -395,8 +374,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<String> getUnionNames(String sqlStr,
-                                             Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<String> getUnionNames(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         List<String> list = new ArrayList<String>();
@@ -413,8 +391,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Customer> getCustomerList(Connection nuodbConnection,
-                                                 PreparedStatement stmt2) throws Exception {
+    public static List<Customer> getCustomerList(Connection nuodbConnection, PreparedStatement stmt2) throws Exception {
         String sqlStr = "select * from customers";
         List<Customer> list = new ArrayList<Customer>();
         ResultSet rs2 = null;
@@ -423,11 +400,9 @@ public class DatabaseUtil {
             rs2 = stmt2.executeQuery();
             List<Order> list1 = null;
             while (rs2.next()) {
-                list1 = getOrderList(rs2.getString("customerid"),
-                        nuodbConnection, stmt2);
-                Customer c1 = new Customer(rs2.getString("companyname"),
-                        rs2.getInt("month"), rs2.getString("customerid"),
-                        rs2.getString("region"), list1);
+                list1 = getOrderList(rs2.getString("customerid"), nuodbConnection, stmt2);
+                Customer c1 = new Customer(rs2.getString("companyname"), rs2.getInt("month"),
+                        rs2.getString("customerid"), rs2.getString("region"), list1);
                 list.add(c1);
             }
             Assert.assertNotNull(rs2);
@@ -437,19 +412,16 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Order> getOrderList(String custId,
-                                           Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Order> getOrderList(String custId, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
-        String sqlStr = "select * from orders where customerid='" + custId
-                + "'";
+        String sqlStr = "select * from orders where customerid='" + custId + "'";
         ResultSet rs2 = null;
         List<Order> list = new ArrayList<Order>();
         try {
             stmt2 = nuodbConnection.prepareStatement(sqlStr);
             rs2 = stmt2.executeQuery();
             while (rs2.next()) {
-                Order o1 = new Order(rs2.getString("orderid"),
-                        rs2.getString("orderdate"), rs2.getDouble("total"),
+                Order o1 = new Order(rs2.getString("orderid"), rs2.getString("orderdate"), rs2.getDouble("total"),
                         rs2.getString("customerid"));
                 list.add(o1);
             }
@@ -460,8 +432,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Customer> getCustomerList(String sqlStr,
-                                                 Connection nuodbConnection, PreparedStatement stmt2)
+    public static List<Customer> getCustomerList(String sqlStr, Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         ResultSet rs2 = null;
         List<Customer> list = null;
@@ -476,8 +447,7 @@ public class DatabaseUtil {
                 if (cList.get(cid) != null) {
                     c1 = cList.get(cid);
                     List<Order> l = c1.getList1();
-                    l.add(new Order(rs2.getString("orderid"), rs2
-                            .getString("orderdate"), rs2.getDouble("total"),
+                    l.add(new Order(rs2.getString("orderid"), rs2.getString("orderdate"), rs2.getDouble("total"),
                             rs2.getString("customerid")));
 
                 } else {
@@ -487,8 +457,7 @@ public class DatabaseUtil {
                     c1.setMonth(rs2.getInt("month"));
                     c1.setRegion(rs2.getString("region"));
                     List<Order> l = c1.getList1();
-                    l.add(new Order(rs2.getString("orderid"), rs2
-                            .getString("orderdate"), rs2.getDouble("total"),
+                    l.add(new Order(rs2.getString("orderid"), rs2.getString("orderdate"), rs2.getDouble("total"),
                             rs2.getString("customerid")));
                     cList.put(cid, c1);
                 }
@@ -501,9 +470,8 @@ public class DatabaseUtil {
         }
     }
 
-    public static List<Customer> getGroupByCustomerList(String sqlStr,
-                                                        Connection nuodbConnection, PreparedStatement stmt2)
-            throws Exception {
+    public static List<Customer> getGroupByCustomerList(String sqlStr, Connection nuodbConnection,
+            PreparedStatement stmt2) throws Exception {
         ResultSet rs2 = null;
         List<Customer> list = null;
         try {
@@ -517,8 +485,7 @@ public class DatabaseUtil {
                 if (cList.get(cid) != null) {
                     c1 = cList.get(cid);
                     List<Order> l = c1.getList1();
-                    l.add(new Order(rs2.getString("orderid"), rs2
-                            .getString("orderdate"), rs2.getDouble("total"),
+                    l.add(new Order(rs2.getString("orderid"), rs2.getString("orderdate"), rs2.getDouble("total"),
                             rs2.getString("customerid")));
 
                 } else {
@@ -528,8 +495,7 @@ public class DatabaseUtil {
                     c1.setMonth(rs2.getInt("month"));
                     c1.setRegion(rs2.getString("region"));
                     List<Order> l = c1.getList1();
-                    l.add(new Order(rs2.getString("orderid"), rs2
-                            .getString("orderdate"), rs2.getDouble("total"),
+                    l.add(new Order(rs2.getString("orderid"), rs2.getString("orderdate"), rs2.getDouble("total"),
                             rs2.getString("customerid")));
                     cList.put(cid, c1);
                 }
@@ -542,8 +508,7 @@ public class DatabaseUtil {
         }
     }
 
-    public static TreeMap<String, String> getJoinProductList(
-            Connection nuodbConnection, PreparedStatement stmt2)
+    public static TreeMap<String, String> getJoinProductList(Connection nuodbConnection, PreparedStatement stmt2)
             throws Exception {
         String sqlStr = "select p.pname,p.pid,a.cate_name from array5 a left join products p on a.cate_name=p.category";
         TreeMap<String, String> map = new TreeMap<String, String>();
@@ -563,9 +528,8 @@ public class DatabaseUtil {
         }
     }
 
-    public static HashMap<String, Integer> getAgreProductList(String sqlStr,
-                                                              Connection nuodbConnection, PreparedStatement stmt2)
-            throws Exception {
+    public static HashMap<String, Integer> getAgreProductList(String sqlStr, Connection nuodbConnection,
+            PreparedStatement stmt2) throws Exception {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
         ResultSet rs2 = null;
         try {
@@ -581,9 +545,8 @@ public class DatabaseUtil {
         }
     }
 
-    public static HashMap<String, Double> getAgreDoubProductList(String sqlStr,
-                                                                 Connection nuodbConnection, PreparedStatement stmt2)
-            throws Exception {
+    public static HashMap<String, Double> getAgreDoubProductList(String sqlStr, Connection nuodbConnection,
+            PreparedStatement stmt2) throws Exception {
         HashMap<String, Double> map = new HashMap<String, Double>();
         ResultSet rs2 = null;
         try {
@@ -599,9 +562,8 @@ public class DatabaseUtil {
         }
     }
 
-    public static HashMap<String, Integer> getAgreOrderList(String sqlStr,
-                                                            Connection nuodbConnection, PreparedStatement stmt2)
-            throws Exception {
+    public static HashMap<String, Integer> getAgreOrderList(String sqlStr, Connection nuodbConnection,
+            PreparedStatement stmt2) throws Exception {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
         ResultSet rs2 = null;
         try {
@@ -626,8 +588,7 @@ public class DatabaseUtil {
         return false;
     }
 
-    protected static void closeAll(ResultSet rs1, Statement stmt1)
-            throws SQLException {
+    protected static void closeAll(ResultSet rs1, Statement stmt1) throws SQLException {
         if (rs1 != null) {
             rs1.close();
         }

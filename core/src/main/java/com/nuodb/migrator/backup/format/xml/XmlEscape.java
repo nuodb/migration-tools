@@ -45,13 +45,7 @@ public class XmlEscape {
     private EntityMap entityMap = new EntityMap();
 
     public XmlEscape() {
-        String[][] entities = {
-                {"quot", "34"},
-                {"amp", "38"},
-                {"lt", "60"},
-                {"gt", "62"},
-                {"apos", "39"}
-        };
+        String[][] entities = { { "quot", "34" }, { "amp", "38" }, { "lt", "60" }, { "gt", "62" }, { "apos", "39" } };
         for (String[] entity : entities) {
             addEntity(entity[0], Integer.parseInt(entity[1]));
         }
@@ -146,12 +140,12 @@ public class XmlEscape {
                             char hex = entity.charAt(1);
                             try {
                                 switch (hex) {
-                                    case 'X':
-                                    case 'x':
-                                        value = Integer.parseInt(entity.substring(2), 16);
-                                        break;
-                                    default:
-                                        value = Integer.parseInt(entity.substring(1), 10);
+                                case 'X':
+                                case 'x':
+                                    value = Integer.parseInt(entity.substring(2), 16);
+                                    break;
+                                default:
+                                    value = Integer.parseInt(entity.substring(1), 10);
                                 }
                                 if (value > 0xFFFF) {
                                     value = null;

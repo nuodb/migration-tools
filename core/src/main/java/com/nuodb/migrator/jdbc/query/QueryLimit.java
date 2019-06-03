@@ -70,13 +70,17 @@ public class QueryLimit {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof QueryLimit)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof QueryLimit))
+            return false;
 
         QueryLimit that = (QueryLimit) o;
 
-        if (count != null ? !count.equals(that.count) : that.count != null) return false;
-        if (offset != null ? !offset.equals(that.offset) : that.offset != null) return false;
+        if (count != null ? !count.equals(that.count) : that.count != null)
+            return false;
+        if (offset != null ? !offset.equals(that.offset) : that.offset != null)
+            return false;
 
         return true;
     }

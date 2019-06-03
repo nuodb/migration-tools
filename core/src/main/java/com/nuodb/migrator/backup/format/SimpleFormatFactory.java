@@ -55,11 +55,11 @@ public class SimpleFormatFactory implements FormatFactory {
 
     protected final Logger logger = getLogger(getClass());
 
-    private Map<String, Class<? extends Input>> inputFormats =
-            new TreeMap<String, Class<? extends Input>>(CASE_INSENSITIVE_ORDER);
+    private Map<String, Class<? extends Input>> inputFormats = new TreeMap<String, Class<? extends Input>>(
+            CASE_INSENSITIVE_ORDER);
 
-    private Map<String, Class<? extends Output>> outputFormats =
-            new TreeMap<String, Class<? extends Output>>(CASE_INSENSITIVE_ORDER);
+    private Map<String, Class<? extends Output>> outputFormats = new TreeMap<String, Class<? extends Output>>(
+            CASE_INSENSITIVE_ORDER);
 
     public SimpleFormatFactory() {
         addFormat(CsvFormat.TYPE, CsvInput.class);

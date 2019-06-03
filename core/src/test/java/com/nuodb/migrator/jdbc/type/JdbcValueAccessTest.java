@@ -68,8 +68,9 @@ public class JdbcValueAccessTest {
     private JdbcValueAccessProvider jdbcValueAccessProvider;
 
     /**
-     * Initializes mocks on this test instance & adds single TIMESTAMP type & TIMESTAMP type adapter to the {@link
-     * com.nuodb.migrator.jdbc.type.SimpleJdbcValueAccessProvider}
+     * Initializes mocks on this test instance & adds single TIMESTAMP type &
+     * TIMESTAMP type adapter to the
+     * {@link com.nuodb.migrator.jdbc.type.SimpleJdbcValueAccessProvider}
      *
      * @throws Exception
      */
@@ -89,11 +90,9 @@ public class JdbcValueAccessTest {
 
     @DataProvider(name = "getColumnValueGetter")
     public Object[][] createGetColumnValueGetterData() {
-        return new Object[][]{
-                {new JdbcTypeDesc(Types.TIMESTAMP)},
-                {new JdbcTypeDesc(Types.TIMESTAMP, "TIMESTAMP")},
-                {JdbcTimestampValue.INSTANCE.getJdbcTypeDesc()},
-        };
+        return new Object[][] { { new JdbcTypeDesc(Types.TIMESTAMP) },
+                { new JdbcTypeDesc(Types.TIMESTAMP, "TIMESTAMP") },
+                { JdbcTimestampValue.INSTANCE.getJdbcTypeDesc() }, };
     }
 
     @Test(dataProvider = "getColumnValueGetter")
@@ -105,19 +104,18 @@ public class JdbcValueAccessTest {
 
     @DataProvider(name = "getColumnValueGetterFailed")
     public Object[][] createGetColumnValueGetterFailedData() {
-        return new Object[][]{
-                {new JdbcTypeDesc(Types.DATE)},
-                {new JdbcTypeDesc(Types.TIME)}
-        };
+        return new Object[][] { { new JdbcTypeDesc(Types.DATE) }, { new JdbcTypeDesc(Types.TIME) } };
     }
 
     /**
-     * Verifiers that the provider throws {@link com.nuodb.migrator.jdbc.type.JdbcTypeException} for the type
+     * Verifiers that the provider throws
+     * {@link com.nuodb.migrator.jdbc.type.JdbcTypeException} for the type
      * descriptors which has now associated {@link JdbcTypeValue} classes.
      *
-     * @param jdbcTypeDesc to be verified
+     * @param jdbcTypeDesc
+     *            to be verified
      */
-    @Test(dataProvider = "getColumnValueGetterFailed", expectedExceptions = {JdbcTypeException.class})
+    @Test(dataProvider = "getColumnValueGetterFailed", expectedExceptions = { JdbcTypeException.class })
     public void testGetColumnValueGetterFailed(JdbcTypeDesc jdbcTypeDesc) {
         jdbcValueAccessProvider.getJdbcValueGetter(jdbcTypeDesc);
     }
@@ -128,8 +126,8 @@ public class JdbcValueAccessTest {
         Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
         given(resultSet.getTimestamp(COLUMN)).willReturn(timestamp);
 
-        JdbcValueAccess<Timestamp> resultSetAccess =
-                jdbcValueAccessProvider.getJdbcValueGetter(connection, resultSet, COLUMN);
+        JdbcValueAccess<Timestamp> resultSetAccess = jdbcValueAccessProvider.getJdbcValueGetter(connection, resultSet,
+                COLUMN);
 
         Map<String, Object> options = new HashMap<String, Object>();
         assertEquals(resultSetAccess.getValue(options), timestamp);
@@ -143,8 +141,8 @@ public class JdbcValueAccessTest {
         Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
         given(resultSet.getTimestamp(COLUMN)).willReturn(timestamp);
 
-        JdbcValueAccess<Object> preparedStatementAccess =
-                jdbcValueAccessProvider.getJdbcValueGetter(connection, preparedStatement, COLUMN);
+        JdbcValueAccess<Object> preparedStatementAccess = jdbcValueAccessProvider.getJdbcValueGetter(connection,
+                preparedStatement, COLUMN);
 
         Map<String, Object> options = new HashMap<String, Object>();
         preparedStatementAccess.setValue(calendar.getTimeInMillis(), options);

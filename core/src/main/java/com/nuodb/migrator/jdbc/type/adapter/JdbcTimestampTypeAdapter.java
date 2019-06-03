@@ -41,7 +41,7 @@ import java.util.GregorianCalendar;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"unchecked", "UnnecessaryUnboxing"})
+@SuppressWarnings({ "unchecked", "UnnecessaryUnboxing" })
 public class JdbcTimestampTypeAdapter extends JdbcTypeAdapterBase<Timestamp> {
 
     public static final JdbcTypeAdapter INSTANCE = new JdbcTimestampTypeAdapter();

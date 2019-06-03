@@ -31,9 +31,5 @@ package com.nuodb.migrator.job;
  * @author Sergey Bushik
  */
 public enum JobStatusType {
-    RUNNING,
-    PAUSED,
-    WAITING,
-    STOPPED,
-    FINISHED
+    RUNNING, PAUSED, WAITING, STOPPED, FINISHED
 }

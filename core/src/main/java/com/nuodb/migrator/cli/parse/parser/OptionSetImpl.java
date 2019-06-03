@@ -27,8 +27,8 @@ import java.util.List;
 import static com.google.common.collect.Iterables.tryFind;
 
 /**
- * Instances of CommandLine represent a executable line that has been processed according to the spec supplied to the
- * parser.
+ * Instances of CommandLine represent a executable line that has been processed
+ * according to the spec supplied to the parser.
  */
 public abstract class OptionSetImpl implements OptionSet {
 

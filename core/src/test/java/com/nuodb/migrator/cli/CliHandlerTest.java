@@ -55,7 +55,7 @@ public class CliHandlerTest {
     public void testConfig() throws Exception {
         String path = createTempFile("nuodb-migrator", "config").getPath();
         write("--list", new FileOutputStream(path));
-        cliHandler.boot(new String[]{"--config=" + path});
+        cliHandler.boot(new String[] { "--config=" + path });
         verify(cliHandler).handleConfig(any(OptionSet.class));
     }
 }

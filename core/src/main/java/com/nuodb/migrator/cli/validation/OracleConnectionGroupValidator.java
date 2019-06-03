@@ -60,9 +60,8 @@ public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
     @Override
     protected void validateCatalog(CommandLine commandLine, Option option, String catalog) {
         if (!isEmpty(catalog)) {
-            throw new OptionException(format("Unexpected option %s. Oracle catalog is equal to database name, " +
-                    "use %s option to access user data", getCatalogOption(), getSchemaOption()), option
-            );
+            throw new OptionException(format("Unexpected option %s. Oracle catalog is equal to database name, "
+                    + "use %s option to access user data", getCatalogOption(), getSchemaOption()), option);
         }
     }
 
@@ -70,8 +69,8 @@ public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
     protected void validateSchema(CommandLine commandLine, Option option, String schema) {
         if (isEmpty(schema)) {
             throw new OptionException(
-                    format("No schema option is passed. Please provide --source.schema option", getSchemaOption()), option
-            );
+                    format("No schema option is passed. Please provide --source.schema option", getSchemaOption()),
+                    option);
         }
     }
 

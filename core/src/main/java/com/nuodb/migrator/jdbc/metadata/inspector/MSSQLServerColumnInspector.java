@@ -43,7 +43,8 @@ import static org.apache.commons.lang3.StringUtils.startsWith;
 public class MSSQLServerColumnInspector extends SimpleColumnInspector {
 
     @Override
-    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
+    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column)
+            throws SQLException {
         super.processColumn(inspectionContext, columns, column);
         DefaultValue defaultValue = column.getDefaultValue();
         if (defaultValue != null && !defaultValue.isProcessed()) {

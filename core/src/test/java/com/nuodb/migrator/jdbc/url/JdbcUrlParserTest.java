@@ -47,38 +47,27 @@ public class JdbcUrlParserTest {
 
     @DataProvider(name = "parseUrl")
     public Object[][] createParseUrlData() {
-        return new Object[][]{
-                {"jdbc:jtds:sqlserver://localhost:1433/test;autoCommit=true;batchSize=0",
-                        "jtds", "sqlserver", null, null,
-                        new PropertiesBuilder("autoCommit", "true").put("batchSize", "0").build()},
-                {"jdbc:sqlserver://localhost:1433;database=test",
-                        "sqlserver", null, null, null,
-                        new PropertiesBuilder("database", "test").build()},
-                {"jdbc:mysql://localhost:3306/database",
-                        "mysql", null, "database", null,
-                        new PropertiesBuilder(ZERO_DATE_TIME_BEHAVIOR, DEFAULT_BEHAVIOR).build()},
-                {"jdbc:mysql://localhost:3306/database?connectTimeout=1000",
-                        "mysql", null, "database", null,
+        return new Object[][] {
+                { "jdbc:jtds:sqlserver://localhost:1433/test;autoCommit=true;batchSize=0", "jtds", "sqlserver", null,
+                        null, new PropertiesBuilder("autoCommit", "true").put("batchSize", "0").build() },
+                { "jdbc:sqlserver://localhost:1433;database=test", "sqlserver", null, null, null,
+                        new PropertiesBuilder("database", "test").build() },
+                { "jdbc:mysql://localhost:3306/database", "mysql", null, "database", null,
+                        new PropertiesBuilder(ZERO_DATE_TIME_BEHAVIOR, DEFAULT_BEHAVIOR).build() },
+                { "jdbc:mysql://localhost:3306/database?connectTimeout=1000", "mysql", null, "database", null,
                         new PropertiesBuilder(ZERO_DATE_TIME_BEHAVIOR, DEFAULT_BEHAVIOR).put("connectTimeout", "1000")
-                                .build()},
-                {"jdbc:com.nuodb://localhost/database",
-                        "com.nuodb", null, null, null,
-                        EMPTY_PROPERTIES},
-                {"jdbc:com.nuodb://localhost/database?user=admin&schema=test",
-                        "com.nuodb", null, null, "test",
-                        new PropertiesBuilder("user", "admin").put("schema", "test").build()},
-                {"jdbc:oracle:thin:@//localhost:1521/sid",
-                        "oracle", "thin", null, null,
-                        EMPTY_PROPERTIES},
-                {"jdbc:postgresql:localhost?user=admin&searchpath=schema",
-                        "postgresql", null, null, "schema",
-                        new PropertiesBuilder("user", "admin").put("searchpath", "schema").build()}
-        };
+                                .build() },
+                { "jdbc:com.nuodb://localhost/database", "com.nuodb", null, null, null, EMPTY_PROPERTIES },
+                { "jdbc:com.nuodb://localhost/database?user=admin&schema=test", "com.nuodb", null, null, "test",
+                        new PropertiesBuilder("user", "admin").put("schema", "test").build() },
+                { "jdbc:oracle:thin:@//localhost:1521/sid", "oracle", "thin", null, null, EMPTY_PROPERTIES },
+                { "jdbc:postgresql:localhost?user=admin&searchpath=schema", "postgresql", null, null, "schema",
+                        new PropertiesBuilder("user", "admin").put("searchpath", "schema").build() } };
     }
 
     @Test(dataProvider = "parseUrl")
-    public void testParseUrl(String url, String subProtocol, String qualifier,
-                             String catalog, String schema, Map<String, Object> properties) {
+    public void testParseUrl(String url, String subProtocol, String qualifier, String catalog, String schema,
+            Map<String, Object> properties) {
         JdbcUrlParser jdbcUrlParser = JdbcUrlParsers.getInstance().getParser(url);
 
         assertNotNull(jdbcUrlParser);
@@ -97,29 +86,27 @@ public class JdbcUrlParserTest {
 
     @DataProvider(name = "userPasswordData")
     public Object[][] createUserPasswordData() {
-        return new Object[][]{
-                {"jdbc:jtds:sqlserver://localhost:1433/test;user=admin;password=root",
-                        "jtds", new PropertiesBuilder("user", "admin").put("password", "root").build()},
-                {"jdbc:sqlserver://localhost:1433;user=admin;password=root",
-                        "sqlserver", new PropertiesBuilder("user", "admin").put("password", "root").build()},
-                {"jdbc:mysql://localhost:3306/database?user=admin&password=root",
-                         "mysql", 
-                         new PropertiesBuilder("user", "admin").put("password", "root").put(ZERO_DATE_TIME_BEHAVIOR, DEFAULT_BEHAVIOR).build()},
-                {"jdbc:postgresql:localhost?user=admin&&password=root",
-                         "postgresql", new PropertiesBuilder("user", "admin").put("password", "root").build()},
-                {"jdbc:oracle:thin:scott/tiger@//localhost:1521/sid",
-                         "oracle", new PropertiesBuilder("user", "scott").put("password", "tiger").build()},               
-                {"jdbc:oracle:thin:scott@//localhost:1521/sid",
-                         "oracle", new PropertiesBuilder("user", "scott").build()},
-                {"jdbc:oracle:thin:@//localhost:1521/sid",
-                         "oracle",EMPTY_PROPERTIES},
-                {"jdbc:com.nuodb://localhost/database?schema=test&user=admin&password=root",
-                         "com.nuodb", new PropertiesBuilder("user", "admin").put("password", "root").put("schema", "test").build()},
-                {"jdbc:db2://localhost:5000/database:user=admin;password=root;",
-                         "db2", new PropertiesBuilder("user", "admin").put("password", "root").build()},
-                {"jdbc:db2://localhost:5000/database",
-                         "db2", EMPTY_PROPERTIES}
-                         //jdbc:db2://127.0.0.1:50000/SAMPLE:user=root;password=root;  
+        return new Object[][] {
+                { "jdbc:jtds:sqlserver://localhost:1433/test;user=admin;password=root", "jtds",
+                        new PropertiesBuilder("user", "admin").put("password", "root").build() },
+                { "jdbc:sqlserver://localhost:1433;user=admin;password=root", "sqlserver",
+                        new PropertiesBuilder("user", "admin").put("password", "root").build() },
+                { "jdbc:mysql://localhost:3306/database?user=admin&password=root", "mysql",
+                        new PropertiesBuilder("user", "admin").put("password", "root")
+                                .put(ZERO_DATE_TIME_BEHAVIOR, DEFAULT_BEHAVIOR).build() },
+                { "jdbc:postgresql:localhost?user=admin&&password=root", "postgresql",
+                        new PropertiesBuilder("user", "admin").put("password", "root").build() },
+                { "jdbc:oracle:thin:scott/tiger@//localhost:1521/sid", "oracle",
+                        new PropertiesBuilder("user", "scott").put("password", "tiger").build() },
+                { "jdbc:oracle:thin:scott@//localhost:1521/sid", "oracle",
+                        new PropertiesBuilder("user", "scott").build() },
+                { "jdbc:oracle:thin:@//localhost:1521/sid", "oracle", EMPTY_PROPERTIES },
+                { "jdbc:com.nuodb://localhost/database?schema=test&user=admin&password=root", "com.nuodb",
+                        new PropertiesBuilder("user", "admin").put("password", "root").put("schema", "test").build() },
+                { "jdbc:db2://localhost:5000/database:user=admin;password=root;", "db2",
+                        new PropertiesBuilder("user", "admin").put("password", "root").build() },
+                { "jdbc:db2://localhost:5000/database", "db2", EMPTY_PROPERTIES }
+                // jdbc:db2://127.0.0.1:50000/SAMPLE:user=root;password=root;
         };
     }
 

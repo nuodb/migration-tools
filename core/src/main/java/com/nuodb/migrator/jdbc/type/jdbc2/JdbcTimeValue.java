@@ -46,8 +46,7 @@ public class JdbcTimeValue extends JdbcDateValueBase<Time> {
     }
 
     @Override
-    public Time getValue(ResultSet resultSet, int index,
-                         Field field, Map<String, Object> options) throws SQLException {
+    public Time getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options) throws SQLException {
         Calendar calendar = getCalendar(options);
         if (calendar != null) {
             return resultSet.getTime(index, calendar);
@@ -57,8 +56,8 @@ public class JdbcTimeValue extends JdbcDateValueBase<Time> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Time value,
-                                    int index, Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Time value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         Calendar calendar = getCalendar(options);
         if (calendar == null) {
             statement.setTime(index, value);

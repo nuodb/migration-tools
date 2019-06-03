@@ -60,5 +60,6 @@ public interface JdbcValueAccessProvider {
 
     <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index);
 
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index, Field field);
+    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index,
+            Field field);
 }

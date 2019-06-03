@@ -45,8 +45,8 @@ public class SequenceHashNamingStrategy extends SequenceQualifyNamingStrategy {
     protected String getNonPrefixedName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
         String nonPrefixedName = toHexString(super.getNonPrefixedName(sequence, scriptGeneratorManager).hashCode());
         Collection<Column> columns = sequence.getColumns();
-        String tableName = columns.size() == 1 ?
-                scriptGeneratorManager.getName(get(columns, 0).getTable(), false) : null;
+        String tableName = columns.size() == 1 ? scriptGeneratorManager.getName(get(columns, 0).getTable(), false)
+                : null;
         if (isLowerCase(tableName)) {
             nonPrefixedName = lowerCase(nonPrefixedName);
         } else if (isCapitalizedCase(tableName)) {

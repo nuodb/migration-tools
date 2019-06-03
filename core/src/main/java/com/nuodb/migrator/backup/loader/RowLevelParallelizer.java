@@ -39,8 +39,9 @@ import static java.lang.Math.*;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * Forking on row level where the number of workers is proportional to the size of the largest row set. Notice row level
- * parallelization may (and typically does) reorder of the rows in the loaded table.
+ * Forking on row level where the number of workers is proportional to the size
+ * of the largest row set. Notice row level parallelization may (and typically
+ * does) reorder of the rows in the loaded table.
  *
  * @author Sergey Bushik
  */
@@ -72,14 +73,14 @@ public class RowLevelParallelizer implements Parallelizer {
         RowSet rowSet = loadTable.getRowSet();
         long rowSetSize = rowSet.getSize(backupOps);
         long maxRowSetSize = 0L;
-        for (Iterator<LoadTable> iterator = backupLoaderContext.getLoadTables().iterator(); iterator.hasNext(); ) {
+        for (Iterator<LoadTable> iterator = backupLoaderContext.getLoadTables().iterator(); iterator.hasNext();) {
             maxRowSetSize = max(iterator.next().getRowSet().getSize(backupOps), maxRowSetSize);
         }
         long threads = getThreads(backupLoaderContext);
         long minThreadsPerRowSet = getMinThreadsPerRowSet(loadTable, backupLoaderContext);
         long maxThreadsPerRowSet = getMaxThreadsPerRowSet(loadTable, backupLoaderContext);
-        return (int) min(max(round(rowSetSize / (double) maxRowSetSize * threads),
-                minThreadsPerRowSet), maxThreadsPerRowSet);
+        return (int) min(max(round(rowSetSize / (double) maxRowSetSize * threads), minThreadsPerRowSet),
+                maxThreadsPerRowSet);
     }
 
     protected int getThreads(BackupLoaderContext backupLoaderContext) {
@@ -90,15 +91,13 @@ public class RowLevelParallelizer implements Parallelizer {
     protected long getMinThreadsPerRowSet(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
         long rowCount = loadTable.getRowSet().getRowCount();
         long minRowsPerThread = getMinRowsPerThread();
-        return max(minRowsPerThread != 0 ?
-                round(rowCount / (double) minRowsPerThread) : 1, 1);
+        return max(minRowsPerThread != 0 ? round(rowCount / (double) minRowsPerThread) : 1, 1);
     }
 
     protected long getMaxThreadsPerRowSet(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
         long rowCount = loadTable.getRowSet().getRowCount();
         int threads = getThreads(backupLoaderContext);
-        return min(getMaxRowsPerThread() != 0 ?
-                round(rowCount / (double) getMaxRowsPerThread()) : threads, threads);
+        return min(getMaxRowsPerThread() != 0 ? round(rowCount / (double) getMaxRowsPerThread()) : threads, threads);
     }
 
     public long getMinRowsPerThread() {
@@ -119,13 +118,17 @@ public class RowLevelParallelizer implements Parallelizer {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         RowLevelParallelizer that = (RowLevelParallelizer) o;
 
-        if (maxRowsPerThread != that.maxRowsPerThread) return false;
-        if (minRowsPerThread != that.minRowsPerThread) return false;
+        if (maxRowsPerThread != that.maxRowsPerThread)
+            return false;
+        if (minRowsPerThread != that.minRowsPerThread)
+            return false;
 
         return true;
     }

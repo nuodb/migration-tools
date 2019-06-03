@@ -38,9 +38,11 @@ import java.util.TimeZone;
 public class SessionObservers {
 
     /**
-     * Sets transaction isolation level to one of the supported values from specified array.
+     * Sets transaction isolation level to one of the supported values from
+     * specified array.
      *
-     * @param levels to use for setting transaction isolation.
+     * @param levels
+     *            to use for setting transaction isolation.
      * @return session observer.
      */
     public static SessionObserver newTransactionIsolationSetter(final int[] levels) {
@@ -59,7 +61,8 @@ public class SessionObservers {
     /**
      * Sets session time zone of dialect supports its.
      *
-     * @param timeZone to use in set statement.
+     * @param timeZone
+     *            to use in set statement.
      * @return session observer.
      */
     public static SessionObserver newSessionTimeZoneSetter(final TimeZone timeZone) {

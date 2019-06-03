@@ -59,14 +59,14 @@ public class JdbcSqlXmlValue extends JdbcTypeValueBase<SQLXML> {
     }
 
     @Override
-    public SQLXML getValue(ResultSet resultSet, int index,
-                           Field field, Map<String, Object> options) throws SQLException {
+    public SQLXML getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getSQLXML(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, SQLXML value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, SQLXML value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setSQLXML(index, value);
     }
 }

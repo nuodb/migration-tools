@@ -36,21 +36,19 @@ import org.testng.annotations.Test;
 import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 
-@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
+@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
 public class ConversionTest extends MigrationTestBase {
     PreparedStatement pstmt = null;
 
     public void orderByAsc() throws Exception {
-        List<String> list = DatabaseUtil.getMixedWordsArray(
-                "select words from array1 order by words", nuodbConnection,
+        List<String> list = DatabaseUtil.getMixedWordsArray("select words from array1 order by words", nuodbConnection,
                 pstmt);
         Assert.assertTrue(list.size() >= 1, "The list is empty");
         String[] words = list.toArray(new String[list.size()]);
         String s = null;
         for (String str : words) {
             if (s != null) {
-                Assert.assertTrue(((str.compareTo(s) >= 0)),
-                        "Not sorted this two strings " + s + " : " + str);
+                Assert.assertTrue(((str.compareTo(s) >= 0)), "Not sorted this two strings " + s + " : " + str);
             }
             s = str;
         }

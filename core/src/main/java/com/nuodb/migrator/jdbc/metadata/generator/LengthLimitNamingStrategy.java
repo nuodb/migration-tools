@@ -50,8 +50,8 @@ public class LengthLimitNamingStrategy<M extends MetaData> extends CompositeNami
     }
 
     @Override
-    protected String getName(NamingStrategy<M> namingStrategy, M object,
-                             ScriptGeneratorManager scriptGeneratorManager, boolean normalize) {
+    protected String getName(NamingStrategy<M> namingStrategy, M object, ScriptGeneratorManager scriptGeneratorManager,
+            boolean normalize) {
         String name = namingStrategy.getName(object, scriptGeneratorManager, normalize);
         if (name != null && (lengthLimit == null || name.length() < lengthLimit)) {
             return name;
@@ -62,8 +62,7 @@ public class LengthLimitNamingStrategy<M extends MetaData> extends CompositeNami
 
     @Override
     protected String getQualifiedName(NamingStrategy<M> namingStrategy, M object,
-                                      ScriptGeneratorManager scriptGeneratorManager,
-                                      String catalog, String schema, boolean normalize) {
+            ScriptGeneratorManager scriptGeneratorManager, String catalog, String schema, boolean normalize) {
         String name = namingStrategy.getName(object, scriptGeneratorManager, normalize);
         if (name != null && (lengthLimit == null || name.length() < lengthLimit)) {
             return namingStrategy.getQualifiedName(object, scriptGeneratorManager, catalog, schema, normalize);

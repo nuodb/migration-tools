@@ -47,10 +47,13 @@ public class TriggerImpl implements Trigger {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         TriggerImpl trigger = (TriggerImpl) o;
-        if (this.trigger != null ? !this.trigger.equals(trigger.trigger) : trigger.trigger != null) return false;
+        if (this.trigger != null ? !this.trigger.equals(trigger.trigger) : trigger.trigger != null)
+            return false;
         return true;
     }
 

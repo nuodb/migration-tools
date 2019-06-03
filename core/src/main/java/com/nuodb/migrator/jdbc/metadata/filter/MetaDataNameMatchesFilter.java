@@ -42,8 +42,7 @@ public class MetaDataNameMatchesFilter<T extends Identifiable> extends MetaDataN
 
     private Regex regex;
 
-    public MetaDataNameMatchesFilter(MetaDataType objectType, boolean qualifyName,
-                                     String regex) {
+    public MetaDataNameMatchesFilter(MetaDataType objectType, boolean qualifyName, String regex) {
         super(objectType, qualifyName);
         this.regex = INSTANCE.compile(regex);
     }
@@ -59,13 +58,17 @@ public class MetaDataNameMatchesFilter<T extends Identifiable> extends MetaDataN
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         MetaDataNameMatchesFilter that = (MetaDataNameMatchesFilter) o;
 
-        if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
+        if (regex != null ? !regex.equals(that.regex) : that.regex != null)
+            return false;
 
         return true;
     }

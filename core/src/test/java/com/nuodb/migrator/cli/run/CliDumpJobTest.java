@@ -58,28 +58,18 @@ public class CliDumpJobTest {
 
     @Test
     public void testParse() {
-        String[] arguments = {
-                "--source.driver=com.mysql.jdbc.Driver",
-                "--source.url=jdbc:mysql://localhost:3306/test",
-                "--source.username=root",
-                "--source.password=",
-                "--source.catalog=test",
+        String[] arguments = { "--source.driver=com.mysql.jdbc.Driver", "--source.url=jdbc:mysql://localhost:3306/test",
+                "--source.username=root", "--source.password=", "--source.catalog=test",
                 "--source.properties=profileSQL=true",
 
-                "--output.path=/tmp/dump.cat",
-                "--output.type=xml",
+                "--output.path=/tmp/dump.cat", "--output.type=xml",
 
-                "--output.csv.encoding=cp1251",
-                "--output.csv.delimiter=,",
-                "--output.csv.quoting=true",
+                "--output.csv.encoding=cp1251", "--output.csv.delimiter=,", "--output.csv.quoting=true",
                 "--output.csv.escape=|",
 
-                "--table.type=TABLE",
-                "--table.type=SYSTEM TABLE",
+                "--table.type=TABLE", "--table.type=SYSTEM TABLE",
 
-                "--query=SELECT id, name, definition FROM definitions",
-                "--time.zone=GMT"
-        };
+                "--query=SELECT id, name, definition FROM definitions", "--time.zone=GMT" };
         parser.parse(arguments, cliDumpJob);
 
         assertEquals(cliDumpJob.getJobSpec(), createDumpSpec());
@@ -113,7 +103,7 @@ public class CliDumpJobTest {
 
         dumpSpec.setOutputSpec(outputSpec);
         dumpSpec.setQuerySpecs(asList(new QuerySpec("SELECT id, name, definition FROM definitions")));
-        dumpSpec.setTableTypes(new String[]{"TABLE", "SYSTEM TABLE"});
+        dumpSpec.setTableTypes(new String[] { "TABLE", "SYSTEM TABLE" });
         dumpSpec.setTimeZone(TimeZone.getTimeZone("GMT"));
         return dumpSpec;
     }

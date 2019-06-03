@@ -37,10 +37,13 @@ public class ParserImpl implements Parser {
     protected transient final Logger logger = getLogger(getClass());
 
     /**
-     * Parse the withConnection.arguments according to the specified options and properties.
+     * Parse the withConnection.arguments according to the specified options and
+     * properties.
      *
-     * @param arguments to parse.
-     * @param option    sets the option to parse against.
+     * @param arguments
+     *            to parse.
+     * @param option
+     *            sets the option to parse against.
      * @return the option setValue object.
      */
     public OptionSet parse(String[] arguments, Option option) throws OptionException {

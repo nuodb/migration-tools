@@ -37,12 +37,12 @@ public class MySQLEnumTypeName extends JdbcEnumTypeName {
         char[] symbols = value.toCharArray();
         for (char symbol : symbols) {
             switch (symbol) {
-                case '\\':
-                    buffer.append('\\');
-                    break;
-                case '\'':
-                    buffer.append('\'');
-                    break;
+            case '\\':
+                buffer.append('\\');
+                break;
+            case '\'':
+                buffer.append('\'');
+                break;
             }
             buffer.append(symbol);
         }

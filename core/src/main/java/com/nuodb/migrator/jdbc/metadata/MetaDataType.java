@@ -60,7 +60,7 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
     public static final Map<String, MetaDataType> NAME_TYPE_MAP = getNameTypeMap();
 
-    public static final MetaDataType[] TYPES = NAME_TYPE_MAP.values().toArray(new MetaDataType[]{});
+    public static final MetaDataType[] TYPES = NAME_TYPE_MAP.values().toArray(new MetaDataType[] {});
 
     private static Map<String, MetaDataType> getNameTypeMap() {
         Map<String, MetaDataType> nameTypeMap = Maps.newLinkedHashMap();
@@ -98,10 +98,13 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         MetaDataType that = (MetaDataType) o;
-        if (!objectType.equals(that.objectType)) return false;
+        if (!objectType.equals(that.objectType))
+            return false;
         return true;
     }
 

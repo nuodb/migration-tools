@@ -50,12 +50,10 @@ public class SessionFactoryTest {
     public Object[][] createConnectionLessSessionData() throws Exception {
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setUrl("jdbc:mysql://localhost/test");
-        return new Object[][]{
-                {new MySQLDialect(MYSQL), connectionSpec}
-        };
+        return new Object[][] { { new MySQLDialect(MYSQL), connectionSpec } };
     }
 
-    @Test(dataProvider = "connectionLessSession", expectedExceptions = {SessionException.class})
+    @Test(dataProvider = "connectionLessSession", expectedExceptions = { SessionException.class })
     public void testConnectionLessSession(Dialect dialect, DriverConnectionSpec connectionSpec) throws SQLException {
         Session session = newSessionFactory(dialect, connectionSpec).openSession();
         assertEquals(session.getConnectionSpec(), connectionSpec);

@@ -49,15 +49,15 @@ public class JdbcDoubleValue extends JdbcTypeValueBase<Double> {
     }
 
     @Override
-    public Double getValue(ResultSet resultSet, int index,
-                           Field field, Map<String, Object> options) throws SQLException {
+    public Double getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         double doubleValue = resultSet.getDouble(index);
         return resultSet.wasNull() ? null : doubleValue;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Double value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Double value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setDouble(index, value);
     }
 }

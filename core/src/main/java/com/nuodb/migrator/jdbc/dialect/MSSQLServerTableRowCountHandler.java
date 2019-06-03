@@ -39,7 +39,7 @@ import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 public class MSSQLServerTableRowCountHandler extends SimpleTableRowCountHandler {
 
     public MSSQLServerTableRowCountHandler(Dialect dialect, Table table, Column column, String filter,
-                                           RowCountType rowCountType) {
+            RowCountType rowCountType) {
         super(dialect, table, column, filter, rowCountType);
     }
 

@@ -38,7 +38,7 @@ import java.util.Map;
 
 import static com.nuodb.migrator.utils.Collections.putAll;
 
-@SuppressWarnings({"unchecked", "ConstantConditions"})
+@SuppressWarnings({ "unchecked", "ConstantConditions" })
 public class XmlHandlerStrategy implements XmlContextStrategy {
 
     protected XmlHandlerRegistry registry;
@@ -76,8 +76,8 @@ public class XmlHandlerStrategy implements XmlContextStrategy {
     }
 
     protected XmlReadContext createReadContext(Map map) {
-        return map instanceof XmlReadContext ? (XmlReadContext) map :
-                new XmlReadStrategyContext(putAll(map, context), this);
+        return map instanceof XmlReadContext ? (XmlReadContext) map
+                : new XmlReadStrategyContext(putAll(map, context), this);
     }
 
     protected Value read(Type type, InputNode input, Value value, XmlReadContext context) throws Exception {
@@ -122,8 +122,8 @@ public class XmlHandlerStrategy implements XmlContextStrategy {
     }
 
     protected XmlWriteContext createWriteContext(Map map) {
-        return map instanceof XmlWriteContext ? (XmlWriteContext)map :
-                new XmlWriteStrategyContext(putAll(map, context), this);
+        return map instanceof XmlWriteContext ? (XmlWriteContext) map
+                : new XmlWriteStrategyContext(putAll(map, context), this);
     }
 
     protected boolean write(Type type, Object source, OutputNode output, XmlWriteContext context) throws Exception {
@@ -135,8 +135,8 @@ public class XmlHandlerStrategy implements XmlContextStrategy {
         return writer != null && writer.write(source, type.getType(), output, context);
     }
 
-    protected XmlWriteHandler lookupWriter(Object source, Class type, OutputNode output,
-                                           XmlWriteContext context) throws Exception {
+    protected XmlWriteHandler lookupWriter(Object source, Class type, OutputNode output, XmlWriteContext context)
+            throws Exception {
         return registry.lookupWriter(source, type, output, context);
     }
 

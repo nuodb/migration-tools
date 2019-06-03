@@ -86,14 +86,19 @@ public class LoadTable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         LoadTable loadTable = (LoadTable) o;
 
-        if (query != null ? !query.equals(loadTable.query) : loadTable.query != null) return false;
-        if (rowSet != null ? !rowSet.equals(loadTable.rowSet) : loadTable.rowSet != null) return false;
-        if (table != null ? !table.equals(loadTable.table) : loadTable.table != null) return false;
+        if (query != null ? !query.equals(loadTable.query) : loadTable.query != null)
+            return false;
+        if (rowSet != null ? !rowSet.equals(loadTable.rowSet) : loadTable.rowSet != null)
+            return false;
+        if (table != null ? !table.equals(loadTable.table) : loadTable.table != null)
+            return false;
 
         return true;
     }

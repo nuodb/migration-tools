@@ -31,7 +31,8 @@ import com.nuodb.migrator.utils.DateTime.DayOverflow;
 import com.nuodb.migrator.utils.DateTime.Unit;
 
 /**
- * Helper class for adding intervals of time. The mental model of this class is similar to that of a car's odometer.
+ * Helper class for adding intervals of time. The mental model of this class is
+ * similar to that of a car's odometer.
  */
 final class DateTimeInterval {
 
@@ -61,13 +62,13 @@ final class DateTimeInterval {
 
     // PRIVATE
 
-    //the base date to which the interval is calculated
+    // the base date to which the interval is calculated
     private final DateTime fFrom;
 
     private boolean fIsPlus;
     private DateTime.DayOverflow fDayOverflow;
 
-    //the various increments
+    // the various increments
     private int fYearIncr;
     private int fMonthIncr;
     private int fDayIncr;
@@ -76,7 +77,8 @@ final class DateTimeInterval {
     private int fSecondIncr;
     private int fNanosecondIncr;
 
-    //work area for the final result - starts off with values from base date fFrom
+    // work area for the final result - starts off with values from base date
+    // fFrom
     private Integer fYear;
     private Integer fMonth;
     private Integer fDay;
@@ -96,11 +98,11 @@ final class DateTimeInterval {
         boolean success = false;
         if (fFrom.unitsAllPresent(Unit.YEAR, Unit.MONTH, Unit.DAY, Unit.HOUR, Unit.MINUTE, Unit.SECOND)) {
             success = true;
-        } else if (fFrom.unitsAllPresent(Unit.YEAR, Unit.MONTH, Unit.DAY) && fFrom.unitsAllAbsent(Unit.HOUR,
-                Unit.MINUTE, Unit.SECOND)) {
+        } else if (fFrom.unitsAllPresent(Unit.YEAR, Unit.MONTH, Unit.DAY)
+                && fFrom.unitsAllAbsent(Unit.HOUR, Unit.MINUTE, Unit.SECOND)) {
             success = true;
-        } else if (fFrom.unitsAllAbsent(Unit.YEAR, Unit.MONTH, Unit.DAY) && fFrom.unitsAllPresent(Unit.HOUR,
-                Unit.MINUTE, Unit.SECOND)) {
+        } else if (fFrom.unitsAllAbsent(Unit.YEAR, Unit.MONTH, Unit.DAY)
+                && fFrom.unitsAllPresent(Unit.HOUR, Unit.MINUTE, Unit.SECOND)) {
             success = true;
         } else {
             success = false;
@@ -112,7 +114,7 @@ final class DateTimeInterval {
     }
 
     private DateTime plusOrMinus(boolean aIsPlus, Integer aYear, Integer aMonth, Integer aDay, Integer aHour,
-                                 Integer aMinute, Integer aSecond, Integer aNanosecond) {
+            Integer aMinute, Integer aSecond, Integer aNanosecond) {
         fIsPlus = aIsPlus;
         fYearIncr = aYear;
         fMonthIncr = aMonth;
@@ -161,7 +163,7 @@ final class DateTimeInterval {
         } else {
             fYear = fFrom.getYear() - fYearIncr;
         }
-        //the DateTime ctor will check the range of the year
+        // the DateTime ctor will check the range of the year
     }
 
     private void changeMonth() {
@@ -205,9 +207,10 @@ final class DateTimeInterval {
     }
 
     /**
-     * Nanos are different from other items. They don't cycle one step at a time. They are just added. If they
-     * under/over flow, then extra math is performed. They don't over/under by more than 1 second, since the size of the
-     * increment is limited.
+     * Nanos are different from other items. They don't cycle one step at a
+     * time. They are just added. If they under/over flow, then extra math is
+     * performed. They don't over/under by more than 1 second, since the size of
+     * the increment is limited.
      */
     private void changeNanosecond() {
         if (fIsPlus) {
@@ -325,10 +328,9 @@ final class DateTimeInterval {
         int daysInMonth = numDaysInMonth();
         if (fDay > daysInMonth) {
             if (DayOverflow.Abort == fDayOverflow) {
-                throw new RuntimeException(
-                        "Day Overflow: Year:" + fYear + " Month:" + fMonth + " has " + daysInMonth + " days, but day has value:" + fDay +
-                                " To avoid these exceptions, please specify a different DayOverflow policy."
-                );
+                throw new RuntimeException("Day Overflow: Year:" + fYear + " Month:" + fMonth + " has " + daysInMonth
+                        + " days, but day has value:" + fDay
+                        + " To avoid these exceptions, please specify a different DayOverflow policy.");
             } else if (DayOverflow.FirstDay == fDayOverflow) {
                 fDay = 1;
                 stepMonth();

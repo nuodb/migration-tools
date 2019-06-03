@@ -116,8 +116,7 @@ public class OracleLobTypeSupport implements JdbcLobTypeSupport {
     private <T> T createLob(Connection connection, Class<?> lobClass) {
         initLobClasses(connection);
         try {
-            Method createTemporary = lobClass.getMethod(
-                    "createTemporary", Connection.class, boolean.class, int.class);
+            Method createTemporary = lobClass.getMethod("createTemporary", Connection.class, boolean.class, int.class);
             Object lob = createTemporary.invoke(null, connection, isCache(), durationSessionConstants.get(lobClass));
             Method open = lobClass.getMethod("open", int.class);
             return (T) open.invoke(lob, modeReadWriteConstants.get(lobClass));
@@ -182,20 +181,14 @@ public class OracleLobTypeSupport implements JdbcLobTypeSupport {
         if (!initLobClasses) {
             try {
                 blobClass = connection.getClass().getClassLoader().loadClass(BLOB_CLASS_NAME);
-                durationSessionConstants.put(
-                        blobClass, blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null));
-                modeReadWriteConstants.put(
-                        blobClass, blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null));
-                modeReadOnlyConstants.put(
-                        blobClass, blobClass.getField(MODE_READONLY_FIELD_NAME).getInt(null));
+                durationSessionConstants.put(blobClass, blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null));
+                modeReadWriteConstants.put(blobClass, blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null));
+                modeReadOnlyConstants.put(blobClass, blobClass.getField(MODE_READONLY_FIELD_NAME).getInt(null));
 
                 clobClass = connection.getClass().getClassLoader().loadClass(CLOB_CLASS_NAME);
-                durationSessionConstants.put(
-                        clobClass, clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null));
-                modeReadWriteConstants.put(
-                        clobClass, clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null));
-                modeReadOnlyConstants.put(
-                        clobClass, clobClass.getField(MODE_READONLY_FIELD_NAME).getInt(null));
+                durationSessionConstants.put(clobClass, clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null));
+                modeReadWriteConstants.put(clobClass, clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null));
+                modeReadOnlyConstants.put(clobClass, clobClass.getField(MODE_READONLY_FIELD_NAME).getInt(null));
             } catch (ClassNotFoundException exception) {
                 throw new JdbcTypeException(exception);
             } catch (NoSuchFieldException exception) {

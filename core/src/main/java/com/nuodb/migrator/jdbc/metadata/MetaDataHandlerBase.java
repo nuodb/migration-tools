@@ -63,12 +63,15 @@ public class MetaDataHandlerBase implements MetaDataHandler {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         MetaDataHandlerBase that = (MetaDataHandlerBase) o;
 
-        if (!objectType.equals(that.objectType)) return false;
+        if (!objectType.equals(that.objectType))
+            return false;
 
         return true;
     }

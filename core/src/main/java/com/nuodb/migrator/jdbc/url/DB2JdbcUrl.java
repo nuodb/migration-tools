@@ -53,7 +53,7 @@ public class DB2JdbcUrl extends JdbcUrlBase {
 
     @Override
     protected void parseSubName(String subName) {
-        if (!isEmpty(substringAfterLast(subName, ":")) && substringAfterLast(subName, ":").indexOf("/") < 0){
+        if (!isEmpty(substringAfterLast(subName, ":")) && substringAfterLast(subName, ":").indexOf("/") < 0) {
             parseParameters(getParameters(), substringAfterLast(subName, ":"), ";");
         }
     }

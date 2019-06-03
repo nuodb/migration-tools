@@ -84,10 +84,8 @@ public class SimpleRowSetMapper implements RowSetMapper {
         }
         int actual = min(qualifiers.size(), maximum);
         qualifiers = qualifiers.subList(qualifiers.size() - actual, qualifiers.size());
-        final String source = getQualifiedName(null,
-                rowSet.getCatalog(), rowSet.getSchema(), rowSet.getTable(), null);
-        final String target = getQualifiedName(null,
-                qualifiers, rowSet.getTable(), null);
+        final String source = getQualifiedName(null, rowSet.getCatalog(), rowSet.getSchema(), rowSet.getTable(), null);
+        final String target = getQualifiedName(null, qualifiers, rowSet.getTable(), null);
         if (logger.isDebugEnabled()) {
             logger.debug(format("Mapping %s row set to %s table", source, target));
         }

@@ -96,12 +96,12 @@ public class CsvOutput extends OutputBase implements CsvFormat {
             for (int i = 0; i < values.length; i++) {
                 String value = null;
                 switch (get(columns, i).getValueType()) {
-                    case BINARY:
-                        value = BASE64.encode(values[i].asBytes());
-                        break;
-                    case STRING:
-                        value = values[i].asString();
-                        break;
+                case BINARY:
+                    value = BASE64.encode(values[i].asBytes());
+                    break;
+                case STRING:
+                    value = values[i].asString();
+                    break;
                 }
                 if (value != null && value.length() == 0) {
                     value = doubleQuote;

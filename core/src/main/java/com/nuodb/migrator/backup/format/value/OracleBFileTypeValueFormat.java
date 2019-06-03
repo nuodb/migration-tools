@@ -86,7 +86,8 @@ public class OracleBFileTypeValueFormat extends LazyInitValueFormatBase<Object> 
     @Override
     protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options)
             throws Throwable {
-        access.setValue(newInstanceNoWrap(bfileClass, new Object[]{getConnection(access), value.asBytes()}), options);
+        access.setValue(newInstanceNoWrap(bfileClass, new Object[] { getConnection(access), value.asBytes() }),
+                options);
     }
 
     @Override

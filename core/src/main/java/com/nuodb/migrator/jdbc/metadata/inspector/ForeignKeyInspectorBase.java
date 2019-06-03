@@ -37,8 +37,8 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 /**
  * @author Sergey Bushik
  */
-public abstract class ForeignKeyInspectorBase
-        extends TableInspectorBase<Table, TableInspectionScope> implements ForeignKeyInspector {
+public abstract class ForeignKeyInspectorBase extends TableInspectorBase<Table, TableInspectionScope>
+        implements ForeignKeyInspector {
 
     private DeferrabilityMap deferrabilityMap;
     private ReferenceActionMap referenceActionMap;
@@ -48,14 +48,14 @@ public abstract class ForeignKeyInspectorBase
     }
 
     protected Deferrability getDeferrability(int value) {
-        DeferrabilityMap deferrabilityMap = getDeferrabilityMap() != null ?
-                getDeferrabilityMap() : DeferrabilityMap.getInstance();
+        DeferrabilityMap deferrabilityMap = getDeferrabilityMap() != null ? getDeferrabilityMap()
+                : DeferrabilityMap.getInstance();
         return deferrabilityMap.get(value);
     }
 
     protected ReferenceAction getReferentialAction(int value) {
-        ReferenceActionMap referenceActionMap = getReferenceActionMap() != null ?
-                getReferenceActionMap() : ReferenceActionMap.getInstance();
+        ReferenceActionMap referenceActionMap = getReferenceActionMap() != null ? getReferenceActionMap()
+                : ReferenceActionMap.getInstance();
         return referenceActionMap.get(value);
     }
 

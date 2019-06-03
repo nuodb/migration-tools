@@ -45,7 +45,6 @@ import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.testng.Assert.assertEquals;
 
-
 /**
  * @author Sergey Bushik
  */
@@ -78,15 +77,11 @@ public class XmlBackupOpsTest {
         rowSet.addChunk(chunk);
         expected.addRowSet(rowSet);
 
-        String input =
-                "<?xml version=\"1.0\"?>\n" +
-                "<backup version=\"" + Migrator.getVersion() + "\" format=\"csv\">\n" +
-                "  <database/>\n" +
-                "  <row-set type=\"table\" name=\"test.t1\" row-count=\"1\" catalog=\"test\" table=\"t1\">\n" +
-                "    <column name=\"f1\" value-type=\"string\"/>\n" +
-                "    <chunk name=\"test.t1.csv\" row-count=\"1\"/>\n" +
-                "  </row-set>\n" +
-                "</backup>";
+        String input = "<?xml version=\"1.0\"?>\n" + "<backup version=\"" + Migrator.getVersion()
+                + "\" format=\"csv\">\n" + "  <database/>\n"
+                + "  <row-set type=\"table\" name=\"test.t1\" row-count=\"1\" catalog=\"test\" table=\"t1\">\n"
+                + "    <column name=\"f1\" value-type=\"string\"/>\n"
+                + "    <chunk name=\"test.t1.csv\" row-count=\"1\"/>\n" + "  </row-set>\n" + "</backup>";
         Backup actual = xmlBackupOps.read(toInputStream(input));
         assertEquals(actual, expected);
     }
@@ -101,8 +96,7 @@ public class XmlBackupOpsTest {
         Schema schema = database.addCatalog("test").addSchema(EMPTY);
         Table foreignTable = schema.addTable("t1");
         Column foreignColumn = foreignTable.addColumn("t1_f1");
-        foreignColumn.setJdbcType(
-                new JdbcType(new JdbcTypeDesc(4, "INT"), newOptions(10, 10, 0)));
+        foreignColumn.setJdbcType(new JdbcType(new JdbcTypeDesc(4, "INT"), newOptions(10, 10, 0)));
         ForeignKey foreignKey = new ForeignKey("fk_1");
         Table primaryTable = schema.addTable("t2");
         Column primaryColumn = primaryTable.addColumn("t2_f1");
@@ -111,26 +105,17 @@ public class XmlBackupOpsTest {
         expected.setFormat("csv");
         expected.setDatabase(database);
 
-        String input =
-                "<?xml version=\"1.0\"?>\n" +
-                "<backup version=\"" + Migrator.getVersion() + "\" format=\"csv\">\n" +
-                "  <database>\n" +
-                "    <catalog name=\"test\">\n" +
-                "      <schema>\n" +
-                "        <table name=\"t1\" type=\"TABLE\">\n" +
-                "          <column name=\"t1_f1\">\n" +
-                "            <type code=\"4\" name=\"INT\" size=\"10\" precision=\"10\" scale=\"0\"/>\n" +
-                "          </column>\n" +
-                "          <foreign-key name=\"fk_1\" primary-catalog=\"test\" primary-table=\"t2\" " +
-                "foreign-catalog=\"test\" foreign-table=\"t1\" update-action=\"no_action\" " +
-                "delete-action=\"no_action\" deferrability=\"not_deferrable\">\n" +
-                "            <reference primary-column=\"t2_f1\" foreign-column=\"t1_f1\"/>\n" +
-                "          </foreign-key>\n" +
-                "        </table>\n" +
-                "      </schema>\n" +
-                "    </catalog>\n" +
-                "  </database>\n" +
-                "</backup>";
+        String input = "<?xml version=\"1.0\"?>\n" + "<backup version=\"" + Migrator.getVersion()
+                + "\" format=\"csv\">\n" + "  <database>\n" + "    <catalog name=\"test\">\n" + "      <schema>\n"
+                + "        <table name=\"t1\" type=\"TABLE\">\n" + "          <column name=\"t1_f1\">\n"
+                + "            <type code=\"4\" name=\"INT\" size=\"10\" precision=\"10\" scale=\"0\"/>\n"
+                + "          </column>\n"
+                + "          <foreign-key name=\"fk_1\" primary-catalog=\"test\" primary-table=\"t2\" "
+                + "foreign-catalog=\"test\" foreign-table=\"t1\" update-action=\"no_action\" "
+                + "delete-action=\"no_action\" deferrability=\"not_deferrable\">\n"
+                + "            <reference primary-column=\"t2_f1\" foreign-column=\"t1_f1\"/>\n"
+                + "          </foreign-key>\n" + "        </table>\n" + "      </schema>\n" + "    </catalog>\n"
+                + "  </database>\n" + "</backup>";
         Backup actual = xmlBackupOps.read(toInputStream(input));
         assertEquals(actual, expected);
         assertEquals(actual.getDatabase().getSchemas(), expected.getDatabase().getSchemas());

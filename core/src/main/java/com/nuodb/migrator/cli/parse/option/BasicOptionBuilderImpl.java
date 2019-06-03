@@ -40,8 +40,8 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class BasicOptionBuilderImpl<O extends BasicOption>
-        extends AugmentOptionBuilderBase<O> implements BasicOptionBuilder<O> {
+public class BasicOptionBuilderImpl<O extends BasicOption> extends AugmentOptionBuilderBase<O>
+        implements BasicOptionBuilder<O> {
 
     private Map<String, OptionFormat> aliases = Maps.newHashMap();
 

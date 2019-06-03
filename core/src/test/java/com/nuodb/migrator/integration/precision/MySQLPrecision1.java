@@ -35,60 +35,58 @@ package com.nuodb.migrator.integration.precision;
  */
 
 public class MySQLPrecision1 {
-	int tinyInt;
-	int smallInt;
-	long mediumInt;
-	long intType;
-	long bigInt;
+    int tinyInt;
+    int smallInt;
+    long mediumInt;
+    long intType;
+    long bigInt;
 
-	public MySQLPrecision1(int tinyInt, int smallInt, long mediumInt,
-			long intType, long bigInt) {
-		this.tinyInt = tinyInt;
-		this.smallInt = smallInt;
-		this.mediumInt = mediumInt;
-		this.intType = intType;
-		this.bigInt = bigInt;
-	}
+    public MySQLPrecision1(int tinyInt, int smallInt, long mediumInt, long intType, long bigInt) {
+        this.tinyInt = tinyInt;
+        this.smallInt = smallInt;
+        this.mediumInt = mediumInt;
+        this.intType = intType;
+        this.bigInt = bigInt;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (bigInt ^ (bigInt >>> 32));
-		result = prime * result + (int) (intType ^ (intType >>> 32));
-		result = prime * result + (int) (mediumInt ^ (mediumInt >>> 32));
-		result = prime * result + smallInt;
-		result = prime * result + tinyInt;
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (bigInt ^ (bigInt >>> 32));
+        result = prime * result + (int) (intType ^ (intType >>> 32));
+        result = prime * result + (int) (mediumInt ^ (mediumInt >>> 32));
+        result = prime * result + smallInt;
+        result = prime * result + tinyInt;
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		MySQLPrecision1 other = (MySQLPrecision1) obj;
-		if (bigInt != other.bigInt)
-			return false;
-		if (intType != other.intType)
-			return false;
-		if (mediumInt != other.mediumInt)
-			return false;
-		if (smallInt != other.smallInt)
-			return false;
-		if (tinyInt != other.tinyInt)
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MySQLPrecision1 other = (MySQLPrecision1) obj;
+        if (bigInt != other.bigInt)
+            return false;
+        if (intType != other.intType)
+            return false;
+        if (mediumInt != other.mediumInt)
+            return false;
+        if (smallInt != other.smallInt)
+            return false;
+        if (tinyInt != other.tinyInt)
+            return false;
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return "MySQLPrecision1 [tinyInt=" + tinyInt + ", smallInt=" + smallInt
-				+ ", mediumInt=" + mediumInt + ", intType=" + intType
-				+ ", bigInt=" + bigInt + "]";
-	}
+    @Override
+    public String toString() {
+        return "MySQLPrecision1 [tinyInt=" + tinyInt + ", smallInt=" + smallInt + ", mediumInt=" + mediumInt
+                + ", intType=" + intType + ", bigInt=" + bigInt + "]";
+    }
 
 }

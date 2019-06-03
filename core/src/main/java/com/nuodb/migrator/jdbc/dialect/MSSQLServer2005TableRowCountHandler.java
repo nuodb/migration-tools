@@ -39,13 +39,14 @@ import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 public class MSSQLServer2005TableRowCountHandler extends MSSQLServerTableRowCountHandler {
 
     public MSSQLServer2005TableRowCountHandler(Dialect dialect, Table table, Column column, String filter,
-                                               RowCountType rowCountType) {
+            RowCountType rowCountType) {
         super(dialect, table, column, filter, rowCountType);
     }
 
     /**
-     * Row counts using SYS.DM_DB_PARTITION_STATS <a href="http://www.sqlservercentral
-     * .com/articles/T-SQL/67624/">dynamic management view</a>
+     * Row counts using SYS.DM_DB_PARTITION_STATS
+     * <a href="http://www.sqlservercentral .com/articles/T-SQL/67624/">dynamic
+     * management view</a>
      *
      * @return query used to estimate row count number.
      */

@@ -49,8 +49,7 @@ public class WriteQuery {
         this.rowSet = rowSet;
     }
 
-    public WriteQuery(QuerySplitter querySplitter,
-                      Collection<? extends Field> columns, RowSet rowSet) {
+    public WriteQuery(QuerySplitter querySplitter, Collection<? extends Field> columns, RowSet rowSet) {
         this.querySplitter = querySplitter;
         this.columns = columns;
         this.rowSet = rowSet;

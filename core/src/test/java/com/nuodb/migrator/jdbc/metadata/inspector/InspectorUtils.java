@@ -49,8 +49,8 @@ public class InspectorUtils {
         return createInspector(objectType, newArrayList(objects));
     }
 
-    public static Inspector createInspector(final MetaDataType objectType,
-                                            final Collection<? extends MetaData> objects) throws Exception {
+    public static Inspector createInspector(final MetaDataType objectType, final Collection<? extends MetaData> objects)
+            throws Exception {
         final Inspector inspector = mock(Inspector.class);
         willAnswer(new Answer<Object>() {
             @Override

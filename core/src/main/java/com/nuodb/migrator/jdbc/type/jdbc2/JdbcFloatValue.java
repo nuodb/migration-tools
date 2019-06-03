@@ -62,15 +62,15 @@ public class JdbcFloatValue extends JdbcTypeValueBase<Float> {
     }
 
     @Override
-    public Float getValue(ResultSet resultSet, int index,
-                          Field field, Map<String, Object> options) throws SQLException {
+    public Float getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         float floatValue = resultSet.getFloat(index);
         return resultSet.wasNull() ? null : floatValue;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Float value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Float value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setFloat(index, value);
     }
 }

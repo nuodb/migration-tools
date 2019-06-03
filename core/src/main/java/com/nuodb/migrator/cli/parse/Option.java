@@ -26,12 +26,14 @@ import java.util.ListIterator;
 import java.util.Set;
 
 /**
- * The super type of all options representing a particular element of the executable line interface.
+ * The super type of all options representing a particular element of the
+ * executable line interface.
  */
 public interface Option {
 
     /**
-     * Returns the id of the option.  This can be used in a loop and switch construct:
+     * Returns the id of the option. This can be used in a loop and switch
+     * construct:
      * <p/>
      * <code> for(Option option : commandLine.getOptions()){ switch(option.getId()){ case OPTION: ... } } </code>
      * <p/>
@@ -44,7 +46,8 @@ public interface Option {
     /**
      * Changes the id of the option.
      *
-     * @param id new identifiers of the option.
+     * @param id
+     *            new identifiers of the option.
      */
     void setId(int id);
 
@@ -58,12 +61,14 @@ public interface Option {
     /**
      * Changes the name of the option.
      *
-     * @param name of the option.
+     * @param name
+     *            of the option.
      */
     void setName(String name);
 
     /**
-     * Returns a description of the option. This string is used to build help messages as in the help formatter.
+     * Returns a description of the option. This string is used to build help
+     * messages as in the help formatter.
      *
      * @return a description of the option.
      */
@@ -72,7 +77,8 @@ public interface Option {
     /**
      * Changes the description of the option.
      *
-     * @param description of the option.
+     * @param description
+     *            of the option.
      */
     void setDescription(String description);
 
@@ -86,7 +92,8 @@ public interface Option {
     /**
      * Changes the indication flag of whether option is required or not.
      *
-     * @param required the required value for the option.
+     * @param required
+     *            the required value for the option.
      */
     void setRequired(boolean required);
 
@@ -100,28 +107,32 @@ public interface Option {
     /**
      * Changes option format to the desired.
      *
-     * @param optionFormat to be used.
+     * @param optionFormat
+     *            to be used.
      */
     void setOptionFormat(OptionFormat optionFormat);
 
     /**
      * Associates option validator with this option.
      *
-     * @param optionValidator to be associated.
+     * @param optionValidator
+     *            to be associated.
      */
     void addOptionValidator(OptionValidator optionValidator);
 
     /**
      * Associates option processor with this option.
      *
-     * @param optionProcessor to be associated.
+     * @param optionProcessor
+     *            to be associated.
      */
     void addOptionProcessor(OptionProcessor optionProcessor);
 
     /**
      * Removes previously associated option processor with this option.
      *
-     * @param optionProcessor to be associated.
+     * @param optionProcessor
+     *            to be associated.
      */
     void removeOptionProcessor(OptionProcessor optionProcessor);
 
@@ -133,8 +144,9 @@ public interface Option {
     Collection<OptionProcessor> getOptionProcessors();
 
     /**
-     * Identifies the argument prefixes that should be considered options. This is used to identify whether a given
-     * string looks like an option or an argument value. Typically an option would return the value [--,-] while
+     * Identifies the argument prefixes that should be considered options. This
+     * is used to identify whether a given string looks like an option or an
+     * argument value. Typically an option would return the value [--,-] while
      * switches might offer [-,+].
      * <p/>
      * The returned Set must not be null.
@@ -148,13 +160,15 @@ public interface Option {
     /**
      * Adds trigger to this option.
      *
-     * @param trigger to be added to the option.
+     * @param trigger
+     *            to be added to the option.
      */
     void addTrigger(Trigger trigger, int priority);
 
     /**
-     * Identifies the argument triggers that should triggers this option. This is used to decide which of many options
-     * should be tried when processing a given argument string.
+     * Identifies the argument triggers that should triggers this option. This
+     * is used to decide which of many options should be tried when processing a
+     * given argument string.
      * <p/>
      * The returned setValue must not be null.
      *
@@ -165,7 +179,8 @@ public interface Option {
     /**
      * Recursively searches for an option with the supplied trigger.
      *
-     * @param trigger the trigger to search for.
+     * @param trigger
+     *            the trigger to search for.
      * @return the matching option or null.
      */
     Option findOption(String trigger);
@@ -173,7 +188,8 @@ public interface Option {
     /**
      * Recursively searches for an option with the supplied trigger.
      *
-     * @param trigger the trigger to search for.
+     * @param trigger
+     *            the trigger to search for.
      * @return the matching option or null.
      */
     Option findOption(Trigger trigger);
@@ -181,84 +197,107 @@ public interface Option {
     /**
      * Adds defaults to a CommandLine.
      * <p/>
-     * Any defaults for this option are applied as well as the defaults for any contained options
+     * Any defaults for this option are applied as well as the defaults for any
+     * contained options
      *
-     * @param commandLine executable line object to store defaults in
+     * @param commandLine
+     *            executable line object to store defaults in
      */
     void defaults(CommandLine commandLine);
 
     /**
      * Checks if the argument is command line command.
      *
-     * @param argument to be checked
+     * @param argument
+     *            to be checked
      * @return true is this argument is a command
      */
     boolean isCommand(String argument);
 
     /**
-     * Indicates whether this Option will be able to withConnection the particular argument.
+     * Indicates whether this Option will be able to withConnection the
+     * particular argument.
      *
-     * @param commandLine executable line to check
-     * @param argument    the argument to be tested
+     * @param commandLine
+     *            executable line to check
+     * @param argument
+     *            the argument to be tested
      * @return true if the argument can be processed by this Option
      */
     boolean canProcess(CommandLine commandLine, String argument);
 
     /**
-     * Indicates whether this Option will be able to withConnection the particular argument. The list iterator must be
-     * restored to the initial state before returning the boolean.
+     * Indicates whether this Option will be able to withConnection the
+     * particular argument. The list iterator must be restored to the initial
+     * state before returning the boolean.
      *
-     * @param commandLine the command line to check
-     * @param arguments   the list iterator over string arguments
+     * @param commandLine
+     *            the command line to check
+     * @param arguments
+     *            the list iterator over string arguments
      * @return true if the argument can be processed by this Option
      * @see #canProcess(CommandLine, String)
      */
     boolean canProcess(CommandLine commandLine, ListIterator<String> arguments);
 
-
     /**
      * Pre processes command line arguments.
      *
-     * @param commandLine the command line to store any pre processed results in.
-     * @param arguments   the argument to be pre processed.
+     * @param commandLine
+     *            the command line to store any pre processed results in.
+     * @param arguments
+     *            the argument to be pre processed.
      */
     void preProcess(CommandLine commandLine, ListIterator<String> arguments);
 
     /**
      * Processes string arguments into a executable line.
      * <p/>
-     * The iterator will initially point at the first argument to be processed and at the end of the method should point
-     * to the first argument not processed. This method must withConnection at least one argument from the list
-     * iterator.
+     * The iterator will initially point at the first argument to be processed
+     * and at the end of the method should point to the first argument not
+     * processed. This method must withConnection at least one argument from the
+     * list iterator.
      *
-     * @param commandLine the executable line object to store results in
-     * @param arguments   the arguments to withConnection.
+     * @param commandLine
+     *            the executable line object to store results in
+     * @param arguments
+     *            the arguments to withConnection.
      */
     void process(CommandLine commandLine, ListIterator<String> arguments);
 
     /**
-     * Performs any required post processing, such as validation & items conversion.
+     * Performs any required post processing, such as validation & items
+     * conversion.
      *
-     * @param commandLine executable line to check.
-     * @throws OptionException if the executable line is not valid.
+     * @param commandLine
+     *            executable line to check.
+     * @throws OptionException
+     *             if the executable line is not valid.
      */
     void postProcess(CommandLine commandLine);
 
     /**
      * Appends help to the specified buffer
      *
-     * @param buffer     the buffer to append to
-     * @param hints      a setValue of withConnection hints
-     * @param comparator a comparator used to sort the options
+     * @param buffer
+     *            the buffer to append to
+     * @param hints
+     *            a setValue of withConnection hints
+     * @param comparator
+     *            a comparator used to sort the options
      */
     void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator);
 
     /**
-     * Builds up a list of help lines instances to be presented by HelpFormatter.
+     * Builds up a list of help lines instances to be presented by
+     * HelpFormatter.
      *
-     * @param indent     the initial indent depth
-     * @param hints      the help settings that should be applied
-     * @param comparator a comparator used to sort options when applicable
+     * @param indent
+     *            the initial indent depth
+     * @param hints
+     *            the help settings that should be applied
+     * @param comparator
+     *            a comparator used to sort options when applicable
      * @return a list of help lines objects
      */
     List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator);

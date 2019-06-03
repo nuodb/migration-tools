@@ -42,8 +42,7 @@ public class ConnectionGroupInfo {
     private String transactionIsolationOption;
 
     public ConnectionGroupInfo(String driverOption, String urlOption, String usernameOption, String passwordOption,
-                               String catalogOption, String schemaOption, String propertiesOption,
-                               String transactionIsolationOption) {
+            String catalogOption, String schemaOption, String propertiesOption, String transactionIsolationOption) {
         this.driverOption = driverOption;
         this.urlOption = urlOption;
         this.usernameOption = usernameOption;

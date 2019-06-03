@@ -39,26 +39,20 @@ import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 @Test(groups = { "mysqlintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
 public class DataTypesTest extends BaseDataTypeTest {
 
-	@DataProvider(name = "dataTypeMysql")
-	public Object[][] createDataTypeData() {
-		return new Object[][] { { "testdata_smallint" }, { "testdata_bigint" },
-				{ "testdata_tinyint" }, { "testdata_smallint" },
-				{ "testdata_integer" }, { "testdata_mediumint" },
-				{ "testdata_bigint" }, { "testdata_char" },
-				{ "testdata_varchar" }, { "testdata_varchar_max" },
-				{ "testdata_tinytext" }, { "testdata_text" },
-				{ "testdata_mediumtext" }, { "testdata_longtext" },
-				{ "testdata_decimal" }, { "testdata_float" },
-				{ "testdata_double" }, { "testdata_tinyblob" },
-				{ "testdata_blob" }, { "testdata_mediumblob" },
-				{ "testdata_longblob" }, { "testdata_enum" },
-				{ "testdata_set" }, { "testdata_year" },
-				{ "testdata_datetime" }, { "testdata_date" },
-				{ "testdata_timestamp" }, { "testdata_time" } };
-	}
+    @DataProvider(name = "dataTypeMysql")
+    public Object[][] createDataTypeData() {
+        return new Object[][] { { "testdata_smallint" }, { "testdata_bigint" }, { "testdata_tinyint" },
+                { "testdata_smallint" }, { "testdata_integer" }, { "testdata_mediumint" }, { "testdata_bigint" },
+                { "testdata_char" }, { "testdata_varchar" }, { "testdata_varchar_max" }, { "testdata_tinytext" },
+                { "testdata_text" }, { "testdata_mediumtext" }, { "testdata_longtext" }, { "testdata_decimal" },
+                { "testdata_float" }, { "testdata_double" }, { "testdata_tinyblob" }, { "testdata_blob" },
+                { "testdata_mediumblob" }, { "testdata_longblob" }, { "testdata_enum" }, { "testdata_set" },
+                { "testdata_year" }, { "testdata_datetime" }, { "testdata_date" }, { "testdata_timestamp" },
+                { "testdata_time" } };
+    }
 
-	@Test(dataProvider = "dataTypeMysql")
-	public void testDataType(String tableName) throws Exception {
-		super.testDataType(tableName);
-	}
+    @Test(dataProvider = "dataTypeMysql")
+    public void testDataType(String tableName) throws Exception {
+        super.testDataType(tableName);
+    }
 }

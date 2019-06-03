@@ -46,8 +46,8 @@ public class JdbcTimestampValue extends JdbcDateValueBase<Timestamp> {
     }
 
     @Override
-    public Timestamp getValue(ResultSet resultSet, int index,
-                              Field field, Map<String, Object> options) throws SQLException {
+    public Timestamp getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         Calendar calendar = getCalendar(options);
         if (calendar != null) {
             return resultSet.getTimestamp(index, calendar);
@@ -57,8 +57,8 @@ public class JdbcTimestampValue extends JdbcDateValueBase<Timestamp> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Timestamp value,
-                                    int index, Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Timestamp value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         Calendar calendar = getCalendar(options);
         if (calendar == null) {
             statement.setTimestamp(index, value);

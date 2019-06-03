@@ -50,12 +50,15 @@ public class BasicQuery extends QueryBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BasicQuery)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof BasicQuery))
+            return false;
 
         BasicQuery that = (BasicQuery) o;
 
-        if (query != null ? !query.equals(that.query) : that.query != null) return false;
+        if (query != null ? !query.equals(that.query) : that.query != null)
+            return false;
 
         return true;
     }

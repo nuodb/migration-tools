@@ -99,7 +99,7 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
         while (iterator1.hasNext() && iterator2.hasNext()) {
             Object o1 = iterator1.next();
             Object o2 = iterator2.next();
-            if (!(o1==null ? o2==null : o1.equals(o2)))
+            if (!(o1 == null ? o2 == null : o1.equals(o2)))
                 return false;
         }
         return !(iterator1.hasNext() || iterator2.hasNext());
@@ -175,14 +175,19 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             SimpleEntry item = (SimpleEntry) o;
 
-            if (id != item.id) return false;
-            if (priority != item.priority) return false;
-            if (value != null ? !value.equals(item.value) : item.value != null) return false;
+            if (id != item.id)
+                return false;
+            if (priority != item.priority)
+                return false;
+            if (value != null ? !value.equals(item.value) : item.value != null)
+                return false;
             return true;
         }
 
@@ -192,5 +197,3 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
         }
     }
 }
-
-

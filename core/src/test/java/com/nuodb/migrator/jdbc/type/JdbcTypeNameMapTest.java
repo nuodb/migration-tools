@@ -60,23 +60,20 @@ public class JdbcTypeNameMapTest {
 
     @DataProvider(name = "getTypeName")
     public Object[][] createGetTypeNameData() {
-        return new Object[][]{
-                {JdbcDoubleValue.INSTANCE, newOptions(8, 8, 0), "DOUBLE"},
-                {JdbcDoubleValue.INSTANCE, newOptions(8, 6, 2), "DOUBLE"},
-                {JdbcTimeValue.INSTANCE, newOptions(19, 19, 0), "TIME"},
-                {JdbcTimeValue.INSTANCE, newOptions(19, 15, 4), "TIME(4)"},
-                {JdbcDecimalValue.INSTANCE, newOptions(8, 8, 0), "DECIMAL(8,0)"},
-                {JdbcDecimalValue.INSTANCE, newOptions(8, 6, 2), "DECIMAL(6,2)"},
-                {JdbcCharValue.INSTANCE, newSize(1), "CHAR(1)"},
-                {JdbcVarCharValue.INSTANCE, newSize(128), "VARCHAR(128)"},
-                {JdbcLongVarCharValue.INSTANCE, newSize(128), null},
-                {JdbcBigIntValue.INSTANCE, newPrecision(10), "BIGINT"},
-                {JdbcBigIntValue.INSTANCE, newPrecision(15), "BIGINT"},
-                {JdbcBigIntValue.INSTANCE, newPrecision(19), "BIGINT"},
-                {JdbcBigIntValue.INSTANCE, newPrecision(20), "NUMBER(20)"},
-                {JdbcBitValue.INSTANCE, newSize(1), "BOOLEAN"},
-                {JdbcBitValue.INSTANCE, newSize(10), "BIT(10)"},
-        };
+        return new Object[][] { { JdbcDoubleValue.INSTANCE, newOptions(8, 8, 0), "DOUBLE" },
+                { JdbcDoubleValue.INSTANCE, newOptions(8, 6, 2), "DOUBLE" },
+                { JdbcTimeValue.INSTANCE, newOptions(19, 19, 0), "TIME" },
+                { JdbcTimeValue.INSTANCE, newOptions(19, 15, 4), "TIME(4)" },
+                { JdbcDecimalValue.INSTANCE, newOptions(8, 8, 0), "DECIMAL(8,0)" },
+                { JdbcDecimalValue.INSTANCE, newOptions(8, 6, 2), "DECIMAL(6,2)" },
+                { JdbcCharValue.INSTANCE, newSize(1), "CHAR(1)" },
+                { JdbcVarCharValue.INSTANCE, newSize(128), "VARCHAR(128)" },
+                { JdbcLongVarCharValue.INSTANCE, newSize(128), null },
+                { JdbcBigIntValue.INSTANCE, newPrecision(10), "BIGINT" },
+                { JdbcBigIntValue.INSTANCE, newPrecision(15), "BIGINT" },
+                { JdbcBigIntValue.INSTANCE, newPrecision(19), "BIGINT" },
+                { JdbcBigIntValue.INSTANCE, newPrecision(20), "NUMBER(20)" },
+                { JdbcBitValue.INSTANCE, newSize(1), "BOOLEAN" }, { JdbcBitValue.INSTANCE, newSize(10), "BIT(10)" }, };
     }
 
     @Test(dataProvider = "getTypeName")

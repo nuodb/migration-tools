@@ -28,7 +28,8 @@
 package com.nuodb.migrator.integration.precision;
 
 /**
- * Test to make sure all the Tables, Constraints, Views, Triggers etc have been migrated.
+ * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
+ * migrated.
  *
  * @author Krishnamoorthy Dhandapani
  */
@@ -43,8 +44,7 @@ public class MSSQLServerPrecision2 {
     double t7;
     String t8;
 
-    public MSSQLServerPrecision2(String t1, String t2, double t3, String t4, int t5, double t6, double t7,
-                                 String t8) {
+    public MSSQLServerPrecision2(String t1, String t2, double t3, String t4, int t5, double t6, double t7, String t8) {
         this.t1 = t1;
         this.t2 = t2;
         this.t3 = t3;
@@ -115,10 +115,8 @@ public class MSSQLServerPrecision2 {
 
     @Override
     public String toString() {
-        return "MSSQLServerPrecision2 [t1=" + t1 + ", t2=" + t2 + ", t3="
-                + t3 + ", t4=" + t4 + ", t5=" + t5 + ", t6=" + t6 + ", t7="
-                + t7 + ", t8=" + t8 + "]";
+        return "MSSQLServerPrecision2 [t1=" + t1 + ", t2=" + t2 + ", t3=" + t3 + ", t4=" + t4 + ", t5=" + t5 + ", t6="
+                + t6 + ", t7=" + t7 + ", t8=" + t8 + "]";
     }
-
 
 }

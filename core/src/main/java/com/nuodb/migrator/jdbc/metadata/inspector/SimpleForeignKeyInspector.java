@@ -48,24 +48,23 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
     @Override
     protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
-        return inspectionContext.getConnection().getMetaData().getImportedKeys(
-                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(), tableInspectionScope.getTable());
+        return inspectionContext.getConnection().getMetaData().getImportedKeys(tableInspectionScope.getCatalog(),
+                tableInspectionScope.getSchema(), tableInspectionScope.getTable());
     }
 
     @Override
     protected void processResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope,
-                                    ResultSet foreignKeys)
-            throws SQLException {
+            ResultSet foreignKeys) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         boolean fixPosition = false;
         while (foreignKeys.next()) {
             String primaryCatalogName = foreignKeys.getString("PKTABLE_CAT");
-            boolean addObject = tableInspectionScope.getCatalog() == null ||
-                    equalsIgnoreCase(tableInspectionScope.getCatalog(), primaryCatalogName);
+            boolean addObject = tableInspectionScope.getCatalog() == null
+                    || equalsIgnoreCase(tableInspectionScope.getCatalog(), primaryCatalogName);
 
             String primarySchemaName = foreignKeys.getString("PKTABLE_SCHEM");
-            addObject = addObject && (tableInspectionScope.getSchema() == null ||
-                    equalsIgnoreCase(tableInspectionScope.getSchema(), primarySchemaName));
+            addObject = addObject && (tableInspectionScope.getSchema() == null
+                    || equalsIgnoreCase(tableInspectionScope.getSchema(), primarySchemaName));
 
             String primaryTableName = foreignKeys.getString("PKTABLE_NAME");
             final Table primaryTable = addTable(inspectionResults, primaryCatalogName, primarySchemaName,
@@ -84,21 +83,20 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
                 position += 1;
             }
             final Identifier identifier = valueOf(foreignKeys.getString("FK_NAME"));
-            Optional<ForeignKey> optional = tryFind(foreignTable.getForeignKeys(),
-                    new Predicate<ForeignKey>() {
-                        @Override
-                        public boolean apply(ForeignKey foreignKey) {
-                            if (identifier != null) {
-                                return identifier.equals(foreignKey.getIdentifier());
-                            }
-                            for (ForeignKeyReference foreignKeyReference : foreignKey.getReferences()) {
-                                if (primaryTable.equals(foreignKeyReference.getPrimaryTable())) {
-                                    return true;
-                                }
-                            }
-                            return false;
+            Optional<ForeignKey> optional = tryFind(foreignTable.getForeignKeys(), new Predicate<ForeignKey>() {
+                @Override
+                public boolean apply(ForeignKey foreignKey) {
+                    if (identifier != null) {
+                        return identifier.equals(foreignKey.getIdentifier());
+                    }
+                    for (ForeignKeyReference foreignKeyReference : foreignKey.getReferences()) {
+                        if (primaryTable.equals(foreignKeyReference.getPrimaryTable())) {
+                            return true;
                         }
-                    });
+                    }
+                    return false;
+                }
+            });
             ForeignKey foreignKey;
             if (optional.isPresent()) {
                 foreignKey = optional.get();

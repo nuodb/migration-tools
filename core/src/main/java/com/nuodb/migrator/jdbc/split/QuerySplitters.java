@@ -48,7 +48,7 @@ public class QuerySplitters {
     }
 
     public static QuerySplitter<Statement> newLimitSplitter(Dialect dialect, RowCountStrategy rowCountStrategy,
-                                                            Query query, QueryLimit queryLimit) {
+            Query query, QueryLimit queryLimit) {
         return new LimitQuerySplitter(dialect, rowCountStrategy, query, queryLimit, null);
     }
 

@@ -65,8 +65,8 @@ public abstract class ValueHandleListBuilder {
 
             @Override
             protected JdbcValueAccess buildJdbcValueAccess(ValueHandle valueHandle) {
-                return getDialect().getJdbcValueAccessProvider().getJdbcValueGetter(
-                        connection, resultSet, column++, valueHandle);
+                return getDialect().getJdbcValueAccessProvider().getJdbcValueGetter(connection, resultSet, column++,
+                        valueHandle);
             }
         };
     }
@@ -77,8 +77,8 @@ public abstract class ValueHandleListBuilder {
 
             @Override
             protected JdbcValueAccess buildJdbcValueAccess(ValueHandle valueHandle) {
-                return getDialect().getJdbcValueAccessProvider().getJdbcValueGetter(
-                        connection, statement, column++, valueHandle);
+                return getDialect().getJdbcValueAccessProvider().getJdbcValueGetter(connection, statement, column++,
+                        valueHandle);
             }
         };
     }
@@ -99,8 +99,8 @@ public abstract class ValueHandleListBuilder {
 
     protected ValueHandle createValueHandle(Field field) {
         ValueHandle valueHandle = new SimpleValueHandle(field);
-        JdbcTypeDesc jdbcTypeDesc = getDialect().getJdbcTypeRegistry().getJdbcTypeAlias(
-                field.getTypeCode(), field.getTypeName());
+        JdbcTypeDesc jdbcTypeDesc = getDialect().getJdbcTypeRegistry().getJdbcTypeAlias(field.getTypeCode(),
+                field.getTypeName());
         valueHandle.setTypeCode(jdbcTypeDesc.getTypeCode());
         valueHandle.setTypeName(jdbcTypeDesc.getTypeName());
         return valueHandle;
@@ -118,8 +118,8 @@ public abstract class ValueHandleListBuilder {
     }
 
     protected ValueFormat buildValueFormat(ValueHandle valueHandle) {
-        return getValueFormatRegistry().getValueFormat(
-                new JdbcTypeDesc(valueHandle.getTypeCode(), valueHandle.getTypeName()));
+        return getValueFormatRegistry()
+                .getValueFormat(new JdbcTypeDesc(valueHandle.getTypeCode(), valueHandle.getTypeName()));
     }
 
     protected void initValueType(ValueHandle valueHandle) {
@@ -139,15 +139,15 @@ public abstract class ValueHandleListBuilder {
     protected Map<String, Object> buildJdbcValueAccessOptions(ValueHandle valueHandle) {
         Map<String, Object> jdbcValueAccessOptions = null;
         switch (valueHandle.getTypeCode()) {
-            case Types.DATE:
-            case Types.TIME:
-            case Types.TIMESTAMP:
-                if (dialect.supportsStatementWithTimezone()) {
-                    jdbcValueAccessOptions = newHashMap();
-                    jdbcValueAccessOptions.put(TIMEZONE, getTimeZone());
-                }
-                break;
-            default:
+        case Types.DATE:
+        case Types.TIME:
+        case Types.TIMESTAMP:
+            if (dialect.supportsStatementWithTimezone()) {
+                jdbcValueAccessOptions = newHashMap();
+                jdbcValueAccessOptions.put(TIMEZONE, getTimeZone());
+            }
+            break;
+        default:
         }
         return jdbcValueAccessOptions;
     }

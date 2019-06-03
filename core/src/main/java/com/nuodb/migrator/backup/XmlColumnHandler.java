@@ -76,8 +76,8 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
     protected Column createTarget(InputNode input, Class<? extends Column> type, XmlReadContext context) {
         Table table = getParent(context, 0);
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        return table != null ? (table.hasColumn(name) ?
-                table.getColumn(name) : table.addColumn(name)) : new Column(name);
+        return table != null ? (table.hasColumn(name) ? table.getColumn(name) : table.addColumn(name))
+                : new Column(name);
     }
 
     @Override
@@ -106,9 +106,8 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
             column.addCheck(context.read(input, Check.class));
         } else if (SEQUENCE_ELEMENT.equals(element)) {
             Integer index = context.readAttribute(input, REF_INDEX_ATTRIBUTE, Integer.class);
-            Sequence sequence = index != null ?
-                    Iterables.get(((Schema) getParent(context, 2)).getSequences(), index) :
-                    context.read(input, Sequence.class);
+            Sequence sequence = index != null ? Iterables.get(((Schema) getParent(context, 2)).getSequences(), index)
+                    : context.read(input, Sequence.class);
             column.setSequence(sequence);
         }
     }
@@ -158,9 +157,8 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         final Sequence sequence = column.getSequence();
         if (sequence != null && sequence.getSchema() != null && !skip(SEQUENCE, context)) {
             OutputNode element = output.getChild(SEQUENCE_ELEMENT);
-            context.writeAttribute(element, REF_INDEX_ATTRIBUTE, indexOf(filter(
-                    sequence.getSchema().getSequences(),
-                    new Predicate<Sequence>() {
+            context.writeAttribute(element, REF_INDEX_ATTRIBUTE,
+                    indexOf(filter(sequence.getSchema().getSequences(), new Predicate<Sequence>() {
                         @Override
                         public boolean apply(Sequence sequence) {
                             return !context.skip(null, sequence);

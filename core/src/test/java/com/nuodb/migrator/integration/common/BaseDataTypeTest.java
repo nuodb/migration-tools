@@ -38,30 +38,29 @@ import java.sql.Statement;
  */
 public class BaseDataTypeTest extends MigrationTestBase {
 
-	public void testDataType(String tableName) throws Exception {
-		String query = "select * from " + tableName;
-		verifyData(query, query);
-	}
+    public void testDataType(String tableName) throws Exception {
+        String query = "select * from " + tableName;
+        verifyData(query, query);
+    }
 
-	public void verifyData(String sqlStr1, String sqlStr2) throws SQLException,
-			Exception {
-		Statement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
-		try {
-			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr1);
+    public void verifyData(String sqlStr1, String sqlStr2) throws SQLException, Exception {
+        Statement stmt1 = null, stmt2 = null;
+        ResultSet rs1 = null, rs2 = null;
+        try {
+            stmt1 = sourceConnection.createStatement();
+            rs1 = stmt1.executeQuery(sqlStr1);
 
-			Assert.assertNotNull(rs1);
+            Assert.assertNotNull(rs1);
 
-			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr2);
+            stmt2 = nuodbConnection.createStatement();
+            rs2 = stmt2.executeQuery(sqlStr2);
 
-			Assert.assertNotNull(rs2);
+            Assert.assertNotNull(rs2);
 
-			rsUtil.assertIsEqual(rs1, rs2, true, true);
+            rsUtil.assertIsEqual(rs1, rs2, true, true);
 
-		} finally {
-			closeAll(rs1, stmt1, rs2, stmt2);
-		}
-	}
+        } finally {
+            closeAll(rs1, stmt1, rs2, stmt2);
+        }
+    }
 }

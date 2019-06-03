@@ -41,8 +41,7 @@ public class MetaDataNameEqualsFilter<T extends Identifiable> extends MetaDataNa
 
     private Identifier identifier;
 
-    public MetaDataNameEqualsFilter(MetaDataType objectType, boolean qualifyName,
-                                    String name) {
+    public MetaDataNameEqualsFilter(MetaDataType objectType, boolean qualifyName, String name) {
         super(objectType, qualifyName);
         this.identifier = valueOf(name);
     }
@@ -58,13 +57,17 @@ public class MetaDataNameEqualsFilter<T extends Identifiable> extends MetaDataNa
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         MetaDataNameEqualsFilter that = (MetaDataNameEqualsFilter) o;
 
-        if (identifier != null ? !identifier.equals(that.identifier) : that.identifier != null) return false;
+        if (identifier != null ? !identifier.equals(that.identifier) : that.identifier != null)
+            return false;
 
         return true;
     }

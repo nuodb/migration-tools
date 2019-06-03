@@ -51,8 +51,8 @@ public class JdbcRefValue extends JdbcTypeValueBase<Ref> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Ref value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Ref value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setRef(index, value);
     }
 }

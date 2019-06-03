@@ -48,8 +48,8 @@ public class JdbcTypeNameTemplateDeltaOptions extends JdbcTypeNameTemplate {
     @Override
     protected String expandPrecision(String template, Integer precision) {
         Integer precisionDelta = getDeltaPrecision();
-        return super.expandPrecision(template, precisionDelta != null && precision != null ?
-                precisionDelta + precision : precision);
+        return super.expandPrecision(template,
+                precisionDelta != null && precision != null ? precisionDelta + precision : precision);
     }
 
     @Override
@@ -78,14 +78,18 @@ public class JdbcTypeNameTemplateDeltaOptions extends JdbcTypeNameTemplate {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         JdbcTypeNameTemplateDeltaOptions jdbcTypeNameDeltaOptions = (JdbcTypeNameTemplateDeltaOptions) o;
 
-        if (deltaOptions != null ? !deltaOptions.equals(
-                jdbcTypeNameDeltaOptions.deltaOptions) : jdbcTypeNameDeltaOptions.deltaOptions != null) return false;
+        if (deltaOptions != null ? !deltaOptions.equals(jdbcTypeNameDeltaOptions.deltaOptions)
+                : jdbcTypeNameDeltaOptions.deltaOptions != null)
+            return false;
 
         return true;
     }

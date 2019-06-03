@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-
 import com.nuodb.migrator.jdbc.model.Field;
 
 import java.sql.PreparedStatement;
@@ -74,8 +73,8 @@ public abstract class JdbcTypeValueBase<T> implements JdbcTypeValue<T> {
     }
 
     @Override
-    public void setValue(PreparedStatement statement, int index, Field field, T value,
-                         Map<String, Object> options) throws SQLException {
+    public void setValue(PreparedStatement statement, int index, Field field, T value, Map<String, Object> options)
+            throws SQLException {
         if (value == null) {
             setNullValue(statement, index, field);
         } else {
@@ -93,16 +92,19 @@ public abstract class JdbcTypeValueBase<T> implements JdbcTypeValue<T> {
     }
 
     protected abstract void setNullSafeValue(PreparedStatement statement, T value, int index, Field field,
-                                             Map<String, Object> options) throws SQLException;
+            Map<String, Object> options) throws SQLException;
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         JdbcTypeValueBase that = (JdbcTypeValueBase) o;
 
-        if (jdbcTypeDesc != null ? !jdbcTypeDesc.equals(that.jdbcTypeDesc) : that.jdbcTypeDesc != null) return false;
+        if (jdbcTypeDesc != null ? !jdbcTypeDesc.equals(that.jdbcTypeDesc) : that.jdbcTypeDesc != null)
+            return false;
 
         return true;
     }

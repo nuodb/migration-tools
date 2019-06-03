@@ -68,8 +68,7 @@ public class XmlReadTargetAwareContext<T> implements XmlReadContext {
     }
 
     @Override
-    public <T> T readAttribute(InputNode input, String attribute, Class<T> type,
-                               T defaultValue) {
+    public <T> T readAttribute(InputNode input, String attribute, Class<T> type, T defaultValue) {
         return context.readAttribute(input, attribute, type, defaultValue);
     }
 
@@ -79,8 +78,7 @@ public class XmlReadTargetAwareContext<T> implements XmlReadContext {
     }
 
     @Override
-    public <T> T readElement(InputNode input, String element, Class<T> type,
-                             T defaultValue) {
+    public <T> T readElement(InputNode input, String element, Class<T> type, T defaultValue) {
         return context.readElement(input, element, type, defaultValue);
     }
 
@@ -103,8 +101,8 @@ public class XmlReadTargetAwareContext<T> implements XmlReadContext {
         for (int index = 0; context != null && index < parent; index++) {
             context = context.getContext();
         }
-        return context instanceof XmlReadTargetAwareContext ?
-                (T) ((XmlReadTargetAwareContext) context).getTarget() : null;
+        return context instanceof XmlReadTargetAwareContext ? (T) ((XmlReadTargetAwareContext) context).getTarget()
+                : null;
     }
 
     public void setTarget(T target) {
@@ -183,13 +181,17 @@ public class XmlReadTargetAwareContext<T> implements XmlReadContext {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         XmlReadTargetAwareContext that = (XmlReadTargetAwareContext) o;
 
-        if (context != null ? !context.equals(that.context) : that.context != null) return false;
-        if (target != null ? !target.equals(that.target) : that.target != null) return false;
+        if (context != null ? !context.equals(that.context) : that.context != null)
+            return false;
+        if (target != null ? !target.equals(that.target) : that.target != null)
+            return false;
 
         return true;
     }

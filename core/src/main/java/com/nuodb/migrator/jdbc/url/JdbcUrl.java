@@ -49,15 +49,17 @@ public interface JdbcUrl {
     String getProtocol();
 
     /**
-     * Vendor dependent sub protocol name, i.e. for jdbc:com.nuodb://localhost/test returns "com.nuodb"
+     * Vendor dependent sub protocol name, i.e. for
+     * jdbc:com.nuodb://localhost/test returns "com.nuodb"
      *
      * @return sub protocol part of the url
      */
     String getSubProtocol();
 
     /**
-     * Vendor dependent qualifier of the data source, i.e. for jdbc:jtds:sqlserver://localhost:1433/test sub protocol is
-     * "jtds" and qualifier is "sqlserver"
+     * Vendor dependent qualifier of the data source, i.e. for
+     * jdbc:jtds:sqlserver://localhost:1433/test sub protocol is "jtds" and
+     * qualifier is "sqlserver"
      *
      * @return qualifier describing data source.
      */
@@ -80,15 +82,18 @@ public interface JdbcUrl {
     /**
      * Adds parameter with specified value to the url parameters.
      *
-     * @param parameter name of the parameter to add.
-     * @param value     parameter value.
+     * @param parameter
+     *            name of the parameter to add.
+     * @param value
+     *            parameter value.
      */
     void addParameter(String parameter, Object value);
 
     /**
      * Merges parameters with current url parameters.
      *
-     * @param parameters to be added to url parameters.
+     * @param parameters
+     *            to be added to url parameters.
      */
     void addParameters(Map<String, Object> parameters);
 

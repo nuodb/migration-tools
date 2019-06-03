@@ -77,18 +77,20 @@ public class WildcardFileFilter implements FileFilter {
     }
 
     private static String quote(String pattern, int start, int end) {
-        return start == end ? EMPTY :
-                Pattern.quote(pattern.substring(start, end));
+        return start == end ? EMPTY : Pattern.quote(pattern.substring(start, end));
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof WildcardFileFilter)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof WildcardFileFilter))
+            return false;
 
         WildcardFileFilter that = (WildcardFileFilter) o;
 
-        if (pattern != null ? !pattern.equals(that.pattern) : that.pattern != null) return false;
+        if (pattern != null ? !pattern.equals(that.pattern) : that.pattern != null)
+            return false;
 
         return true;
     }

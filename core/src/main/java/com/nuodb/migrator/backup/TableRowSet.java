@@ -73,15 +73,21 @@ public class TableRowSet extends RowSet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TableRowSet)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof TableRowSet))
+            return false;
+        if (!super.equals(o))
+            return false;
 
         TableRowSet that = (TableRowSet) o;
 
-        if (catalog != null ? !catalog.equals(that.catalog) : that.catalog != null) return false;
-        if (schema != null ? !schema.equals(that.schema) : that.schema != null) return false;
-        if (table != null ? !table.equals(that.table) : that.table != null) return false;
+        if (catalog != null ? !catalog.equals(that.catalog) : that.catalog != null)
+            return false;
+        if (schema != null ? !schema.equals(that.schema) : that.schema != null)
+            return false;
+        if (table != null ? !table.equals(that.table) : that.table != null)
+            return false;
 
         return true;
     }

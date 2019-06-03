@@ -48,24 +48,23 @@ import static com.nuodb.migrator.utils.StringUtils.equalsIgnoreCase;
  */
 public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
 
-    private static final String QUERY =
-            "SELECT PRIMARYTABLE.SCHEMA AS PKTABLE_SCHEM, PRIMARYTABLE.TABLENAME AS PKTABLE_NAME,\n" +
-            "       PRIMARYFIELD.FIELD AS PKCOLUMN_NAME, FOREIGNTABLE.SCHEMA AS FKTABLE_SCHEM,\n" +
-            "       FOREIGNTABLE.TABLENAME AS FKTABLE_NAME, FOREIGNFIELD.FIELD AS FKCOLUMN_NAME,\n" +
-            "       FOREIGNKEYS.FOREIGNKEYNAME AS FK_NAME,\n" +
-            "       FOREIGNKEYS.POSITION+1 AS KEY_SEQ, FOREIGNKEYS.UPDATERULE AS UPDATE_RULE,\n" +
-            "       FOREIGNKEYS.DELETERULE AS DELETE_RULE, FOREIGNKEYS.DEFERRABILITY AS DEFERRABILITY\n" +
-            "FROM SYSTEM.FOREIGNKEYS\n" +
-            "INNER JOIN SYSTEM.TABLES PRIMARYTABLE ON PRIMARYTABLEID=PRIMARYTABLE.TABLEID\n" +
-            "INNER JOIN SYSTEM.FIELDS PRIMARYFIELD ON PRIMARYTABLE.SCHEMA=PRIMARYFIELD.SCHEMA\n" +
-            "AND PRIMARYTABLE.TABLENAME=PRIMARYFIELD.TABLENAME\n" +
-            "AND FOREIGNKEYS.PRIMARYFIELDID=PRIMARYFIELD.FIELDID\n" +
-            "INNER JOIN SYSTEM.TABLES FOREIGNTABLE ON FOREIGNTABLEID=FOREIGNTABLE.TABLEID\n" +
-            "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA\n" +
-            "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME\n" +
-            "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID\n" +
-            "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, " +
-            "KEY_SEQ ASC";
+    private static final String QUERY = "SELECT PRIMARYTABLE.SCHEMA AS PKTABLE_SCHEM, PRIMARYTABLE.TABLENAME AS PKTABLE_NAME,\n"
+            + "       PRIMARYFIELD.FIELD AS PKCOLUMN_NAME, FOREIGNTABLE.SCHEMA AS FKTABLE_SCHEM,\n"
+            + "       FOREIGNTABLE.TABLENAME AS FKTABLE_NAME, FOREIGNFIELD.FIELD AS FKCOLUMN_NAME,\n"
+            + "       FOREIGNKEYS.FOREIGNKEYNAME AS FK_NAME,\n"
+            + "       FOREIGNKEYS.POSITION+1 AS KEY_SEQ, FOREIGNKEYS.UPDATERULE AS UPDATE_RULE,\n"
+            + "       FOREIGNKEYS.DELETERULE AS DELETE_RULE, FOREIGNKEYS.DEFERRABILITY AS DEFERRABILITY\n"
+            + "FROM SYSTEM.FOREIGNKEYS\n"
+            + "INNER JOIN SYSTEM.TABLES PRIMARYTABLE ON PRIMARYTABLEID=PRIMARYTABLE.TABLEID\n"
+            + "INNER JOIN SYSTEM.FIELDS PRIMARYFIELD ON PRIMARYTABLE.SCHEMA=PRIMARYFIELD.SCHEMA\n"
+            + "AND PRIMARYTABLE.TABLENAME=PRIMARYFIELD.TABLENAME\n"
+            + "AND FOREIGNKEYS.PRIMARYFIELDID=PRIMARYFIELD.FIELDID\n"
+            + "INNER JOIN SYSTEM.TABLES FOREIGNTABLE ON FOREIGNTABLEID=FOREIGNTABLE.TABLEID\n"
+            + "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA\n"
+            + "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME\n"
+            + "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID\n"
+            + "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, "
+            + "KEY_SEQ ASC";
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
@@ -77,17 +76,17 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
 
     @Override
     protected void processResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope,
-                                    ResultSet foreignKeys) throws SQLException {
+            ResultSet foreignKeys) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         ForeignKey foreignKey = null;
         while (foreignKeys.next()) {
             String primarySchemaName = foreignKeys.getString("PKTABLE_SCHEM");
-            boolean addObject = (tableInspectionScope.getSchema() == null ||
-                    equalsIgnoreCase(tableInspectionScope.getSchema(), primarySchemaName));
+            boolean addObject = (tableInspectionScope.getSchema() == null
+                    || equalsIgnoreCase(tableInspectionScope.getSchema(), primarySchemaName));
 
             String primaryTableName = foreignKeys.getString("PKTABLE_NAME");
-            final Table primaryTable = addTable(inspectionResults, null, primarySchemaName,
-                    primaryTableName, addObject);
+            final Table primaryTable = addTable(inspectionResults, null, primarySchemaName, primaryTableName,
+                    addObject);
 
             final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
             int position = foreignKeys.getInt("KEY_SEQ");

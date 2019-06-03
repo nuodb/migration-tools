@@ -26,7 +26,8 @@ public enum HelpHint {
      */
     OPTIONAL,
     /**
-     * Indicates that optional child groups should be displayed in square brackets
+     * Indicates that optional child groups should be displayed in square
+     * brackets
      */
     OPTIONAL_CHILD_GROUP,
     /**

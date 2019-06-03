@@ -46,12 +46,12 @@ public class ValueUtils {
             ValueType valueType = valueTypes.get(offset);
             valueType = valueType != null ? valueType : STRING;
             switch (valueType) {
-                case BINARY:
-                    values[offset] = ValueUtils.BINARY_NULL;
-                    break;
-                case STRING:
-                    values[offset] = ValueUtils.STRING_NULL;
-                    break;
+            case BINARY:
+                values[offset] = ValueUtils.BINARY_NULL;
+                break;
+            case STRING:
+                values[offset] = ValueUtils.STRING_NULL;
+                break;
             }
         }
     }
@@ -94,12 +94,15 @@ public class ValueUtils {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             BinaryValue that = (BinaryValue) o;
 
-            if (!Arrays.equals(value, that.value)) return false;
+            if (!Arrays.equals(value, that.value))
+                return false;
 
             return true;
         }
@@ -145,12 +148,15 @@ public class ValueUtils {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             StringValue that = (StringValue) o;
 
-            if (value != null ? !value.equals(that.value) : that.value != null) return false;
+            if (value != null ? !value.equals(that.value) : that.value != null)
+                return false;
 
             return true;
         }

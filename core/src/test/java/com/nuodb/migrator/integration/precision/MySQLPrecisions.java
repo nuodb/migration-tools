@@ -33,15 +33,13 @@ import java.util.Collection;
 public class MySQLPrecisions {
 
     public static Collection<MySQLPrecision1> getMySQLPrecision1() {
-        
-        long l1= -9223372036854775807L;
-		long l2= -2147483648L;
-		long l3= -8388608L;
-		/*
-        long l1 = 0L;
-        long l2 = 0L;
-        long l3 = 0L;
-        */
+
+        long l1 = -9223372036854775807L;
+        long l2 = -2147483648L;
+        long l3 = -8388608L;
+        /*
+         * long l1 = 0L; long l2 = 0L; long l3 = 0L;
+         */
         Collection<MySQLPrecision1> t1List = new ArrayList<MySQLPrecision1>();
         t1List.add(new MySQLPrecision1(66, 2687, 678246, 49, 3720368547758L));
         t1List.add(new MySQLPrecision1(127, 32767, 8388607, 2147483647, 9223372036854775807L));
@@ -51,14 +49,12 @@ public class MySQLPrecisions {
 
     public static Collection<MySQLPrecision2> getMySQLPrecision2() {
         /* Original values are changed to avoid float data type issue */
-    	/* DB-23789 */
+        /* DB-23789 */
         Collection<MySQLPrecision2> values = new ArrayList<MySQLPrecision2>();
-        values.add(new MySQLPrecision2("sample text", "sample data", 23.22, 4.6, 416.7,
-                "true", "1234567890"));
-        values.add(new MySQLPrecision2("sample text length20", "total word lenght 20", 1.234567822E7,
-                9.8765432E7, 34567891.17, "false", "12345678900123456789"));
-        values.add(new MySQLPrecision2("", "sample data", 23.22, 4.6, 416.7, "true",
-                "5291"));
+        values.add(new MySQLPrecision2("sample text", "sample data", 23.22, 4.6, 416.7, "true", "1234567890"));
+        values.add(new MySQLPrecision2("sample text length20", "total word lenght 20", 1.234567822E7, 9.8765432E7,
+                34567891.17, "false", "12345678900123456789"));
+        values.add(new MySQLPrecision2("", "sample data", 23.22, 4.6, 416.7, "true", "5291"));
         return values;
     }
 }

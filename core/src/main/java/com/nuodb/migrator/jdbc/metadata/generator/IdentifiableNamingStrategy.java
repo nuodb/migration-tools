@@ -65,15 +65,13 @@ public class IdentifiableNamingStrategy<I extends Identifiable> extends MetaData
         this.prefix = prefix;
     }
 
-    public IdentifiableNamingStrategy(Class<? extends MetaData> objectClass,
-                                      String prefix, char delimiter) {
+    public IdentifiableNamingStrategy(Class<? extends MetaData> objectClass, String prefix, char delimiter) {
         super(objectClass);
         this.prefix = prefix;
         this.delimiter = delimiter;
     }
 
-    public IdentifiableNamingStrategy(MetaDataType objectType, String prefix,
-                                      char delimiter) {
+    public IdentifiableNamingStrategy(MetaDataType objectType, String prefix, char delimiter) {
         super(objectType);
         this.prefix = prefix;
         this.delimiter = delimiter;
@@ -88,7 +86,7 @@ public class IdentifiableNamingStrategy<I extends Identifiable> extends MetaData
 
     @Override
     public String getQualifiedName(I object, ScriptGeneratorManager scriptGeneratorManager, String catalog,
-                                   String schema, boolean normalize) {
+            String schema, boolean normalize) {
         Dialect dialect = normalize ? scriptGeneratorManager.getTargetDialect() : null;
         String name = getNonNormalizedName(object, scriptGeneratorManager);
         return IdentifiableBase.getQualifiedName(dialect, catalog, schema, name, object);

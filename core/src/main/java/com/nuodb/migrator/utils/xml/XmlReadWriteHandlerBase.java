@@ -59,7 +59,7 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     protected XmlReadTargetAwareContext<T> createContext(InputNode input, Class<? extends T> type,
-                                                         XmlReadContext context) {
+            XmlReadContext context) {
         return new XmlReadTargetAwareContext<T>(createTarget(input, type, context), context);
     }
 
@@ -76,8 +76,9 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     protected <T> T getParent(XmlReadContext context, int parent) {
-        return context instanceof XmlReadTargetAwareContext ?
-                (T) ((XmlReadTargetAwareContext) context).getTarget(parent) : null;
+        return context instanceof XmlReadTargetAwareContext
+                ? (T) ((XmlReadTargetAwareContext) context).getTarget(parent)
+                : null;
     }
 
     protected void read(InputNode input, XmlReadTargetAwareContext<T> context) throws Exception {
@@ -144,8 +145,9 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     protected <T> T getParent(XmlWriteContext context, int parent) {
-        return context instanceof XmlWriteSourceAwareContext ?
-                (T) ((XmlWriteSourceAwareContext) context).getSource(parent) : null;
+        return context instanceof XmlWriteSourceAwareContext
+                ? (T) ((XmlWriteSourceAwareContext) context).getSource(parent)
+                : null;
     }
 
     protected boolean write(OutputNode output, XmlWriteSourceAwareContext context) throws Exception {

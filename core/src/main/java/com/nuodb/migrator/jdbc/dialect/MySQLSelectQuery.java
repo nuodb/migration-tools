@@ -57,7 +57,7 @@ public class MySQLSelectQuery extends SelectQuery {
             query.append(" ");
             query.append(indexHint.getIndexUsage());
             query.append(" INDEX (");
-            for (Iterator<Index> iterator = indexHint.getIndexes().iterator(); iterator.hasNext(); ) {
+            for (Iterator<Index> iterator = indexHint.getIndexes().iterator(); iterator.hasNext();) {
                 Index index = iterator.next();
                 query.append(getDialect().getIdentifier(index.getName(), index));
                 if (iterator.hasNext()) {

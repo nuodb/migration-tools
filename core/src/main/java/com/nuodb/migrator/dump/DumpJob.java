@@ -53,7 +53,7 @@ import static java.sql.Connection.*;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"all"})
+@SuppressWarnings({ "all" })
 public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     private BackupWriter backupWriter;
@@ -91,14 +91,10 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     protected SessionFactory createSourceSessionFactory() {
         SessionFactory sessionFactory = newSessionFactory(
-                createConnectionProviderFactory().
-                        createConnectionProvider(getSourceSpec()), createDialectResolver());
+                createConnectionProviderFactory().createConnectionProvider(getSourceSpec()), createDialectResolver());
         if (getSourceSpec().getTransactionIsolation() == null) {
-            sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
-                    TRANSACTION_SERIALIZABLE,
-                    TRANSACTION_REPEATABLE_READ,
-                    TRANSACTION_READ_COMMITTED
-            }));
+            sessionFactory.addSessionObserver(newTransactionIsolationSetter(
+                    new int[] { TRANSACTION_SERIALIZABLE, TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED }));
         }
         sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
         return sessionFactory;

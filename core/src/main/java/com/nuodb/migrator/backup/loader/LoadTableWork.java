@@ -69,8 +69,7 @@ public class LoadTableWork extends WorkForkJoinTaskBase {
     @Override
     protected void init() throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        RowReader rowReader = newSequentialRowReader(
-                loadTable.getRowSet(), backupLoaderContext.getBackupOps(),
+        RowReader rowReader = newSequentialRowReader(loadTable.getRowSet(), backupLoaderContext.getBackupOps(),
                 backupLoaderContext.getFormatFactory(), backupLoaderContext.getFormatAttributes());
         int threads = loadTable.getThreads();
         if (threads > 1) {
@@ -83,8 +82,8 @@ public class LoadTableWork extends WorkForkJoinTaskBase {
     public void execute() throws Exception {
         Collection<LoadTableForkWork> loadTableForkWorks = newArrayList();
         for (int thread = 0; thread < loadTable.getThreads(); thread++) {
-            LoadTableForkWork loadTableForkWork = new LoadTableForkWork(
-                    loadTable, rowReader, thread, backupLoaderManager);
+            LoadTableForkWork loadTableForkWork = new LoadTableForkWork(loadTable, rowReader, thread,
+                    backupLoaderManager);
             loadTableForkWork.fork();
             loadTableForkWorks.add(loadTableForkWork);
         }

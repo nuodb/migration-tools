@@ -58,15 +58,11 @@ public class XmlJdbcTypeHandler<T extends JdbcType> extends XmlReadWriteHandlerB
 
     @Override
     protected void readAttributes(InputNode input, T target, XmlReadContext context) throws Exception {
-        target.setJdbcTypeDesc(new JdbcTypeDesc(
-                context.readAttribute(input, CODE_ATTRIBUTE, Integer.class),
-                context.readAttribute(input, NAME_ATTRIBUTE, String.class)
-        ));
-        target.setJdbcTypeOptions(newOptions(
-                context.readAttribute(input, SIZE_ATTRIBUTE, Integer.class),
+        target.setJdbcTypeDesc(new JdbcTypeDesc(context.readAttribute(input, CODE_ATTRIBUTE, Integer.class),
+                context.readAttribute(input, NAME_ATTRIBUTE, String.class)));
+        target.setJdbcTypeOptions(newOptions(context.readAttribute(input, SIZE_ATTRIBUTE, Integer.class),
                 context.readAttribute(input, PRECISION_ATTRIBUTE, Integer.class),
-                context.readAttribute(input, SCALE_ATTRIBUTE, Integer.class)
-        ));
+                context.readAttribute(input, SCALE_ATTRIBUTE, Integer.class)));
     }
 
     @Override

@@ -42,8 +42,7 @@ public class SourceNamingStrategy<I extends Identifiable> extends IdentifiableNa
         super(typeClass);
     }
 
-    public SourceNamingStrategy(Class<? extends MetaData> objectClass,
-                                String prefix) {
+    public SourceNamingStrategy(Class<? extends MetaData> objectClass, String prefix) {
         super(objectClass, prefix);
     }
 

@@ -65,29 +65,18 @@ public class CliSchemaJobTest {
 
     @Test
     public void testParse() {
-        String[] arguments = {
-                "--source.driver=oracle.jdbc.driver.OracleDriver",
-                "--source.url=jdbc:oracle:thin:@//localhost:1521/test",
-                "--source.username=test",
-                "--source.password=12345",
-                "--source.schema=test",
+        String[] arguments = { "--source.driver=oracle.jdbc.driver.OracleDriver",
+                "--source.url=jdbc:oracle:thin:@//localhost:1521/test", "--source.username=test",
+                "--source.password=12345", "--source.schema=test",
 
-                "--target.url=jdbc:com.nuodb://localhost/test",
-                "--target.username=dba",
-                "--target.password=goalie",
+                "--target.url=jdbc:com.nuodb://localhost/test", "--target.username=dba", "--target.password=goalie",
                 "--target.schema=test",
 
                 "--output.path=/tmp/schema.sql",
 
-                "--use.explicit.defaults=false",
-                "--meta.data.check=false",
-                "--meta.data.sequence=false",
-                "--script.type=drop,create",
-                "--group.scripts.by=meta.data",
-                "--identifier.quoting=always",
-                "--identifier.normalizer=standard",
-                "--fail.on.empty.database=false",
-        };
+                "--use.explicit.defaults=false", "--meta.data.check=false", "--meta.data.sequence=false",
+                "--script.type=drop,create", "--group.scripts.by=meta.data", "--identifier.quoting=always",
+                "--identifier.normalizer=standard", "--fail.on.empty.database=false", };
         parser.parse(arguments, cliSchemaJob);
 
         assertEquals(cliSchemaJob.getJobSpec(), createSchemaSpec());

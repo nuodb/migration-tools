@@ -91,13 +91,17 @@ public class UserDefinedType extends IdentifiableBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         UserDefinedType that = (UserDefinedType) o;
 
-        if (schema != null ? !schema.equals(that.schema) : that.schema != null) return false;
+        if (schema != null ? !schema.equals(that.schema) : that.schema != null)
+            return false;
         return !(code != null ? !code.equals(that.code) : that.code != null);
 
     }

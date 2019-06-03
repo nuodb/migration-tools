@@ -64,15 +64,14 @@ public class OracleTableInspector extends SimpleTableInspector {
         String schema = tableInspectionScope.getSchema();
         String table = tableInspectionScope.getTable();
         Collection<Object> parameters = newArrayList();
-        SelectQuery synonymsQuery = includeSynonyms ?
-                createSelectSynonymsQuery(schema, table, parameters) : null;
-        SelectQuery notSynonymsQuery = includeNotSynonyms ?
-                createSelectNotSynonymsQuery(schema, table, tableTypes, parameters) : null;
+        SelectQuery synonymsQuery = includeSynonyms ? createSelectSynonymsQuery(schema, table, parameters) : null;
+        SelectQuery notSynonymsQuery = includeNotSynonyms
+                ? createSelectNotSynonymsQuery(schema, table, tableTypes, parameters)
+                : null;
         return new ParameterizedQuery(union(synonymsQuery, notSynonymsQuery), parameters);
     }
 
-    protected SelectQuery createSelectSynonymsQuery(String schema, String table,
-                                                    Collection<Object> parameters) {
+    protected SelectQuery createSelectSynonymsQuery(String schema, String table, Collection<Object> parameters) {
         SelectQuery query = new SelectQuery();
         query.columns("NULL AS TABLE_CAT", "S.OWNER AS TABLE_SCHEM", "S.SYNONYM_NAME AS TABLE_NAME",
                 "'SYNONYM' AS TABLE_TYPE", "C.COMMENTS AS REMARKS");
@@ -95,7 +94,7 @@ public class OracleTableInspector extends SimpleTableInspector {
     }
 
     protected SelectQuery createSelectNotSynonymsQuery(String schema, String table, Collection<String> tableTypes,
-                                                       Collection<Object> parameters) {
+            Collection<Object> parameters) {
         SelectQuery query = new SelectQuery();
         query.columns("NULL AS TABLE_CAT", "O.OWNER AS TABLE_SCHEM", "O.OBJECT_NAME AS TABLE_NAME",
                 "O.OBJECT_TYPE AS TABLE_TYPE", "C.COMMENTS AS REMARKS");
@@ -119,5 +118,3 @@ public class OracleTableInspector extends SimpleTableInspector {
         return query;
     }
 }
-
-

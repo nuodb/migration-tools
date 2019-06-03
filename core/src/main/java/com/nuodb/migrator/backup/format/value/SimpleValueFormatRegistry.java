@@ -43,5 +43,3 @@ public class SimpleValueFormatRegistry extends ValueFormatRegistryBase {
         addValueFormat(JdbcDateValue.INSTANCE, new JdbcDateValueFormat());
     }
 }
-
-

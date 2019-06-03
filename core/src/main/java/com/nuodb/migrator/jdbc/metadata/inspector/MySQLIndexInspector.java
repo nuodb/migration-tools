@@ -50,10 +50,10 @@ import com.nuodb.migrator.utils.StringUtils;
 public class MySQLIndexInspector extends SimpleIndexInspector {
 
     private static final String PRIMARY = "PRIMARY";
-    
+
     @Override
-    protected void processIndex(InspectionContext inspectionContext, ResultSet indexes,
-                                Index index) throws SQLException {
+    protected void processIndex(InspectionContext inspectionContext, ResultSet indexes, Index index)
+            throws SQLException {
         super.processIndex(inspectionContext, indexes, index);
         if (StringUtils.equals(index.getName(), PRIMARY)) {
             index.setPrimary(true);
@@ -62,18 +62,19 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
         index.setType(indexes.getString("INDEX_TYPE"));
     }
 
-    /** 
-    * This method is overridden to build a query to fetch information from MySQL 
-    * INFORMATION_SCHEMA.STATISTICS and INFORMATION_SCHEMA.COLUMNS tables including 
-    * all index types
-    */
+    /**
+     * This method is overridden to build a query to fetch information from
+     * MySQL INFORMATION_SCHEMA.STATISTICS and INFORMATION_SCHEMA.COLUMNS tables
+     * including all index types
+     */
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery statisticsIndex = new SelectQuery();
         Collection<String> parameters = newArrayList();
-        statisticsIndex.columns("S.TABLE_CATALOG ", "S.TABLE_SCHEMA AS TABLE_CAT ","NULL AS TABLE_SCHEM " , "S.TABLE_NAME", "S.NON_UNIQUE",
-                "S.INDEX_SCHEMA","S.INDEX_NAME","S.INDEX_TYPE","1 AS TYPE", "S.SEQ_IN_INDEX AS ORDINAL_POSITION", "S.COLUMN_NAME", "S.COLLATION AS ASC_OR_DESC",
-                "S.CARDINALITY", "S.SUB_PART", "NULL AS FILTER_CONDITION");
+        statisticsIndex.columns("S.TABLE_CATALOG ", "S.TABLE_SCHEMA AS TABLE_CAT ", "NULL AS TABLE_SCHEM ",
+                "S.TABLE_NAME", "S.NON_UNIQUE", "S.INDEX_SCHEMA", "S.INDEX_NAME", "S.INDEX_TYPE", "1 AS TYPE",
+                "S.SEQ_IN_INDEX AS ORDINAL_POSITION", "S.COLUMN_NAME", "S.COLLATION AS ASC_OR_DESC", "S.CARDINALITY",
+                "S.SUB_PART", "NULL AS FILTER_CONDITION");
         statisticsIndex.from("INFORMATION_SCHEMA.STATISTICS S");
         statisticsIndex.join("INFORMATION_SCHEMA.COLUMNS C",
                 "C.COLUMN_NAME = S.COLUMN_NAME AND C.TABLE_NAME = S.TABLE_NAME AND S.TABLE_SCHEMA = C.TABLE_SCHEMA");
@@ -91,4 +92,3 @@ public class MySQLIndexInspector extends SimpleIndexInspector {
         return new ParameterizedQuery(union(statisticsIndex, null), parameters);
     }
 }
-

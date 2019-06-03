@@ -37,8 +37,8 @@ public class IdentifierQuotings {
     public static final IdentifierQuoting MINIMAL = new IdentifierQuoting() {
         @Override
         public boolean isQuotingIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return !dialect.isAllowedIdentifier(identifier, identifiable) ||
-                    dialect.isSQLKeyword(identifier, identifiable);
+            return !dialect.isAllowedIdentifier(identifier, identifiable)
+                    || dialect.isSQLKeyword(identifier, identifiable);
         }
     };
 

@@ -36,59 +36,90 @@
 package com.nuodb.migrator.utils.concurrent;
 
 /**
- * A recursive resultless {@link ForkJoinTask}.  This class establishes conventions to parameterize resultless actions
- * as {@code Void} {@code ForkJoinTask}s. Because {@code null} is the only valid value of type {@code Void}, methods
- * such as join always return {@code null} upon completion.
+ * A recursive resultless {@link ForkJoinTask}. This class establishes
+ * conventions to parameterize resultless actions as {@code Void}
+ * {@code ForkJoinTask}s. Because {@code null} is the only valid value of type
+ * {@code Void}, methods such as join always return {@code null} upon
+ * completion.
  * <p/>
- * <p><b>Sample Usages.</b> Here is a sketch of a ForkJoin sort that sorts a given {@code long[]} array:
+ * <p>
+ * <b>Sample Usages.</b> Here is a sketch of a ForkJoin sort that sorts a given
+ * {@code long[]} array:
  * <p/>
- * <pre> {@code
- * class SortTask extends RecursiveAction {
- *   final long[] array; final int lo; final int hi;
- *   SortTask(long[] array, int lo, int hi) {
- *     this.array = array; this.lo = lo; this.hi = hi;
- *   }
- *   protected void compute() {
- *     if (hi - lo < THRESHOLD)
- *       sequentiallySort(array, lo, hi);
- *     else {
- *       int mid = (lo + hi) >>> 1;
- *       invokeAll(new SortTask(array, lo, mid),
- *                 new SortTask(array, mid, hi));
- *       merge(array, lo, hi);
+ * 
+ * <pre>
+ * {
+ *     &#64;code
+ *     class SortTask extends RecursiveAction {
+ *         final long[] array;
+ *         final int lo;
+ *         final int hi;
+ * 
+ *         SortTask(long[] array, int lo, int hi) {
+ *             this.array = array;
+ *             this.lo = lo;
+ *             this.hi = hi;
+ *         }
+ * 
+ *         protected void compute() {
+ *             if (hi - lo < THRESHOLD)
+ *                 sequentiallySort(array, lo, hi);
+ *             else {
+ *                 int mid = (lo + hi) >>> 1;
+ *                 invokeAll(new SortTask(array, lo, mid), new SortTask(array, mid, hi));
+ *                 merge(array, lo, hi);
+ *             }
+ *         }
  *     }
- *   }
- * }}</pre>
+ * }
+ * </pre>
  * <p/>
- * You could then sort {@code anArray} by creating {@code new SortTask(anArray, 0, anArray.length-1) } and invoking it
- * in a ForkJoinPool.  As a more concrete simple example, the following task increments each element of an array:
- * <pre> {@code
- * class IncrementTask extends RecursiveAction {
- *   final long[] array; final int lo; final int hi;
- *   IncrementTask(long[] array, int lo, int hi) {
- *     this.array = array; this.lo = lo; this.hi = hi;
- *   }
- *   protected void compute() {
- *     if (hi - lo < THRESHOLD) {
- *       for (int i = lo; i < hi; ++i)
- *         array[i]++;
+ * You could then sort {@code anArray} by creating
+ * {@code new SortTask(anArray, 0, anArray.length-1) } and invoking it in a
+ * ForkJoinPool. As a more concrete simple example, the following task
+ * increments each element of an array:
+ * 
+ * <pre>
+ * {
+ *     &#64;code
+ *     class IncrementTask extends RecursiveAction {
+ *         final long[] array;
+ *         final int lo;
+ *         final int hi;
+ * 
+ *         IncrementTask(long[] array, int lo, int hi) {
+ *             this.array = array;
+ *             this.lo = lo;
+ *             this.hi = hi;
+ *         }
+ * 
+ *         protected void compute() {
+ *             if (hi - lo < THRESHOLD) {
+ *                 for (int i = lo; i < hi; ++i)
+ *                     array[i]++;
+ *             } else {
+ *                 int mid = (lo + hi) >>> 1;
+ *                 invokeAll(new IncrementTask(array, lo, mid), new IncrementTask(array, mid, hi));
+ *             }
+ *         }
  *     }
- *     else {
- *       int mid = (lo + hi) >>> 1;
- *       invokeAll(new IncrementTask(array, lo, mid),
- *                 new IncrementTask(array, mid, hi));
- *     }
- *   }
- * }}</pre>
+ * }
+ * </pre>
  * <p/>
- * <p>The following example illustrates some refinements and idioms that may lead to better performance:
- * RecursiveActions need not be fully recursive, so long as they maintain the basic divide-and-conquer approach. Here is
- * a class that sums the squares of each element of a double array, by subdividing out only the right-hand-sides of
- * repeated divisions by two, and keeping track of them with a chain of {@code next} references. It uses a dynamic
- * threshold based on method {@code getSurplusQueuedTaskCount}, but counterbalances potential excess partitioning by
- * directly performing leaf actions on unstolen tasks rather than further subdividing.
+ * <p>
+ * The following example illustrates some refinements and idioms that may lead
+ * to better performance: RecursiveActions need not be fully recursive, so long
+ * as they maintain the basic divide-and-conquer approach. Here is a class that
+ * sums the squares of each element of a double array, by subdividing out only
+ * the right-hand-sides of repeated divisions by two, and keeping track of them
+ * with a chain of {@code next} references. It uses a dynamic threshold based on
+ * method {@code getSurplusQueuedTaskCount}, but counterbalances potential
+ * excess partitioning by directly performing leaf actions on unstolen tasks
+ * rather than further subdividing.
  * <p/>
- * <pre> {@code
+ * 
+ * <pre>
+ *  {@code
  * double sumOfSquares(ForkJoinPool pool, double[] array) {
  *   int n = array.length;
  *   Applyer a = new Applyer(array, 0, n, null);
@@ -135,7 +166,8 @@ package com.nuodb.migrator.utils.concurrent;
  *      }
  *     result = sum;
  *   }
- * }}</pre>
+ * }}
+ * </pre>
  *
  * @author Doug Lea
  * @since 1.7

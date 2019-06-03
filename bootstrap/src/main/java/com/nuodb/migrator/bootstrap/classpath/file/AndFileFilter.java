@@ -61,12 +61,15 @@ public class AndFileFilter implements FileFilter {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AndFileFilter)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof AndFileFilter))
+            return false;
 
         AndFileFilter that = (AndFileFilter) o;
 
-        if (fileFilters != null ? !fileFilters.equals(that.fileFilters) : that.fileFilters != null) return false;
+        if (fileFilters != null ? !fileFilters.equals(that.fileFilters) : that.fileFilters != null)
+            return false;
 
         return true;
     }

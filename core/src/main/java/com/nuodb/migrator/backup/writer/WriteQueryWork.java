@@ -66,7 +66,8 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 /**
- * Work executed by a thread, which exports table rows to a row set. Row set is split into chunks if specified.
+ * Work executed by a thread, which exports table rows to a row set. Row set is
+ * split into chunks if specified.
  *
  * @author Sergey Bushik
  */
@@ -86,8 +87,8 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
     private BackupWriterContext backupWriterContext;
     private ValueHandleList valueHandleList;
 
-    public WriteQueryWork(WriteQuery writeQuery, QuerySplit querySplit,
-                          boolean hasNextQuerySplit, BackupWriterManager backupWriterManager) {
+    public WriteQueryWork(WriteQuery writeQuery, QuerySplit querySplit, boolean hasNextQuerySplit,
+            BackupWriterManager backupWriterManager) {
         super(backupWriterManager, backupWriterManager.getBackupWriterContext().getSourceSessionFactory());
         this.writeQuery = writeQuery;
         this.querySplit = querySplit;
@@ -113,13 +114,12 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
             }
         });
 
-        Collection<? extends Field> fields = writeQuery.getColumns() != null ?
-                writeQuery.getColumns() : newFieldList(resultSet);
+        Collection<? extends Field> fields = writeQuery.getColumns() != null ? writeQuery.getColumns()
+                : newFieldList(resultSet);
 
-        valueHandleList = newBuilder(getSession().getConnection(), resultSet).
-                withDialect(dialect).withFields(fields).
-                withTimeZone(backupWriterContext.getTimeZone()).
-                withValueFormatRegistry(backupWriterContext.getValueFormatRegistry()).build();
+        valueHandleList = newBuilder(getSession().getConnection(), resultSet).withDialect(dialect).withFields(fields)
+                .withTimeZone(backupWriterContext.getTimeZone())
+                .withValueFormatRegistry(backupWriterContext.getValueFormatRegistry()).build();
 
         RowSet rowSet = writeQuery.getRowSet();
         if (isEmpty(rowSet.getColumns())) {
@@ -131,8 +131,8 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
         }
         rowSet.setName(getRowSetName());
 
-        output = backupWriterContext.getFormatFactory().createOutput(
-                backupWriterContext.getFormat(), backupWriterContext.getFormatAttributes());
+        output = backupWriterContext.getFormatFactory().createOutput(backupWriterContext.getFormat(),
+                backupWriterContext.getFormatAttributes());
         output.setRowSet(rowSet);
 
         chunks = newArrayList();
@@ -157,8 +157,8 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
             Row row = new Row(chunk, values, number);
             int index = 0;
             for (ValueHandle valueHandle : valueHandleList) {
-                values[index++] = valueHandle.getValueFormat().getValue(
-                        valueHandle.getJdbcValueAccess(), valueHandle.getJdbcValueAccessOptions());
+                values[index++] = valueHandle.getValueFormat().getValue(valueHandle.getJdbcValueAccess(),
+                        valueHandle.getJdbcValueAccessOptions());
             }
             output.writeValues(values);
             chunk.incrementRowCount();
@@ -221,8 +221,8 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
             rowSetName = table.getQualifiedName(null);
         } else {
             RowSet rowSet = writeQuery.getRowSet();
-            int rowSetIndex = indexOf(filter(rowSet.getBackup().getRowSets(),
-                    instanceOf(QueryRowSet.class)), equalTo(rowSet));
+            int rowSetIndex = indexOf(filter(rowSet.getBackup().getRowSets(), instanceOf(QueryRowSet.class)),
+                    equalTo(rowSet));
             rowSetName = StringUtils.join(asList(QUERY, rowSetIndex + 1), "-");
         }
         return lowerCase(rowSetName);
@@ -254,7 +254,6 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
 
     @Override
     public String toString() {
-        return ObjectUtils.toString(this,
-                asList("writeQuery", "querySplit", "hasNextQuerySplit"));
+        return ObjectUtils.toString(this, asList("writeQuery", "querySplit", "hasNextQuerySplit"));
     }
 }

@@ -80,7 +80,7 @@ public class Migrator {
         Throwable failure = jobExecutor.getJobStatus().getFailure();
         if (failure != null) {
             if (failure instanceof MigratorException) {
-                throw (MigratorException)failure;
+                throw (MigratorException) failure;
             } else {
                 throw new MigratorException(failure);
             }

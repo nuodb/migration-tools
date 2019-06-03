@@ -193,23 +193,33 @@ public class Sequence extends IdentifiableBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         Sequence sequence = (Sequence) o;
 
-        if (cycle != sequence.cycle) return false;
-        if (order != sequence.order) return false;
-        if (temporary != sequence.temporary) return false;
-        if (cache != null ? !cache.equals(sequence.cache) : sequence.cache != null) return false;
+        if (cycle != sequence.cycle)
+            return false;
+        if (order != sequence.order)
+            return false;
+        if (temporary != sequence.temporary)
+            return false;
+        if (cache != null ? !cache.equals(sequence.cache) : sequence.cache != null)
+            return false;
         if (lastValue != null ? !lastValue.equals(sequence.lastValue) : sequence.lastValue != null)
             return false;
         if (incrementBy != null ? !incrementBy.equals(sequence.incrementBy) : sequence.incrementBy != null)
             return false;
-        if (maxValue != null ? !maxValue.equals(sequence.maxValue) : sequence.maxValue != null) return false;
-        if (minValue != null ? !minValue.equals(sequence.minValue) : sequence.minValue != null) return false;
-        if (startWith != null ? !startWith.equals(sequence.startWith) : sequence.startWith != null) return false;
+        if (maxValue != null ? !maxValue.equals(sequence.maxValue) : sequence.maxValue != null)
+            return false;
+        if (minValue != null ? !minValue.equals(sequence.minValue) : sequence.minValue != null)
+            return false;
+        if (startWith != null ? !startWith.equals(sequence.startWith) : sequence.startWith != null)
+            return false;
 
         return true;
     }

@@ -86,13 +86,17 @@ public class JarDirClassPath implements FileClassPath {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JarDirClassPath)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof JarDirClassPath))
+            return false;
 
         JarDirClassPath that = (JarDirClassPath) o;
 
-        if (!dir.equals(that.dir)) return false;
-        if (!fileFilter.equals(that.fileFilter)) return false;
+        if (!dir.equals(that.dir))
+            return false;
+        if (!fileFilter.equals(that.fileFilter))
+            return false;
 
         return true;
     }

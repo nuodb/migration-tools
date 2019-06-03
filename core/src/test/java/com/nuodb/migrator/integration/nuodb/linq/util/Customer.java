@@ -38,8 +38,7 @@ public class Customer {
     private String region;
     private List<Order> list1;
 
-    public Customer(String companyname, int month, String customerid,
-                    String region, List<Order> list1) {
+    public Customer(String companyname, int month, String customerid, String region, List<Order> list1) {
         this.companyname = companyname;
         this.month = month;
         this.customerid = customerid;
@@ -92,10 +91,8 @@ public class Customer {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result
-                + ((companyname == null) ? 0 : companyname.hashCode());
-        result = prime * result
-                + ((customerid == null) ? 0 : customerid.hashCode());
+        result = prime * result + ((companyname == null) ? 0 : companyname.hashCode());
+        result = prime * result + ((customerid == null) ? 0 : customerid.hashCode());
         result = prime * result + ((list1 == null) ? 0 : list1.hashCode());
         result = prime * result + month;
         result = prime * result + ((region == null) ? 0 : region.hashCode());
@@ -138,9 +135,8 @@ public class Customer {
 
     @Override
     public String toString() {
-        return "Customer [companyname=" + companyname + ", month=" + month
-                + ", customerid=" + customerid + ", region=" + region
-                + ", list1=" + list1 + "]";
+        return "Customer [companyname=" + companyname + ", month=" + month + ", customerid=" + customerid + ", region="
+                + region + ", list1=" + list1 + "]";
     }
 
     public static Comparator<Customer> getSortBasedOnCustomerID() {

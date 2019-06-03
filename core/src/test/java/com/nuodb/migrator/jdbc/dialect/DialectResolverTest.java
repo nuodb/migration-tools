@@ -54,11 +54,11 @@ public class DialectResolverTest {
         assertTrue(dialectResolver.resolve(new DatabaseInfo("MySQL", "5.5.5.28", 5, 5)) instanceof MySQLDialect);
         assertTrue(dialectResolver.resolve(new DatabaseInfo("PostgreSQL", "9.2.3", 2, 9)) instanceof PostgreSQLDialect);
         assertTrue(dialectResolver.resolve(new DatabaseInfo("Oracle",
-                        "Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production\n" +
-                        "With the Partitioning, OLAP, Data Mining and Real Application Testing options", 2, 11))
-                instanceof OracleDialect);
-        assertTrue(dialectResolver.resolve(
-                new DatabaseInfo("Microsoft SQL Server", "8", 0, 8)) instanceof MSSQLServerDialect);
+                "Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production\n"
+                        + "With the Partitioning, OLAP, Data Mining and Real Application Testing options",
+                2, 11)) instanceof OracleDialect);
+        assertTrue(dialectResolver
+                .resolve(new DatabaseInfo("Microsoft SQL Server", "8", 0, 8)) instanceof MSSQLServerDialect);
         assertTrue(dialectResolver.resolve(
                 new DatabaseInfo("Microsoft SQL Server", "11.00.3339", 0, 11)) instanceof MSSQLServer2005Dialect);
         assertNotNull(dialectResolver.resolve(new DatabaseInfo("DB2", "DSN10015", 10, 1)));

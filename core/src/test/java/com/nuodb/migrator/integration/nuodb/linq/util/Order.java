@@ -33,8 +33,7 @@ public class Order {
     double total;
     String customerid;
 
-    public Order(String orderid, String orderdate, double total,
-                 String customerid) {
+    public Order(String orderid, String orderdate, double total, String customerid) {
         this.orderid = orderid;
         this.orderdate = orderdate;
         this.total = total;
@@ -61,10 +60,8 @@ public class Order {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result
-                + ((customerid == null) ? 0 : customerid.hashCode());
-        result = prime * result
-                + ((orderdate == null) ? 0 : orderdate.hashCode());
+        result = prime * result + ((customerid == null) ? 0 : customerid.hashCode());
+        result = prime * result + ((orderdate == null) ? 0 : orderdate.hashCode());
         result = prime * result + ((orderid == null) ? 0 : orderid.hashCode());
         long temp;
         temp = Double.doubleToLongBits(total);
@@ -96,20 +93,16 @@ public class Order {
                 return false;
         } else if (!orderid.equals(other.orderid))
             return false;
-        if (Double.doubleToLongBits(total) != Double
-                .doubleToLongBits(other.total))
+        if (Double.doubleToLongBits(total) != Double.doubleToLongBits(other.total))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "Order [orderid=" + orderid + ", orderdate=" + orderdate
-                + ", total=" + total + ", customerid=" + customerid
-                + ", getOrderid()=" + getOrderid() + ", getOrderdate()="
-                + getOrderdate() + ", getTotal()=" + getTotal()
-                + ", getCustomerid()=" + getCustomerid() + ", hashCode()="
-                + hashCode() + ", getClass()=" + getClass() + ", toString()="
-                + super.toString() + "]";
+        return "Order [orderid=" + orderid + ", orderdate=" + orderdate + ", total=" + total + ", customerid="
+                + customerid + ", getOrderid()=" + getOrderid() + ", getOrderdate()=" + getOrderdate() + ", getTotal()="
+                + getTotal() + ", getCustomerid()=" + getCustomerid() + ", hashCode()=" + hashCode() + ", getClass()="
+                + getClass() + ", toString()=" + super.toString() + "]";
     }
 }

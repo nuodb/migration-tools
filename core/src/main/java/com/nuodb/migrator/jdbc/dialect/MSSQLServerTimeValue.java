@@ -38,7 +38,8 @@ import java.sql.Types;
 import java.util.Map;
 
 /**
- * MSSQL Server TIME type supports fractional second and should be extracted as string.
+ * MSSQL Server TIME type supports fractional second and should be extracted as
+ * string.
  *
  * @author Sergey Bushik
  */
@@ -57,8 +58,8 @@ public class MSSQLServerTimeValue extends JdbcTypeValueBase<String> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, String value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setString(index, value);
     }
 }

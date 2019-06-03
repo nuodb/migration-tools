@@ -42,13 +42,12 @@ public class TriggerTranslatorBase<S extends TriggerScript> extends TranslatorBa
         super(sourceDatabaseInfo, targetDatabaseInfo, TriggerScript.class);
     }
 
-    public TriggerTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                 Class<? extends S> scriptClass) {
+    public TriggerTranslatorBase(DatabaseInfo sourceDatabaseInfo, Class<? extends S> scriptClass) {
         super(sourceDatabaseInfo, scriptClass);
     }
 
     public TriggerTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                 Class<? extends S> scriptClass) {
+            Class<? extends S> scriptClass) {
         super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
     }
 

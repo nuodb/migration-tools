@@ -44,60 +44,52 @@ import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
  */
 public class JdbcTypeAliasMapTest {
 
-	private DialectResolver dialectResolver;
-	private Dialect dialectMSSQL;
-	private Dialect dialectNuoDB;
+    private DialectResolver dialectResolver;
+    private Dialect dialectMSSQL;
+    private Dialect dialectNuoDB;
 
-	@BeforeMethod
-	public void init() {
-		dialectResolver = new SimpleDialectResolver();
-		dialectMSSQL = dialectResolver.resolve(new DatabaseInfo(
-				"Microsoft SQL Server"));
-		dialectNuoDB = dialectResolver.resolve(new DatabaseInfo(
-                "NuoDB"));
-	}
+    @BeforeMethod
+    public void init() {
+        dialectResolver = new SimpleDialectResolver();
+        dialectMSSQL = dialectResolver.resolve(new DatabaseInfo("Microsoft SQL Server"));
+        dialectNuoDB = dialectResolver.resolve(new DatabaseInfo("NuoDB"));
+    }
 
-	@Test(dataProvider = "getTypeAliasNameMSSQL")
-	public void testJdbcTypeAliasMSSQL(JdbcType jdbcType, String expected) {
+    @Test(dataProvider = "getTypeAliasNameMSSQL")
+    public void testJdbcTypeAliasMSSQL(JdbcType jdbcType, String expected) {
 
-		String actual = dialectMSSQL.getTypeName(new DatabaseInfo(
-				"Microsoft SQL Server"), jdbcType);
-		Assert.assertEquals(expected, actual);
-	}
+        String actual = dialectMSSQL.getTypeName(new DatabaseInfo("Microsoft SQL Server"), jdbcType);
+        Assert.assertEquals(expected, actual);
+    }
 
-	@Test(dataProvider = "getTypeAliasNameOracle")
-	public void testJdbcTypeAliasOracle(JdbcType jdbcType) {
+    @Test(dataProvider = "getTypeAliasNameOracle")
+    public void testJdbcTypeAliasOracle(JdbcType jdbcType) {
 
-	    String actual = dialectNuoDB.getTypeName(new DatabaseInfo("Oracle"), jdbcType);
-        Assert.assertEquals(actual,"BLOB" );
-	}
+        String actual = dialectNuoDB.getTypeName(new DatabaseInfo("Oracle"), jdbcType);
+        Assert.assertEquals(actual, "BLOB");
+    }
 
-	@DataProvider(name = "getTypeAliasNameMSSQL")
-	public Object[][] createGetTypeNameDataMSSQL() {
-		return new Object[][] {
-				{ getJdbcType(12, "UNIQUEIDENTIFIER", 36), "VARCHAR(36)" },
-				{ getJdbcType(2005, "NTEXT", 0), "CLOB" } 
-		};
-	}
+    @DataProvider(name = "getTypeAliasNameMSSQL")
+    public Object[][] createGetTypeNameDataMSSQL() {
+        return new Object[][] { { getJdbcType(12, "UNIQUEIDENTIFIER", 36), "VARCHAR(36)" },
+                { getJdbcType(2005, "NTEXT", 0), "CLOB" } };
+    }
 
-	   @DataProvider(name = "getTypeAliasNameOracle")
-	    public Object[][] createGetTypeNameDataOracle() {
-	       return new Object[][] {
-	                { getJdbcType(OTHER,"ARRAY")},
-	                { getJdbcType(OTHER, "STRUCT")},
-	                { getJdbcType(OTHER, "REF")}
-	        };
-	    }
+    @DataProvider(name = "getTypeAliasNameOracle")
+    public Object[][] createGetTypeNameDataOracle() {
+        return new Object[][] { { getJdbcType(OTHER, "ARRAY") }, { getJdbcType(OTHER, "STRUCT") },
+                { getJdbcType(OTHER, "REF") } };
+    }
 
-	private JdbcType getJdbcType(int typeCode, String typeName, int size) {
-		JdbcType jdbcType = new JdbcType();
-		jdbcType.setTypeCode(typeCode);
-		jdbcType.setTypeName(typeName);
-		jdbcType.setSize((long)size);
-		jdbcType.setPrecision(size);
-		return jdbcType;
+    private JdbcType getJdbcType(int typeCode, String typeName, int size) {
+        JdbcType jdbcType = new JdbcType();
+        jdbcType.setTypeCode(typeCode);
+        jdbcType.setTypeName(typeName);
+        jdbcType.setSize((long) size);
+        jdbcType.setPrecision(size);
+        return jdbcType;
 
-	}
+    }
 
     private JdbcType getJdbcType(int typeCode, String typeName) {
         JdbcType jdbcType = new JdbcType();

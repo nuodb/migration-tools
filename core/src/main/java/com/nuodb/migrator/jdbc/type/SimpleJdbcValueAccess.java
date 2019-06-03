@@ -49,7 +49,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
     private Field field;
 
     public SimpleJdbcValueAccess(JdbcValueGetter<T> jdbcValueGetter, Connection connection, ResultSet resultSet,
-                                 int index, Field field) throws SQLException {
+            int index, Field field) throws SQLException {
         this.jdbcValueGetter = jdbcValueGetter;
         this.connection = connection;
         this.resultSet = resultSet;
@@ -57,8 +57,8 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
         this.field = field;
     }
 
-    public SimpleJdbcValueAccess(JdbcValueSetter jdbcValueSetter, Connection connection,
-                                 PreparedStatement statement, int index, Field field) throws SQLException {
+    public SimpleJdbcValueAccess(JdbcValueSetter jdbcValueSetter, Connection connection, PreparedStatement statement,
+            int index, Field field) throws SQLException {
         this.jdbcValueSetter = jdbcValueSetter;
         this.connection = connection;
         this.statement = statement;

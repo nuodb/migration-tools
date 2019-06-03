@@ -43,14 +43,13 @@ import static java.lang.Integer.MAX_VALUE;
  *
  * @author Sergey Bushik
  */
-public class ArgumentBuilderImpl<O extends Argument>
-        extends OptionBuilderBase<O> implements ArgumentBuilder<O> {
+public class ArgumentBuilderImpl<O extends Argument> extends OptionBuilderBase<O> implements ArgumentBuilder<O> {
 
     private int minimum = 0;
     private int maximum = 1;
     private int minimumValue = 0;
     private int maximumValue = MAX_VALUE;
-    
+
     private List<Object> defaultValues = Lists.newArrayList();
     private Collection<String> helpValues;
 

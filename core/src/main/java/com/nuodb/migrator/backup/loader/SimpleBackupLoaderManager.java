@@ -43,8 +43,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * @author Sergey Bushik
  */
-public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderListener>
-        implements BackupLoaderManager {
+public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderListener> implements BackupLoaderManager {
 
     private BackupLoaderSync backupLoaderSync;
     private BackupLoaderContext backupLoaderContext;
@@ -149,8 +148,8 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
     public void setBackupLoaderContext(BackupLoaderContext backupLoaderContext) {
         isNotNull(backupLoaderContext, "Backup loader context is required");
         this.backupLoaderContext = backupLoaderContext;
-        this.backupLoaderSync = new BackupLoaderSync(
-                backupLoaderContext.isLoadData(), backupLoaderContext.isLoadSchema());
+        this.backupLoaderSync = new BackupLoaderSync(backupLoaderContext.isLoadData(),
+                backupLoaderContext.isLoadSchema());
     }
 
     @Override

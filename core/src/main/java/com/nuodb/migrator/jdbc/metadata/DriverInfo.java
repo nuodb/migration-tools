@@ -30,7 +30,6 @@ package com.nuodb.migrator.jdbc.metadata;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
-
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.io.Serializable;
@@ -76,7 +75,8 @@ public class DriverInfo implements Serializable {
         try {
             url = metaData.getURL();
             if (!url.equalsIgnoreCase(null) && url.contains(MySQL)) {
-                validateJdbcDriverVersion(metaData.getDriverVersion(), metaData.getJDBCMajorVersion(), metaData.getJDBCMinorVersion());
+                validateJdbcDriverVersion(metaData.getDriverVersion(), metaData.getJDBCMajorVersion(),
+                        metaData.getJDBCMinorVersion());
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -91,7 +91,8 @@ public class DriverInfo implements Serializable {
 
     protected void logErrorMessage(String dname) {
         if (logger.isErrorEnabled()) {
-            logger.error((format( "JDBC Driver "+dname+" "+" version is not applicable for Migrator , Use latest version of the driver ")));
+            logger.error((format("JDBC Driver " + dname + " "
+                    + " version is not applicable for Migrator , Use latest version of the driver ")));
         }
         System.exit(DRIVER_ERROR);
     }
@@ -130,15 +131,21 @@ public class DriverInfo implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         DriverInfo that = (DriverInfo) o;
 
-        if (majorVersion != that.majorVersion) return false;
-        if (minorVersion != that.minorVersion) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (version != null ? !version.equals(that.version) : that.version != null) return false;
+        if (majorVersion != that.majorVersion)
+            return false;
+        if (minorVersion != that.minorVersion)
+            return false;
+        if (name != null ? !name.equals(that.name) : that.name != null)
+            return false;
+        if (version != null ? !version.equals(that.version) : that.version != null)
+            return false;
 
         return true;
     }

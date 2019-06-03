@@ -62,8 +62,8 @@ public class XmlAliasTypeMapper<T> implements XmlReadHandler<T> {
     public T read(InputNode input, Class<? extends T> type, XmlReadContext context) {
         Class<? extends T> aliasClass = lookupType(input, type);
         if (aliasClass == null) {
-            throw new XmlPersisterException(format("Unable to resolve %s name to class",
-                    get(input, getTypeAttribute())));
+            throw new XmlPersisterException(
+                    format("Unable to resolve %s name to class", get(input, getTypeAttribute())));
         }
         return context.read(input, aliasClass);
     }
@@ -111,14 +111,19 @@ public class XmlAliasTypeMapper<T> implements XmlReadHandler<T> {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             Alias that = (Alias) o;
 
-            if (name != null ? !name.equals(that.name) : that.name != null) return false;
-            if (element != null ? !element.equals(that.element) : that.element != null) return false;
-            if (namespace != null ? !namespace.equals(that.namespace) : that.namespace != null) return false;
+            if (name != null ? !name.equals(that.name) : that.name != null)
+                return false;
+            if (element != null ? !element.equals(that.element) : that.element != null)
+                return false;
+            if (namespace != null ? !namespace.equals(that.namespace) : that.namespace != null)
+                return false;
             return true;
         }
 

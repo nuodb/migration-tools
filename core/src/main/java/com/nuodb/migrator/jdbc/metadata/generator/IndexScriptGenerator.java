@@ -54,7 +54,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     @Override
     public Collection<Script> getCreateScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         /**
-         *  Drop all indexes other than BTREE
+         * Drop all indexes other than BTREE
          */
         if ((index.getType() != null) && (!index.isBtree())) {
             if (logger.isWarnEnabled()) {
@@ -79,7 +79,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
             buffer.append(" ON ");
             buffer.append(scriptGeneratorManager.getQualifiedName(index.getTable()));
             buffer.append(" (");
-            for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
+            for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext();) {
                 Column column = iterator.next();
                 buffer.append(scriptGeneratorManager.getName(column));
                 if (iterator.hasNext()) {
@@ -95,7 +95,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     @Override
     public Collection<Script> getDropScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         /**
-         *  Drop all indexes other than BTREE
+         * Drop all indexes other than BTREE
          */
         if ((index.getType() != null) && (!index.isBtree())) {
             if (logger.isWarnEnabled()) {
@@ -104,7 +104,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
             return emptySet();
         }
 
-       if (index.getExpression() != null) {
+        if (index.getExpression() != null) {
             if (logger.isWarnEnabled()) {
                 logger.warn(format("Index expressions are not supported %s", index));
             }
@@ -143,7 +143,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
         }
         buffer.append("(");
         boolean nullable = false;
-        for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext();) {
             Column column = iterator.next();
             if (column.isNullable()) {
                 nullable = true;

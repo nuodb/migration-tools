@@ -159,29 +159,39 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         ScriptGeneratorJobSpecBase that = (ScriptGeneratorJobSpecBase) o;
 
-        if (metaDataFilterManager != null ? !metaDataFilterManager.equals(that.metaDataFilterManager) :
-                that.metaDataFilterManager != null) return false;
-        if (groupScriptsBy != that.groupScriptsBy) return false;
-        if (identifierNormalizer != null ? !identifierNormalizer.equals(that.identifierNormalizer) :
-                that.identifierNormalizer != null) return false;
-        if (identifierQuoting != null ? !identifierQuoting.equals(that.identifierQuoting) :
-                that.identifierQuoting != null)
+        if (metaDataFilterManager != null ? !metaDataFilterManager.equals(that.metaDataFilterManager)
+                : that.metaDataFilterManager != null)
+            return false;
+        if (groupScriptsBy != that.groupScriptsBy)
+            return false;
+        if (identifierNormalizer != null ? !identifierNormalizer.equals(that.identifierNormalizer)
+                : that.identifierNormalizer != null)
+            return false;
+        if (identifierQuoting != null ? !identifierQuoting.equals(that.identifierQuoting)
+                : that.identifierQuoting != null)
             return false;
         if (jdbcTypeSpecs != null ? !jdbcTypeSpecs.equals(that.jdbcTypeSpecs) : that.jdbcTypeSpecs != null)
             return false;
-        if (metaDataSpec != null ? !metaDataSpec.equals(that.metaDataSpec) : that.metaDataSpec != null) return false;
+        if (metaDataSpec != null ? !metaDataSpec.equals(that.metaDataSpec) : that.metaDataSpec != null)
+            return false;
         if (namingStrategies != null ? !namingStrategies.equals(that.namingStrategies) : that.namingStrategies != null)
             return false;
-        if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null) return false;
-        if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null) return false;
-        if (translationConfig != null ? !translationConfig.equals(that.translationConfig) :
-                that.translationConfig != null) return false;
+        if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null)
+            return false;
+        if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null)
+            return false;
+        if (translationConfig != null ? !translationConfig.equals(that.translationConfig)
+                : that.translationConfig != null)
+            return false;
         return true;
     }
 

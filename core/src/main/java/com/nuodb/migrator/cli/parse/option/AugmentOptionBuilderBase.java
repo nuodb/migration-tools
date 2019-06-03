@@ -37,8 +37,8 @@ import com.nuodb.migrator.cli.parse.Trigger;
 /**
  * @author Sergey Bushik
  */
-public abstract class AugmentOptionBuilderBase<O extends AugmentOption>
-        extends OptionBuilderBase<O> implements AugmentOptionBuilder<O> {
+public abstract class AugmentOptionBuilderBase<O extends AugmentOption> extends OptionBuilderBase<O>
+        implements AugmentOptionBuilder<O> {
 
     private Argument argument;
     private Group group;

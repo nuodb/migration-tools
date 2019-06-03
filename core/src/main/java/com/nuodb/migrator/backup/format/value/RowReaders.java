@@ -43,9 +43,8 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
  */
 public class RowReaders {
 
-    public static RowReader newSequentialRowReader(RowSet rowSet, BackupOps backupOps,
-                                                   FormatFactory formatFactory,
-                                                   Map<String, Object> formatAttributes) {
+    public static RowReader newSequentialRowReader(RowSet rowSet, BackupOps backupOps, FormatFactory formatFactory,
+            Map<String, Object> formatAttributes) {
         return new SequentialRowReader(rowSet, backupOps, formatFactory, formatAttributes);
     }
 
@@ -70,9 +69,8 @@ public class RowReaders {
         private Row row;
         private volatile long number;
 
-        SequentialRowReader(RowSet rowSet, BackupOps backupOps,
-                            FormatFactory formatFactory,
-                            Map<String, Object> formatAttributes) {
+        SequentialRowReader(RowSet rowSet, BackupOps backupOps, FormatFactory formatFactory,
+                Map<String, Object> formatAttributes) {
             this.rowSet = rowSet;
             this.backupOps = backupOps;
             this.formatFactory = formatFactory;

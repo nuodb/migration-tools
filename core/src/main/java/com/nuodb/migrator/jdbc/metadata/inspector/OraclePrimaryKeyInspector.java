@@ -65,5 +65,3 @@ public class OraclePrimaryKeyInspector extends SimplePrimaryKeyInspector {
         return new ParameterizedQuery(query, parameters);
     }
 }
-
-

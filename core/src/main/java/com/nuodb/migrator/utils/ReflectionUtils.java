@@ -128,7 +128,7 @@ public class ReflectionUtils {
     }
 
     public static <T> T newInstance(Class<T> type, Object argument) {
-        return newInstance(type, new Object[]{argument});
+        return newInstance(type, new Object[] { argument });
     }
 
     public static <T> T newInstance(Class<T> type, Object[] arguments) {
@@ -150,8 +150,7 @@ public class ReflectionUtils {
         }
     }
 
-    public static <T> T invokeMethodNoWrap(Object object, Method method, Object... arguments)
-            throws Throwable {
+    public static <T> T invokeMethodNoWrap(Object object, Method method, Object... arguments) throws Throwable {
         try {
             if (arguments == null) {
                 arguments = EMPTY_OBJECT_ARRAY;
@@ -172,10 +171,11 @@ public class ReflectionUtils {
     }
 
     private static ReflectionException wrap(Throwable cause, Method method, Object object) {
-        return isStatic(method.getModifiers()) ?
-                new ReflectionException(format("Failed to invoke static %s method", method), cause) :
-                new ReflectionException(format("Failed to invoke %s method on object of %s class", method,
-                        object.getClass().getName()), cause);
+        return isStatic(method.getModifiers())
+                ? new ReflectionException(format("Failed to invoke static %s method", method), cause)
+                : new ReflectionException(
+                        format("Failed to invoke %s method on object of %s class", method, object.getClass().getName()),
+                        cause);
     }
 
     public static Method getMethodNoWrap(Class type, String name, Class[] argumentTypes) throws Exception {

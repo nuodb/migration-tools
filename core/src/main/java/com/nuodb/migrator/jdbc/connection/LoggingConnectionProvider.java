@@ -57,16 +57,13 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
     private static final String GET_CONNECTION_METHOD = "getConnection";
     private static final String CREATE_STATEMENT_METHOD = "createStatement";
     private static final String PREPARE_STATEMENT_METHOD = "prepareStatement";
-    private static final Collection<String> EXECUTE_METHODS = newArrayList(
-            "execute", "executeQuery", "executeUpdate");
+    private static final Collection<String> EXECUTE_METHODS = newArrayList("execute", "executeQuery", "executeUpdate");
     private static final String SET_NULL_METHOD = "setNull";
-    private static final Collection<String> SET_METHODS = newArrayList(
-            "setNull", "setBoolean", "setByte", "setShort", "setInt", "setLong", "setFloat", "setDouble",
-            "setBigDecimal", "setString", "setBytes", "setDate", "setTime", "setTimestamp", "setAsciiStream",
-            "setUnicodeStream", "setBinaryStream", "setObject", "setCharacterStream", "setRef", "setBlob",
-            "setClob", "setArray", "setURL", "setRowId", "setNString", "setNCharacterStream", "setNClob",
-            "setSQLXML"
-    );
+    private static final Collection<String> SET_METHODS = newArrayList("setNull", "setBoolean", "setByte", "setShort",
+            "setInt", "setLong", "setFloat", "setDouble", "setBigDecimal", "setString", "setBytes", "setDate",
+            "setTime", "setTimestamp", "setAsciiStream", "setUnicodeStream", "setBinaryStream", "setObject",
+            "setCharacterStream", "setRef", "setBlob", "setClob", "setArray", "setURL", "setRowId", "setNString",
+            "setNCharacterStream", "setNClob", "setSQLXML");
 
     private final ConnectionProvider connectionProvider;
     private final QueryLogger queryLogger;
@@ -76,14 +73,12 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
         this(connectionProvider, new SimpleQueryFormatFactory());
     }
 
-    public LoggingConnectionProvider(ConnectionProvider connectionProvider,
-                                     QueryFormatFactory queryFormatFactory) {
-        this(connectionProvider, queryFormatFactory,
-                new SimpleQueryLogger(getLogger(LoggingConnectionProvider.class)));
+    public LoggingConnectionProvider(ConnectionProvider connectionProvider, QueryFormatFactory queryFormatFactory) {
+        this(connectionProvider, queryFormatFactory, new SimpleQueryLogger(getLogger(LoggingConnectionProvider.class)));
     }
 
-    public LoggingConnectionProvider(ConnectionProvider connectionProvider,
-                                     QueryFormatFactory queryFormatFactory, QueryLogger queryLogger) {
+    public LoggingConnectionProvider(ConnectionProvider connectionProvider, QueryFormatFactory queryFormatFactory,
+            QueryLogger queryLogger) {
         this.connectionProvider = connectionProvider;
         this.queryFormatFactory = queryFormatFactory;
         this.queryLogger = queryLogger;
@@ -115,38 +110,34 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
         }, newMethodMatcher(Connection.class, GET_META_DATA_METHOD)));
 
         // statement advices
-        connection.addAdvisor(newMethodAdvisor(
-                new MethodInterceptor() {
-                    @Override
-                    public Object invoke(MethodInvocation invocation) throws Throwable {
-                        final AopProxy statement = createAopProxy(invocation.proceed(), Statement.class);
-                        initStatementProxy(connection, statement);
-                        return statement;
-                    }
-                }, new MethodMatcher() {
-                    @Override
-                    public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
-                        return method.getName().startsWith(CREATE_STATEMENT_METHOD);
-                    }
-                }
-        ));
+        connection.addAdvisor(newMethodAdvisor(new MethodInterceptor() {
+            @Override
+            public Object invoke(MethodInvocation invocation) throws Throwable {
+                final AopProxy statement = createAopProxy(invocation.proceed(), Statement.class);
+                initStatementProxy(connection, statement);
+                return statement;
+            }
+        }, new MethodMatcher() {
+            @Override
+            public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
+                return method.getName().startsWith(CREATE_STATEMENT_METHOD);
+            }
+        }));
 
         // prepared statement advices
-        connection.addAdvisor(newMethodAdvisor(
-                new MethodInterceptor() {
-                    @Override
-                    public Object invoke(MethodInvocation invocation) throws Throwable {
-                        final AopProxy statement = createAopProxy(invocation.proceed(), PreparedStatement.class);
-                        initPreparedStatementProxy(connection, statement, (String) invocation.getArguments()[0]);
-                        return statement;
-                    }
-                }, new MethodMatcher() {
-                    @Override
-                    public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
-                        return method.getName().startsWith(PREPARE_STATEMENT_METHOD);
-                    }
-                }
-        ));
+        connection.addAdvisor(newMethodAdvisor(new MethodInterceptor() {
+            @Override
+            public Object invoke(MethodInvocation invocation) throws Throwable {
+                final AopProxy statement = createAopProxy(invocation.proceed(), PreparedStatement.class);
+                initPreparedStatementProxy(connection, statement, (String) invocation.getArguments()[0]);
+                return statement;
+            }
+        }, new MethodMatcher() {
+            @Override
+            public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
+                return method.getName().startsWith(PREPARE_STATEMENT_METHOD);
+            }
+        }));
     }
 
     protected void initMetaDataProxy(final AopProxy connection, final AopProxy metaData) {
@@ -168,23 +159,20 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
             }
         }, newMethodMatcher(Statement.class, GET_CONNECTION_METHOD)));
 
-        // statement.execute(query), statement.executeQuery(query), statement.executeUpdate(query) logs query string
-        statement.addAdvisor(newMethodAdvisor(
-                new MethodInterceptor() {
-                    @Override
-                    public Object invoke(MethodInvocation invocation) throws Throwable {
-                        log((Statement) statement, (String) invocation.getArguments()[0]);
-                        return invocation.proceed();
-                    }
-                },
-                new MethodMatcher() {
-                    @Override
-                    public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
-                        return method.getDeclaringClass() == Statement.class &&
-                                EXECUTE_METHODS.contains(method.getName());
-                    }
-                }
-        ));
+        // statement.execute(query), statement.executeQuery(query),
+        // statement.executeUpdate(query) logs query string
+        statement.addAdvisor(newMethodAdvisor(new MethodInterceptor() {
+            @Override
+            public Object invoke(MethodInvocation invocation) throws Throwable {
+                log((Statement) statement, (String) invocation.getArguments()[0]);
+                return invocation.proceed();
+            }
+        }, new MethodMatcher() {
+            @Override
+            public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
+                return method.getDeclaringClass() == Statement.class && EXECUTE_METHODS.contains(method.getName());
+            }
+        }));
     }
 
     protected void initPreparedStatementProxy(final AopProxy connection, final AopProxy statement, final String query) {
@@ -192,44 +180,38 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
 
         final QueryFormat queryFormat = createQueryFormat((Statement) statement, query);
         // statement.setXXX() capture parameters
-        statement.addAdvisor(newMethodAdvisor(
-                new MethodInterceptor() {
-                    @Override
-                    public Object invoke(MethodInvocation invocation) throws Throwable {
-                        Object[] arguments = invocation.getArguments();
-                        Object parameter = arguments[0];
-                        if (parameter instanceof Integer) {
-                            Object value = SET_NULL_METHOD.equals(invocation.getMethod().getName()) ? null : arguments[1];
-                            queryFormat.setParameter(((Integer) parameter) - 1, value);
-                        }
-                        return invocation.proceed();
-                    }
-                }, new MethodMatcher() {
-                    @Override
-                    public boolean matches(Method method, Class<?> targetClass,
-                                           Object[] arguments) {
-                        return method.getDeclaringClass() == PreparedStatement.class &&
-                                SET_METHODS.contains(method.getName());
-                    }
+        statement.addAdvisor(newMethodAdvisor(new MethodInterceptor() {
+            @Override
+            public Object invoke(MethodInvocation invocation) throws Throwable {
+                Object[] arguments = invocation.getArguments();
+                Object parameter = arguments[0];
+                if (parameter instanceof Integer) {
+                    Object value = SET_NULL_METHOD.equals(invocation.getMethod().getName()) ? null : arguments[1];
+                    queryFormat.setParameter(((Integer) parameter) - 1, value);
                 }
-        ));
-        // statement.execute(), statement.executeQuery(), statement.executeUpdate() logs query string
-        statement.addAdvisor(newMethodAdvisor(
-                new MethodInterceptor() {
-                    @Override
-                    public Object invoke(MethodInvocation invocation) throws Throwable {
-                        log((Statement) statement, queryFormat.format());
-                        return invocation.proceed();
-                    }
-                },
-                new MethodMatcher() {
-                    @Override
-                    public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
-                        return method.getDeclaringClass() == PreparedStatement.class &&
-                                EXECUTE_METHODS.contains(method.getName());
-                    }
-                }
-        ));
+                return invocation.proceed();
+            }
+        }, new MethodMatcher() {
+            @Override
+            public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
+                return method.getDeclaringClass() == PreparedStatement.class && SET_METHODS.contains(method.getName());
+            }
+        }));
+        // statement.execute(), statement.executeQuery(),
+        // statement.executeUpdate() logs query string
+        statement.addAdvisor(newMethodAdvisor(new MethodInterceptor() {
+            @Override
+            public Object invoke(MethodInvocation invocation) throws Throwable {
+                log((Statement) statement, queryFormat.format());
+                return invocation.proceed();
+            }
+        }, new MethodMatcher() {
+            @Override
+            public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
+                return method.getDeclaringClass() == PreparedStatement.class
+                        && EXECUTE_METHODS.contains(method.getName());
+            }
+        }));
     }
 
     protected QueryFormat createQueryFormat(Statement statement, String query) {

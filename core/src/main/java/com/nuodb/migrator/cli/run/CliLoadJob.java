@@ -61,8 +61,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
 
     @Override
     protected Option createOption() {
-        GroupBuilder group = newGroupBuilder().
-                withName(getMessage(LOAD_GROUP_NAME)).withRequired(true);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(LOAD_GROUP_NAME)).withRequired(true);
         group.withOption(createTargetGroup());
         group.withOption(createInputGroup());
         group.withOption(createMigrationModeGroup());
@@ -101,22 +100,16 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
     protected Option createInsertTypeGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(INSERT_TYPE_GROUP_NAME));
 
-        Option replace = newBasicOptionBuilder().
-                withName(REPLACE).
-                withAlias(REPLACE_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(REPLACE_OPTION_DESCRIPTION)).build();
+        Option replace = newBasicOptionBuilder().withName(REPLACE).withAlias(REPLACE_SHORT, OptionFormat.SHORT)
+                .withDescription(getMessage(REPLACE_OPTION_DESCRIPTION)).build();
         group.withOption(replace);
 
-        Option replaceType = newRegexOptionBuilder().
-                withName(TABLE_REPLACE).
-                withDescription(getMessage(TABLE_REPLACE_OPTION_DESCRIPTION)).
-                withRegex(TABLE_REPLACE, 1, LOW).build();
+        Option replaceType = newRegexOptionBuilder().withName(TABLE_REPLACE)
+                .withDescription(getMessage(TABLE_REPLACE_OPTION_DESCRIPTION)).withRegex(TABLE_REPLACE, 1, LOW).build();
         group.withOption(replaceType);
 
-        Option insertType = newRegexOptionBuilder().
-                withName(TABLE_INSERT).
-                withDescription(getMessage(TABLE_INSERT_OPTION_DESCRIPTION)).
-                withRegex(TABLE_INSERT, 1, LOW).build();
+        Option insertType = newRegexOptionBuilder().withName(TABLE_INSERT)
+                .withDescription(getMessage(TABLE_INSERT_OPTION_DESCRIPTION)).withRegex(TABLE_INSERT, 1, LOW).build();
         group.withOption(insertType);
 
         return group.build();
@@ -126,28 +119,21 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
     protected void createExecutorGroup(GroupBuilder group) {
         super.createExecutorGroup(group);
 
-        Option parallelizer = newBasicOptionBuilder().
-                withName(PARALLELIZER).
-                withAlias(PARALLELIZER_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(PARALLELIZER_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(PARALLELIZER_ARGUMENT_NAME)).build()
-                ).build();
+        Option parallelizer = newBasicOptionBuilder().withName(PARALLELIZER)
+                .withAlias(PARALLELIZER_SHORT, OptionFormat.SHORT)
+                .withDescription(getMessage(PARALLELIZER_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(PARALLELIZER_ARGUMENT_NAME)).build()).build();
         group.withOption(parallelizer);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option parallelizerAttributes = newRegexOptionBuilder().
-                withName(PARALLELIZER_ATTRIBUTES).
-                withDescription(getMessage(PARALLELIZER_ATTRIBUTES_OPTION_DESCRIPTION)).
-                withRegex(PARALLELIZER_ATTRIBUTES, 1, LOW).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(PARALLELIZER_ATTRIBUTES_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build()
-                ).build();
+        Option parallelizerAttributes = newRegexOptionBuilder().withName(PARALLELIZER_ATTRIBUTES)
+                .withDescription(getMessage(PARALLELIZER_ATTRIBUTES_OPTION_DESCRIPTION))
+                .withRegex(PARALLELIZER_ATTRIBUTES, 1, LOW)
+                .withArgument(newArgumentBuilder().withName(getMessage(PARALLELIZER_ATTRIBUTES_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build())
+                .build();
         group.withOption(parallelizerAttributes);
     }
 
@@ -172,22 +158,18 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
 
     protected void parseExecutorGroup(OptionSet optionSet, LoadJobSpec jobSpec) {
         jobSpec.setThreads(parseThreadsOption(optionSet, this));
-        String parallelizerValue = (String) optionSet.getValue(
-                PARALLELIZER, PARALLELIZER_TABLE_LEVEL);
+        String parallelizerValue = (String) optionSet.getValue(PARALLELIZER, PARALLELIZER_TABLE_LEVEL);
         Parallelizer parallelizer = createParallelizerMapping().get(parallelizerValue);
         if (parallelizer == null) {
             parallelizer = newInstance(parallelizerValue);
         }
-        parallelizer.setAttributes(parseAttributes(
-                optionSet.<String>getValues(PARALLELIZER_ATTRIBUTES),
+        parallelizer.setAttributes(parseAttributes(optionSet.<String>getValues(PARALLELIZER_ATTRIBUTES),
                 optionSet.getOption(PARALLELIZER_ATTRIBUTES)));
         jobSpec.setParallelizer(parallelizer);
     }
 
-
     protected Map<String, Parallelizer> createParallelizerMapping() {
-        Map<String, Parallelizer> parallelizerMapping =
-                new TreeMap<String, Parallelizer>(CASE_INSENSITIVE_ORDER);
+        Map<String, Parallelizer> parallelizerMapping = new TreeMap<String, Parallelizer>(CASE_INSENSITIVE_ORDER);
         parallelizerMapping.put(PARALLELIZER_TABLE_LEVEL, new TableLevelParallelizer());
         parallelizerMapping.put(PARALLELIZER_ROW_LEVEL, new RowLevelParallelizer());
         return parallelizerMapping;

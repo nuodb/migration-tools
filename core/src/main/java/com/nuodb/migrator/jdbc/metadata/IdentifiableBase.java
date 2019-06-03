@@ -139,12 +139,12 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
     }
 
     public static String getQualifiedName(Dialect dialect, String catalog, String schema, String name,
-                                          Identifiable identifiable) {
+            Identifiable identifiable) {
         return getQualifiedName(dialect, newArrayList(catalog, schema), name, identifiable);
     }
 
-    public static String getQualifiedName(Dialect dialect, Collection<String> qualifiers,
-                                          String name, Identifiable identifiable) {
+    public static String getQualifiedName(Dialect dialect, Collection<String> qualifiers, String name,
+            Identifiable identifiable) {
         if (identifiable == null || identifiable.isQualified()) {
             Collection<String> parts = newArrayList();
             for (String qualifier : qualifiers) {
@@ -168,11 +168,14 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) return true;
-        if (!(object instanceof Identifiable)) return false;
+        if (this == object)
+            return true;
+        if (!(object instanceof Identifiable))
+            return false;
         Identifiable identifiable = (Identifiable) object;
-        if (identifier != null ? !identifier.equals(
-                identifiable.getIdentifier()) : identifiable.getIdentifier() != null) return false;
+        if (identifier != null ? !identifier.equals(identifiable.getIdentifier())
+                : identifiable.getIdentifier() != null)
+            return false;
         return true;
     }
 

@@ -63,12 +63,14 @@ public class OptionValidators {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof OptionProcessorValidator)) return false;
+            if (this == o)
+                return true;
+            if (!(o instanceof OptionProcessorValidator))
+                return false;
             OptionProcessorValidator that = (OptionProcessorValidator) o;
 
-            if (optionValidator != null ? !optionValidator.equals(
-                    that.optionValidator) : that.optionValidator != null) {
+            if (optionValidator != null ? !optionValidator.equals(that.optionValidator)
+                    : that.optionValidator != null) {
                 return false;
             }
             return true;

@@ -54,7 +54,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"unchecked", "RedundantCast", "UnusedParameters"})
+@SuppressWarnings({ "unchecked", "RedundantCast", "UnusedParameters" })
 public abstract class InspectorBase<M extends MetaData, I extends InspectionScope> extends MetaDataHandlerBase
         implements Inspector<M, I> {
 
@@ -64,19 +64,18 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     private Class<? extends InspectionScope> inspectionScopeClass;
 
     protected InspectorBase(Class<? extends MetaData> objectClass,
-                            Class<? extends InspectionScope> inspectionScopeClass) {
+            Class<? extends InspectionScope> inspectionScopeClass) {
         super(objectClass);
         this.inspectionScopeClass = inspectionScopeClass;
     }
 
-    protected InspectorBase(MetaDataType objectType,
-                            Class<? extends InspectionScope> inspectionScopeClass) {
+    protected InspectorBase(MetaDataType objectType, Class<? extends InspectionScope> inspectionScopeClass) {
         super(objectType);
         this.inspectionScopeClass = inspectionScopeClass;
     }
 
     protected InspectorBase(MetaDataType objectType, MetaDataType parentObjectType,
-                            Class<? extends InspectionScope> inspectionScopeClass) {
+            Class<? extends InspectionScope> inspectionScopeClass) {
         super(objectType);
         this.parentObjectType = parentObjectType;
         this.inspectionScopeClass = inspectionScopeClass;
@@ -95,8 +94,9 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     protected Collection<M> getParentObjects(InspectionContext inspectionScope) throws SQLException {
-        return getParentObjectType() != null ?
-                (Collection<M>) inspectionScope.getInspectionResults().getObjects(getParentObjectType()) : null;
+        return getParentObjectType() != null
+                ? (Collection<M>) inspectionScope.getInspectionResults().getObjects(getParentObjectType())
+                : null;
     }
 
     @Override
@@ -105,14 +105,14 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     @Override
-    public void inspectObjects(InspectionContext inspectionContext,
-                               Collection<? extends M> objects) throws SQLException {
+    public void inspectObjects(InspectionContext inspectionContext, Collection<? extends M> objects)
+            throws SQLException {
         inspectScopes(inspectionContext, createInspectionScopes(objects));
     }
 
     @Override
-    public void inspectScopes(InspectionContext inspectionContext,
-                              Collection<? extends I> inspectionScopes) throws SQLException {
+    public void inspectScopes(InspectionContext inspectionContext, Collection<? extends I> inspectionScopes)
+            throws SQLException {
         inspectionContext = createInspectionContext(inspectionContext, inspectionScopes);
         try {
             for (I inspectionScope : inspectionScopes) {
@@ -124,7 +124,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     protected InspectionContext createInspectionContext(InspectionContext inspectionContext,
-                                                        Collection<? extends I> inspectionScopes) throws SQLException {
+            Collection<? extends I> inspectionScopes) throws SQLException {
         return inspectionContext;
     }
 
@@ -166,7 +166,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     protected Statement createStatement(InspectionContext inspectionContext, I inspectionScope,
-                                        ParameterizedQuery query) throws SQLException {
+            ParameterizedQuery query) throws SQLException {
         return createStatement(inspectionContext, query);
     }
 
@@ -187,8 +187,8 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
         return connection.createStatement();
     }
 
-    protected void processStatement(InspectionContext inspectionContext, I inspectionScope,
-                                    Query query, Statement statement) throws SQLException {
+    protected void processStatement(InspectionContext inspectionContext, I inspectionScope, Query query,
+            Statement statement) throws SQLException {
         ResultSet resultSet = openResultSet(inspectionContext, inspectionScope, query, statement);
         try {
             processResultSet(inspectionContext, inspectionScope, query, resultSet);
@@ -198,14 +198,14 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     @Override
-    public void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query,
-                               Statement statement) throws SQLException {
+    public void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query, Statement statement)
+            throws SQLException {
         closeQuietly(statement);
     }
 
     @Override
     public ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,
-                                   Statement statement) throws SQLException {
+            Statement statement) throws SQLException {
         ResultSet resultSet;
         if (statement instanceof PreparedStatement) {
             resultSet = openResultSet(inspectionContext, inspectionScope, (PreparedStatement) statement, query);
@@ -218,7 +218,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope,
-                                      PreparedStatement statement, Query query) throws SQLException {
+            PreparedStatement statement, Query query) throws SQLException {
         int index = 1;
         if (query instanceof ParameterizedQuery) {
             for (Object parameter : ((ParameterizedQuery) query).getParameters()) {
@@ -228,13 +228,13 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
         return statement.executeQuery();
     }
 
-    protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope,
-                                      Statement statement, Query query) throws SQLException {
+    protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope, Statement statement,
+            Query query) throws SQLException {
         return statement.executeQuery(query.toString());
     }
 
-    protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope,
-                                      Query query) throws SQLException {
+    protected ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope, Query query)
+            throws SQLException {
         return openResultSet(inspectionContext, inspectionScope);
     }
 
@@ -243,12 +243,12 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     protected void processResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,
-                                    ResultSet resultSet) throws SQLException {
+            ResultSet resultSet) throws SQLException {
         processResultSet(inspectionContext, inspectionScope, resultSet);
     }
 
-    protected void processResultSet(InspectionContext inspectionContext, I inspectionScope,
-                                    ResultSet resultSet) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, I inspectionScope, ResultSet resultSet)
+            throws SQLException {
         processResultSet(inspectionContext, resultSet);
     }
 
@@ -256,8 +256,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     protected void closeResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,
-                                  ResultSet resultSet)
-            throws SQLException {
+            ResultSet resultSet) throws SQLException {
         closeResultSet(inspectionContext, inspectionScope, resultSet);
     }
 
@@ -273,19 +272,18 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     protected abstract I createInspectionScope(M object);
 
     protected Collection<? extends I> createInspectionScopes(Collection<? extends M> objects) {
-        return newArrayList(
-                transform(objects, new Function<M, I>() {
-                    @Override
-                    public I apply(M object) {
-                        return createInspectionScope(object);
-                    }
-                }));
+        return newArrayList(transform(objects, new Function<M, I>() {
+            @Override
+            public I apply(M object) {
+                return createInspectionScope(object);
+            }
+        }));
     }
 
     @Override
     public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) {
-        return inspectionScope != null && getInspectionScopeClass().isInstance(inspectionScope) &&
-                supportsScope((I) inspectionScope);
+        return inspectionScope != null && getInspectionScopeClass().isInstance(inspectionScope)
+                && supportsScope((I) inspectionScope);
     }
 
     protected boolean supportsScope(I inspectionScope) {

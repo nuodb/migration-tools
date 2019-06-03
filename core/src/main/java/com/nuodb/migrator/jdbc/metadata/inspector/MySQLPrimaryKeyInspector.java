@@ -51,8 +51,7 @@ public class MySQLPrimaryKeyInspector extends SimplePrimaryKeyInspector {
                 table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));
                 inspectionResults.addObject(primaryKey);
             }
-            primaryKey.addColumn(table.addColumn(primaryKeys.getString("COLUMN_NAME")),
-                    primaryKeys.getInt("KEY_SEQ"));
+            primaryKey.addColumn(table.addColumn(primaryKeys.getString("COLUMN_NAME")), primaryKeys.getInt("KEY_SEQ"));
         }
     }
 }

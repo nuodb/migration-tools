@@ -63,8 +63,7 @@ public class XmlDriverInfoHandler extends XmlReadWriteHandlerBase<DriverInfo> {
     }
 
     @Override
-    protected void writeElements(DriverInfo driverInfo, OutputNode output,
-                                 XmlWriteContext context) throws Exception {
+    protected void writeElements(DriverInfo driverInfo, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeElement(output, NAME_ELEMENT, driverInfo.getName());
         context.writeElement(output, VERSION_ELEMENT, driverInfo.getVersion());
         context.writeElement(output, MAJOR_VERSION_ELEMENT, driverInfo.getMajorVersion());

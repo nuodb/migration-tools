@@ -72,7 +72,6 @@ public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
         return insertQuery;
     }
 
-
     public InsertQueryBuilder dialect(Dialect dialect) {
         this.dialect = dialect;
         return this;

@@ -39,9 +39,8 @@ public class Product {
     private int productcount;
     private int unitinstock;
 
-    public Product(int pid, String pname, int stock, String category,
-                   String cheapestproduct, double unitprice, int productcount,
-                   int unitinstock) {
+    public Product(int pid, String pname, int stock, String category, String cheapestproduct, double unitprice,
+            int productcount, int unitinstock) {
         this.pid = pid;
         this.pname = pname;
         this.stock = stock;
@@ -88,10 +87,8 @@ public class Product {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result
-                + ((category == null) ? 0 : category.hashCode());
-        result = prime * result
-                + ((cheapestproduct == null) ? 0 : cheapestproduct.hashCode());
+        result = prime * result + ((category == null) ? 0 : category.hashCode());
+        result = prime * result + ((cheapestproduct == null) ? 0 : cheapestproduct.hashCode());
         result = prime * result + pid;
         result = prime * result + ((pname == null) ? 0 : pname.hashCode());
         result = prime * result + productcount;
@@ -135,26 +132,20 @@ public class Product {
             return false;
         if (unitinstock != other.unitinstock)
             return false;
-        if (Double.doubleToLongBits(unitprice) != Double
-                .doubleToLongBits(other.unitprice))
+        if (Double.doubleToLongBits(unitprice) != Double.doubleToLongBits(other.unitprice))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "Product [pid=" + pid + ", pname=" + pname + ", stock=" + stock
-                + ", category=" + category + ", cheapestproduct="
-                + cheapestproduct + ", unitprice=" + unitprice
-                + ", productcount=" + productcount + ", unitinstock="
-                + unitinstock + ", getPid()=" + getPid() + ", getPname()="
-                + getPname() + ", getStock()=" + getStock()
-                + ", getCategory()=" + getCategory()
-                + ", getCheapestproduct()=" + getCheapestproduct()
-                + ", getUnitprice()=" + getUnitprice() + ", getProductcount()="
-                + getProductcount() + ", getUnitinstock()=" + getUnitinstock()
-                + ", hashCode()=" + hashCode() + ", getClass()=" + getClass()
-                + ", toString()=" + super.toString() + "]";
+        return "Product [pid=" + pid + ", pname=" + pname + ", stock=" + stock + ", category=" + category
+                + ", cheapestproduct=" + cheapestproduct + ", unitprice=" + unitprice + ", productcount=" + productcount
+                + ", unitinstock=" + unitinstock + ", getPid()=" + getPid() + ", getPname()=" + getPname()
+                + ", getStock()=" + getStock() + ", getCategory()=" + getCategory() + ", getCheapestproduct()="
+                + getCheapestproduct() + ", getUnitprice()=" + getUnitprice() + ", getProductcount()="
+                + getProductcount() + ", getUnitinstock()=" + getUnitinstock() + ", hashCode()=" + hashCode()
+                + ", getClass()=" + getClass() + ", toString()=" + super.toString() + "]";
     }
 
     public static Comparator<Product> getSortBasedOnProductName() {

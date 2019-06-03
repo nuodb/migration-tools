@@ -54,19 +54,13 @@ public class TranslatorTest {
         translationManager.addTranslator(new MySQLZeroDateTimeTranslator());
         translationManager.getTranslationConfig().setUseExplicitDefaults(true);
         Dialect dialect = createService(DialectResolver.class).resolve(MYSQL);
-        return new Object[][]{{
-                new SimpleTranslationContext(dialect, session, translationManager),
-                createScript("0000-00-00", DATE, "DATE"),
-                "0001-01-01"
-        }, {
-                new SimpleTranslationContext(dialect, session, translationManager),
-                createScript("00:00:00", TIME, "TIME"),
-                "00:00:00"
-        }, {
-                new SimpleTranslationContext(dialect, session, translationManager),
-                createScript("0000-00-00 00:00:00", TIMESTAMP, "TIMESTAMP"),
-                "0001-01-01 00:00:00"
-        }};
+        return new Object[][] {
+                { new SimpleTranslationContext(dialect, session, translationManager),
+                        createScript("0000-00-00", DATE, "DATE"), "0001-01-01" },
+                { new SimpleTranslationContext(dialect, session, translationManager),
+                        createScript("00:00:00", TIME, "TIME"), "00:00:00" },
+                { new SimpleTranslationContext(dialect, session, translationManager),
+                        createScript("0000-00-00 00:00:00", TIMESTAMP, "TIMESTAMP"), "0001-01-01 00:00:00" } };
     }
 
     @Test(dataProvider = "translate")

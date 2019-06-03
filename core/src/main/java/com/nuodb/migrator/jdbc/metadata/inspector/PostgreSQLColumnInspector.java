@@ -38,7 +38,8 @@ import java.sql.SQLException;
 public class PostgreSQLColumnInspector extends SimpleColumnInspector {
 
     @Override
-    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
+    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column)
+            throws SQLException {
         super.processColumn(inspectionContext, columns, column);
         PostgreSQLColumn.processColumn(inspectionContext, column);
     }

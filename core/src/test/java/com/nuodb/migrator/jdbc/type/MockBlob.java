@@ -117,8 +117,10 @@ class MockBlob implements Blob {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Blob)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Blob))
+            return false;
         Blob blob = (Blob) o;
         try {
             return StreamUtils.equals(getBinaryStream(), blob.getBinaryStream());
@@ -137,8 +139,7 @@ class MockBlob implements Blob {
         if (pattern.length == 0) {
             return 0;
         }
-        outer:
-        for (int i = start; i < buffer.length - pattern.length + 1; i++) {
+        outer: for (int i = start; i < buffer.length - pattern.length + 1; i++) {
             for (int j = 0; j < pattern.length; j++) {
                 if (buffer[i + j] != pattern[j]) {
                     continue outer;

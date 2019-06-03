@@ -82,24 +82,24 @@ public abstract class QuerySplitterBase<S extends Statement> implements QuerySpl
         return hasNextQuerySplit(connection) ? createNextQuerySplit(connection, callback) : null;
     }
 
-    protected QuerySplit createNextQuerySplit(Connection connection,
-                                              StatementCallback<S> callback) throws SQLException {
+    protected QuerySplit createNextQuerySplit(Connection connection, StatementCallback<S> callback)
+            throws SQLException {
         return createQuerySplit(connection, callback, createQueryLimit(connection, splitIndex), splitIndex++);
     }
 
     protected abstract QueryLimit createQueryLimit(Connection connection, int splitIndex) throws SQLException;
 
-    protected abstract S prepareStatement(Connection connection, QueryLimit queryLimit,
-                                          int splitIndex) throws SQLException;
+    protected abstract S prepareStatement(Connection connection, QueryLimit queryLimit, int splitIndex)
+            throws SQLException;
 
-    protected abstract S createStatement(Connection connection, QueryLimit queryLimit,
-                                         int splitIndex) throws SQLException;
+    protected abstract S createStatement(Connection connection, QueryLimit queryLimit, int splitIndex)
+            throws SQLException;
 
-    protected abstract ResultSet executeStatement(S statement, QueryLimit queryLimit,
-                                                  int splitIndex) throws SQLException;
+    protected abstract ResultSet executeStatement(S statement, QueryLimit queryLimit, int splitIndex)
+            throws SQLException;
 
     protected QuerySplit createQuerySplit(final Connection connection, final StatementCallback<S> callback,
-                                          final QueryLimit queryLimit, final int splitIndex) throws SQLException {
+            final QueryLimit queryLimit, final int splitIndex) throws SQLException {
         return new QuerySplit() {
             @Override
             public int getSplitIndex() {
@@ -128,8 +128,8 @@ public abstract class QuerySplitterBase<S extends Statement> implements QuerySpl
 
             @Override
             public ResultSet getResultSet(Connection connection, StatementCallback callback) throws SQLException {
-                final S statement = isParameterized() ? prepareStatement(connection, queryLimit,
-                        splitIndex) : createStatement(connection, queryLimit, splitIndex);
+                final S statement = isParameterized() ? prepareStatement(connection, queryLimit, splitIndex)
+                        : createStatement(connection, queryLimit, splitIndex);
                 if (callback != null) {
                     callback.executeStatement(statement);
                 }

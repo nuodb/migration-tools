@@ -73,7 +73,7 @@ public class InspectionResultsUtils {
     }
 
     public static Schema addSchema(InspectionResults results, String catalogName, String schemaName,
-                                   boolean addObject) {
+            boolean addObject) {
         Catalog catalog = addCatalog(results, catalogName, addObject);
         Schema schema;
         Identifier schemaId = valueOf(schemaName);
@@ -93,7 +93,7 @@ public class InspectionResultsUtils {
     }
 
     public static Table addTable(InspectionResults results, String catalogName, String schemaName, String tableName,
-                                 boolean addObject) {
+            boolean addObject) {
         Schema schema = addSchema(results, catalogName, schemaName, addObject);
         Table table;
         Identifier tableId = valueOf(tableName);

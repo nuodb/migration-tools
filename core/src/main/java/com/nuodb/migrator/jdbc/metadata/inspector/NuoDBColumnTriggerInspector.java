@@ -57,8 +57,8 @@ public class NuoDBColumnTriggerInspector extends TableInspectorBase<Table, Table
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery triggers = new SelectQuery();
         Collection<String> parameters = newArrayList();
-        triggers.columns("SCHEMA", "TABLENAME", "TRIGGERNAME", "TRIGGER_TYPE",
-                "TYPE_MASK", "POSITION", "ACTIVE", "TRIGGER_TEXT");
+        triggers.columns("SCHEMA", "TABLENAME", "TRIGGERNAME", "TRIGGER_TYPE", "TYPE_MASK", "POSITION", "ACTIVE",
+                "TRIGGER_TEXT");
         triggers.from("SYSTEM.TRIGGERS");
 
         String table = tableInspectionScope.getTable();
@@ -71,7 +71,7 @@ public class NuoDBColumnTriggerInspector extends TableInspectorBase<Table, Table
             triggers.where("SCHEMA=?");
             parameters.add(schema);
         }
-        return new ParameterizedQuery(triggers , parameters);
+        return new ParameterizedQuery(triggers, parameters);
     }
 
     @Override
@@ -81,8 +81,8 @@ public class NuoDBColumnTriggerInspector extends TableInspectorBase<Table, Table
         String TRIGGERTIME = null;
         boolean active = false;
         while (triggers.next()) {
-            if (triggers.getInt("TRIGGER_TYPE") == 1 ) {
-                switch(triggers.getInt("TYPE_MASK")) {
+            if (triggers.getInt("TRIGGER_TYPE") == 1) {
+                switch (triggers.getInt("TYPE_MASK")) {
                 case 1:
                     TRIGGERTIME = "BEFORE";
                     TRIGGEREVENT = "INSERT";
@@ -116,7 +116,7 @@ public class NuoDBColumnTriggerInspector extends TableInspectorBase<Table, Table
                     TRIGGEREVENT = "COMMIT";
                     break;
                 }
-                switch(triggers.getInt("ACTIVE")) {
+                switch (triggers.getInt("ACTIVE")) {
                 case 1:
                     active = true;
                     break;
@@ -127,7 +127,8 @@ public class NuoDBColumnTriggerInspector extends TableInspectorBase<Table, Table
 
                 Table table = inspectionResults.getObject(MetaDataType.TABLE, triggers.getString("TABLENAME"));
                 ColumnTrigger columnTrigger = new ColumnTrigger();
-                String columnName = RegexUtils.getRegexGroup(TRIGGERTEXT_REG_EXPRESSION, triggers.getString("TRIGGER_TEXT"), 1);
+                String columnName = RegexUtils.getRegexGroup(TRIGGERTEXT_REG_EXPRESSION,
+                        triggers.getString("TRIGGER_TEXT"), 1);
                 if (!StringUtils.isEmpty(columnName)) {
                     columnTrigger.setColumn(table.getColumn(columnName));
                 }
@@ -142,9 +143,9 @@ public class NuoDBColumnTriggerInspector extends TableInspectorBase<Table, Table
 
     private String getTriggerBody(String tString) {
         String triggerBody = null;
-        if (!tString.isEmpty() ) {
+        if (!tString.isEmpty()) {
             String triggerText[] = tString.split(";");
-            triggerBody = triggerText[0]+ ";";
+            triggerBody = triggerText[0] + ";";
         }
         return triggerBody;
     }

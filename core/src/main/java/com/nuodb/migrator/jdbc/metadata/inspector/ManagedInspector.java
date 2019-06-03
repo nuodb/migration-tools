@@ -39,9 +39,9 @@ import java.sql.Statement;
  */
 public interface ManagedInspector<M extends MetaData, I extends InspectionScope> extends Inspector<M, I> {
 
-    ResultSet openResultSet(ManagedInspectionContext<I> inspectionContext, I inspectionScope,
-                            Query query, Statement statement) throws SQLException;
+    ResultSet openResultSet(ManagedInspectionContext<I> inspectionContext, I inspectionScope, Query query,
+            Statement statement) throws SQLException;
 
-    Statement createStatement(ManagedInspectionContext<I> inspectionContext, I inspectionScope,
-                              Query query) throws SQLException;
+    Statement createStatement(ManagedInspectionContext<I> inspectionContext, I inspectionScope, Query query)
+            throws SQLException;
 }

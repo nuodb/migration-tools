@@ -54,17 +54,21 @@ public class PostgreSQLConnectionGroupValidator extends ConnectionGroupValidator
     protected void validateCatalog(CommandLine commandLine, Option option, String catalog) {
         if (!isEmpty(catalog)) {
             throw new OptionException(
-                    format("Unexpected option %s. PostgreSQL catalogs store meta data and built-in objects, " +
-                            "use %s option to access user data", getCatalogOption(), getSchemaOption()), option
-            );
+                    format("Unexpected option %s. PostgreSQL catalogs store meta data and built-in objects, "
+                            + "use %s option to access user data", getCatalogOption(), getSchemaOption()),
+                    option);
         }
     }
 
     @Override
-    protected void dbUserWarnMessage(String jdbcUsername, String jdbcPassword, String optionUsername, String optionPasssword) {
-        if(!StringUtils.equals(optionUsername, jdbcUsername) || !StringUtils.equals(optionPasssword, jdbcPassword)){
-            logger.warn(format("JDBC URL parameters user: %s passowrd: %s are not matching with commandline options --source.username %s --source.password %s.",jdbcUsername, jdbcPassword, optionUsername,optionPasssword));
-            logger.warn(format("JDBC URL parameters user: %s password: %s are used for database connection", jdbcUsername, jdbcPassword));
+    protected void dbUserWarnMessage(String jdbcUsername, String jdbcPassword, String optionUsername,
+            String optionPasssword) {
+        if (!StringUtils.equals(optionUsername, jdbcUsername) || !StringUtils.equals(optionPasssword, jdbcPassword)) {
+            logger.warn(format(
+                    "JDBC URL parameters user: %s passowrd: %s are not matching with commandline options --source.username %s --source.password %s.",
+                    jdbcUsername, jdbcPassword, optionUsername, optionPasssword));
+            logger.warn(format("JDBC URL parameters user: %s password: %s are used for database connection",
+                    jdbcUsername, jdbcPassword));
         }
     }
 }

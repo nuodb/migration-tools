@@ -53,7 +53,7 @@ public class JdbcUtils {
     }
 
     public static JdbcUrl getJdbcUrl(Connection connection) {
-        return ((ConnectionProxy<DriverConnectionSpec>)connection).getConnectionSpec().getJdbcUrl();
+        return ((ConnectionProxy<DriverConnectionSpec>) connection).getConnectionSpec().getJdbcUrl();
     }
 
     public static void closeQuietly(ResultSet resultSet) {

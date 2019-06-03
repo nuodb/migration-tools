@@ -71,8 +71,8 @@ public class WriteQueriesWork extends WorkRunnableBase {
             while (writeQuery.getQuerySplitter().hasNextQuerySplit(session.getConnection())) {
                 QuerySplit nextQuerySplit = querySplitter.getNextQuerySplit(connection);
                 boolean hasNextQuerySplit = querySplitter.hasNextQuerySplit(connection);
-                WriteQueryWork writeQueryWork = new WriteQueryWork(
-                        writeQuery, nextQuerySplit, hasNextQuerySplit, backupWriterManager);
+                WriteQueryWork writeQueryWork = new WriteQueryWork(writeQuery, nextQuerySplit, hasNextQuerySplit,
+                        backupWriterManager);
                 writeQueryWork.fork();
                 writeQueryWorks.add(writeQueryWork);
             }

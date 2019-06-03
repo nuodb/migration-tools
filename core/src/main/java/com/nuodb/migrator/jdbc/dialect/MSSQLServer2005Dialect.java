@@ -52,8 +52,7 @@ public class MSSQLServer2005Dialect extends MSSQLServerDialect {
     }
 
     @Override
-    public RowCountHandler createRowCountHandler(Table table, Column column, String filter,
-                                                      RowCountType rowCountType) {
+    public RowCountHandler createRowCountHandler(Table table, Column column, String filter, RowCountType rowCountType) {
         return new MSSQLServer2005TableRowCountHandler(this, table, column, filter, rowCountType);
     }
 }

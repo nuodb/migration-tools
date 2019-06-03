@@ -139,15 +139,21 @@ public class ForeignKey extends ConstraintBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         ForeignKey that = (ForeignKey) o;
 
-        if (deferrability != that.deferrability) return false;
-        if (deleteAction != that.deleteAction) return false;
-        if (updateAction != that.updateAction) return false;
+        if (deferrability != that.deferrability)
+            return false;
+        if (deleteAction != that.deleteAction)
+            return false;
+        if (updateAction != that.updateAction)
+            return false;
 
         return true;
     }

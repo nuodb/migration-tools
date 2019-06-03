@@ -81,8 +81,8 @@ public class NuoDBColumnTriggerInspectorTest extends InspectorTestBase {
         given(resultSet.getString("TRIGGER_TEXT")).willReturn("NEW.`f1` = 'NOW'; END_TRIGGER;");
         inspectionResults.addObject(table);
 
-        TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName );
-        getInspectionManager().inspect(getConnection(), inspectionResults,inspectionScope, COLUMN_TRIGGER);
+        TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
+        getInspectionManager().inspect(getConnection(), inspectionResults, inspectionScope, COLUMN_TRIGGER);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<ColumnTrigger> cTriggers = inspectionResults.getObjects(COLUMN_TRIGGER);
@@ -99,6 +99,7 @@ public class NuoDBColumnTriggerInspectorTest extends InspectorTestBase {
         table1.addColumn(column);
         table1.setType(type);
         table1.addTrigger(columnTrigger);
-        assertEquals(get(cTriggers, 0).getTriggerBody()+" END_TRIGGER", table1.getTriggers().iterator().next().getTriggerBody());
+        assertEquals(get(cTriggers, 0).getTriggerBody() + " END_TRIGGER",
+                table1.getTriggers().iterator().next().getTriggerBody());
     }
 }

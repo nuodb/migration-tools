@@ -68,13 +68,17 @@ public class XmlReadStrategyContext extends XmlReadContextBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         XmlReadStrategyContext that = (XmlReadStrategyContext) o;
 
-        if (strategy != null ? !strategy.equals(that.strategy) : that.strategy != null) return false;
+        if (strategy != null ? !strategy.equals(that.strategy) : that.strategy != null)
+            return false;
 
         return true;
     }

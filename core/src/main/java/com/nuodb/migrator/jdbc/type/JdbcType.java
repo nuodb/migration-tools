@@ -60,8 +60,9 @@ public class JdbcType implements Cloneable {
         JdbcTypeDesc jdbcTypeDesc = jdbcType.getJdbcTypeDesc();
         this.jdbcTypeDesc = new JdbcTypeDesc(jdbcTypeDesc.getTypeCode(), jdbcTypeDesc.getTypeName());
         JdbcTypeOptions jdbcTypeOptions = jdbcType.getJdbcTypeOptions();
-        this.jdbcTypeOptions = jdbcTypeOptions != null ? newOptions(
-                jdbcTypeOptions.getSize(), jdbcTypeOptions.getPrecision(), jdbcTypeOptions.getScale()) : new JdbcTypeOptions();
+        this.jdbcTypeOptions = jdbcTypeOptions != null
+                ? newOptions(jdbcTypeOptions.getSize(), jdbcTypeOptions.getPrecision(), jdbcTypeOptions.getScale())
+                : new JdbcTypeOptions();
     }
 
     public int getTypeCode() {
@@ -176,12 +177,15 @@ public class JdbcType implements Cloneable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         JdbcType that = (JdbcType) o;
 
-        if (jdbcTypeDesc != null ? !jdbcTypeDesc.equals(that.jdbcTypeDesc) : that.jdbcTypeDesc != null) return false;
+        if (jdbcTypeDesc != null ? !jdbcTypeDesc.equals(that.jdbcTypeDesc) : that.jdbcTypeDesc != null)
+            return false;
         if (jdbcTypeOptions != null ? !jdbcTypeOptions.equals(that.jdbcTypeOptions) : that.jdbcTypeOptions != null) {
             return false;
         }

@@ -48,8 +48,8 @@ import static java.lang.Long.parseLong;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * An implementation of {@link CliRunAdapter} which assembles dump spec from provided command line after the validation
- * is passed.
+ * An implementation of {@link CliRunAdapter} which assembles dump spec from
+ * provided command line after the validation is passed.
  *
  * @author Sergey Bushik
  */
@@ -61,8 +61,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
 
     @Override
     protected Option createOption() {
-        GroupBuilder group = newGroupBuilder().
-                withName(getMessage(DUMP_GROUP_NAME)).withRequired(true);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(DUMP_GROUP_NAME)).withRequired(true);
         group.withOption(createSourceGroup());
         group.withOption(createOutputGroup());
         group.withOption(createMigrationModeGroup());
@@ -102,30 +101,18 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
-        Option query = newBasicOptionBuilder().
-                withName(QUERY).
-                withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(QUERY_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withMaximum(MAX_VALUE).
-                                withOptionFormat(optionFormat).
-                                withRequired(true).build()
-                ).build();
+        Option query = newBasicOptionBuilder().withName(QUERY).withDescription(getMessage(QUERY_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(QUERY_ARGUMENT_NAME)).withMinimum(1)
+                        .withMaximum(MAX_VALUE).withOptionFormat(optionFormat).withRequired(true).build())
+                .build();
         group.withOption(query);
 
         return group.build();
     }
 
     protected Option createQueryLimitOption() {
-        return newBasicOptionBuilder().
-                withName(QUERY_LIMIT).
-                withDescription(getMessage(QUERY_LIMIT_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(QUERY_LIMIT_ARGUMENT_NAME)).build()
-                ).build();
+        return newBasicOptionBuilder().withName(QUERY_LIMIT).withDescription(getMessage(QUERY_LIMIT_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(QUERY_LIMIT_ARGUMENT_NAME)).build()).build();
     }
 
     protected void parseDataMigrationGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
@@ -156,26 +143,16 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option tableType = newBasicOptionBuilder().
-                withName(TABLE_TYPE).
-                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
+        Option tableType = newBasicOptionBuilder().withName(TABLE_TYPE)
+                .withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).withMaximum(MAX_VALUE).build())
+                .build();
         group.withOption(tableType);
 
-        Option metaData = newRegexOptionBuilder().
-                withName(META_DATA).
-                withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).
-                withRegex(META_DATA, 1, LOW).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(META_DATA_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withMinimum(1).withMaximum(MAX_VALUE).build()
-                )
+        Option metaData = newRegexOptionBuilder().withName(META_DATA)
+                .withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).withRegex(META_DATA, 1, LOW)
+                .withArgument(newArgumentBuilder().withName(getMessage(META_DATA_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build())
                 .build();
         group.withOption(metaData);
         return group.build();

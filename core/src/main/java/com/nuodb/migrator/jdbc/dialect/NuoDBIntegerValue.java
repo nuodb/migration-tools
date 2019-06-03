@@ -46,21 +46,22 @@ public class NuoDBIntegerValue extends JdbcTypeValueBase<BigDecimal> {
     public static final JdbcTypeValue INSTANCE = new NuoDBIntegerValue();
 
     /**
-     * Got Types.BIGINT instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
+     * Got Types.BIGINT instead of Types.DECIMAL. Awaiting for DB-2288 to be
+     * resolved
      */
     public NuoDBIntegerValue() {
         super(Types.INTEGER, BigDecimal.class);
     }
 
     @Override
-    public BigDecimal getValue(ResultSet resultSet, int index,
-                               Field field, Map<String, Object> options) throws SQLException {
+    public BigDecimal getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getBigDecimal(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setBigDecimal(index, value);
     }
 }

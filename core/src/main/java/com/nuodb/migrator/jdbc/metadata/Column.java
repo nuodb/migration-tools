@@ -288,17 +288,25 @@ public class Column extends IdentifiableBase implements Field {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         Column column = (Column) o;
 
-        if (table != null ? !table.equals(column.table) : column.table != null) return false;
-        if (autoIncrement != column.autoIncrement) return false;
-        if (nullable != column.nullable) return false;
-        if (comment != null ? !comment.equals(column.comment) : column.comment != null) return false;
-        if (jdbcType != null ? !jdbcType.equals(column.jdbcType) : column.jdbcType != null) return false;
+        if (table != null ? !table.equals(column.table) : column.table != null)
+            return false;
+        if (autoIncrement != column.autoIncrement)
+            return false;
+        if (nullable != column.nullable)
+            return false;
+        if (comment != null ? !comment.equals(column.comment) : column.comment != null)
+            return false;
+        if (jdbcType != null ? !jdbcType.equals(column.jdbcType) : column.jdbcType != null)
+            return false;
         if (defaultValue != null ? !defaultValue.equals(column.defaultValue) : column.defaultValue != null)
             return false;
 
@@ -338,4 +346,3 @@ public class Column extends IdentifiableBase implements Field {
         }
     }
 }
-

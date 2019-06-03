@@ -70,13 +70,17 @@ public class DefaultValue implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DefaultValue)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof DefaultValue))
+            return false;
 
         DefaultValue that = (DefaultValue) o;
 
-        if (script != null ? !script.equals(that.script) : that.script != null) return false;
-        if (processed != that.processed) return false;
+        if (script != null ? !script.equals(that.script) : that.script != null)
+            return false;
+        if (processed != that.processed)
+            return false;
 
         return true;
     }

@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-
 import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.ORACLE_SUB_PROTOCOL;
 import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.USER;
 import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PASSWORD;
@@ -70,9 +69,9 @@ public class OracleJdbcUrl extends JdbcUrlBase {
         Pattern jdbcPattern = Pattern.compile(ORACLE_JDBC_REG_EXPRESSION);
         Matcher jdbcMatcher = jdbcPattern.matcher(getUrl());
         if (jdbcMatcher.matches()) {
-            if (!StringUtils.isEmpty(jdbcMatcher.group(5))) 
+            if (!StringUtils.isEmpty(jdbcMatcher.group(5)))
                 addParameter(USER, jdbcMatcher.group(5));
-            if (!StringUtils.isEmpty(jdbcMatcher.group(7))) 
+            if (!StringUtils.isEmpty(jdbcMatcher.group(7)))
                 addParameter(PASSWORD, jdbcMatcher.group(7));
         }
     }

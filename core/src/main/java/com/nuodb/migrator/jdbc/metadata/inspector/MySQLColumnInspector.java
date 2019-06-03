@@ -52,7 +52,7 @@ public class MySQLColumnInspector extends SimpleColumnInspector {
 
     @Override
     protected void processResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope,
-                                    ResultSet resultSet) throws SQLException {
+            ResultSet resultSet) throws SQLException {
         super.processResultSet(inspectionContext, tableInspectionScope, resultSet);
         final InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         final StringBuilder query = new StringBuilder(
@@ -61,8 +61,7 @@ public class MySQLColumnInspector extends SimpleColumnInspector {
         final Collection<String> parameters = newArrayList();
         String catalog = tableInspectionScope.getCatalog();
         if (catalog != null) {
-            filters.add(containsAny(tableInspectionScope.getCatalog(), "%") ? "TABLE_SCHEMA LIKE ?" :
-                    "TABLE_SCHEMA=?");
+            filters.add(containsAny(tableInspectionScope.getCatalog(), "%") ? "TABLE_SCHEMA LIKE ?" : "TABLE_SCHEMA=?");
             parameters.add(catalog);
         } else {
             filters.add("TABLE_SCHEMA=DATABASE()");
@@ -75,32 +74,28 @@ public class MySQLColumnInspector extends SimpleColumnInspector {
         // finally append filters to the query and join then with "AND"
         where(query, filters, "AND");
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.executeStatement(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement createStatement(Connection connection) throws SQLException {
-                        // let's prepare statement from the query
-                        return connection.prepareStatement(query.toString());
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void executeStatement(PreparedStatement statement)
-                            throws SQLException {
-                        int index = 1;
-                        for (String parameter : parameters) {
-                            statement.setString(index++, parameter);
-                        }
-                        ResultSet columns = statement.executeQuery();
-
-                        while (columns.next()) {
-                            Table table = addTable(inspectionResults, columns.getString("TABLE_SCHEMA"), null,
-                                    columns.getString("TABLE_NAME"));
-                            Column column = table.addColumn(columns.getString("COLUMN_NAME"));
-                            column.setJdbcType(getJdbcType(column.getJdbcType(), columns.getString("COLUMN_TYPE")));
-                        }
-                    }
+        template.executeStatement(new StatementFactory<PreparedStatement>() {
+            @Override
+            public PreparedStatement createStatement(Connection connection) throws SQLException {
+                // let's prepare statement from the query
+                return connection.prepareStatement(query.toString());
+            }
+        }, new StatementCallback<PreparedStatement>() {
+            @Override
+            public void executeStatement(PreparedStatement statement) throws SQLException {
+                int index = 1;
+                for (String parameter : parameters) {
+                    statement.setString(index++, parameter);
                 }
-        );
+                ResultSet columns = statement.executeQuery();
+
+                while (columns.next()) {
+                    Table table = addTable(inspectionResults, columns.getString("TABLE_SCHEMA"), null,
+                            columns.getString("TABLE_NAME"));
+                    Column column = table.addColumn(columns.getString("COLUMN_NAME"));
+                    column.setJdbcType(getJdbcType(column.getJdbcType(), columns.getString("COLUMN_TYPE")));
+                }
+            }
+        });
     }
 }

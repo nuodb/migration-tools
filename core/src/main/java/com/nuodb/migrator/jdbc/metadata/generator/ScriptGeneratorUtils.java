@@ -58,9 +58,8 @@ public class ScriptGeneratorUtils {
             useSchema = dialect.getUseSchema(scriptGeneratorManager.getTargetCatalog(), true);
         }
         if (useSchema == null) {
-            useSchema = schema.getIdentifier() != null ?
-                    dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
-                    dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog()));
+            useSchema = schema.getIdentifier() != null ? dialect.getUseSchema(scriptGeneratorManager.getName(schema))
+                    : dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog()));
         }
         return new Script(useSchema);
     }
@@ -74,19 +73,17 @@ public class ScriptGeneratorUtils {
             dropSchema = dialect.getDropSchema(scriptGeneratorManager.getTargetCatalog(), true);
         }
         if (dropSchema == null) {
-            dropSchema = schema.getIdentifier() != null ?
-                    dialect.getDropSchema(scriptGeneratorManager.getName(schema)) :
-                    dialect.getDropSchema(scriptGeneratorManager.getName(schema.getCatalog()));
+            dropSchema = schema.getIdentifier() != null ? dialect.getDropSchema(scriptGeneratorManager.getName(schema))
+                    : dialect.getDropSchema(scriptGeneratorManager.getName(schema.getCatalog()));
         }
         return new Script(dropSchema);
     }
 
     public static Collection<Script> getCreateMultipleIndexes(Collection<Index> indexes,
-                                                              final ScriptGeneratorManager scriptGeneratorManager) {
+            final ScriptGeneratorManager scriptGeneratorManager) {
         Collection<Script> multipleIndexesScripts = newArrayList();
         for (Index index : indexes) {
-            Collection<Script> indexScripts =
-                    scriptGeneratorManager.getCreateScripts(index);
+            Collection<Script> indexScripts = scriptGeneratorManager.getCreateScripts(index);
             if (size(indexScripts) > 0) {
                 multipleIndexesScripts.add(get(indexScripts, 0));
             }

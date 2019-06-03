@@ -43,8 +43,7 @@ public class OptionFormat {
     private String valuesSeparator;
 
     public OptionFormat(OptionFormat optionFormat) {
-        this(optionFormat.getPrefixes(), optionFormat.getArgumentSeparator(),
-                optionFormat.getValuesSeparator());
+        this(optionFormat.getPrefixes(), optionFormat.getArgumentSeparator(), optionFormat.getValuesSeparator());
     }
 
     public OptionFormat(String optionPrefix, String argumentSeparator, String valuesSeparator) {

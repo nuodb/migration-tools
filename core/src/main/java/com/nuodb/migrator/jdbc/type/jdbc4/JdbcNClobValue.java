@@ -59,14 +59,14 @@ public class JdbcNClobValue extends JdbcTypeValueBase<NClob> {
     }
 
     @Override
-    public NClob getValue(ResultSet resultSet, int index,
-                          Field field, Map<String, Object> options) throws SQLException {
+    public NClob getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getNClob(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, NClob value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, NClob value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setNClob(index, value);
     }
 }

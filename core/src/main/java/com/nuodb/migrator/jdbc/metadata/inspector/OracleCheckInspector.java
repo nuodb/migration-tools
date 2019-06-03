@@ -58,8 +58,8 @@ public class OracleCheckInspector extends TableInspectorBase<Table, TableInspect
         SelectQuery query = new SelectQuery();
         query.columns("C.CONSTRAINT_NAME", "CC.COLUMN_NAME", "C.SEARCH_CONDITION", "C.TABLE_NAME", "C.OWNER");
         query.from("SYS.ALL_CONS_COLUMNS CC");
-        query.join("SYS.ALL_CONSTRAINTS C", "CC.OWNER=C.OWNER AND CC.TABLE_NAME=C.TABLE_NAME AND " +
-                "CC.CONSTRAINT_NAME=C.CONSTRAINT_NAME");
+        query.join("SYS.ALL_CONSTRAINTS C",
+                "CC.OWNER=C.OWNER AND CC.TABLE_NAME=C.TABLE_NAME AND " + "CC.CONSTRAINT_NAME=C.CONSTRAINT_NAME");
         query.where("C.CONSTRAINT_TYPE='C'");
         query.where("C.STATUS='ENABLED'");
         String schema = tableInspectionScope.getSchema();

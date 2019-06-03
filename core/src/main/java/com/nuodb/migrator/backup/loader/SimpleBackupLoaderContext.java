@@ -66,7 +66,7 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private Database database;
     private ExecutorService executorService;
     private FormatFactory formatFactory;
-    private Map<String,Object> formatAttributes;
+    private Map<String, Object> formatAttributes;
     private InsertTypeFactory insertTypeFactory;
     private LoadConstraints loadConstraints;
     private LoadTables loadTables;

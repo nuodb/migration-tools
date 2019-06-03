@@ -43,11 +43,11 @@ public class ClassPathLoader extends URLClassLoader {
     private static final Logger logger = getLogger(ClassPathLoader.class);
 
     public ClassPathLoader() {
-        super(new URL[]{});
+        super(new URL[] {});
     }
 
     public ClassPathLoader(ClassLoader parent) {
-        super(new URL[]{}, parent);
+        super(new URL[] {}, parent);
     }
 
     public boolean addUrl(String path) {

@@ -61,13 +61,17 @@ public class PrimaryKey extends ConstraintBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         PrimaryKey that = (PrimaryKey) o;
 
-        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
+        if (columns != null ? !columns.equals(that.columns) : that.columns != null)
+            return false;
 
         return true;
     }
@@ -84,7 +88,7 @@ public class PrimaryKey extends ConstraintBase {
         super.output(indent, buffer);
 
         buffer.append('(');
-        for (Iterator<Column> iterator = getColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = getColumns().iterator(); iterator.hasNext();) {
             Column column = iterator.next();
             buffer.append(column.getName());
             if (iterator.hasNext()) {

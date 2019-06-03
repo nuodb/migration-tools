@@ -75,8 +75,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
     }
 
     @Override
-    public Collection<Script> getScripts(HasTables tables,
-                                         ScriptGeneratorManager scriptGeneratorManager) {
+    public Collection<Script> getScripts(HasTables tables, ScriptGeneratorManager scriptGeneratorManager) {
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<Script> scripts = newArrayList();
@@ -92,29 +91,29 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
             }
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
-                case TABLE:
-                    for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
-                        scripts.addAll(scriptGeneratorManager.getScripts(table));
-                    }
-                    migratorSummary(scriptGeneratorManager);
-                    addCreateForeignKeysScripts(scripts, true, scriptGeneratorManager);
-                    break;
-                case META_DATA:
-                    Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
-                    try {
-                        for (MetaDataType objectType : newArrayList(SEQUENCE, TABLE, PRIMARY_KEY, INDEX, TRIGGER,
-                                COLUMN_TRIGGER, FOREIGN_KEY)) {
-                            if (objectTypes.contains(objectType)) {
-                                scriptGeneratorManager.setObjectTypes(singleton(objectType));
-                                for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
-                                    scripts.addAll(scriptGeneratorManager.getScripts(table));
-                                }
+            case TABLE:
+                for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
+                    scripts.addAll(scriptGeneratorManager.getScripts(table));
+                }
+                migratorSummary(scriptGeneratorManager);
+                addCreateForeignKeysScripts(scripts, true, scriptGeneratorManager);
+                break;
+            case META_DATA:
+                Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
+                try {
+                    for (MetaDataType objectType : newArrayList(SEQUENCE, TABLE, PRIMARY_KEY, INDEX, TRIGGER,
+                            COLUMN_TRIGGER, FOREIGN_KEY)) {
+                        if (objectTypes.contains(objectType)) {
+                            scriptGeneratorManager.setObjectTypes(singleton(objectType));
+                            for (Table table : getTables(tables, scriptGeneratorManager).getTables()) {
+                                scripts.addAll(scriptGeneratorManager.getScripts(table));
                             }
                         }
-                    } finally {
-                        scriptGeneratorManager.setObjectTypes(objectTypes);
                     }
-                    break;
+                } finally {
+                    scriptGeneratorManager.setObjectTypes(objectTypes);
+                }
+                break;
             }
             return scripts;
         } finally {
@@ -128,14 +127,14 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
     }
 
     protected void addCreateForeignKeysScripts(Collection<Script> scripts, boolean force,
-                                               ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         boolean createForeignKeys = scriptGeneratorManager.getObjectTypes().contains(FOREIGN_KEY);
         if (!createForeignKeys) {
             return;
         }
         Collection<Table> tables = (Collection<Table>) scriptGeneratorManager.getAttribute(TABLES);
-        Multimap<Table, ForeignKey> foreignKeys =
-                (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttribute(FOREIGN_KEYS);
+        Multimap<Table, ForeignKey> foreignKeys = (Multimap<Table, ForeignKey>) scriptGeneratorManager
+                .getAttribute(FOREIGN_KEYS);
         for (ForeignKey foreignKey : newArrayList(foreignKeys.values())) {
             Table primaryTable = foreignKey.getPrimaryTable();
             if (tables.contains(primaryTable) || force) {
@@ -154,22 +153,23 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
             String table = org.apache.commons.lang3.StringUtils.EMPTY;
             int count = 0;
             if (!(catalog == null) || !(schema == null)) {
-                catalog = (catalog == null ? "<"+catalog+">" : catalog);
-                schema = (schema == null ? "<"+schema+">" : schema);
+                catalog = (catalog == null ? "<" + catalog + ">" : catalog);
+                schema = (schema == null ? "<" + schema + ">" : schema);
                 logger.info("\n\n");
                 logger.info("*****************************");
                 logger.info("***** Migration Summary *****");
                 logger.info("*****************************");
-                logger.info(format(" Catalog = %s",catalog));
-                logger.info(format(" Schema = %s\n",schema));
+                logger.info(format(" Catalog = %s", catalog));
+                logger.info(format(" Schema = %s\n", schema));
                 logger.info("*****************************");
                 logger.info(format("******** Tables *************"));
                 logger.info("*****************************");
-                for (int i=0; i < tables.length; i++) {
+                for (int i = 0; i < tables.length; i++) {
                     table = table + tables[i] + "  |  ";
                     count++;
-                    if ((count%3 == 0) || (count%2 == 0 && tables.length == count) || (count%1 == 0 && tables.length == count)) {
-                        logger.info(format(" %s",table));
+                    if ((count % 3 == 0) || (count % 2 == 0 && tables.length == count)
+                            || (count % 1 == 0 && tables.length == count)) {
+                        logger.info(format(" %s", table));
                         table = org.apache.commons.lang3.StringUtils.EMPTY;
                     }
                 }
@@ -179,10 +179,10 @@ public class HasTablesScriptGenerator<H extends HasTables> extends MetaDataHandl
                 logger.info("***********************************");
                 logger.info("**** Datatypes Mapping Summary ****");
                 logger.info("***********************************");
-                logger.info(format(" Source"+" Datatypes \t" + " NuoDB Datatypes"));
+                logger.info(format(" Source" + " Datatypes \t" + " NuoDB Datatypes"));
                 logger.info(" ---------------- \t ----------------");
                 for (Entry<String, String> entry : datatypes.entrySet()) {
-                    logger.info(format(" "+entry.getKey()+"\t\t "+entry.getValue()));
+                    logger.info(format(" " + entry.getKey() + "\t\t " + entry.getValue()));
                 }
                 logger.info("\n\n");
             }

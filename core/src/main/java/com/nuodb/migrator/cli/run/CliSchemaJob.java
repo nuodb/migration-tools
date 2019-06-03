@@ -53,8 +53,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
 
     @Override
     protected Option createOption() {
-        GroupBuilder group = newGroupBuilder().
-                withName(getMessage(SCHEMA_GROUP_NAME));
+        GroupBuilder group = newGroupBuilder().withName(getMessage(SCHEMA_GROUP_NAME));
         group.withRequired(true);
         group.withOption(createSourceGroup());
         group.withOption(createTargetGroup());
@@ -83,13 +82,9 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
     @Override
     protected Group createSchemaMigrationGroup() {
         Group group = super.createSchemaMigrationGroup();
-        Option failOnEmptyDatabase = newBasicOptionBuilder().
-                withName(FAIL_ON_EMPTY_DATABASE).
-                withDescription(getMessage(FAIL_ON_EMPTY_DATABASE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(FAIL_ON_EMPTY_DATABASE_ARGUMENT_NAME)).build()
-                )
+        Option failOnEmptyDatabase = newBasicOptionBuilder().withName(FAIL_ON_EMPTY_DATABASE)
+                .withDescription(getMessage(FAIL_ON_EMPTY_DATABASE_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(FAIL_ON_EMPTY_DATABASE_ARGUMENT_NAME)).build())
                 .build();
         group.addOption(failOnEmptyDatabase);
         return group;
@@ -98,23 +93,17 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
     @Override
     protected Group createOutputGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(SCHEMA_OUTPUT_GROUP_NAME));
-        Option path = newBasicOptionBuilder().
-                withName(OUTPUT_PATH).
-                withRequired(true).
-                withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withRequired(true).build()
-                ).build();
+        Option path = newBasicOptionBuilder().withName(OUTPUT_PATH).withRequired(true)
+                .withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).withMinimum(1).withRequired(true).build())
+                .build();
         group.withOption(path);
         return group.build();
     }
 
     protected void parseSchemaMigrationGroup(OptionSet optionSet, SchemaJobSpec jobSpec, Option option) {
         super.parseSchemaMigrationGroup(optionSet, jobSpec, option);
-        String value = (String)optionSet.getValue(FAIL_ON_EMPTY_DATABASE);
+        String value = (String) optionSet.getValue(FAIL_ON_EMPTY_DATABASE);
         jobSpec.setFailOnEmptyDatabase(!isEmpty(value) ? parseBoolean(value) : FAIL_ON_EMPTY_DATABASE_DEFAULT);
     }
 
@@ -132,59 +121,37 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
     protected Group createTargetGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(TARGET_GROUP_NAME));
 
-        Option url = newBasicOptionBuilder().
-                withName(TARGET_URL).
-                withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
-                                withMinimum(1).withRequired(true).build()
-                ).build();
+        Option url = newBasicOptionBuilder().withName(TARGET_URL)
+                .withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(TARGET_URL_ARGUMENT_NAME)).withMinimum(1).withRequired(true).build())
+                .build();
         group.withOption(url);
 
-        Option username = newBasicOptionBuilder().
-                withName(TARGET_USERNAME).
-                withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
-                ).build();
+        Option username = newBasicOptionBuilder().withName(TARGET_USERNAME)
+                .withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()).build();
         group.withOption(username);
 
-        Option password = newBasicOptionBuilder().
-                withName(TARGET_PASSWORD).
-                withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
-                ).build();
+        Option password = newBasicOptionBuilder().withName(TARGET_PASSWORD)
+                .withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()).build();
         group.withOption(password);
 
-        Option properties = newBasicOptionBuilder().
-                withName(TARGET_PROPERTIES).
-                withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
-                ).build();
+        Option properties = newBasicOptionBuilder().withName(TARGET_PROPERTIES)
+                .withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(properties);
 
-        Option schema = newBasicOptionBuilder().
-                withName(TARGET_SCHEMA).
-                withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
-                ).build();
+        Option schema = newBasicOptionBuilder().withName(TARGET_SCHEMA)
+                .withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()).build();
         group.withOption(schema);
 
-        Option autoCommit = newBasicOptionBuilder().
-                withName(TARGET_AUTO_COMMIT).
-                withDescription(getMessage(TARGET_AUTO_COMMIT_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_AUTO_COMMIT_ARGUMENT_NAME)).build()
-                ).build();
+        Option autoCommit = newBasicOptionBuilder().withName(TARGET_AUTO_COMMIT)
+                .withDescription(getMessage(TARGET_AUTO_COMMIT_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_AUTO_COMMIT_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(autoCommit);
         return group.build();
     }

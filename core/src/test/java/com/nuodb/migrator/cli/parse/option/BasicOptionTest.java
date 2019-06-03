@@ -47,7 +47,8 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 /**
- * Verifies that basic option is able to process arguments being triggered by it's name or aliases.
+ * Verifies that basic option is able to process arguments being triggered by
+ * it's name or aliases.
  *
  * @author Sergey Bushik
  */
@@ -69,10 +70,10 @@ public class BasicOptionTest {
     public void testCanProcessByName() {
         CommandLine commandLine = createCommandLineMock();
 
-        assertTrue(basicOption.canProcess(commandLine,
-                createArguments("--option")), "Option should be processable by name");
-        assertFalse(basicOption.canProcess(commandLine,
-                createArguments("--non-option")), "Unexpected option can't be processed by name");
+        assertTrue(basicOption.canProcess(commandLine, createArguments("--option")),
+                "Option should be processable by name");
+        assertFalse(basicOption.canProcess(commandLine, createArguments("--non-option")),
+                "Unexpected option can't be processed by name");
     }
 
     @Test(groups = "cli.parse.option.BasicOption.canProcess")
@@ -80,10 +81,9 @@ public class BasicOptionTest {
         basicOption.addAlias(ALIAS, SHORT);
 
         CommandLine commandLine = createCommandLineMock();
-        assertTrue(basicOption.canProcess(commandLine,
-                createArguments("-o")), "Option should be processable by alias");
-        assertFalse(basicOption.canProcess(commandLine,
-                createArguments("-non-o")), "Unexpected argument can't be processed by alias");
+        assertTrue(basicOption.canProcess(commandLine, createArguments("-o")), "Option should be processable by alias");
+        assertFalse(basicOption.canProcess(commandLine, createArguments("-non-o")),
+                "Unexpected argument can't be processed by alias");
     }
 
     @Test(dependsOnGroups = "cli.parse.option.BasicOption.canProcess")

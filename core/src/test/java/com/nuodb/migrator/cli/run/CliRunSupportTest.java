@@ -61,15 +61,24 @@ import static org.testng.Assert.*;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Verifies functionality of the create & parse pairs of methods from {@link CliRunSupport} for creating option &
- * parsing that option to the required spec classes. Correspondingly tested pairs are: <ul> <li>{@link
- * CliRunSupport#createSourceGroup()} & {@link CliRunSupport#parseSourceGroup(OptionSet, Option)}</li> <li>{@link
- * CliRunSupport#createTargetGroup()} & {@link CliRunSupport#parseTargetGroup(OptionSet, Option)}</li> <li>{@link
- * CliRunSupport#createInputGroup()} & {@link CliRunSupport#parseInputGroup(OptionSet, Option)}</li> <li>{@link
- * CliRunSupport#createOutputGroup()} & {@link CliRunSupport#parseOutputGroup(OptionSet, Option)}</li> <li>{@link
- * CliRunSupport#createTimeZoneOption()} & {@link CliRunSupport#parseTimeZoneOption(OptionSet, Option)}</li> <li>{@link
- * com.nuodb.migrator.cli.run.CliRunSupport#createMetaDataFilterManagerGroup()} & {@link CliRunSupport#parseMetaDataFilterManagerGroup (OptionSet,
- * ScriptGeneratorJobSpecBase, Option)}</li> </ul>
+ * Verifies functionality of the create & parse pairs of methods from
+ * {@link CliRunSupport} for creating option & parsing that option to the
+ * required spec classes. Correspondingly tested pairs are:
+ * <ul>
+ * <li>{@link CliRunSupport#createSourceGroup()} &
+ * {@link CliRunSupport#parseSourceGroup(OptionSet, Option)}</li>
+ * <li>{@link CliRunSupport#createTargetGroup()} &
+ * {@link CliRunSupport#parseTargetGroup(OptionSet, Option)}</li>
+ * <li>{@link CliRunSupport#createInputGroup()} &
+ * {@link CliRunSupport#parseInputGroup(OptionSet, Option)}</li>
+ * <li>{@link CliRunSupport#createOutputGroup()} &
+ * {@link CliRunSupport#parseOutputGroup(OptionSet, Option)}</li>
+ * <li>{@link CliRunSupport#createTimeZoneOption()} &
+ * {@link CliRunSupport#parseTimeZoneOption(OptionSet, Option)}</li>
+ * <li>{@link com.nuodb.migrator.cli.run.CliRunSupport#createMetaDataFilterManagerGroup()}
+ * &
+ * {@link CliRunSupport#parseMetaDataFilterManagerGroup (OptionSet, ScriptGeneratorJobSpecBase, Option)}</li>
+ * </ul>
  *
  * @author Sergey Bushik
  */
@@ -88,14 +97,9 @@ public class CliRunSupportTest {
 
     @DataProvider(name = "sourceGroup")
     public Object[][] createSourceGroupData() {
-        String[] arguments = {
-                "--source.driver=com.mysql.jdbc.Driver",
-                "--source.url=jdbc:mysql://localhost:3306/test",
-                "--source.username=root",
-                "--source.password=",
-                "--source.catalog=test",
-                "--source.properties=profileSQL=true"
-        };
+        String[] arguments = { "--source.driver=com.mysql.jdbc.Driver", "--source.url=jdbc:mysql://localhost:3306/test",
+                "--source.username=root", "--source.password=", "--source.catalog=test",
+                "--source.properties=profileSQL=true" };
 
         DriverConnectionSpec expected = new DriverConnectionSpec();
         expected.setDriver("com.mysql.jdbc.Driver");
@@ -107,14 +111,13 @@ public class CliRunSupportTest {
         properties.put("profileSQL", "true");
         expected.setProperties(properties);
 
-        return new Object[][]{{arguments, expected}};
+        return new Object[][] { { arguments, expected } };
     }
 
     @Test(dataProvider = "sourceGroup")
     public void testSourceGroup(String[] arguments, DriverConnectionSpec expected) {
         Group group = cliRunSupport.createSourceGroup();
         assertNotNull(group, "Source group of options is required");
-
 
         OptionSet options = parser.parse(arguments, group);
         assertNotNull(options, "Option set containing source group options is expected");
@@ -126,62 +129,24 @@ public class CliRunSupportTest {
 
     @DataProvider(name = "sourceGroupValidation")
     public Object[][] createSourceGroupValidationData() {
-        return new Object[][]{
-                {
-                        new String[]{
-                                "--source.driver=com.mysql.jdbc.Driver",
-                                "--source.url=jdbc:mysql://localhost:3306/test",
-                                "--source.username=root",
-                                "--source.catalog=catalog",
-                                "--source.schema=schema"
-                        },
-                        "MySQL does not support source.schema option"
-                },
-                {
-                        new String[]{
-                                "--source.driver=com.nuodb.jdbc.Driver",
-                                "--source.url=jdbc:com.nuodb://localhost/test",
-                                "--source.catalog=test",
-                                "--source.password=goalie",
-                                "--source.schema=schema"
-                        },
-                        "NuoDB doesn't source.catalog option"
-                },
-                {
-                        new String[]{
-                                "--source.driver=com.nuodb.jdbc.Driver",
-                                "--source.url=jdbc:com.nuodb://localhost/test",
-                                "--source.password=goalie",
-                                "--source.schema=schema"
-                        },
-                        "NuoDB requires source.username option"
-                },
-                {
-                        new String[]{
-                                "--source.driver=com.nuodb.jdbc.Driver",
-                                "--source.url=jdbc:com.nuodb://localhost/test",
-                                "--source.username=dba",
-                                "--source.schema=schema"
-                        },
-                        "NuoDB requires source.password option"
-                },
-                {
-                        new String[]{
-                                "--source.driver=oracle.jdbc.driver.OracleDriver",
-                                "--source.url=jdbc:oracle:thin:@//localhost/test",
-                                "--source.catalog=catalog"
-                        },
-                        "Oracle doesn't support source.catalog option"
-                },
-                {
-                        new String[]{
-                                "--source.driver=org.postgresql.Driver",
-                                "--source.url=jdbc:postgresql:test",
-                                "--source.catalog=catalog"
-                        },
-                        "PostgreSQL doesn't support source.catalog option"
-                }
-        };
+        return new Object[][] { {
+                new String[] { "--source.driver=com.mysql.jdbc.Driver", "--source.url=jdbc:mysql://localhost:3306/test",
+                        "--source.username=root", "--source.catalog=catalog", "--source.schema=schema" },
+                "MySQL does not support source.schema option" },
+                { new String[] { "--source.driver=com.nuodb.jdbc.Driver",
+                        "--source.url=jdbc:com.nuodb://localhost/test", "--source.catalog=test",
+                        "--source.password=goalie", "--source.schema=schema" }, "NuoDB doesn't source.catalog option" },
+                { new String[] { "--source.driver=com.nuodb.jdbc.Driver",
+                        "--source.url=jdbc:com.nuodb://localhost/test", "--source.password=goalie",
+                        "--source.schema=schema" }, "NuoDB requires source.username option" },
+                { new String[] { "--source.driver=com.nuodb.jdbc.Driver",
+                        "--source.url=jdbc:com.nuodb://localhost/test", "--source.username=dba",
+                        "--source.schema=schema" }, "NuoDB requires source.password option" },
+                { new String[] { "--source.driver=oracle.jdbc.driver.OracleDriver",
+                        "--source.url=jdbc:oracle:thin:@//localhost/test", "--source.catalog=catalog" },
+                        "Oracle doesn't support source.catalog option" },
+                { new String[] { "--source.driver=org.postgresql.Driver", "--source.url=jdbc:postgresql:test",
+                        "--source.catalog=catalog" }, "PostgreSQL doesn't support source.catalog option" } };
     }
 
     @Test(dataProvider = "sourceGroupValidation", expectedExceptions = OptionException.class)
@@ -193,12 +158,8 @@ public class CliRunSupportTest {
 
     @DataProvider(name = "targetGroup")
     public Object[][] createTargetGroupData() {
-        String[] arguments = {
-                "--target.url=jdbc:com.nuodb://localhost/test",
-                "--target.username=dba",
-                "--target.password=goalie",
-                "--target.schema=hockey"
-        };
+        String[] arguments = { "--target.url=jdbc:com.nuodb://localhost/test", "--target.username=dba",
+                "--target.password=goalie", "--target.schema=hockey" };
 
         DriverConnectionSpec expected = new DriverConnectionSpec();
         expected.setDriver(JdbcConstants.NUODB_DRIVER);
@@ -206,7 +167,7 @@ public class CliRunSupportTest {
         expected.setUsername("dba");
         expected.setPassword("goalie");
         expected.setSchema("hockey");
-        return new Object[][]{{arguments, expected}};
+        return new Object[][] { { arguments, expected } };
     }
 
     @Test(dataProvider = "targetGroup")
@@ -223,11 +184,8 @@ public class CliRunSupportTest {
 
     @DataProvider(name = "inputGroup")
     public Object[][] createInputGroupData() {
-        String[] arguments = {
-                "--input.path=/tmp/dump.cat",
-                "--input.csv.encoding=utf-8",
-                "--input.csv.delimiter=tab"
-        };
+        String[] arguments = { "--input.path=/tmp/dump.cat", "--input.csv.encoding=utf-8",
+                "--input.csv.delimiter=tab" };
 
         ResourceSpec expected = new ResourceSpec();
         expected.setPath("/tmp/dump.cat");
@@ -236,7 +194,7 @@ public class CliRunSupportTest {
         attributes.put("csv.encoding", "utf-8");
         attributes.put("csv.delimiter", "tab");
         expected.setAttributes(attributes);
-        return new Object[][]{{arguments, expected}};
+        return new Object[][] { { arguments, expected } };
     }
 
     @Test(dataProvider = "inputGroup")
@@ -253,15 +211,12 @@ public class CliRunSupportTest {
 
     @DataProvider(name = "outputGroup")
     public Object[][] createOutputGroupData() {
-        String[] arguments = {
-                "--output.path=/tmp/dump.cat",
-                "--output.type=bson"
-        };
+        String[] arguments = { "--output.path=/tmp/dump.cat", "--output.type=bson" };
 
         ResourceSpec expected = new ResourceSpec();
         expected.setPath("/tmp/dump.cat");
         expected.setType("bson");
-        return new Object[][]{{arguments, expected}};
+        return new Object[][] { { arguments, expected } };
     }
 
     @Test(dataProvider = "outputGroup")
@@ -278,11 +233,9 @@ public class CliRunSupportTest {
 
     @DataProvider(name = "timeZone")
     public Object[][] createTimeZoneData() {
-        return new Object[][]{
-                {new String[]{"-z=UTC"}, getTimeZone("UTC")},
-                {new String[]{"--time.zone=EST"}, getTimeZone("EST")},
-                {new String[]{"--time.zone=GMT+2"}, getTimeZone("GMT+2")}
-        };
+        return new Object[][] { { new String[] { "-z=UTC" }, getTimeZone("UTC") },
+                { new String[] { "--time.zone=EST" }, getTimeZone("EST") },
+                { new String[] { "--time.zone=GMT+2" }, getTimeZone("GMT+2") } };
     }
 
     @Test(dataProvider = "timeZone")
@@ -302,7 +255,7 @@ public class CliRunSupportTest {
         Collection<Object[]> data = newArrayList();
 
         // #1 verify inclusion switches first
-        String[] arguments1 = {"--table=table1,*pattern1*,test.*.fields"};
+        String[] arguments1 = { "--table=table1,*pattern1*,test.*.fields" };
         Map<Table, Boolean> tables1 = newHashMap();
         // verify exact matching
         tables1.put(createTable("catalog1", "schema1", "table1"), true);
@@ -314,10 +267,10 @@ public class CliRunSupportTest {
         // match wild-carded schema name
         tables1.put(createTable("test", "user1", "fields"), true);
         tables1.put(createTable("test", "user2", "fields"), true);
-        data.add(new Object[]{arguments1, tables1});
+        data.add(new Object[] { arguments1, tables1 });
 
         // #2 verify exclusion switches next
-        String[] arguments2 = {"--table.exclude=exclude_table1,*exclude_pattern1*,catalog3.schema.*"};
+        String[] arguments2 = { "--table.exclude=exclude_table1,*exclude_pattern1*,catalog3.schema.*" };
         Map<Table, Boolean> tables2 = newHashMap();
         tables2.put(createTable("catalog1", "schema1", "exclude_table1"), false);
         tables2.put(createTable("catalog2", "schema2", "exclude_pattern1_xyz"), false);
@@ -325,20 +278,23 @@ public class CliRunSupportTest {
         tables2.put(createTable("catalog3", "schema", "exclude_pattern1_xyz"), false);
         // this one is from different schema
         tables2.put(createTable("catalog3", "schema2", "table"), true);
-        data.add(new Object[]{arguments2, tables2});
+        data.add(new Object[] { arguments2, tables2 });
 
         return data.toArray(new Object[data.size()][]);
     }
 
     /**
-     * Verifies that --table=table1,pattern1 and --table.exclude=table1,pattern1 command line switches are parsed
-     * properly and constructed meta data filter manager accept/does not accept tables from tables map according to
+     * Verifies that --table=table1,pattern1 and --table.exclude=table1,pattern1
+     * command line switches are parsed properly and constructed meta data
+     * filter manager accept/does not accept tables from tables map according to
      * command line switches.
      *
-     * @param arguments --table=table1,*pattern1* or --table.exclude=exclude.table1, *exclude.pattern1* switches or
-     *                  both.
-     * @param tables    table to boolean map, where boolean determines whether the table should accepted by meta data
-     *                  filter manager.
+     * @param arguments
+     *            --table=table1,*pattern1* or --table.exclude=exclude.table1,
+     *            *exclude.pattern1* switches or both.
+     * @param tables
+     *            table to boolean map, where boolean determines whether the
+     *            table should accepted by meta data filter manager.
      */
     @Test(dataProvider = "tableGroup")
     public void testTableGroup(String[] arguments, Map<Table, Boolean> tables) {
@@ -352,8 +308,7 @@ public class CliRunSupportTest {
             Table table = entry.getKey();
             boolean accepts = entry.getValue();
             assertEquals(filter.accepts(table), accepts,
-                    MessageFormat.format(
-                            "Table {0} should be {1,choice,0#not accepted|1#accepted by filter manager}",
+                    MessageFormat.format("Table {0} should be {1,choice,0#not accepted|1#accepted by filter manager}",
                             table.getQualifiedName(), accepts ? 1 : 0));
         }
     }

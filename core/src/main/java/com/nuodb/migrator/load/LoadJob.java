@@ -98,9 +98,8 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
     }
 
     protected SessionFactory createTargetSessionFactory() {
-        SessionFactory targetSessionFactory =
-                newSessionFactory(createConnectionProviderFactory().
-                createConnectionProvider(getTargetSpec()), createDialectResolver());
+        SessionFactory targetSessionFactory = newSessionFactory(
+                createConnectionProviderFactory().createConnectionProvider(getTargetSpec()), createDialectResolver());
         targetSessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
         return targetSessionFactory;
     }

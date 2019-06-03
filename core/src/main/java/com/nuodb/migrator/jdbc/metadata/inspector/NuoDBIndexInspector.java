@@ -66,7 +66,8 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
             Index index = table.getIndex(identifier);
             if (index == null) {
                 table.addIndex(index = new Index(identifier));
-                index.setUnique(indexes.getInt("INDEXTYPE") == UNIQUE || indexes.getInt("INDEXTYPE") == UNIQUECONSTRAINT);
+                index.setUnique(
+                        indexes.getInt("INDEXTYPE") == UNIQUE || indexes.getInt("INDEXTYPE") == UNIQUECONSTRAINT);
                 index.setUniqueConstraint(indexes.getInt("INDEXTYPE") == UNIQUECONSTRAINT);
             }
             index.addColumn(table.addColumn(indexes.getString("FIELD")), indexes.getInt("POSITION"));

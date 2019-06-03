@@ -58,20 +58,17 @@ import static org.mockito.Matchers.anyString;
 public class BackupOpsValidateTableFilterTest {
 
     @DataProvider(name = "getData")
-    public Object[][] createGetTypeNameData() throws Exception{
+    public Object[][] createGetTypeNameData() throws Exception {
         ArrayList<String> databaseTable = new ArrayList();
         databaseTable.add("test");
         databaseTable.add("customers");
 
-        return new Object[][] {
-                {databaseTable , "temp"},
-                {databaseTable , "student"}
-        };
+        return new Object[][] { { databaseTable, "temp" }, { databaseTable, "student" } };
     }
 
     @Test(dataProvider = "getData")
     public void testValidateTableNameFilter(ArrayList<String> databaseTable, String FilterTable) {
-        MetaDataNameEqualsFilter mdnef = new MetaDataNameEqualsFilter(MetaDataType.TABLE,true,FilterTable);
+        MetaDataNameEqualsFilter mdnef = new MetaDataNameEqualsFilter(MetaDataType.TABLE, true, FilterTable);
         Collection<MetaDataFilter<Table>> filters = newArrayList();
         filters.add(mdnef);
         MetaDataFilter<Table> metaDataTablesFilter = newEitherOfFilters(MetaDataType.TABLE, filters);
@@ -79,23 +76,20 @@ public class BackupOpsValidateTableFilterTest {
 
         XmlBackupOps backupOps1 = spy(new XmlBackupOps());
         backupOps1.verifyFilter(databaseTable, all);
-        verify(backupOps1,times(1)).logWarnMessage(valueOf(anyString()));
+        verify(backupOps1, times(1)).logWarnMessage(valueOf(anyString()));
     }
 
     @DataProvider(name = "getData1")
-    public Object[][] createGetTypeNameData1() throws Exception{
+    public Object[][] createGetTypeNameData1() throws Exception {
         ArrayList<String> databaseTable = new ArrayList();
         databaseTable.add("customers");
         databaseTable.add("student");
-        return new Object[][] {
-                {databaseTable , "*est"},
-                {databaseTable , "*emp"}
-        };
+        return new Object[][] { { databaseTable, "*est" }, { databaseTable, "*emp" } };
     }
 
     @Test(dataProvider = "getData1")
     public void testValidateTableRegexFilter1(ArrayList<String> databaseTable, String FilterTable) {
-        MetaDataNameMatchesFilter mdnmf = new MetaDataNameMatchesFilter(MetaDataType.TABLE,true,FilterTable);
+        MetaDataNameMatchesFilter mdnmf = new MetaDataNameMatchesFilter(MetaDataType.TABLE, true, FilterTable);
         Collection<MetaDataFilter<Table>> filters = newArrayList();
         filters.add(mdnmf);
         MetaDataFilter<Table> metaDataTablesFilter = newEitherOfFilters(MetaDataType.TABLE, filters);
@@ -103,6 +97,6 @@ public class BackupOpsValidateTableFilterTest {
 
         XmlBackupOps backupOps1 = spy(new XmlBackupOps());
         backupOps1.verifyFilter(databaseTable, all);
-        verify(backupOps1,times(1)).logWarnMessage(valueOf(anyString()));
+        verify(backupOps1, times(1)).logWarnMessage(valueOf(anyString()));
     }
 }

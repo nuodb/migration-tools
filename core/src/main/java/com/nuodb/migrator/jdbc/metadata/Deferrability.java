@@ -31,7 +31,5 @@ package com.nuodb.migrator.jdbc.metadata;
  * @author Sergey Bushik
  */
 public enum Deferrability {
-    INITIALLY_DEFERRED,
-    INITIALLY_IMMEDIATE,
-    NOT_DEFERRABLE
+    INITIALLY_DEFERRED, INITIALLY_IMMEDIATE, NOT_DEFERRABLE
 }

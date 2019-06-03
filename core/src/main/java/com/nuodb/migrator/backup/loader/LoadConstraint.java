@@ -64,12 +64,15 @@ public class LoadConstraint {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         LoadConstraint that = (LoadConstraint) o;
 
-        if (constraint != null ? !constraint.equals(that.constraint) : that.constraint != null) return false;
+        if (constraint != null ? !constraint.equals(that.constraint) : that.constraint != null)
+            return false;
 
         return true;
     }

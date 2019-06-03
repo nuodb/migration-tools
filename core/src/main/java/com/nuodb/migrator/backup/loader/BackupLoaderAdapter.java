@@ -32,8 +32,7 @@ import com.nuodb.migrator.jdbc.session.WorkAdapter;
 /**
  * @author Sergey Bushik
  */
-public class BackupLoaderAdapter extends WorkAdapter
-        implements BackupLoaderListener {
+public class BackupLoaderAdapter extends WorkAdapter implements BackupLoaderListener {
 
     @Override
     public void onLoadStart(LoadChunkEvent event) {

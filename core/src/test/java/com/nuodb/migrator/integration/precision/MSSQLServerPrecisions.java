@@ -40,14 +40,15 @@ public class MSSQLServerPrecisions {
     }
 
     public static Collection<MSSQLServerPrecision2> getMSSQLServerPrecision2() {
-        /* Original values are changed to avoid numeric(7,2), decimal(7,2) data type issue */
+        /*
+         * Original values are changed to avoid numeric(7,2), decimal(7,2) data
+         * type issue
+         */
         Collection<MSSQLServerPrecision2> values = new ArrayList<MSSQLServerPrecision2>();
-        values.add(new MSSQLServerPrecision2(
-                "total word", "text length", 25.0, "F", 0, 76.0, 15.25, "M"));
-        values.add(new MSSQLServerPrecision2(
-                "total word lenght 20", "sample text length20", 54325.0, "F", 0, 98765.0, 56.65, "M"));
-        values.add(new MSSQLServerPrecision2(
-                "lenght", "sample", 525.0, "F", 0, 145.0, 96.65, "M"));
+        values.add(new MSSQLServerPrecision2("total word", "text length", 25.0, "F", 0, 76.0, 15.25, "M"));
+        values.add(new MSSQLServerPrecision2("total word lenght 20", "sample text length20", 54325.0, "F", 0, 98765.0,
+                56.65, "M"));
+        values.add(new MSSQLServerPrecision2("lenght", "sample", 525.0, "F", 0, 145.0, 96.65, "M"));
         return values;
     }
 }

@@ -94,13 +94,17 @@ public class Chunk implements HasSize {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Chunk chunk = (Chunk) o;
 
-        if (name != null ? !name.equals(chunk.name) : chunk.name != null) return false;
-        if (getRowCount() != chunk.getRowCount()) return false;
+        if (name != null ? !name.equals(chunk.name) : chunk.name != null)
+            return false;
+        if (getRowCount() != chunk.getRowCount())
+            return false;
 
         return true;
     }

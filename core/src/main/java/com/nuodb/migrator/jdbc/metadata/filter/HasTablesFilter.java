@@ -55,8 +55,9 @@ public class HasTablesFilter implements HasTables {
 
     @Override
     public Collection<Table> getTables() {
-        final MetaDataFilter filter = metaDataFilterManager != null ?
-                metaDataFilterManager.getMetaDataFilter(MetaDataType.TABLE) : null;
+        final MetaDataFilter filter = metaDataFilterManager != null
+                ? metaDataFilterManager.getMetaDataFilter(MetaDataType.TABLE)
+                : null;
         return newArrayList(filter(hasTables.getTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table table) {
@@ -67,8 +68,9 @@ public class HasTablesFilter implements HasTables {
 
     @Override
     public Collection<Sequence> getSequences() {
-        final MetaDataFilter filter = metaDataFilterManager != null ?
-                metaDataFilterManager.getMetaDataFilter(MetaDataType.TABLE) : null;
+        final MetaDataFilter filter = metaDataFilterManager != null
+                ? metaDataFilterManager.getMetaDataFilter(MetaDataType.TABLE)
+                : null;
         return newArrayList(filter(hasTables.getSequences(), new Predicate<Sequence>() {
             @Override
             public boolean apply(Sequence sequence) {
@@ -79,8 +81,9 @@ public class HasTablesFilter implements HasTables {
 
     @Override
     public Collection<UserDefinedType> getUserDefinedTypes() {
-        final MetaDataFilter filter = metaDataFilterManager != null ?
-                metaDataFilterManager.getMetaDataFilter(MetaDataType.TABLE) : null;
+        final MetaDataFilter filter = metaDataFilterManager != null
+                ? metaDataFilterManager.getMetaDataFilter(MetaDataType.TABLE)
+                : null;
         return newArrayList(filter(hasTables.getUserDefinedTypes(), new Predicate<UserDefinedType>() {
             @Override
             public boolean apply(UserDefinedType userDefinedType) {

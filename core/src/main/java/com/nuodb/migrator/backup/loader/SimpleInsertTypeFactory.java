@@ -42,8 +42,7 @@ public class SimpleInsertTypeFactory implements InsertTypeFactory {
     private InsertType insertType;
     private Map<String, InsertType> tableInsertTypes;
 
-    public SimpleInsertTypeFactory(InsertType insertType,
-                                   Map<String, InsertType> tableInsertTypes) {
+    public SimpleInsertTypeFactory(InsertType insertType, Map<String, InsertType> tableInsertTypes) {
         this.insertType = insertType;
         this.tableInsertTypes = tableInsertTypes;
     }

@@ -42,8 +42,8 @@ public class WriteTable extends WriteQuery {
     private Table table;
     private String filter;
 
-    public WriteTable(Table table, Collection<? extends Column> columns, String filter,
-                      QuerySplitter querySplitter, RowSet rowSet) {
+    public WriteTable(Table table, Collection<? extends Column> columns, String filter, QuerySplitter querySplitter,
+            RowSet rowSet) {
         super(querySplitter, columns, rowSet);
         this.table = table;
         this.filter = filter;

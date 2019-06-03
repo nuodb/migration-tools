@@ -43,7 +43,6 @@ import java.util.Set;
 import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 
-
 /**
  * @author Sergey Bushik
  */
@@ -51,8 +50,7 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 public class SimpleInspectionResults implements InspectionResults {
 
     private SetMultimap<MetaDataType, MetaData> objects = newSetMultimap(
-            Maps.<MetaDataType, Collection<MetaData>>newHashMap(),
-            new Supplier<Set<MetaData>>() {
+            Maps.<MetaDataType, Collection<MetaData>>newHashMap(), new Supplier<Set<MetaData>>() {
                 public Set<MetaData> get() {
                     return newLinkedHashSet();
                 }
@@ -86,8 +84,8 @@ public class SimpleInspectionResults implements InspectionResults {
         Optional<MetaData> identifiable = Iterables.tryFind(objects.get(objectType), new Predicate<MetaData>() {
             @Override
             public boolean apply(MetaData object) {
-                return object instanceof Identifiable && ObjectUtils.equals(((Identifiable) object).getIdentifier(),
-                        identifier);
+                return object instanceof Identifiable
+                        && ObjectUtils.equals(((Identifiable) object).getIdentifier(), identifier);
             }
         });
         return identifiable.isPresent() ? (M) identifiable.get() : null;

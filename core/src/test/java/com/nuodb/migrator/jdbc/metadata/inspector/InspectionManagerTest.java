@@ -22,19 +22,18 @@ public class InspectionManagerTest {
     private InspectionManager inspectionManager;
 
     /**
-     * Returns inspection context, which creates inspection context doing nothing during commit() call.
+     * Returns inspection context, which creates inspection context doing
+     * nothing during commit() call.
      */
     @BeforeMethod
     public void setUp() throws Exception {
         inspectionManager = spy(new InspectionManager());
 
-        given(inspectionManager.createInspectionContext(
-                any(Connection.class), any(InspectionResults.class), (MetaDataType[]) anyVararg())).
-                will(new Answer<InspectionContext>() {
+        given(inspectionManager.createInspectionContext(any(Connection.class), any(InspectionResults.class),
+                (MetaDataType[]) anyVararg())).will(new Answer<InspectionContext>() {
                     @Override
                     public InspectionContext answer(InvocationOnMock invocation) throws Throwable {
-                        InspectionContext inspectionContext =
-                                (InspectionContext) spy(invocation.callRealMethod());
+                        InspectionContext inspectionContext = (InspectionContext) spy(invocation.callRealMethod());
                         willDoNothing().given(inspectionContext).close();
                         return inspectionContext;
                     }
@@ -47,15 +46,17 @@ public class InspectionManagerTest {
         Object[][] inspectData = new Object[objectTypes.length][];
         int index = 0;
         for (MetaDataType objectType : objectTypes) {
-            inspectData[index++] = new Object[]{objectType};
+            inspectData[index++] = new Object[] { objectType };
         }
         return inspectData;
     }
 
     /**
-     * Verifies that correspondent inspector is called by the inspection manager.
+     * Verifies that correspondent inspector is called by the inspection
+     * manager.
      *
-     * @param objectType to be inspected
+     * @param objectType
+     *            to be inspected
      * @throws Exception
      */
     @Test(dataProvider = "inspect")

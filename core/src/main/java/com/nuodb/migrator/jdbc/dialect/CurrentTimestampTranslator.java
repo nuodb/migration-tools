@@ -49,7 +49,7 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScrip
     }
 
     public CurrentTimestampTranslator(DatabaseInfo databaseInfo, Collection<String> aliases, String timestamp,
-                                      boolean literal) {
+            boolean literal) {
         super(databaseInfo);
         this.aliases.addAll(aliases);
         this.timestamp = timestamp;
@@ -60,14 +60,14 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScrip
     protected boolean supportsScript(ColumnScript script, TranslationContext context) {
         boolean supports;
         switch (script.getColumn().getTypeCode()) {
-            case Types.TIME:
-            case Types.DATE:
-            case Types.TIMESTAMP:
-                supports = true;
-                break;
-            default:
-                supports = false;
-                break;
+        case Types.TIME:
+        case Types.DATE:
+        case Types.TIMESTAMP:
+            supports = true;
+            break;
+        default:
+            supports = false;
+            break;
         }
         return supports && script.getScript() != null && aliases.contains(script.getScript());
     }

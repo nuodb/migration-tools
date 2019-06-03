@@ -46,14 +46,13 @@ public class JdbcClobValue extends JdbcTypeValueBase<Clob> {
     }
 
     @Override
-    public Clob getValue(ResultSet resultSet, int index,
-                         Field field, Map<String, Object> options) throws SQLException {
+    public Clob getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options) throws SQLException {
         return resultSet.getClob(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Clob value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Clob value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setClob(index, value);
     }
 }

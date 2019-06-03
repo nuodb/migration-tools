@@ -37,4 +37,3 @@ public interface StatementAction<S extends Statement, V extends Object> {
 
     V executeStatement(S statement) throws SQLException;
 }
-

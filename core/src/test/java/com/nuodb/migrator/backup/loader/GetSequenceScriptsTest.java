@@ -54,11 +54,8 @@ public class GetSequenceScriptsTest {
         c1.setSequence(s1);
         t1.addColumn(c1);
         schema1.addTable(t1);
-        Collection<String> expected1 = newArrayList(
-                "USE \"schema1\"",
-                "DROP SEQUENCE IF EXISTS \"seq2\"",
-                "CREATE SEQUENCE \"seq2\""
-        );
+        Collection<String> expected1 = newArrayList("USE \"schema1\"", "DROP SEQUENCE IF EXISTS \"seq2\"",
+                "CREATE SEQUENCE \"seq2\"");
 
         Schema schema2 = new Schema("schema2");
         Table t2 = new Table("t2");
@@ -73,13 +70,8 @@ public class GetSequenceScriptsTest {
         schema2.addSequence(s4);
         t2.addColumn(c2);
         schema2.addTable(t2);
-        Collection<String> expected2 = newArrayList(
-                "USE \"schema2\"",
-                "DROP SEQUENCE IF EXISTS \"seq3\"",
-                "CREATE SEQUENCE \"seq3\"",
-                "DROP SEQUENCE IF EXISTS \"seq4\"",
-                "CREATE SEQUENCE \"seq4\""
-        );
+        Collection<String> expected2 = newArrayList("USE \"schema2\"", "DROP SEQUENCE IF EXISTS \"seq3\"",
+                "CREATE SEQUENCE \"seq3\"", "DROP SEQUENCE IF EXISTS \"seq4\"", "CREATE SEQUENCE \"seq4\"");
 
         Schema schema3 = new Schema("schema3");
         Sequence s5 = createSequence("seq5", null, "schema2", null, null);
@@ -95,11 +87,7 @@ public class GetSequenceScriptsTest {
         schema3.addSequence(s5);
         Collection<String> expected3 = newArrayList();
 
-        return new Object[][]{
-                {schema1, expected1},
-                {schema2, expected2},
-                {schema3, expected3}
-        };
+        return new Object[][] { { schema1, expected1 }, { schema2, expected2 }, { schema3, expected3 } };
     }
 
     @Test(dataProvider = "getSequencesScripts")

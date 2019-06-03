@@ -51,7 +51,7 @@ public class OracleTableRowCountHandler extends SimpleTableRowCountHandler {
     private boolean updateStatistics = UPDATE_STATISTICS;
 
     public OracleTableRowCountHandler(Dialect dialect, Table table, Column column, String filter,
-                                      RowCountType rowCountType) {
+            RowCountType rowCountType) {
         super(dialect, table, column, filter, rowCountType);
     }
 

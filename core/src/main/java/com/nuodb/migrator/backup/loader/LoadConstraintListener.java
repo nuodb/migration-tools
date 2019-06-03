@@ -56,20 +56,19 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
         this.backupLoader = backupLoader;
         this.backupLoaderManager = backupLoaderManager;
 
-        LoadConstraints loadConstraints = backupLoaderManager.
-                getBackupLoaderContext().getLoadConstraints();
-        this.loadIndexes = synchronizedListMultimap(create(
-                loadConstraints.getLoadConstraints(INDEX, PRIMARY_KEY)));
-        this.loadForeignKeys = synchronizedListMultimap(create(
-                loadConstraints.getLoadConstraints(FOREIGN_KEY)));
+        LoadConstraints loadConstraints = backupLoaderManager.getBackupLoaderContext().getLoadConstraints();
+        this.loadIndexes = synchronizedListMultimap(create(loadConstraints.getLoadConstraints(INDEX, PRIMARY_KEY)));
+        this.loadForeignKeys = synchronizedListMultimap(create(loadConstraints.getLoadConstraints(FOREIGN_KEY)));
     }
 
     /**
-     * Tracks completion of load constraint work and updates list of queued indexes, primary keys & foreign keys. Once
-     * indexes are loaded foreign keys are started, eventually when all constraints are loaded corresponding signal will
-     * be called on sync object.
+     * Tracks completion of load constraint work and updates list of queued
+     * indexes, primary keys & foreign keys. Once indexes are loaded foreign
+     * keys are started, eventually when all constraints are loaded
+     * corresponding signal will be called on sync object.
      *
-     * @param event defining work completion
+     * @param event
+     *            defining work completion
      */
     @Override
     public void onExecuteEnd(WorkEvent event) {
@@ -77,11 +76,9 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
         if (work instanceof LoadTableWork) {
             LoadTableWork loadTableWork = (LoadTableWork) work;
             LoadTable loadTable = loadTableWork.getLoadTable();
-            Table table = backupLoader.getTable(loadTable,
-                    backupLoaderManager.getBackupLoaderContext());
+            Table table = backupLoader.getTable(loadTable, backupLoaderManager.getBackupLoaderContext());
             if (table != null) {
-                backupLoader.loadConstraints(newArrayList(
-                        loadIndexes.get(table)), backupLoaderManager);
+                backupLoader.loadConstraints(newArrayList(loadIndexes.get(table)), backupLoaderManager);
             }
         } else if (work instanceof LoadConstraintWork) {
             LoadConstraintWork loadConstraintWork = (LoadConstraintWork) work;
@@ -102,7 +99,8 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
     }
 
     protected void loadConstraintsDone() {
-        // once all indexes & foreign keys are loaded shutdown pool and await for termination
+        // once all indexes & foreign keys are loaded shutdown pool and await
+        // for termination
         if (loadIndexes.isEmpty() && loadForeignKeys.isEmpty()) {
             backupLoaderManager.loadConstraintsDone();
         }

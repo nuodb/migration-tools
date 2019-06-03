@@ -51,7 +51,7 @@ public class PostgreSQLTableRowCountHandler extends SimpleTableRowCountHandler {
     private static final Pattern EXPLAIN_QUERY_ROW_COUNT = Pattern.compile("rows=(\\d+)");
 
     public PostgreSQLTableRowCountHandler(Dialect dialect, Table table, Column column, String filter,
-                                          RowCountType rowCountType) {
+            RowCountType rowCountType) {
         super(dialect, table, column, filter, rowCountType);
     }
 
@@ -85,17 +85,17 @@ public class PostgreSQLTableRowCountHandler extends SimpleTableRowCountHandler {
     protected Long getRowCount(ResultSet resultSet, RowCountQuery rowCountQuery) throws SQLException {
         Long rowCount = null;
         switch (rowCountQuery.getRowCountType()) {
-            case APPROX:
-                while (rowCount == null && resultSet.next()) {
-                    Matcher matcher = EXPLAIN_QUERY_ROW_COUNT.matcher(resultSet.getString(1));
-                    if (matcher.find()) {
-                        rowCount = parseLong(matcher.group(1));
-                    }
+        case APPROX:
+            while (rowCount == null && resultSet.next()) {
+                Matcher matcher = EXPLAIN_QUERY_ROW_COUNT.matcher(resultSet.getString(1));
+                if (matcher.find()) {
+                    rowCount = parseLong(matcher.group(1));
                 }
-                break;
-            case EXACT:
-                rowCount = resultSet.next() ? resultSet.getLong(1) : null;
-                break;
+            }
+            break;
+        case EXACT:
+            rowCount = resultSet.next() ? resultSet.getLong(1) : null;
+            break;
         }
         return rowCount;
     }

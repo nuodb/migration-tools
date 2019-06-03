@@ -51,12 +51,15 @@ public class QueryRowSet extends RowSet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof QueryRowSet)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof QueryRowSet))
+            return false;
 
         QueryRowSet that = (QueryRowSet) o;
 
-        if (query != null ? !query.equals(that.query) : that.query != null) return false;
+        if (query != null ? !query.equals(that.query) : that.query != null)
+            return false;
 
         return true;
     }

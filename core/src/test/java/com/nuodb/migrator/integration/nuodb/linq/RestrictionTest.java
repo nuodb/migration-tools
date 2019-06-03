@@ -41,13 +41,12 @@ import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 import com.nuodb.migrator.integration.nuodb.linq.util.Order;
 import com.nuodb.migrator.integration.nuodb.linq.util.Product;
 
-@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
+@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
 public class RestrictionTest extends MigrationTestBase {
     PreparedStatement pstmt = null;
 
     public void numbersLessThan5() throws Exception {
-        List<Integer> list = DatabaseUtil.getNumArray(
-                "select num  from array where num < 5", nuodbConnection, pstmt);
+        List<Integer> list = DatabaseUtil.getNumArray("select num  from array where num < 5", nuodbConnection, pstmt);
         Assert.assertTrue(list.size() >= 1, "The list is empty");
         Integer[] numbers = list.toArray(new Integer[list.size()]);
         int count = 0;
@@ -59,36 +58,29 @@ public class RestrictionTest extends MigrationTestBase {
     }
 
     public void outOfStock() throws Exception {
-        List<Product> products = DatabaseUtil.getProductList(
-                "select * from products where stock=0", nuodbConnection, pstmt);
+        List<Product> products = DatabaseUtil.getProductList("select * from products where stock=0", nuodbConnection,
+                pstmt);
         Assert.assertTrue(products.size() >= 1, "The product list is empty");
         List<Product> verifyProdList = getOutOfStock();
         Collections.sort(products, Product.getSortBasedOnProductID());
         Collections.sort(verifyProdList, Product.getSortBasedOnProductID());
         Assert.assertEquals(products.size(), verifyProdList.size());
         for (int i = 0; i < products.size(); i++) {
-            Assert.assertEquals(
-                    products.get(i),
-                    verifyProdList.get(i),
-                    "Object data not matched : Product(" + i + ") "
-                            + products.get(i) + " " + verifyProdList.get(i));
+            Assert.assertEquals(products.get(i), verifyProdList.get(i),
+                    "Object data not matched : Product(" + i + ") " + products.get(i) + " " + verifyProdList.get(i));
         }
     }
 
     private List<Product> getOutOfStock() {
         List<Product> list = new ArrayList<Product>();
-        list.add(new Product(1, "Alice Mutton", 0, "Beverages",
-                "CheapestProducts", 4.5000, 10, 23));
-        list.add(new Product(3, "Gorgonzola", 0, "Produce", "CheapestProducts",
-                25, 3, 10));
-        list.add(new Product(4, "Perth Pasties", 0, "Seafood",
-                "CheapestProducts", 38, 5, 5));
+        list.add(new Product(1, "Alice Mutton", 0, "Beverages", "CheapestProducts", 4.5000, 10, 23));
+        list.add(new Product(3, "Gorgonzola", 0, "Produce", "CheapestProducts", 25, 3, 10));
+        list.add(new Product(4, "Perth Pasties", 0, "Seafood", "CheapestProducts", 38, 5, 5));
         return list;
     }
 
     public void inStock() throws Exception {
-        List<Product> products = DatabaseUtil.getProductList(
-                "select * from products where unitprice>4 and stock>=1",
+        List<Product> products = DatabaseUtil.getProductList("select * from products where unitprice>4 and stock>=1",
                 nuodbConnection, pstmt);
         Assert.assertTrue(products.size() >= 1, "The product list is empty");
         List<Product> verifyProdList = getInStock();
@@ -96,38 +88,30 @@ public class RestrictionTest extends MigrationTestBase {
         Collections.sort(verifyProdList, Product.getSortBasedOnProductID());
         Assert.assertEquals(products.size(), verifyProdList.size());
         for (int i = 0; i < products.size(); i++) {
-            Assert.assertEquals(
-                    products.get(i),
-                    verifyProdList.get(i),
-                    "Object data not matched : Product(" + i + ") "
-                            + products.get(i) + " " + verifyProdList.get(i));
+            Assert.assertEquals(products.get(i), verifyProdList.get(i),
+                    "Object data not matched : Product(" + i + ") " + products.get(i) + " " + verifyProdList.get(i));
         }
 
     }
 
     private List<Product> getInStock() {
         List<Product> list = new ArrayList<Product>();
-        list.add(new Product(2, "Chef Anton", 1, "Condiments",
-                "CheapestProducts", 7.4500, 4, 12));
+        list.add(new Product(2, "Chef Anton", 1, "Condiments", "CheapestProducts", 7.4500, 4, 12));
         return list;
     }
 
     public void customerFromWashington() throws Exception {
-        List<Customer> customer = DatabaseUtil
-                .getCustomerList(
-                        "select * from customers c join orders o on c.customerid=o.customerid where region like 'Wa%'",
-                        nuodbConnection, pstmt);
+        List<Customer> customer = DatabaseUtil.getCustomerList(
+                "select * from customers c join orders o on c.customerid=o.customerid where region like 'Wa%'",
+                nuodbConnection, pstmt);
         Assert.assertTrue(customer.size() >= 1, "The customer list is empty");
         List<Customer> verifyCustList = getCustomerFromWashington();
         Assert.assertEquals(customer.size(), verifyCustList.size());
         Collections.sort(customer, Customer.getSortBasedOnCustomerID());
         Collections.sort(verifyCustList, Customer.getSortBasedOnCustomerID());
         for (int i = 0; i < customer.size(); i++) {
-            Assert.assertEquals(
-                    customer.get(i),
-                    verifyCustList.get(i),
-                    "Object data not matched : Product(" + i + ") "
-                            + customer.get(i) + " " + verifyCustList.get(i));
+            Assert.assertEquals(customer.get(i), verifyCustList.get(i),
+                    "Object data not matched : Product(" + i + ") " + customer.get(i) + " " + verifyCustList.get(i));
         }
     }
 
@@ -135,8 +119,7 @@ public class RestrictionTest extends MigrationTestBase {
         List<Customer> listCust = new ArrayList<Customer>();
         List<Order> listOrd1 = new ArrayList<Order>();
         List<Order> listOrd5 = new ArrayList<Order>();
-        Customer c1 = new Customer("Alfreds Futterkiste", 8, "c101",
-                "Washington", listOrd1);
+        Customer c1 = new Customer("Alfreds Futterkiste", 8, "c101", "Washington", listOrd1);
         listOrd1.add(new Order("O10690", "2012-09-29", 814.50, "c101"));
         listOrd1.add(new Order("O10691", "1989-02-16", 814.50, "c101"));
         listCust.add(c1);

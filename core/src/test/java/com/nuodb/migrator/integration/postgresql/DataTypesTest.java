@@ -38,24 +38,18 @@ import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 @Test(groups = { "postgresqlintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
 public class DataTypesTest extends BaseDataTypeTest {
 
-	@DataProvider(name = "dataTypePostgre")
-	public Object[][] createDataTypeData() {
-		return new Object[][] { { "testdata_smallint" },
-				{ "testdata_integer" }, { "testdata_bigint" },
-				{ "testdata_real" }, { "testdata_doubleprecision" },
-				{ "testdata_serial" }, { "testdata_smallserial" },
-				{ "testdata_bigserial" }, { "testdata_char" },
-				{ "testdata_character" }, { "testdata_charactervarying" },
-				{ "testdata_varchar" }, { "testdata_text" },
-				{ "testdata_bytea" }, { "testdata_boolean" },
-				{ "testdata_timewithtimezone" },
-				{ "testdata_timewithouttimezone" },
-				{ "testdata_timestampwithtimezone" },
-				{ "testdata_timestampwithouttimezone" } };
-	}
+    @DataProvider(name = "dataTypePostgre")
+    public Object[][] createDataTypeData() {
+        return new Object[][] { { "testdata_smallint" }, { "testdata_integer" }, { "testdata_bigint" },
+                { "testdata_real" }, { "testdata_doubleprecision" }, { "testdata_serial" }, { "testdata_smallserial" },
+                { "testdata_bigserial" }, { "testdata_char" }, { "testdata_character" },
+                { "testdata_charactervarying" }, { "testdata_varchar" }, { "testdata_text" }, { "testdata_bytea" },
+                { "testdata_boolean" }, { "testdata_timewithtimezone" }, { "testdata_timewithouttimezone" },
+                { "testdata_timestampwithtimezone" }, { "testdata_timestampwithouttimezone" } };
+    }
 
-	@Test(dataProvider = "dataTypePostgre")
-	public void testDataType(String tableName) throws Exception {
-		super.testDataType(tableName);
-	}
+    @Test(dataProvider = "dataTypePostgre")
+    public void testDataType(String tableName) throws Exception {
+        super.testDataType(tableName);
+    }
 }

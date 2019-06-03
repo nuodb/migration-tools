@@ -71,29 +71,28 @@ public class TranslationManager {
         return translation;
     }
 
-    public void addTranslation(DatabaseInfo source, String sourceScript,
-                               DatabaseInfo target, String targetScript) {
+    public void addTranslation(DatabaseInfo source, String sourceScript, DatabaseInfo target, String targetScript) {
         PatternTranslator translator = new PatternTranslator(source, target);
         translator.addTranslation(sourceScript, targetScript);
         addTranslator(translator);
     }
 
-    public void addTranslations(DatabaseInfo source, Collection<String> sourceScripts,
-                                DatabaseInfo target, String targetScript) {
+    public void addTranslations(DatabaseInfo source, Collection<String> sourceScripts, DatabaseInfo target,
+            String targetScript) {
         PatternTranslator translator = new PatternTranslator(source, target);
         translator.addTranslations(sourceScripts, targetScript);
         addTranslator(translator);
     }
 
-    public void addTranslationRegex(DatabaseInfo source, String sourceScript,
-                                    DatabaseInfo target, String targetScript) {
+    public void addTranslationRegex(DatabaseInfo source, String sourceScript, DatabaseInfo target,
+            String targetScript) {
         PatternTranslator translator = new PatternTranslator(source, target);
         translator.addTranslationRegex(sourceScript, targetScript);
         addTranslator(translator);
     }
 
-    public void addTranslationPattern(DatabaseInfo source, Pattern sourceScript,
-                                      DatabaseInfo target, String targetScript) {
+    public void addTranslationPattern(DatabaseInfo source, Pattern sourceScript, DatabaseInfo target,
+            String targetScript) {
         PatternTranslator translator = new PatternTranslator(source, target);
         translator.addTranslationPattern(sourceScript, targetScript);
         addTranslator(translator);
@@ -117,13 +116,14 @@ public class TranslationManager {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TranslationManager)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof TranslationManager))
+            return false;
 
         TranslationManager that = (TranslationManager) o;
 
-        if (translators != null ? !translators.equals(
-                that.translators) : that.translators != null)
+        if (translators != null ? !translators.equals(that.translators) : that.translators != null)
             return false;
 
         return true;

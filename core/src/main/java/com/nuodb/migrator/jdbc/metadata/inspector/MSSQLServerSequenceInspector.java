@@ -100,10 +100,8 @@ public class MSSQLServerSequenceInspector extends TableInspectorBase<Table, Tabl
     protected void processResultSet(InspectionContext inspectionContext, ResultSet sequences) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         if (sequences.next()) {
-            Table table = addTable(inspectionResults,
-                    sequences.getString("table_catalog"),
-                    sequences.getString("table_schema"),
-                    sequences.getString("table_name"));
+            Table table = addTable(inspectionResults, sequences.getString("table_catalog"),
+                    sequences.getString("table_schema"), sequences.getString("table_name"));
             Sequence sequence = new Sequence();
             sequence.setStartWith(sequences.getLong("start_with"));
             sequence.setLastValue(sequences.getLong("last_value"));

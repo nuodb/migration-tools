@@ -63,13 +63,11 @@ public class MySQLColumn {
     }
 
     public static Collection<String> getEnum(JdbcType baseType, String type) {
-        return ENUM.equals(baseType.getTypeName()) ?
-                getValues(type.substring(5, type.length() - 1)) : null;
+        return ENUM.equals(baseType.getTypeName()) ? getValues(type.substring(5, type.length() - 1)) : null;
     }
 
     public static Collection<String> getSet(JdbcType baseType, String type) {
-        return SET.equals(baseType.getTypeName()) ?
-                getValues(type.substring(4, type.length() - 1)) : null;
+        return SET.equals(baseType.getTypeName()) ? getValues(type.substring(4, type.length() - 1)) : null;
     }
 
     public static Collection<String> getValues(String type) {
@@ -87,33 +85,33 @@ public class MySQLColumn {
             boolean addSymbol = false;
             boolean addValue = false;
             switch (symbol) {
-                case '\'':
-                    if (start && (lastSymbol == '\'' && index > startIndex)) {
-                        addSymbol = true;
-                    }
-                    if (!start) {
-                        start = true;
-                        startIndex = index + 1;
-                        count++;
-                    }
-                    break;
-                case ',':
-                    addSymbol = escape;
-                    if (start && !escape) {
-                        addValue = true;
-                        start = false;
-                    }
-                    break;
-                case ' ':
-                    addSymbol = start;
-                    break;
-                case '\\':
-                    addSymbol = escape;
-                    escape = !escape;
-                    break;
-                default:
+            case '\'':
+                if (start && (lastSymbol == '\'' && index > startIndex)) {
                     addSymbol = true;
-                    break;
+                }
+                if (!start) {
+                    start = true;
+                    startIndex = index + 1;
+                    count++;
+                }
+                break;
+            case ',':
+                addSymbol = escape;
+                if (start && !escape) {
+                    addValue = true;
+                    start = false;
+                }
+                break;
+            case ' ':
+                addSymbol = start;
+                break;
+            case '\\':
+                addSymbol = escape;
+                escape = !escape;
+                break;
+            default:
+                addSymbol = true;
+                break;
             }
             if (addSymbol) {
                 value.append(symbol);

@@ -205,12 +205,15 @@ public abstract class XmlWriteContextBase implements XmlWriteContext {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         XmlWriteContextBase that = (XmlWriteContextBase) o;
 
-        if (map != null ? !map.equals(that.map) : that.map != null) return false;
+        if (map != null ? !map.equals(that.map) : that.map != null)
+            return false;
 
         return true;
     }
@@ -220,4 +223,3 @@ public abstract class XmlWriteContextBase implements XmlWriteContext {
         return map != null ? map.hashCode() : 0;
     }
 }
-

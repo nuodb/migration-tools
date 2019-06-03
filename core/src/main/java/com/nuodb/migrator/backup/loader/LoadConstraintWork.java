@@ -74,8 +74,8 @@ public class LoadConstraintWork extends WorkBase {
         final ScriptGeneratorManager scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
         final Constraint constraint = loadConstraint.getConstraint();
         String constraintType = getMessage(getClassName(constraint.getClass()));
-        Collection<Index> indexes = loadConstraint instanceof LoadIndexes ?
-                ((LoadIndexes) loadConstraint).getIndexes() : null;
+        Collection<Index> indexes = loadConstraint instanceof LoadIndexes ? ((LoadIndexes) loadConstraint).getIndexes()
+                : null;
         String constraintName;
         if (!isEmpty(indexes)) {
             constraintName = join(transform(indexes, new Function<Index, String>() {

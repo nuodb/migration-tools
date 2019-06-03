@@ -106,8 +106,7 @@ public class BsonInput extends InputBase implements BsonFormat {
                 int length = valueTypes.size();
                 values = new Value[length];
                 int index = 0;
-                BitSet nulls = isNextToken(VALUE_NULL) ? EMPTY :
-                        fromByteArray((byte[]) bsonReader.getEmbeddedObject());
+                BitSet nulls = isNextToken(VALUE_NULL) ? EMPTY : fromByteArray((byte[]) bsonReader.getEmbeddedObject());
                 while (index < length) {
                     Object value;
                     if (nulls.get(index)) {
@@ -119,12 +118,12 @@ public class BsonInput extends InputBase implements BsonFormat {
                     ValueType valueType = valueTypes.get(index);
                     valueType = valueType != null ? valueType : STRING;
                     switch (valueType) {
-                        case BINARY:
-                            values[index] = binary((byte[]) value);
-                            break;
-                        case STRING:
-                            values[index] = string((String) value);
-                            break;
+                    case BINARY:
+                        values[index] = binary((byte[]) value);
+                        break;
+                    case STRING:
+                        values[index] = string((String) value);
+                        break;
                     }
                     index++;
                 }

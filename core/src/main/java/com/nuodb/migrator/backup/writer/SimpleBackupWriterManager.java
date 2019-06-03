@@ -54,8 +54,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * @author Sergey Bushik
  */
 @SuppressWarnings("all")
-public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterListener>
-        implements BackupWriterManager {
+public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterListener> implements BackupWriterManager {
 
     private BackupWriterSync backupWriterSync;
     private BackupWriterContext backupWriterContext;
@@ -63,8 +62,7 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     public SimpleBackupWriterManager() {
         this.writeQueries = synchronizedSetMultimap(newSetMultimap(
-                Maps.<WriteQuery, Collection<WriteQueryWork>>newHashMap(),
-                new Supplier<Set<WriteQueryWork>>() {
+                Maps.<WriteQuery, Collection<WriteQueryWork>>newHashMap(), new Supplier<Set<WriteQueryWork>>() {
                     @Override
                     public Set<WriteQueryWork> get() {
                         return newTreeSet(new Comparator<WriteQueryWork>() {
@@ -188,8 +186,8 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
     @Override
     public void setBackupWriterContext(BackupWriterContext backupWriterContext) {
         this.backupWriterContext = backupWriterContext;
-        this.backupWriterSync = new BackupWriterSync(
-                backupWriterContext.isWriteData(), backupWriterContext.isWriteSchema());
+        this.backupWriterSync = new BackupWriterSync(backupWriterContext.isWriteData(),
+                backupWriterContext.isWriteSchema());
     }
 
     @Override

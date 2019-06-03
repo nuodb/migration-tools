@@ -67,11 +67,13 @@ public class PostgreSQLDialect extends SimpleDialect {
     }
 
     /**
-     * The standard says that unquoted identifiers should be normalized to upper case but PostgreSQL normalizes to lower
-     * case.
+     * The standard says that unquoted identifiers should be normalized to upper
+     * case but PostgreSQL normalizes to lower case.
      *
-     * @param identifier   to be normalized.
-     * @param identifiable object identified by specified identifier.
+     * @param identifier
+     *            to be normalized.
+     * @param identifiable
+     *            object identified by specified identifier.
      * @return boolean indicating whether quoting is required.
      */
     @Override
@@ -163,8 +165,8 @@ public class PostgreSQLDialect extends SimpleDialect {
             Connection connection = statement.getConnection();
             DatabaseMetaData metaData = connection.getMetaData();
             int driverVersion = metaData.getDriverMajorVersion() * 10 + metaData.getDriverMinorVersion();
-            if (!connection.getAutoCommit() && (driverVersion >= 74) &&
-                    (statement.getResultSetType() == TYPE_FORWARD_ONLY)) {
+            if (!connection.getAutoCommit() && (driverVersion >= 74)
+                    && (statement.getResultSetType() == TYPE_FORWARD_ONLY)) {
                 statement.setFetchSize(fetchSize);
             }
         } else {

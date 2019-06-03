@@ -46,8 +46,10 @@ public interface Parallelizer {
     /**
      * Returns number of worker threads to load this table with
      *
-     * @param loadTable           table to load
-     * @param backupLoaderContext backup loader context
+     * @param loadTable
+     *            table to load
+     * @param backupLoaderContext
+     *            backup loader context
      * @return number of threads
      */
     int getThreads(LoadTable loadTable, BackupLoaderContext backupLoaderContext);

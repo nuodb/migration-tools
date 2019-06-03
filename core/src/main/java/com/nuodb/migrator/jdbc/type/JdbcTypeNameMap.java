@@ -115,8 +115,8 @@ public class JdbcTypeNameMap {
         removeIf(getJdbcTypeNames(), new Predicate<JdbcTypeName>() {
             @Override
             public boolean apply(JdbcTypeName jdbcTypeName) {
-                return jdbcTypeName instanceof HasJdbcTypeHandler &&
-                        ((HasJdbcTypeHandler) jdbcTypeName).getJdbcType().equals(jdbcType);
+                return jdbcTypeName instanceof HasJdbcTypeHandler
+                        && ((HasJdbcTypeHandler) jdbcTypeName).getJdbcType().equals(jdbcType);
             }
         });
     }

@@ -147,23 +147,31 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         LoadJobSpec that = (LoadJobSpec) o;
 
         if (commitStrategy != null ? !commitStrategy.equals(that.commitStrategy) : that.commitStrategy != null)
             return false;
-        if (inputSpec != null ? !inputSpec.equals(that.inputSpec) : that.inputSpec != null) return false;
-        if (insertType != that.insertType) return false;
+        if (inputSpec != null ? !inputSpec.equals(that.inputSpec) : that.inputSpec != null)
+            return false;
+        if (insertType != that.insertType)
+            return false;
         if (migrationModes != null ? !migrationModes.equals(that.migrationModes) : that.migrationModes != null)
             return false;
         if (tableInsertTypes != null ? !tableInsertTypes.equals(that.tableInsertTypes) : that.tableInsertTypes != null)
             return false;
-        if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null) return false;
-        if (timeZone != null ? !timeZone.equals(that.timeZone) : that.timeZone != null) return false;
-        if (threads != null ? !threads.equals(that.threads) : that.threads != null) return false;
+        if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null)
+            return false;
+        if (timeZone != null ? !timeZone.equals(that.timeZone) : that.timeZone != null)
+            return false;
+        if (threads != null ? !threads.equals(that.threads) : that.threads != null)
+            return false;
 
         return true;
     }

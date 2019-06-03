@@ -69,7 +69,6 @@ public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
         this.productVersion = productVersion;
     }
 
-
     public DatabaseInfo(String productName, String productVersion, Integer majorVersion) {
         this.productName = productName;
         this.productVersion = productVersion;
@@ -89,9 +88,11 @@ public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
             this.productVersion = metaData.getDatabaseProductVersion();
             this.minorVersion = metaData.getDatabaseMinorVersion();
             this.majorVersion = metaData.getDatabaseMajorVersion();
-        }catch(Error e) {
+        } catch (Error e) {
             if (logger.isErrorEnabled()) {
-                logger.error((format("JDBC Driver %s version is not applicable for Migrator, use latest version of the driver",metaData.getDriverVersion())));
+                logger.error((format(
+                        "JDBC Driver %s version is not applicable for Migrator, use latest version of the driver",
+                        metaData.getDriverVersion())));
             }
             System.exit(DRIVER_ERROR);
         }
@@ -132,7 +133,8 @@ public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
     /**
      * Checks if this is a base database info for the given database info
      *
-     * @param databaseInfo to check if it's inherited from this database info
+     * @param databaseInfo
+     *            to check if it's inherited from this database info
      * @return true is this database into is a super class for the given info
      */
     public boolean isAssignable(DatabaseInfo databaseInfo) {
@@ -148,25 +150,23 @@ public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
     }
 
     protected ComparisonChain isAssignableProductName(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-        return comparator.compare(getProductName(), databaseInfo.getProductName(),
-                new Ordering<String>() {
-                    @Override
-                    public int compare(String productName1, String productName2) {
-                        return productName1 == null ? 0 :
-                                StringUtils.equals(productName1, productName2) ? ASSIGNABLE : NOT_ASSIGNABLE;
-                    }
-                });
+        return comparator.compare(getProductName(), databaseInfo.getProductName(), new Ordering<String>() {
+            @Override
+            public int compare(String productName1, String productName2) {
+                return productName1 == null ? 0
+                        : StringUtils.equals(productName1, productName2) ? ASSIGNABLE : NOT_ASSIGNABLE;
+            }
+        });
     }
 
     protected ComparisonChain isAssignableProductVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-        return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(),
-                new Ordering<String>() {
-                    @Override
-                    public int compare(String productVersion1, String productVersion2) {
-                        return productVersion1 == null ? 0 :
-                                StringUtils.equals(productVersion1, productVersion2) ? ASSIGNABLE : NOT_ASSIGNABLE;
-                    }
-                });
+        return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(), new Ordering<String>() {
+            @Override
+            public int compare(String productVersion1, String productVersion2) {
+                return productVersion1 == null ? 0
+                        : StringUtils.equals(productVersion1, productVersion2) ? ASSIGNABLE : NOT_ASSIGNABLE;
+            }
+        });
     }
 
     protected ComparisonChain isAssignableMajorVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
@@ -184,17 +184,22 @@ public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         DatabaseInfo that = (DatabaseInfo) o;
 
-        if (productName != null ? !startsWithIgnoreCase(productName,
-                that.productName) : that.productName != null) return false;
-        if (productVersion != null ? !StringUtils.equals(productVersion,
-                that.productVersion) : that.productVersion != null) return false;
-        if (majorVersion != null ? !majorVersion.equals(that.majorVersion) : that.majorVersion != null) return false;
-        if (minorVersion != null ? !minorVersion.equals(that.minorVersion) : that.minorVersion != null) return false;
+        if (productName != null ? !startsWithIgnoreCase(productName, that.productName) : that.productName != null)
+            return false;
+        if (productVersion != null ? !StringUtils.equals(productVersion, that.productVersion)
+                : that.productVersion != null)
+            return false;
+        if (majorVersion != null ? !majorVersion.equals(that.majorVersion) : that.majorVersion != null)
+            return false;
+        if (minorVersion != null ? !minorVersion.equals(that.minorVersion) : that.minorVersion != null)
+            return false;
         return true;
     }
 

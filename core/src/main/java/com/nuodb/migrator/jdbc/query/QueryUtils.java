@@ -62,7 +62,7 @@ public class QueryUtils {
         if (filters != null && !filters.isEmpty()) {
             query.append(' ');
             query.append("WHERE");
-            for (Iterator<String> iterator = filters.iterator(); iterator.hasNext(); ) {
+            for (Iterator<String> iterator = filters.iterator(); iterator.hasNext();) {
                 String filter = iterator.next();
                 query.append(' ');
                 query.append(filter);
@@ -87,9 +87,9 @@ public class QueryUtils {
         if (orderBys != null && !orderBys.isEmpty()) {
             query.append(' ');
             query.append("ORDER BY");
-            for (Iterator<OrderBy> orderByIterator = orderBys.iterator(); orderByIterator.hasNext(); ) {
+            for (Iterator<OrderBy> orderByIterator = orderBys.iterator(); orderByIterator.hasNext();) {
                 OrderBy orderBy = orderByIterator.next();
-                for (Iterator<String> columnsIterator = orderBy.getColumns().iterator(); columnsIterator.hasNext(); ) {
+                for (Iterator<String> columnsIterator = orderBy.getColumns().iterator(); columnsIterator.hasNext();) {
                     String column = columnsIterator.next();
                     query.append(' ');
                     query.append(column);
@@ -114,7 +114,7 @@ public class QueryUtils {
     public static StringBuilder join(StringBuilder query, Collection<Join> joins) {
         if (joins != null && !joins.isEmpty()) {
             query.append(' ');
-            for (Iterator<Join> iterator = joins.iterator(); iterator.hasNext(); ) {
+            for (Iterator<Join> iterator = joins.iterator(); iterator.hasNext();) {
                 Join join = iterator.next();
                 if (!isEmpty(join.getType())) {
                     query.append(join.getType());
@@ -153,7 +153,7 @@ public class QueryUtils {
     public static StringBuilder in(StringBuilder query, String column, Collection<? extends Object> values) {
         query.append(column);
         query.append(" IN (");
-        for (Iterator<? extends Object> iterator = values.iterator(); iterator.hasNext(); ) {
+        for (Iterator<? extends Object> iterator = values.iterator(); iterator.hasNext();) {
             Object value = iterator.next();
             query.append(value);
             if (iterator.hasNext()) {

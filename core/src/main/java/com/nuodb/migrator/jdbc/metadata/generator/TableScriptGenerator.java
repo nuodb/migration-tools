@@ -67,7 +67,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"all"})
+@SuppressWarnings({ "all" })
 public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
 
     public TableScriptGenerator() {
@@ -94,29 +94,29 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected boolean addCreateScripts(Table table, MetaDataType objectType,
-                                       ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         return objectTypes.contains(objectType);
     }
 
     protected boolean addScriptsInCreateTable(Table table, MetaDataType objectType,
-                                              ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         Object scriptsInCreateTable = scriptGeneratorManager.getAttribute(SCRIPTS_IN_CREATE_TABLE);
-        return scriptsInCreateTable instanceof Boolean ? (Boolean) scriptsInCreateTable : scriptGeneratorManager
-                .getTargetDialect().addScriptsInCreateTable(table);
+        return scriptsInCreateTable instanceof Boolean ? (Boolean) scriptsInCreateTable
+                : scriptGeneratorManager.getTargetDialect().addScriptsInCreateTable(table);
     }
 
     protected boolean addConstraintsInCreateTable(Table table, MetaDataType objectType,
-                                                  ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         Object constraintsInCreateTable = scriptGeneratorManager.getAttribute(UNIQUE_CONSTRAINTS);
-        return constraintsInCreateTable instanceof Boolean ? (Boolean) constraintsInCreateTable : scriptGeneratorManager
-                .getTargetDialect().addConstraintsInCreateTable();
+        return constraintsInCreateTable instanceof Boolean ? (Boolean) constraintsInCreateTable
+                : scriptGeneratorManager.getTargetDialect().addConstraintsInCreateTable();
     }
 
     protected void addCreateSequencesScripts(Table table, Collection<Script> scripts,
-                                             ScriptGeneratorManager scriptGeneratorManager) {
-        boolean createSequences = addCreateScripts(table, SEQUENCE, scriptGeneratorManager) &&
-                scriptGeneratorManager.getTargetDialect().supportsSequence();
+            ScriptGeneratorManager scriptGeneratorManager) {
+        boolean createSequences = addCreateScripts(table, SEQUENCE, scriptGeneratorManager)
+                && scriptGeneratorManager.getTargetDialect().supportsSequence();
         if (!createSequences) {
             return;
         }
@@ -133,9 +133,10 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected void addCreatePrimaryKeyScript(Table table, Collection<Script> scripts,
-                                             ScriptGeneratorManager scriptGeneratorManager) {
-        boolean createPrimaryKey = addCreateScripts(table, PRIMARY_KEY, scriptGeneratorManager) ?
-                !addScriptsInCreateTable(table, PRIMARY_KEY, scriptGeneratorManager) : false;
+            ScriptGeneratorManager scriptGeneratorManager) {
+        boolean createPrimaryKey = addCreateScripts(table, PRIMARY_KEY, scriptGeneratorManager)
+                ? !addScriptsInCreateTable(table, PRIMARY_KEY, scriptGeneratorManager)
+                : false;
         if (!createPrimaryKey) {
             return;
         }
@@ -146,7 +147,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected void addCreateIndexesScripts(Table table, Collection<Script> scripts,
-                                           ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         boolean createIndexes = addCreateScripts(table, INDEX, scriptGeneratorManager);
         if (!createIndexes) {
@@ -154,34 +155,31 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         Collection<Script> indexes = newLinkedHashSet();
-        Collection<Index> nonRepeatingIndexes = getNonRepeatingIndexes(table,
-                new Predicate<Index>() {
-                    @Override
-                    public boolean apply(Index index) {
-                        if (logger.isTraceEnabled()) {
-                            String indexName = index.getName();
-                            String tableName = index.getTable().getQualifiedName();
-                            Iterable<String> columnsNames = transform(index.getTable().getColumns(),
-                                    new Function<Identifiable, String>() {
-                                        @Override
-                                        public String apply(Identifiable column) {
-                                            return column.getName();
-                                        }
-                                    });
-                            logger.trace(format("Index %s on table %s skipped " +
-                                    "as index with column(s) %s is added already",
-                                    indexName, tableName, join(columnsNames, ", ")));
-                        }
-                        return true;
-                    }
-                });
+        Collection<Index> nonRepeatingIndexes = getNonRepeatingIndexes(table, new Predicate<Index>() {
+            @Override
+            public boolean apply(Index index) {
+                if (logger.isTraceEnabled()) {
+                    String indexName = index.getName();
+                    String tableName = index.getTable().getQualifiedName();
+                    Iterable<String> columnsNames = transform(index.getTable().getColumns(),
+                            new Function<Identifiable, String>() {
+                                @Override
+                                public String apply(Identifiable column) {
+                                    return column.getName();
+                                }
+                            });
+                    logger.trace(format("Index %s on table %s skipped " + "as index with column(s) %s is added already",
+                            indexName, tableName, join(columnsNames, ", ")));
+                }
+                return true;
+            }
+        });
         boolean addIndexesInCreateTable = addScriptsInCreateTable(table, INDEX, scriptGeneratorManager);
         Collection<Index> multipleIndexes = newArrayList();
         for (Index nonRepeatingIndex : nonRepeatingIndexes) {
-            boolean uniqueInCreateTable =
-                    nonRepeatingIndex.isUnique() && size(nonRepeatingIndex.getColumns()) == 1 &&
-                            !get(nonRepeatingIndex.getColumns(), 0).isNullable() &&
-                            dialect.supportsUniqueInCreateTable() && addIndexesInCreateTable;
+            boolean uniqueInCreateTable = nonRepeatingIndex.isUnique() && size(nonRepeatingIndex.getColumns()) == 1
+                    && !get(nonRepeatingIndex.getColumns(), 0).isNullable() && dialect.supportsUniqueInCreateTable()
+                    && addIndexesInCreateTable;
             if (!nonRepeatingIndex.isPrimary() && !nonRepeatingIndex.isUniqueConstraint() && !uniqueInCreateTable) {
                 if (dialect.supportsCreateMultipleIndexes()) {
                     multipleIndexes.add(nonRepeatingIndex);
@@ -198,7 +196,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected void addCreateTriggersScripts(Table table, Collection<Script> scripts,
-                                            ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         boolean createTriggers = addCreateScripts(table, TRIGGER, scriptGeneratorManager);
         boolean createColumnTriggers = addCreateScripts(table, COLUMN_TRIGGER, scriptGeneratorManager);
         if (!createTriggers && !createColumnTriggers) {
@@ -218,9 +216,10 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected void addCreateForeignKeysScripts(Table table, Collection<Script> scripts,
-                                               ScriptGeneratorManager scriptGeneratorManager) {
-        boolean createForeignKeys = addCreateScripts(table, FOREIGN_KEY, scriptGeneratorManager) ?
-                !addScriptsInCreateTable(table, FOREIGN_KEY, scriptGeneratorManager) : false;
+            ScriptGeneratorManager scriptGeneratorManager) {
+        boolean createForeignKeys = addCreateScripts(table, FOREIGN_KEY, scriptGeneratorManager)
+                ? !addScriptsInCreateTable(table, FOREIGN_KEY, scriptGeneratorManager)
+                : false;
         if (!createForeignKeys) {
             return;
         }
@@ -228,13 +227,13 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         if (tables == null) {
             return;
         }
-        Multimap<Table, ForeignKey> foreignKeys =
-                (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttribute(FOREIGN_KEYS);
+        Multimap<Table, ForeignKey> foreignKeys = (Multimap<Table, ForeignKey>) scriptGeneratorManager
+                .getAttribute(FOREIGN_KEYS);
         for (ForeignKey foreignKey : table.getForeignKeys()) {
             Table primaryTable = foreignKey.getPrimaryTable();
             Table foreignTable = foreignKey.getForeignTable();
-            if (!addScripts(primaryTable, scriptGeneratorManager) ||
-                    !addScripts(foreignTable, scriptGeneratorManager)) {
+            if (!addScripts(primaryTable, scriptGeneratorManager)
+                    || !addScripts(foreignTable, scriptGeneratorManager)) {
                 continue;
             }
             if (!tables.contains(primaryTable) || !tables.contains(foreignTable)) {
@@ -246,8 +245,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
     }
 
-    protected void addCreateTableScript(Table table, Collection<Script> scripts, ScriptGeneratorManager
-            scriptGeneratorManager) {
+    protected void addCreateTableScript(Table table, Collection<Script> scripts,
+            ScriptGeneratorManager scriptGeneratorManager) {
         boolean createTable = addCreateScripts(table, TABLE, scriptGeneratorManager);
         if (!createTable) {
             return;
@@ -270,7 +269,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         boolean addChecks = addCreateScripts(table, CHECK, scriptGeneratorManager);
         boolean addSequences = addCreateScripts(table, SEQUENCE, scriptGeneratorManager);
         Session session = scriptGeneratorManager.getSourceSession();
-        for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext();) {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorManager.getName(column));
             buffer.append(' ');
@@ -278,8 +277,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             if (column.isIdentity() && addSequences) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
-                        column.getSequence() != null ?
-                                scriptGeneratorManager.getName(column.getSequence()) : null));
+                        column.getSequence() != null ? scriptGeneratorManager.getName(column.getSequence()) : null));
             }
             if (column.isNullable()) {
                 buffer.append(dialect.getNullColumnString());
@@ -296,15 +294,18 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                     @Override
                     public boolean apply(Index index) {
                         Collection<Column> columns = index.getColumns();
-                        return columns.size() == 1 && columns.contains(column) &&
-                                !index.isPrimary() && index.isUnique();
+                        return columns.size() == 1 && columns.contains(column) && !index.isPrimary()
+                                && index.isUnique();
                     }
                 });
                 boolean unique = index.isPresent() && (!column.isNullable() || dialect.supportsNotNullUnique());
                 boolean uniqueConstraint = index.isPresent() && index.get().isUniqueConstraint();
-                // Create the constraint inline with create table when uniqueConstraint is True.
-                // uniqueConstraint is only set and possible to be True when migrating from nuodb,
-                // for other databases, it's false by default. Unique will always be created in a separate query.
+                // Create the constraint inline with create table when
+                // uniqueConstraint is True.
+                // uniqueConstraint is only set and possible to be True when
+                // migrating from nuodb,
+                // for other databases, it's false by default. Unique will
+                // always be created in a separate query.
                 if (unique && uniqueConstraint) {
                     if (dialect.supportsUniqueInCreateTable()) {
                         buffer.append(' ');
@@ -335,8 +336,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         if (addPrimaryKeyInCreateTable) {
             PrimaryKey primaryKey = table.getPrimaryKey();
             if (primaryKey != null) {
-                ConstraintScriptGenerator<PrimaryKey> generator = (ConstraintScriptGenerator<PrimaryKey>)
-                    scriptGeneratorManager.getScriptGenerator(primaryKey);
+                ConstraintScriptGenerator<PrimaryKey> generator = (ConstraintScriptGenerator<PrimaryKey>) scriptGeneratorManager
+                        .getScriptGenerator(primaryKey);
                 String constraint = generator.getConstraintScript(primaryKey, scriptGeneratorManager);
                 if (constraint != null) {
                     buffer.append(", ");
@@ -352,16 +353,16 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 }
             }
         }
-        if (addIndexesInCreateTable &&
-            (dialect.supportsIndexInCreateTable() && dialect.supportsCreateMultipleIndexes())) {
+        if (addIndexesInCreateTable
+                && (dialect.supportsIndexInCreateTable() && dialect.supportsCreateMultipleIndexes())) {
             boolean primary = false;
             for (Index index : indexes) {
                 if (!primary && index.isPrimary()) {
                     primary = true;
                     continue;
                 }
-                ConstraintScriptGenerator<Index> generator = (ConstraintScriptGenerator<Index>)
-                    scriptGeneratorManager.getScriptGenerator(index);
+                ConstraintScriptGenerator<Index> generator = (ConstraintScriptGenerator<Index>) scriptGeneratorManager
+                        .getScriptGenerator(index);
                 String constraint = generator.getConstraintScript(index, scriptGeneratorManager);
                 if (constraint != null && index.isUniqueConstraint()) {
                     buffer.append(", ");
@@ -379,8 +380,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
         if (addForeignKeysInCreateTable) {
             for (ForeignKey foreignKey : table.getForeignKeys()) {
-                ConstraintScriptGenerator<ForeignKey> generator = (ConstraintScriptGenerator<ForeignKey>)
-                    scriptGeneratorManager.getScriptGenerator(foreignKey);
+                ConstraintScriptGenerator<ForeignKey> generator = (ConstraintScriptGenerator<ForeignKey>) scriptGeneratorManager
+                        .getScriptGenerator(foreignKey);
                 String constraint = generator.getConstraintScript(foreignKey, scriptGeneratorManager);
                 if (constraint != null) {
                     buffer.append(", ");
@@ -442,8 +443,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 typeInfo.add(format("scale %d", column.getScale()));
             }
             throw new GeneratorException(
-                    format("Unsupported type on table %s column %s: %s",
-                            tableName, columnName, join(typeInfo, ", ")));
+                    format("Unsupported type on table %s column %s: %s", tableName, columnName, join(typeInfo, ", ")));
         }
         return typeName;
     }
@@ -454,9 +454,9 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             sBuffer.replace(typeName.indexOf("(") + 1, typeName.indexOf(","), "p");
             sBuffer.replace(sBuffer.indexOf(",") + 1, sBuffer.indexOf(")"), "s");
             return sBuffer.toString();
-        }else if ((typeName.contains("(")) && (typeName.contains(")")) && !typeName.contains("ENUM")) {
+        } else if ((typeName.contains("(")) && (typeName.contains(")")) && !typeName.contains("ENUM")) {
             return sBuffer.replace(typeName.indexOf("(") + 1, typeName.indexOf(")"), "n").toString();
-        }else {
+        } else {
             return typeName;
         }
     }
@@ -473,10 +473,10 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected void addDropSequencesScripts(Table table, Collection<Script> scripts,
-                                           ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
-        boolean dropSequences = objectTypes.contains(SEQUENCE) &&
-                scriptGeneratorManager.getTargetDialect().supportsSequence();
+        boolean dropSequences = objectTypes.contains(SEQUENCE)
+                && scriptGeneratorManager.getTargetDialect().supportsSequence();
         if (!dropSequences) {
             return;
         }
@@ -494,7 +494,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected void addDropTriggersScripts(Table table, Collection<Script> scripts,
-                                          ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         boolean dropTriggers = objectTypes.contains(TRIGGER);
         boolean dropColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
@@ -515,7 +515,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected void addDropTableScript(Table table, Collection<Script> scripts,
-                                      ScriptGeneratorManager scriptGeneratorManager) {
+            ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         boolean dropTable = objectTypes.contains(TABLE);
         if (!dropTable) {

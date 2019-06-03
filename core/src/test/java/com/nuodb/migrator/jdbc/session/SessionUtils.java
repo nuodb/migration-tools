@@ -46,8 +46,10 @@ public class SessionUtils {
     /**
      * Creates mock session using the provided dialect & connection url
      *
-     * @param dialect of a source database
-     * @param url     connection url to a source database
+     * @param dialect
+     *            of a source database
+     * @param url
+     *            connection url to a source database
      * @return mock object using the provided dialect & connection url
      */
     public static Session createSession(Dialect dialect, String url) throws SQLException {

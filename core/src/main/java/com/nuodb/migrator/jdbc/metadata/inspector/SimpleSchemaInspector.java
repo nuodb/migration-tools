@@ -57,8 +57,9 @@ public class SimpleSchemaInspector extends ManagedInspectorBase<Catalog, SchemaI
     protected ResultSet openResultSet(InspectionContext inspectionContext, SchemaInspectionScope schemaInspectionScope)
             throws SQLException {
         DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
-        return schemaInspectionScope.getCatalog() != null ?
-                metaData.getSchemas(schemaInspectionScope.getCatalog(), null) : metaData.getSchemas();
+        return schemaInspectionScope.getCatalog() != null
+                ? metaData.getSchemas(schemaInspectionScope.getCatalog(), null)
+                : metaData.getSchemas();
     }
 
     @Override

@@ -165,13 +165,17 @@ public class SimpleField implements Field {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         SimpleField that = (SimpleField) o;
 
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (jdbcType != null ? !jdbcType.equals(that.jdbcType) : that.jdbcType != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null)
+            return false;
+        if (jdbcType != null ? !jdbcType.equals(that.jdbcType) : that.jdbcType != null)
+            return false;
 
         return true;
     }

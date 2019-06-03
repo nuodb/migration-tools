@@ -39,9 +39,9 @@ import java.util.Map;
  */
 public interface JdbcValueGetter<T> {
 
-    T getValue(ResultSet resultSet, Connection connection, int columnIndex, Field field, Map<String,
-            Object> options) throws SQLException;
+    T getValue(ResultSet resultSet, Connection connection, int columnIndex, Field field, Map<String, Object> options)
+            throws SQLException;
 
     <X> X getValue(ResultSet resultSet, Connection connection, int columnIndex, Field field, Class<X> valueClass,
-                   Map<String, Object> options) throws SQLException;
+            Map<String, Object> options) throws SQLException;
 }

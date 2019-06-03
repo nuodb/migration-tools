@@ -63,21 +63,13 @@ public class CliLoadJobTest {
 
     @Test
     public void testParse() {
-        String[] arguments = {
-                "--target.url=jdbc:com.nuodb://localhost/test?schema=hockey",
-                "--target.username=dba",
+        String[] arguments = { "--target.url=jdbc:com.nuodb://localhost/test?schema=hockey", "--target.username=dba",
                 "--target.password=goalie",
 
-                "--input.path=/tmp/dump.cat",
-                "--input.csv.encoding=cp1251",
-                "--input.csv.delimiter= ",
-                "--input.csv.quoting=true",
-                "--input.csv.escape=|",
+                "--input.path=/tmp/dump.cat", "--input.csv.encoding=cp1251", "--input.csv.delimiter= ",
+                "--input.csv.quoting=true", "--input.csv.escape=|",
 
-                "--table.deployments.insert",
-                "--table.deployments_nodes.replace",
-                "--time.zone=GMT+2"
-        };
+                "--table.deployments.insert", "--table.deployments_nodes.replace", "--time.zone=GMT+2" };
         parser.parse(arguments, cliLoadJob);
 
         assertEquals(cliLoadJob.getJobSpec(), createLoadSpec());

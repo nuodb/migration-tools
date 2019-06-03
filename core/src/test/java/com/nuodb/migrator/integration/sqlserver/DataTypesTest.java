@@ -38,27 +38,21 @@ import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 @Test(groups = { "sqlserverintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
 public class DataTypesTest extends BaseDataTypeTest {
 
-	@DataProvider(name = "dataTypeSQLServer")
-	public Object[][] createDataTypeData() {
-		return new Object[][] { { "testdata_bigint" }, { "testdata_integer" },
-				{ "testdata_smallint" }, { "testdata_tinyint" },
-				{ "testdata_varchar" }, { "testdata_nvarchar" },
-				{ "testdata_char" }, { "testdata_nchar" }, { "testdata_text" },
-				{ "testdata_ntext" }, { "testdata_bit" },
-				{ "testdata_numeric" }, { "testdata_decimal" },
-				{ "testdata_money" }, { "testdata_smallmoney" },
-				{ "testdata_real" }, { "testdata_float" },
-				{ "testdata_hierarchyid" }, { "testdata_uniqueidentifier" },
-				{ "testdata_image" }, { "testdata_binary" },
-				{ "testdata_varbinary" }, { "testdata_time" },
-				{ "testdata_date" }, { "testdata_smalldatetime" },
-				{ "testdata_datetime" }, { "testdata_datetimeoffset" },
-				{ "testdata_datetime2" } };
-	}
+    @DataProvider(name = "dataTypeSQLServer")
+    public Object[][] createDataTypeData() {
+        return new Object[][] { { "testdata_bigint" }, { "testdata_integer" }, { "testdata_smallint" },
+                { "testdata_tinyint" }, { "testdata_varchar" }, { "testdata_nvarchar" }, { "testdata_char" },
+                { "testdata_nchar" }, { "testdata_text" }, { "testdata_ntext" }, { "testdata_bit" },
+                { "testdata_numeric" }, { "testdata_decimal" }, { "testdata_money" }, { "testdata_smallmoney" },
+                { "testdata_real" }, { "testdata_float" }, { "testdata_hierarchyid" }, { "testdata_uniqueidentifier" },
+                { "testdata_image" }, { "testdata_binary" }, { "testdata_varbinary" }, { "testdata_time" },
+                { "testdata_date" }, { "testdata_smalldatetime" }, { "testdata_datetime" },
+                { "testdata_datetimeoffset" }, { "testdata_datetime2" } };
+    }
 
-	@Test(dataProvider = "dataTypeSQLServer")
-	public void testDataType(String tableName) throws Exception {
-		super.testDataType(tableName);
-	}
+    @Test(dataProvider = "dataTypeSQLServer")
+    public void testDataType(String tableName) throws Exception {
+        super.testDataType(tableName);
+    }
 
 }

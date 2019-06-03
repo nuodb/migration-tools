@@ -46,14 +46,14 @@ public class JdbcArrayValue extends JdbcTypeValueBase<Array> {
     }
 
     @Override
-    public Array getValue(ResultSet resultSet, int index,
-                          Field field, Map<String, Object> options) throws SQLException {
+    public Array getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getArray(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Array value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Array value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setArray(index, value);
     }
 }

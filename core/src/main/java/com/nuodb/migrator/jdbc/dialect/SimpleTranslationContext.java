@@ -51,7 +51,7 @@ public class SimpleTranslationContext implements TranslationContext {
     }
 
     public SimpleTranslationContext(Dialect dialect, Session session, TranslationManager translationManager,
-                                    Map<Object, Object> context) {
+            Map<Object, Object> context) {
         this.dialect = dialect;
         this.session = session;
         this.translationManager = translationManager;
@@ -140,14 +140,18 @@ public class SimpleTranslationContext implements TranslationContext {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         SimpleTranslationContext that = (SimpleTranslationContext) o;
 
-        if (context != null ? !context.equals(that.context) : that.context != null) return false;
-        if (translationManager != null ? !translationManager.equals(that.translationManager) :
-                that.translationManager != null) return false;
+        if (context != null ? !context.equals(that.context) : that.context != null)
+            return false;
+        if (translationManager != null ? !translationManager.equals(that.translationManager)
+                : that.translationManager != null)
+            return false;
 
         return true;
     }

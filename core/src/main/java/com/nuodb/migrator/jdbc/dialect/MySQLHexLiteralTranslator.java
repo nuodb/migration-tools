@@ -45,8 +45,8 @@ import static java.util.regex.Pattern.compile;
  */
 public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
 
-    private Collection<Integer> TYPES = asList(
-            TINYINT, SMALLINT, INTEGER, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC, DECIMAL);
+    private Collection<Integer> TYPES = asList(TINYINT, SMALLINT, INTEGER, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC,
+            DECIMAL);
     private static final Pattern PATTERN = compile("(?i:x)'([0-9a-f]*)'");
 
     public MySQLHexLiteralTranslator() {
@@ -56,8 +56,8 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
     @Override
     protected boolean supportsScript(ColumnScript script, TranslationContext context) {
         Column column = script.getColumn();
-        return script.getScript() != null && TYPES.contains(column.getTypeCode()) && PATTERN.matcher(script
-                .getScript()).matches();
+        return script.getScript() != null && TYPES.contains(column.getTypeCode())
+                && PATTERN.matcher(script.getScript()).matches();
     }
 
     @Override
@@ -73,4 +73,3 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
         return target != null ? new SimpleScript(valueOf(target), true) : null;
     }
 }
-

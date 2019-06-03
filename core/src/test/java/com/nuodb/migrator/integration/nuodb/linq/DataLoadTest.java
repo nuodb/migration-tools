@@ -39,7 +39,7 @@ import com.nuodb.migrator.integration.MigrationTestBase;
 /*
  * Assert required data is loaded
  */
-@Test(groups = {"linqdataloadperformed"})
+@Test(groups = { "linqdataloadperformed" })
 public class DataLoadTest extends MigrationTestBase {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -52,12 +52,9 @@ public class DataLoadTest extends MigrationTestBase {
             stmt1 = nuodbConnection.createStatement();
             rs1 = stmt1.executeQuery(sqlStr1);
 
-            Assert.assertNotNull(rs1,
-                    "Please check if data required for linq tests are loaded");
-            Assert.assertTrue(rs1.next(),
-                    "Please check if data required for linq tests are loaded");
-            Assert.assertTrue(
-                    rs1.getInt(1) > 0,
+            Assert.assertNotNull(rs1, "Please check if data required for linq tests are loaded");
+            Assert.assertTrue(rs1.next(), "Please check if data required for linq tests are loaded");
+            Assert.assertTrue(rs1.getInt(1) > 0,
                     "No rows in products table. Please check if data required for linq tests are loaded");
 
         } finally {

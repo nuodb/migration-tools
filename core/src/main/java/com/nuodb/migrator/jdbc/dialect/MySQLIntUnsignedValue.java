@@ -56,8 +56,8 @@ public class MySQLIntUnsignedValue extends JdbcTypeValueBase<Long> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Long value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Long value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setLong(index, value);
     }
 }

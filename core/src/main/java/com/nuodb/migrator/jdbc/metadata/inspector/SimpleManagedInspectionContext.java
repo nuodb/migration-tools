@@ -48,8 +48,8 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 /**
  * @author Sergey Bushik
  */
-public class SimpleManagedInspectionContext<M extends MetaData, I extends InspectionScope> implements
-        ManagedInspectionContext<I> {
+public class SimpleManagedInspectionContext<M extends MetaData, I extends InspectionScope>
+        implements ManagedInspectionContext<I> {
 
     private Map<Query, Statement> statements = newLinkedHashMap();
     private ManagedInspector<M, I> managedInspector;
@@ -57,8 +57,8 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
     private Integer maxOpenCursors;
     private boolean init;
 
-    public SimpleManagedInspectionContext(ManagedInspector<M, I> managedInspector,
-                                          InspectionContext inspectionContext) throws SQLException {
+    public SimpleManagedInspectionContext(ManagedInspector<M, I> managedInspector, InspectionContext inspectionContext)
+            throws SQLException {
         this.managedInspector = managedInspector;
         this.inspectionContext = inspectionContext;
     }
@@ -107,8 +107,8 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
         Query query = parameterizedQuery.getQuery();
         Statement statement = statements.get(query);
         if (statement == null) {
-            statements.put(query, statement = managedInspector.createStatement(
-                    this, inspectionScope, parameterizedQuery));
+            statements.put(query,
+                    statement = managedInspector.createStatement(this, inspectionScope, parameterizedQuery));
         }
         return statement;
     }

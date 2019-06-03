@@ -93,8 +93,8 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     }
 
     @Override
-    public void inspectObjects(InspectionContext inspectionContext,
-                               Collection<? extends Database> objects) throws SQLException {
+    public void inspectObjects(InspectionContext inspectionContext, Collection<? extends Database> objects)
+            throws SQLException {
         inspect(inspectionContext);
     }
 
@@ -105,7 +105,7 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
 
     @Override
     public void inspectScopes(InspectionContext inspectionContext,
-                              Collection<? extends InspectionScope> inspectionScopes) throws SQLException {
+            Collection<? extends InspectionScope> inspectionScopes) throws SQLException {
         inspect(inspectionContext);
     }
 
@@ -123,13 +123,13 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
 
     @Override
     public ResultSet openResultSet(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query,
-                                   Statement statement) throws SQLException {
+            Statement statement) throws SQLException {
         return null;
     }
 
     @Override
     public void closeStatement(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query,
-                               Statement statement) throws SQLException {
+            Statement statement) throws SQLException {
         System.out.println("SimpleDatabaseInspector.closeStatement");
     }
 }

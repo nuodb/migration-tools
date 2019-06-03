@@ -72,14 +72,19 @@ public class TableSpec {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         TableSpec that = (TableSpec) o;
 
-        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
-        if (filter != null ? !filter.equals(that.filter) : that.filter != null) return false;
-        if (table != null ? !table.equals(that.table) : that.table != null) return false;
+        if (columns != null ? !columns.equals(that.columns) : that.columns != null)
+            return false;
+        if (filter != null ? !filter.equals(that.filter) : that.filter != null)
+            return false;
+        if (table != null ? !table.equals(that.table) : that.table != null)
+            return false;
 
         return true;
     }

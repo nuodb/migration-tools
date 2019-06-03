@@ -89,8 +89,8 @@ public abstract class AopProxyBase implements AopProxy {
     @Override
     public void addAdvisor(int index, Advisor advisor) {
         if (index > advisorsList.size()) {
-            throw new IllegalArgumentException(format(
-                    "Illegal position %d in advises list with size %d", index, advisorsList.size()));
+            throw new IllegalArgumentException(
+                    format("Illegal position %d in advises list with size %d", index, advisorsList.size()));
         }
         if (supportsAdvice(advisor.getAdvice())) {
             advisorsList.add(index, advisor);
@@ -105,7 +105,7 @@ public abstract class AopProxyBase implements AopProxy {
     @Override
     public boolean removeAdvice(Advice advice) {
         boolean updated = false;
-        for (Iterator<Advisor> iterator = advisorsList.iterator(); iterator.hasNext(); ) {
+        for (Iterator<Advisor> iterator = advisorsList.iterator(); iterator.hasNext();) {
             Advisor advisor = iterator.next();
             if (advisor.getAdvice().equals(advice)) {
                 iterator.remove();

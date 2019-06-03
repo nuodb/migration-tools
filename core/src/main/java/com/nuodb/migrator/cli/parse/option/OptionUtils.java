@@ -59,22 +59,20 @@ public class OptionUtils {
     }
 
     public static void optionRequired(Option option) {
-        throw new OptionException(format("Missing required option %s",
-                option.getName()), option);
+        throw new OptionException(format("Missing required option %s", option.getName()), option);
     }
 
     public static void optionUnexpected(Option option, String argument) {
-        throw new OptionException(format("Unexpected token %s for %s option",
-                argument, option.getName()), option);
+        throw new OptionException(format("Unexpected token %s for %s option", argument, option.getName()), option);
     }
 
     public static void argumentMinimum(Option option, Argument argument) {
-        throw new OptionException(format("Missing %s argument for %s option",
-                argument.getName(), option.getName()), option);
+        throw new OptionException(format("Missing %s argument for %s option", argument.getName(), option.getName()),
+                option);
     }
 
     public static void argumentMaximum(Option option, Argument argument) {
-        throw new OptionException(format("Too many %s arguments for %s option",
-                argument.getName(), option.getName()), option);
+        throw new OptionException(format("Too many %s arguments for %s option", argument.getName(), option.getName()),
+                option);
     }
 }

@@ -34,10 +34,13 @@ public interface Help {
     Option getOption();
 
     /**
-     * Builds a help string for the option using the specified settings and comparator.
+     * Builds a help string for the option using the specified settings and
+     * comparator.
      *
-     * @param hints      the settings to apply.
-     * @param comparator a comparator to sort options when applicable.
+     * @param hints
+     *            the settings to apply.
+     * @param comparator
+     *            a comparator to sort options when applicable.
      * @return the help contents string.
      */
     String help(Set<HelpHint> hints, Comparator<Option> comparator);

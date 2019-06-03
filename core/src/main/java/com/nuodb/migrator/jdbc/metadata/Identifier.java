@@ -51,8 +51,8 @@ public class Identifier implements Comparable<Identifier>, Serializable {
         if (isEmpty(value)) {
             return null;
         }
-        if ((value.startsWith("`") && value.endsWith("`")) || (value.startsWith("\"") && value.endsWith("\"")) ||
-                (value.startsWith("[") && value.endsWith("]"))) {
+        if ((value.startsWith("`") && value.endsWith("`")) || (value.startsWith("\"") && value.endsWith("\""))
+                || (value.startsWith("[") && value.endsWith("]"))) {
             value = value.substring(1, value.length() - 1);
         }
         return new Identifier(value);
@@ -65,10 +65,13 @@ public class Identifier implements Comparable<Identifier>, Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Identifier identifier = (Identifier) o;
-        if (value != null ? !value.equalsIgnoreCase(identifier.value) : identifier.value != null) return false;
+        if (value != null ? !value.equalsIgnoreCase(identifier.value) : identifier.value != null)
+            return false;
         return true;
     }
 

@@ -177,7 +177,7 @@ public abstract class BackupOpsBase implements BackupOps {
 
     @Override
     public void write(Backup backup, Map context) {
-        validateTableFilter(backup,context);
+        validateTableFilter(backup, context);
         OutputStream output = openBackupOutput();
         try {
             write(backup, output, context);
@@ -216,26 +216,24 @@ public abstract class BackupOpsBase implements BackupOps {
                 }
             }
             if (!tables.isEmpty()) {
-                verifyFilter(tables , metaDataTablesFilter);
+                verifyFilter(tables, metaDataTablesFilter);
             }
         }
     }
 
-    protected void verifyFilter(Collection<String> tables , MetaDataFilter<Table> metaDataTablesFilter) {
-        Collection<MetaDataFilter<Table>> metaDataAll = ((MetaDataAllOfFilters)metaDataTablesFilter).getFilters();
+    protected void verifyFilter(Collection<String> tables, MetaDataFilter<Table> metaDataTablesFilter) {
+        Collection<MetaDataFilter<Table>> metaDataAll = ((MetaDataAllOfFilters) metaDataTablesFilter).getFilters();
         Iterator iterator = null;
         for (MetaDataFilter metaDataTableFilter : metaDataAll) {
             iterator = ((MetaDataFiltersBase) metaDataTableFilter).getFilters().iterator();
-            while (iterator!=null && iterator.hasNext()) {
+            while (iterator != null && iterator.hasNext()) {
                 MetaDataFilter metaDataFilter = (MetaDataFilter) iterator.next();
                 if (metaDataFilter instanceof MetaDataNameEqualsFilter) {
-                    acceptFilter(tables,metaDataFilter);
-                }
-                else if (metaDataFilter instanceof MetaDataInvertAcceptFilter) {
-                    MetaDataFilter<Table> filter = ((MetaDataInvertAcceptFilter)metaDataFilter).getFilter();
-                    acceptFilter(tables,filter);
-                }
-                else if (metaDataFilter instanceof MetaDataNameMatchesFilter) {
+                    acceptFilter(tables, metaDataFilter);
+                } else if (metaDataFilter instanceof MetaDataInvertAcceptFilter) {
+                    MetaDataFilter<Table> filter = ((MetaDataInvertAcceptFilter) metaDataFilter).getFilter();
+                    acceptFilter(tables, filter);
+                } else if (metaDataFilter instanceof MetaDataNameMatchesFilter) {
                     acceptFilter(tables, metaDataFilter);
                 }
             }
@@ -246,11 +244,11 @@ public abstract class BackupOpsBase implements BackupOps {
         Identifier identifier = valueOf(StringUtils.EMPTY);
         boolean accept = false;
         for (String table : tables) {
-            if (filter instanceof MetaDataNameEqualsFilter) { 
+            if (filter instanceof MetaDataNameEqualsFilter) {
                 identifier = ((MetaDataNameEqualsFilter) filter).getIdentifier();
                 accept = ((MetaDataNameEqualsFilter) filter).accepts(table);
             }
-            if (filter instanceof MetaDataNameMatchesFilter) { 
+            if (filter instanceof MetaDataNameMatchesFilter) {
                 identifier = ((MetaDataNameMatchesFilter) filter).getIdentifier();
                 accept = ((MetaDataNameMatchesFilter) filter).accepts(table);
             }
@@ -264,7 +262,7 @@ public abstract class BackupOpsBase implements BackupOps {
 
     protected void logWarnMessage(Identifier identifier) {
         if (logger.isWarnEnabled()) {
-            logger.warn(format("Table %s does not exist in the source database " , identifier.value()));
+            logger.warn(format("Table %s does not exist in the source database ", identifier.value()));
         }
     }
 
@@ -273,13 +271,17 @@ public abstract class BackupOpsBase implements BackupOps {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         BackupOpsBase that = (BackupOpsBase) o;
 
-        if (dir != null ? !dir.equals(that.dir) : that.dir != null) return false;
-        if (file != null ? !file.equals(that.file) : that.file != null) return false;
+        if (dir != null ? !dir.equals(that.dir) : that.dir != null)
+            return false;
+        if (file != null ? !file.equals(that.file) : that.file != null)
+            return false;
 
         return true;
     }

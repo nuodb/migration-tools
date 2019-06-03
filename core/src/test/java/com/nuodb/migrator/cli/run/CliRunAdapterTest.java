@@ -85,7 +85,7 @@ public class CliRunAdapterTest {
             }
         }).when(option).process(any(CommandLine.class), any(ListIterator.class));
 
-        OptionSet optionSet = parser.parse(new String[]{"--option"}, cliRunAdapter);
+        OptionSet optionSet = parser.parse(new String[] { "--option" }, cliRunAdapter);
         verify(cliRunAdapter).bind(optionSet);
     }
 }

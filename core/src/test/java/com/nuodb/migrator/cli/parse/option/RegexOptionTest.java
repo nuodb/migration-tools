@@ -63,10 +63,8 @@ public class RegexOptionTest {
     @DataProvider(name = "addRegex")
     public Object[][] createAddRegexData() {
         RegexCompiler regexCompiler = AntRegexCompiler.INSTANCE;
-        return new Object[][]{
-                {"option.*", new RegexTrigger(regexCompiler.compile("--option.*"))},
-                {"*.option", new RegexTrigger(regexCompiler.compile("--*.option"))}
-        };
+        return new Object[][] { { "option.*", new RegexTrigger(regexCompiler.compile("--option.*")) },
+                { "*.option", new RegexTrigger(regexCompiler.compile("--*.option")) } };
     }
 
     @Test(dataProvider = "addRegex")
@@ -78,12 +76,8 @@ public class RegexOptionTest {
 
     @DataProvider(name = "canProcess")
     public Object[][] createCanProcessData() {
-        return new Object[][]{
-                {"option.*", "--option.name"},
-                {"option.*", "--option.comma.name"},
-                {"option.*", "--option.?*"},
-                {"option.*", "--option.option"}
-        };
+        return new Object[][] { { "option.*", "--option.name" }, { "option.*", "--option.comma.name" },
+                { "option.*", "--option.?*" }, { "option.*", "--option.option" } };
     }
 
     @Test(groups = "cli.parse.option.regexOption.canProcess", dataProvider = "canProcess")
@@ -97,11 +91,8 @@ public class RegexOptionTest {
 
     @DataProvider(name = "process")
     public Object[][] createProcessData() {
-        return new Object[][]{
-                {"option.*",
-                        newArrayList("--option.name1=value1", "--option.name2=value2"),
-                        newArrayList("name1", "value1", "name2", "value2")}
-        };
+        return new Object[][] { { "option.*", newArrayList("--option.name1=value1", "--option.name2=value2"),
+                newArrayList("name1", "value1", "name2", "value2") } };
     }
 
     @Test(dependsOnGroups = "cli.parse.option.regexOption.canProcess", dataProvider = "process")

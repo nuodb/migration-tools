@@ -58,7 +58,7 @@ public class JdbcEnumTypeName implements JdbcTypeName {
         buffer.append(getName());
         buffer.append("(");
         Collection<String> values = ((JdbcEnumType) jdbcType).getValues();
-        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
+        for (Iterator<String> iterator = values.iterator(); iterator.hasNext();) {
             buffer.append("'");
             getValue(buffer, iterator.next());
             buffer.append("'");
@@ -74,9 +74,9 @@ public class JdbcEnumTypeName implements JdbcTypeName {
         char[] symbols = value.toCharArray();
         for (char symbol : symbols) {
             switch (symbol) {
-                case '\'':
-                    buffer.append('\'');
-                    break;
+            case '\'':
+                buffer.append('\'');
+                break;
             }
             buffer.append(symbol);
         }

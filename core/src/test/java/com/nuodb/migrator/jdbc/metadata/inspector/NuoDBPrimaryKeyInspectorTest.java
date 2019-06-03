@@ -78,8 +78,8 @@ public class NuoDBPrimaryKeyInspectorTest extends InspectorTestBase {
         given(resultSet.getInt("POSITION")).willReturn(position);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager()
-                .inspect(getConnection(), inspectionScope, PRIMARY_KEY);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope,
+                PRIMARY_KEY);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<PrimaryKey> primaryKeys = inspectionResults.getObjects(PRIMARY_KEY);

@@ -83,7 +83,8 @@ public class ArgumentTest {
     }
 
     /**
-     * Verifies that the arguments correctly collected from the command line and saved as argument values.
+     * Verifies that the arguments correctly collected from the command line and
+     * saved as argument values.
      */
     @Test
     public void testProcessArgument() {
@@ -101,7 +102,8 @@ public class ArgumentTest {
     }
 
     /**
-     * Verifies that no options are added to the parsed command line, when current value looks like an option.
+     * Verifies that no options are added to the parsed command line, when
+     * current value looks like an option.
      */
     @Test
     public void testProcessOption() {
@@ -115,7 +117,8 @@ public class ArgumentTest {
     }
 
     /**
-     * Verifies that no options are added to the parsed command line, when current value looks like an option.
+     * Verifies that no options are added to the parsed command line, when
+     * current value looks like an option.
      */
     @Test
     public void testProcessSeparatedValues() {
@@ -134,8 +137,8 @@ public class ArgumentTest {
     }
 
     /**
-     * Verifies that if minimum required number of values is not reached option exception is thrown during post
-     * processing.
+     * Verifies that if minimum required number of values is not reached option
+     * exception is thrown during post processing.
      */
     @Test(expectedExceptions = OptionException.class)
     public void testPostProcessMinimum() {
@@ -148,7 +151,8 @@ public class ArgumentTest {
     }
 
     /**
-     * Test that argument validates number of stored values against a maximum allowed number.
+     * Test that argument validates number of stored values against a maximum
+     * allowed number.
      */
     @Test(expectedExceptions = OptionException.class)
     public void testPostProcessMaximum() {

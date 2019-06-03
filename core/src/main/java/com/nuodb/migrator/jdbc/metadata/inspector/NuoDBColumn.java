@@ -42,8 +42,10 @@ public class NuoDBColumn {
     /**
      * Create derived enum type or returns base type if type argument is null
      *
-     * @param baseType base type to use
-     * @param type     definition of enumeration
+     * @param baseType
+     *            base type to use
+     * @param type
+     *            definition of enumeration
      * @return base type or enum type if enumeration values are provided
      */
     public static JdbcType getJdbcType(JdbcType baseType, String type) {
@@ -55,10 +57,16 @@ public class NuoDBColumn {
     }
 
     /**
-     * ENUM type decoding rules: <ul><li>^ delimiter character</li><li>\ escape symbol</li><li>\^ turns into
-     * ^</li><li>\\ is changed to \</li></ul>
+     * ENUM type decoding rules:
+     * <ul>
+     * <li>^ delimiter character</li>
+     * <li>\ escape symbol</li>
+     * <li>\^ turns into ^</li>
+     * <li>\\ is changed to \</li>
+     * </ul>
      *
-     * @param type serialized set of enum values
+     * @param type
+     *            serialized set of enum values
      * @return decoded set of enum values
      */
     public static Collection<String> getEnum(String type) {
@@ -75,21 +83,21 @@ public class NuoDBColumn {
                 continue;
             }
             switch (symbol) {
-                case '\\':
-                    escape = true;
-                    break;
-                case '^':
-                    if (start) {
-                        values.add(value.toString());
-                        value.setLength(0);
-                    }
-                    if (!start) {
-                        start = true;
-                    }
-                    break;
-                default:
-                    value.append(symbol);
-                    break;
+            case '\\':
+                escape = true;
+                break;
+            case '^':
+                if (start) {
+                    values.add(value.toString());
+                    value.setLength(0);
+                }
+                if (!start) {
+                    start = true;
+                }
+                break;
+            default:
+                value.append(symbol);
+                break;
             }
         }
         return values;
