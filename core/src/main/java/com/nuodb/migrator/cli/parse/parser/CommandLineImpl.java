@@ -41,14 +41,14 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Collections.unmodifiableSet;
 
 /**
- * A command line implementation allowing options to save processed information to a CommandLine.
+ * A command line implementation allowing options to save processed information
+ * to a CommandLine.
  */
 public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     private List<String> arguments;
     private Set<Option> options = newLinkedHashSet();
-    private ListMultimap<Option, Object> values = newListMultimap(
-            Maps.<Option, Collection<Object>>newLinkedHashMap(),
+    private ListMultimap<Option, Object> values = newListMultimap(Maps.<Option, Collection<Object>>newLinkedHashMap(),
             new Supplier<List<Object>>() {
                 @Override
                 public List<Object> get() {
@@ -65,8 +65,10 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     /**
      * Creates a new CommandLineImpl to hold the parsed arguments.
      *
-     * @param root      the executable line's root option
-     * @param arguments the arguments this executable line represents
+     * @param root
+     *            the executable line's root option
+     * @param arguments
+     *            the arguments this executable line represents
      */
     public CommandLineImpl(Option root, List<String> arguments) {
         this.root = root;
@@ -83,8 +85,8 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     public boolean hasOption(Option option) {
         boolean contains = options.contains(option);
         if (!contains && option instanceof Group) {
-            for (Iterator<Option> iterator = ((Group) option).getOptions().iterator();
-                 !contains && iterator.hasNext();) {
+            for (Iterator<Option> iterator = ((Group) option).getOptions().iterator(); !contains
+                    && iterator.hasNext();) {
                 contains = hasOption(iterator.next());
             }
         }
@@ -231,7 +233,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        for (Iterator iterator = arguments.iterator(); iterator.hasNext(); ) {
+        for (Iterator iterator = arguments.iterator(); iterator.hasNext();) {
             String arg = (String) iterator.next();
             if (arg.indexOf(' ') >= 0) {
                 buffer.append("\"").append(arg).append("\"");

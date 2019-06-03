@@ -92,12 +92,12 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
     }
 
     @Override
-    public <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet,
-                                                     int columnIndex, Field field) {
+    public <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int columnIndex,
+            Field field) {
         try {
             return new SimpleJdbcValueAccess<T>(
-                    (JdbcValueGetter<T>) getJdbcValueGetter(field.getTypeCode(), field.getTypeName()),
-                    connection, resultSet, columnIndex, field);
+                    (JdbcValueGetter<T>) getJdbcValueGetter(field.getTypeCode(), field.getTypeName()), connection,
+                    resultSet, columnIndex, field);
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
         }
@@ -105,10 +105,9 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
 
     @Override
     public <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement,
-                                                     int columnIndex, Field field) {
+            int columnIndex, Field field) {
         try {
-            return new SimpleJdbcValueAccess<T>(
-                    getJdbcValueSetter(field.getTypeCode(), field.getTypeName()),
+            return new SimpleJdbcValueAccess<T>(getJdbcValueSetter(field.getTypeCode(), field.getTypeName()),
                     connection, statement, columnIndex, field);
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
@@ -118,7 +117,8 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
     @Override
     public <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int columnIndex) {
         try {
-            return getJdbcValueGetter(connection, resultSet, columnIndex, FieldFactory.newField(resultSet, columnIndex));
+            return getJdbcValueGetter(connection, resultSet, columnIndex,
+                    FieldFactory.newField(resultSet, columnIndex));
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
         }
@@ -126,7 +126,7 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
 
     @Override
     public <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement,
-                                                     int columnIndex) {
+            int columnIndex) {
         try {
             return getJdbcValueGetter(connection, statement, columnIndex,
                     newField(statement.getMetaData(), columnIndex));

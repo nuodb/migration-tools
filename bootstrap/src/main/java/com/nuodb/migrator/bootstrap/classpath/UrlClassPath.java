@@ -60,12 +60,15 @@ public class UrlClassPath implements ClassPath {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UrlClassPath)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof UrlClassPath))
+            return false;
 
         UrlClassPath that = (UrlClassPath) o;
 
-        if (urls != null ? !urls.equals(that.urls) : that.urls != null) return false;
+        if (urls != null ? !urls.equals(that.urls) : that.urls != null)
+            return false;
 
         return true;
     }

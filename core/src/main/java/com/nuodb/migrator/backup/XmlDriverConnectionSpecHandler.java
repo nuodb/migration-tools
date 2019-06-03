@@ -53,8 +53,8 @@ public class XmlDriverConnectionSpecHandler extends XmlConnectionSpecHandler<Dri
     }
 
     @Override
-    protected void readElement(InputNode input, DriverConnectionSpec connectionSpec,
-                               XmlReadContext context) throws Exception {
+    protected void readElement(InputNode input, DriverConnectionSpec connectionSpec, XmlReadContext context)
+            throws Exception {
         String element = input.getName();
         if (DRIVER_ELEMENT.equals(element)) {
             connectionSpec.setDriver(context.read(input, String.class));
@@ -63,16 +63,14 @@ public class XmlDriverConnectionSpecHandler extends XmlConnectionSpecHandler<Dri
         } else if (USERNAME_ELEMENT.equals(element)) {
             connectionSpec.setUsername(context.read(input, String.class));
         } else if (PROPERTY_ELEMENT.equals(element)) {
-            connectionSpec.addProperty(
-                    context.readAttribute(input, KEY_ATTRIBUTE, String.class),
-                    context.readAttribute(input, VALUE_ATTRIBUTE, String.class)
-            );
+            connectionSpec.addProperty(context.readAttribute(input, KEY_ATTRIBUTE, String.class),
+                    context.readAttribute(input, VALUE_ATTRIBUTE, String.class));
         }
     }
 
     @Override
-    protected void writeElements(DriverConnectionSpec connectionSpec, OutputNode output,
-                                 XmlWriteContext context) throws Exception {
+    protected void writeElements(DriverConnectionSpec connectionSpec, OutputNode output, XmlWriteContext context)
+            throws Exception {
         super.writeElements(connectionSpec, output, context);
         context.writeElement(output, DRIVER_ELEMENT, connectionSpec.getDriver());
         context.writeElement(output, URL_ELEMENT, connectionSpec.getUrl());

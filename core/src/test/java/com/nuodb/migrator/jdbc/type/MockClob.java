@@ -106,7 +106,8 @@ class MockClob implements Clob {
     public long position(String pattern, long start) throws SQLException {
         validate();
         int index = buffer.toString().indexOf(pattern, (int) (start - 1));
-        if (-1 != index) index += 1;
+        if (-1 != index)
+            index += 1;
         return index;
     }
 
@@ -126,8 +127,10 @@ class MockClob implements Clob {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Clob)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Clob))
+            return false;
         Clob clob = (Clob) o;
         try {
             return StreamUtils.equals(getAsciiStream(), clob.getAsciiStream());
@@ -189,7 +192,7 @@ class MockClob implements Clob {
         }
 
         public void write(int byteValue) throws IOException {
-            byte[] bytes = new byte[]{(byte) byteValue};
+            byte[] bytes = new byte[] { (byte) byteValue };
             try {
                 setString(index + 1, new String(bytes));
             } catch (SQLException exception) {

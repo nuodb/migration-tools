@@ -42,7 +42,8 @@ import static java.util.Collections.emptySet;
 /**
  * @author Sergey Bushik
  */
-public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHandlerBase implements ScriptGenerator<T> {
+public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHandlerBase
+        implements ScriptGenerator<T> {
 
     protected ScriptGeneratorBase(MetaDataType objectType) {
         super(objectType);

@@ -85,7 +85,7 @@ public class MetaDataUtils {
     }
 
     public static ForeignKey createForeignKey(String name, Collection<Column> primaryColumns,
-                                              Collection<Column> foreignColumns) {
+            Collection<Column> foreignColumns) {
         Table primaryTable = null;
         Table foreignTable = null;
         int position = 0;

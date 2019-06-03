@@ -55,8 +55,8 @@ public class ReflectionProxy extends AopProxyBase implements InvocationHandler {
 
     @Override
     protected boolean supportsAdvice(Advice advice) {
-        return advice instanceof BeforeMethod || advice instanceof AfterMethod ||
-                advice instanceof AfterThrows || advice instanceof MethodInterceptor;
+        return advice instanceof BeforeMethod || advice instanceof AfterMethod || advice instanceof AfterThrows
+                || advice instanceof MethodInterceptor;
     }
 
     @Override
@@ -98,8 +98,8 @@ public class ReflectionProxy extends AopProxyBase implements InvocationHandler {
         if (methodInterceptors == null) {
             methodInterceptors = newArrayList();
             for (Advisor advisor : getAdvisors()) {
-                if (!(advisor instanceof MethodAdvisor) ||
-                        ((MethodAdvisor) advisor).getMethodMatcher().matches(method, getTargetClass(), arguments)) {
+                if (!(advisor instanceof MethodAdvisor)
+                        || ((MethodAdvisor) advisor).getMethodMatcher().matches(method, getTargetClass(), arguments)) {
                     Advice advice = advisor.getAdvice();
                     if (advice instanceof BeforeMethod) {
                         methodInterceptors.add(newBeforeMethodInterceptor((BeforeMethod) advice));

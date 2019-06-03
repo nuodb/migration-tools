@@ -69,26 +69,19 @@ public class NamingStrategyTest {
 
     @DataProvider(name = "scriptGeneratorManager.getName")
     public Object[][] createScriptGeneratorManagerGetNameData() {
-        return new Object[][]{
-                {createSchema(null, "s2"), false, "s2"},
-                {createSchema(null, "s2"), true, "\"s2\""},
-                {createTable(null, "s2", "t1"), false, "t1"},
-                {createTable(null, "s2", "t1"), true, "\"t1\""},
-                {createColumn(null, "s2", "t1", "c1"), false, "c1"},
-                {createColumn(null, "s2", "t1", "c1"), true, "\"c1\""}
-        };
+        return new Object[][] { { createSchema(null, "s2"), false, "s2" }, { createSchema(null, "s2"), true, "\"s2\"" },
+                { createTable(null, "s2", "t1"), false, "t1" }, { createTable(null, "s2", "t1"), true, "\"t1\"" },
+                { createColumn(null, "s2", "t1", "c1"), false, "c1" },
+                { createColumn(null, "s2", "t1", "c1"), true, "\"c1\"" } };
     }
 
     @DataProvider(name = "scriptGeneratorManager.getQualifiedName")
     public Object[][] createScriptGeneratorManagerGetQualifiedNameData() {
-        return new Object[][]{
-                {createSchema(null, "s2"), false, "s2"},
-                {createSchema(null, "s2"), true, "\"s2\""},
-                {createTable(null, "s2", "t1"), false, "s1.t1"},
-                {createTable(null, "s2", "t1"), true, "\"s1\".\"t1\""},
-                {createColumn(null, "s2", "t1", "c1"), false, "c1"},
-                {createColumn(null, "s2", "t1", "c1"), true, "\"c1\""}
-        };
+        return new Object[][] { { createSchema(null, "s2"), false, "s2" }, { createSchema(null, "s2"), true, "\"s2\"" },
+                { createTable(null, "s2", "t1"), false, "s1.t1" },
+                { createTable(null, "s2", "t1"), true, "\"s1\".\"t1\"" },
+                { createColumn(null, "s2", "t1", "c1"), false, "c1" },
+                { createColumn(null, "s2", "t1", "c1"), true, "\"c1\"" } };
     }
 
     @Test(dataProvider = "scriptGeneratorManager.getName")
@@ -118,33 +111,30 @@ public class NamingStrategyTest {
         Column column = get(t1.getColumns(), 0);
         trigger.setColumn(column);
         column.getTable().addTrigger(trigger);
-        return new Object[][]{
-                {new ForeignKeyQualifyNamingStrategy(), foreignKey, false,
-                        "fk_s1.t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890_s1.t2_c2_1234567890_1234567890_1234567890_1234567890_1234567890"},
-                {new ForeignKeyHashNamingStrategy(), foreignKey, false, "fk_877e7d95"},
-                {new ForeignKeyAutoNamingStrategy(), foreignKey, false, "fk_t2_fk1"},
-                {new ForeignKeySourceNamingStrategy(), foreignKey, false, "fk_t2_fk1"},
-                {new IndexQualifyNamingStrategy(), index, false,
-                        "idx_unique_t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890"},
-                {new IndexHashNamingStrategy(), index, false, "idx_ccd246f8"},
-                {new IndexAutoNamingStrategy(), index, false, "idx_t1_idx1"},
-                {new IndexSourceNamingStrategy(), index, false, "idx_t1_idx1"},
-                {new SequenceQualifyNamingStrategy(), sequence, false,
-                        "s1.seq_t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890"},
-                {new SequenceHashNamingStrategy(), sequence, false, "s1.seq_11bd414a"},
-                {new SequenceAutoNamingStrategy(), sequence, false, "s1.t1_seq1"},
-                {new SequenceSourceNamingStrategy(), sequence, false, "s1.t1_seq1"},
-                {new TriggerQualifyNamingStrategy(), trigger, false, "trg_t1_0"},
-                {new TriggerHashNamingStrategy(), trigger, false, "trg_357eae"},
-                {new TriggerAutoNamingStrategy(), trigger, false, "t1_trg1"},
-                {new TriggerSourceNamingStrategy(), trigger, false, "t1_trg1"},
-        };
+        return new Object[][] { { new ForeignKeyQualifyNamingStrategy(), foreignKey, false,
+                "fk_s1.t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890_s1.t2_c2_1234567890_1234567890_1234567890_1234567890_1234567890" },
+                { new ForeignKeyHashNamingStrategy(), foreignKey, false, "fk_877e7d95" },
+                { new ForeignKeyAutoNamingStrategy(), foreignKey, false, "fk_t2_fk1" },
+                { new ForeignKeySourceNamingStrategy(), foreignKey, false, "fk_t2_fk1" },
+                { new IndexQualifyNamingStrategy(), index, false,
+                        "idx_unique_t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890" },
+                { new IndexHashNamingStrategy(), index, false, "idx_ccd246f8" },
+                { new IndexAutoNamingStrategy(), index, false, "idx_t1_idx1" },
+                { new IndexSourceNamingStrategy(), index, false, "idx_t1_idx1" },
+                { new SequenceQualifyNamingStrategy(), sequence, false,
+                        "s1.seq_t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890" },
+                { new SequenceHashNamingStrategy(), sequence, false, "s1.seq_11bd414a" },
+                { new SequenceAutoNamingStrategy(), sequence, false, "s1.t1_seq1" },
+                { new SequenceSourceNamingStrategy(), sequence, false, "s1.t1_seq1" },
+                { new TriggerQualifyNamingStrategy(), trigger, false, "trg_t1_0" },
+                { new TriggerHashNamingStrategy(), trigger, false, "trg_357eae" },
+                { new TriggerAutoNamingStrategy(), trigger, false, "t1_trg1" },
+                { new TriggerSourceNamingStrategy(), trigger, false, "t1_trg1" }, };
     }
 
     @Test(dataProvider = "namingStrategy.getQualifiedName")
     public <T extends MetaData> void testNamingStrategyGetQualifiedName(NamingStrategy<T> namingStrategy, T object,
-                                                                        boolean normalize, String name) {
-        assertEquals(namingStrategy.getQualifiedName(object, scriptGeneratorManager,
-                catalog, schema, normalize), name);
+            boolean normalize, String name) {
+        assertEquals(namingStrategy.getQualifiedName(object, scriptGeneratorManager, catalog, schema, normalize), name);
     }
 }

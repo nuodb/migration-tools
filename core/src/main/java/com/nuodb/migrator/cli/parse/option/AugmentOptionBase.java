@@ -52,7 +52,8 @@ import static com.nuodb.migrator.cli.parse.option.OptionUtils.unquote;
 import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 
 /**
- * Base subclass for the options augmented with an argument {@link Argument} and a child group {@link Group}.
+ * Base subclass for the options augmented with an argument {@link Argument} and
+ * a child group {@link Group}.
  *
  * @author Sergey Bushik
  */

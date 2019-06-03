@@ -51,14 +51,14 @@ public class JdbcTypeValueTest {
     public void setUp() {
         jdbcTypeBase = spy(new JdbcTypeValueBase<Object>(Types.OTHER, Object.class) {
             @Override
-            public Object getValue(ResultSet resultSet, int index,
-                                   Field field, Map<String, Object> options) throws SQLException {
+            public Object getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+                    throws SQLException {
                 return null;
             }
 
             @Override
-            protected void setNullSafeValue(PreparedStatement statement, Object value, int index,
-                                            Field field, Map<String, Object> options) throws SQLException {
+            protected void setNullSafeValue(PreparedStatement statement, Object value, int index, Field field,
+                    Map<String, Object> options) throws SQLException {
             }
         });
     }

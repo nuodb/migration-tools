@@ -62,9 +62,8 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
         String catalog = isEmpty(inspectionScope.getCatalog()) ? "" : (inspectionScope.getCatalog() + ".");
         query.from(catalog + "INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE AS CTU");
         query.innerJoin(catalog + "INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC",
-                "CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG AND " +
-                        "CTU.TABLE_SCHEMA=CC.CONSTRAINT_SCHEMA AND " +
-                        "CTU.CONSTRAINT_NAME=CC.CONSTRAINT_NAME");
+                "CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG AND " + "CTU.TABLE_SCHEMA=CC.CONSTRAINT_SCHEMA AND "
+                        + "CTU.CONSTRAINT_NAME=CC.CONSTRAINT_NAME");
         Collection<Object> parameters = newArrayList();
         if (!isEmpty(inspectionScope.getCatalog())) {
             query.where("CTU.TABLE_CATALOG=?");
@@ -85,9 +84,8 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
     protected void processResultSet(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
-            Table table = addTable(inspectionResults,
-                    checks.getString("TABLE_CATALOG"), checks.getString("TABLE_SCHEMA"),
-                    checks.getString("TABLE_NAME"));
+            Table table = addTable(inspectionResults, checks.getString("TABLE_CATALOG"),
+                    checks.getString("TABLE_SCHEMA"), checks.getString("TABLE_NAME"));
             Check check = new Check(checks.getString("CONSTRAINT_NAME"));
             check.setText(checks.getString("CHECK_CLAUSE"));
             table.addCheck(check);

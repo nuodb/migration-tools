@@ -46,7 +46,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"NullableProblems", "unchecked"})
+@SuppressWarnings({ "NullableProblems", "unchecked" })
 public class SessionBase implements Session {
 
     private SessionFactoryBase sessionFactoryBase;
@@ -55,11 +55,13 @@ public class SessionBase implements Session {
     private Map context;
     private boolean enforceTableLocksForDDL;
 
-    public SessionBase(SessionFactoryBase sessionFactoryBase, Connection connection, Dialect dialect, boolean enforceTableLocksForDDL) {
+    public SessionBase(SessionFactoryBase sessionFactoryBase, Connection connection, Dialect dialect,
+            boolean enforceTableLocksForDDL) {
         this(sessionFactoryBase, connection, dialect, null, enforceTableLocksForDDL);
     }
 
-    public SessionBase(SessionFactoryBase sessionFactoryBase, Connection connection, Dialect dialect, Map context, boolean enforceTableLocksForDDL) {
+    public SessionBase(SessionFactoryBase sessionFactoryBase, Connection connection, Dialect dialect, Map context,
+            boolean enforceTableLocksForDDL) {
         this.sessionFactoryBase = sessionFactoryBase;
         this.connection = connection;
         this.dialect = dialect;
@@ -129,7 +131,7 @@ public class SessionBase implements Session {
 
     @Override
     public ConnectionSpec getConnectionSpec() {
-        return ((ConnectionProxy)getConnection()).getConnectionSpec();
+        return ((ConnectionProxy) getConnection()).getConnectionSpec();
     }
 
     @Override

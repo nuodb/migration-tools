@@ -57,12 +57,11 @@ import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
  */
 public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    private static final String QUERY =
-            "SELECT S.SEQUENCE_SCHEMA AS SCHEMA_NAME, S.SEQUENCE_NAME AS SEQUENCE_NAME,\n" +
-            "C.TABLE_NAME AS TABLE_NAME, C.COLUMN_NAME AS COLUMN_NAME FROM INFORMATION_SCHEMA.SEQUENCES S\n" +
-            "LEFT OUTER JOIN INFORMATION_SCHEMA.COLUMNS C ON\n" +
-            "S.SEQUENCE_CATALOG=C.TABLE_CATALOG AND S.SEQUENCE_SCHEMA=C.TABLE_SCHEMA AND\n" +
-            "S.SEQUENCE_NAME=SUBSTRING(C.COLUMN_DEFAULT FROM 'nextval[(]''(.*)''::.*[)]')";
+    private static final String QUERY = "SELECT S.SEQUENCE_SCHEMA AS SCHEMA_NAME, S.SEQUENCE_NAME AS SEQUENCE_NAME,\n"
+            + "C.TABLE_NAME AS TABLE_NAME, C.COLUMN_NAME AS COLUMN_NAME FROM INFORMATION_SCHEMA.SEQUENCES S\n"
+            + "LEFT OUTER JOIN INFORMATION_SCHEMA.COLUMNS C ON\n"
+            + "S.SEQUENCE_CATALOG=C.TABLE_CATALOG AND S.SEQUENCE_SCHEMA=C.TABLE_SCHEMA AND\n"
+            + "S.SEQUENCE_NAME=SUBSTRING(C.COLUMN_DEFAULT FROM 'nextval[(]''(.*)''::.*[)]')";
 
     public PostgreSQLSequenceInspector() {
         super(SEQUENCE, TableInspectionScope.class);
@@ -84,30 +83,29 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
     }
 
     @Override
-    protected void processResultSet(final InspectionContext inspectionContext, final ResultSet sequences) throws SQLException {
+    protected void processResultSet(final InspectionContext inspectionContext, final ResultSet sequences)
+            throws SQLException {
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.executeStatement(
-                new StatementFactory<Statement>() {
-                    @Override
-                    public Statement createStatement(Connection connection) throws SQLException {
-                        return connection.createStatement();
-                    }
-                }, new StatementCallback<Statement>() {
-                    @Override
-                    public void executeStatement(Statement statement) throws SQLException {
-                        while (sequences.next()) {
-                            String schemaName = sequences.getString("SCHEMA_NAME");
-                            String sequenceName = sequences.getString("SEQUENCE_NAME");
-                            String tableName = sequences.getString("TABLE_NAME");
-                            Schema schema = addSchema(inspectionContext.getInspectionResults(), null, schemaName);
-                            Table table = tableName != null ? schema.addTable(tableName) : null;
-                            Column column = table != null ? table.addColumn(sequences.getString("COLUMN_NAME")) : null;
-                            processSequence(inspectionContext, schema, column, statement.executeQuery(
-                                    createQuery(inspectionContext, schemaName, sequenceName).toString()));
-                        }
-                    }
+        template.executeStatement(new StatementFactory<Statement>() {
+            @Override
+            public Statement createStatement(Connection connection) throws SQLException {
+                return connection.createStatement();
+            }
+        }, new StatementCallback<Statement>() {
+            @Override
+            public void executeStatement(Statement statement) throws SQLException {
+                while (sequences.next()) {
+                    String schemaName = sequences.getString("SCHEMA_NAME");
+                    String sequenceName = sequences.getString("SEQUENCE_NAME");
+                    String tableName = sequences.getString("TABLE_NAME");
+                    Schema schema = addSchema(inspectionContext.getInspectionResults(), null, schemaName);
+                    Table table = tableName != null ? schema.addTable(tableName) : null;
+                    Column column = table != null ? table.addColumn(sequences.getString("COLUMN_NAME")) : null;
+                    processSequence(inspectionContext, schema, column, statement
+                            .executeQuery(createQuery(inspectionContext, schemaName, sequenceName).toString()));
                 }
-        );
+            }
+        });
     }
 
     protected Query createQuery(InspectionContext inspectionContext, String schema, String sequence)
@@ -120,8 +118,7 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
     }
 
     protected void processSequence(InspectionContext inspectionContext, Schema schema, Column column,
-                                   ResultSet sequences)
-            throws SQLException {
+            ResultSet sequences) throws SQLException {
         if (sequences.next()) {
             String name = sequences.getString("SEQUENCE_NAME");
             Sequence sequence = schema.getSequence(name);

@@ -62,7 +62,7 @@ public abstract class TranslatorBase<S extends Script> implements Translator<S> 
     }
 
     protected TranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                             Class<? extends Script> scriptClass) {
+            Class<? extends Script> scriptClass) {
         this.sourceDatabaseInfo = sourceDatabaseInfo;
         this.targetDatabaseInfo = targetDatabaseInfo;
         this.scriptClass = scriptClass;
@@ -86,8 +86,9 @@ public abstract class TranslatorBase<S extends Script> implements Translator<S> 
     }
 
     protected boolean supportsDatabase(TranslationContext context) {
-        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isAssignable(context.getSession().getDatabaseInfo())) &&
-                (targetDatabaseInfo == null || targetDatabaseInfo.isAssignable(context.getDialect().getDatabaseInfo()));
+        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isAssignable(context.getSession().getDatabaseInfo()))
+                && (targetDatabaseInfo == null
+                        || targetDatabaseInfo.isAssignable(context.getDialect().getDatabaseInfo()));
     }
 
     protected boolean supportsScriptClass(Script script) {
@@ -122,16 +123,21 @@ public abstract class TranslatorBase<S extends Script> implements Translator<S> 
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         TranslatorBase that = (TranslatorBase) o;
 
-        if (sourceDatabaseInfo != null ? !sourceDatabaseInfo.equals(that.sourceDatabaseInfo) :
-                that.sourceDatabaseInfo != null) return false;
-        if (targetDatabaseInfo != null ? !targetDatabaseInfo.equals(that.targetDatabaseInfo) :
-                that.targetDatabaseInfo != null) return false;
-        if (scriptClass != null ? !scriptClass.equals(that.scriptClass) : that.scriptClass != null) return false;
+        if (sourceDatabaseInfo != null ? !sourceDatabaseInfo.equals(that.sourceDatabaseInfo)
+                : that.sourceDatabaseInfo != null)
+            return false;
+        if (targetDatabaseInfo != null ? !targetDatabaseInfo.equals(that.targetDatabaseInfo)
+                : that.targetDatabaseInfo != null)
+            return false;
+        if (scriptClass != null ? !scriptClass.equals(that.scriptClass) : that.scriptClass != null)
+            return false;
         return true;
     }
 

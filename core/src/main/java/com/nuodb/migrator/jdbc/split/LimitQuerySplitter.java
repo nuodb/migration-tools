@@ -47,8 +47,8 @@ public class LimitQuerySplitter extends QuerySplitterBase<Statement> {
     private final Dialect dialect;
     private final RowCountStrategy rowCountStrategy;
 
-    protected LimitQuerySplitter(Dialect dialect, RowCountStrategy rowCountStrategy,
-                                 Query query, QueryLimit queryLimit, ParametersBinder parametersBinder) {
+    protected LimitQuerySplitter(Dialect dialect, RowCountStrategy rowCountStrategy, Query query, QueryLimit queryLimit,
+            ParametersBinder parametersBinder) {
         super(query, queryLimit, parametersBinder);
         this.dialect = dialect;
         this.rowCountStrategy = rowCountStrategy;
@@ -74,14 +74,14 @@ public class LimitQuerySplitter extends QuerySplitterBase<Statement> {
     }
 
     @Override
-    protected Statement createStatement(Connection connection, QueryLimit queryLimit,
-                                        int splitIndex) throws SQLException {
+    protected Statement createStatement(Connection connection, QueryLimit queryLimit, int splitIndex)
+            throws SQLException {
         return connection.createStatement();
     }
 
     @Override
-    protected Statement prepareStatement(Connection connection, QueryLimit queryLimit,
-                                         int splitIndex) throws SQLException {
+    protected Statement prepareStatement(Connection connection, QueryLimit queryLimit, int splitIndex)
+            throws SQLException {
         LimitHandler limitHandler = getDialect().createLimitHandler(getQuery().toString(), queryLimit);
         PreparedStatement statement = connection.prepareStatement(limitHandler.getLimitQuery(true));
         int column = 1;
@@ -95,8 +95,8 @@ public class LimitQuerySplitter extends QuerySplitterBase<Statement> {
     }
 
     @Override
-    protected ResultSet executeStatement(Statement statement, QueryLimit queryLimit,
-                                         int splitIndex) throws SQLException {
+    protected ResultSet executeStatement(Statement statement, QueryLimit queryLimit, int splitIndex)
+            throws SQLException {
         if (isParameterized()) {
             return ((PreparedStatement) statement).executeQuery();
         } else {

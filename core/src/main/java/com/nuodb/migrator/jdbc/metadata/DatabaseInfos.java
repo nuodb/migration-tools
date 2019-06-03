@@ -48,30 +48,27 @@ public interface DatabaseInfos {
     final DatabaseInfo DB2 = new DatabaseInfo("DB2/") {
         @Override
         protected ComparisonChain isAssignableProductName(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-            return comparator.compare(getProductName(), databaseInfo.getProductName(),
-                    new Ordering<String>() {
-                        @Override
-                        public int compare(String productName1, String productName2) {
-                            return productName1 == null ||
-                                    StringUtils.startsWith(productName2, productName1) ?
-                                    ASSIGNABLE : NOT_ASSIGNABLE;
-                        }
-                    });
+            return comparator.compare(getProductName(), databaseInfo.getProductName(), new Ordering<String>() {
+                @Override
+                public int compare(String productName1, String productName2) {
+                    return productName1 == null || StringUtils.startsWith(productName2, productName1) ? ASSIGNABLE
+                            : NOT_ASSIGNABLE;
+                }
+            });
         }
     };
     final DatabaseInfo POSTGRE_SQL = new DatabaseInfo("PostgreSQL");
     final DatabaseInfo POSTGRE_SQL_83 = new DatabaseInfo("PostgreSQL", "8.3") {
         @Override
         protected ComparisonChain isAssignableProductVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-            return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(),
-                    new Ordering<String>() {
-                        @Override
-                        public int compare(String productVersion1, String productVersion2) {
-                            return  productVersion1 == null ||
-                                    (productVersion2 != null && productVersion2.compareTo(productVersion1) >= 0) ?
-                                    ASSIGNABLE : NOT_ASSIGNABLE;
-                        }
-                    });
+            return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(), new Ordering<String>() {
+                @Override
+                public int compare(String productVersion1, String productVersion2) {
+                    return productVersion1 == null
+                            || (productVersion2 != null && productVersion2.compareTo(productVersion1) >= 0) ? ASSIGNABLE
+                                    : NOT_ASSIGNABLE;
+                }
+            });
         }
     };
     final DatabaseInfo MSSQL_SERVER = new DatabaseInfo("Microsoft SQL Server");

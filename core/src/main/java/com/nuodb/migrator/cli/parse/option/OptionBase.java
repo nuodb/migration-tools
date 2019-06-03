@@ -38,7 +38,8 @@ import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionRequired;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
- * A base implementation of the option providing limited ground work for further implementations.
+ * A base implementation of the option providing limited ground work for further
+ * implementations.
  */
 public abstract class OptionBase implements Option {
 
@@ -241,7 +242,7 @@ public abstract class OptionBase implements Option {
     }
 
     public static void join(StringBuilder help, Collection<?> values) {
-        for (Iterator<?> iterator = values.iterator(); iterator.hasNext(); ) {
+        for (Iterator<?> iterator = values.iterator(); iterator.hasNext();) {
             help.append(iterator.next());
             if (iterator.hasNext()) {
                 help.append(",");
@@ -251,13 +252,19 @@ public abstract class OptionBase implements Option {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         OptionBase option = (OptionBase) o;
-        if (id != option.id) return false;
-        if (name != null ? !name.equals(option.name) : option.name != null) return false;
-        if (description != null ? !description.equals(option.description) : option.description != null) return false;
-        if (required != option.required) return false;
+        if (id != option.id)
+            return false;
+        if (name != null ? !name.equals(option.name) : option.name != null)
+            return false;
+        if (description != null ? !description.equals(option.description) : option.description != null)
+            return false;
+        if (required != option.required)
+            return false;
         return true;
     }
 

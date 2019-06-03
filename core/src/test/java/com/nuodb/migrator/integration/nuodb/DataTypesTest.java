@@ -38,22 +38,17 @@ import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 @Test(groups = { "nuodbintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
 public class DataTypesTest extends BaseDataTypeTest {
 
-	@DataProvider(name = "dataTypeNuodb")
-	public Object[][] createDataTypeData() {
-		return new Object[][] { { "testdata_smallint" }, { "testdata_bigint" },
-				{ "testdata_integer" }, { "testdata_decimal" },
-				{ "testdata_double_precision" }, { "testdata_number" },
-				{ "testdata_numeric" }, { "testdata_string" },
-				{ "testdata_varchar" }, { "testdata_clob" },
-				{ "testdata_national_char" }, { "testdata_blob" },
-				{ "testdata_binary" }, { "testdata_binary_varying" },
-				{ "testdata_boolean" }, { "testdata_enum" },
-				{ "testdata_date" }, { "testdata_timestamp" },
-				{ "testdata_time" } };
-	}
+    @DataProvider(name = "dataTypeNuodb")
+    public Object[][] createDataTypeData() {
+        return new Object[][] { { "testdata_smallint" }, { "testdata_bigint" }, { "testdata_integer" },
+                { "testdata_decimal" }, { "testdata_double_precision" }, { "testdata_number" }, { "testdata_numeric" },
+                { "testdata_string" }, { "testdata_varchar" }, { "testdata_clob" }, { "testdata_national_char" },
+                { "testdata_blob" }, { "testdata_binary" }, { "testdata_binary_varying" }, { "testdata_boolean" },
+                { "testdata_enum" }, { "testdata_date" }, { "testdata_timestamp" }, { "testdata_time" } };
+    }
 
-	@Test(dataProvider = "dataTypeNuodb")
-	public void testDataType(String tableName) throws Exception {
-		super.testDataType(tableName);
-	}
+    @Test(dataProvider = "dataTypeNuodb")
+    public void testDataType(String tableName) throws Exception {
+        super.testDataType(tableName);
+    }
 }

@@ -32,7 +32,8 @@ package com.nuodb.migrator.backup.format.bson;
  */
 public interface BsonFormat {
     /**
-     * BSON maximum file size in non streaming mode is 2147483647 bytes, we take it as maximum size /2 or 1 GB.
+     * BSON maximum file size in non streaming mode is 2147483647 bytes, we take
+     * it as maximum size /2 or 1 GB.
      */
     final long MAX_SIZE = 1073741824L;
 

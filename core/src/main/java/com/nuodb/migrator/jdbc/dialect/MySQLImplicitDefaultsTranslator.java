@@ -55,15 +55,17 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.split;
 
 /**
- * Allow for MySQL implicit defaults to move over to the NuoDB schema explicitly <a
- * hre="http://dev.mysql.com/doc/refman/5.5/en/data-type-defaults.html">MySQL Data Type Defaults</a>
+ * Allow for MySQL implicit defaults to move over to the NuoDB schema explicitly
+ * <a hre="http://dev.mysql.com/doc/refman/5.5/en/data-type-defaults.html">MySQL
+ * Data Type Defaults</a>
  *
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
 public class MySQLImplicitDefaultsTranslator extends ImplicitDefaultsTranslatorBase {
     /**
-     * Does not check if strict mode is set, as it's always set by MySQL JDBC driver for the
+     * Does not check if strict mode is set, as it's always set by MySQL JDBC
+     * driver for the
      */
     public static final boolean CHECK_SQL_MODE = false;
     /**
@@ -85,10 +87,12 @@ public class MySQLImplicitDefaultsTranslator extends ImplicitDefaultsTranslatorB
     }
 
     /**
-     * Validates that the script matches requirements for implicit defaults, such as script is null, column is not
-     * nullable and column is not an identity column
+     * Validates that the script matches requirements for implicit defaults,
+     * such as script is null, column is not nullable and column is not an
+     * identity column
      *
-     * @param script to be checked for requirements
+     * @param script
+     *            to be checked for requirements
      * @return true is all requirements are honoured
      */
     protected boolean hasExplicitDefaults(ColumnScript script) {
@@ -101,9 +105,11 @@ public class MySQLImplicitDefaultsTranslator extends ImplicitDefaultsTranslatorB
     }
 
     /**
-     * Checks if any of the strict modes [STRICT_ALL_TABLE, STRICT_TRANS_TABLES] is on for this session
+     * Checks if any of the strict modes [STRICT_ALL_TABLE, STRICT_TRANS_TABLES]
+     * is on for this session
      *
-     * @param context translation context
+     * @param context
+     *            translation context
      * @return true if any of the strict modes is on
      */
     protected boolean checkSqlMode(TranslationContext context) {
@@ -126,38 +132,45 @@ public class MySQLImplicitDefaultsTranslator extends ImplicitDefaultsTranslatorB
     protected Collection<String> getSqlMode(Connection connection) throws SQLException {
         final Collection<String> sqlMode = newArrayList();
         StatementTemplate template = new StatementTemplate(connection);
-        template.executeStatement(
-                new StatementFactory<Statement>() {
-                    @Override
-                    public Statement createStatement(Connection connection)
-                            throws SQLException {
-                        return connection.createStatement();
-                    }
-                }, new StatementCallback<Statement>() {
-                    @Override
-                    public void executeStatement(Statement statement)
-                            throws SQLException {
-                        ResultSet resultSet = statement.executeQuery(getSqlModeQuery());
-                        while (resultSet.next()) {
-                            sqlMode.addAll(asList(split(resultSet.getString(1), ',')));
-                        }
-                    }
+        template.executeStatement(new StatementFactory<Statement>() {
+            @Override
+            public Statement createStatement(Connection connection) throws SQLException {
+                return connection.createStatement();
+            }
+        }, new StatementCallback<Statement>() {
+            @Override
+            public void executeStatement(Statement statement) throws SQLException {
+                ResultSet resultSet = statement.executeQuery(getSqlModeQuery());
+                while (resultSet.next()) {
+                    sqlMode.addAll(asList(split(resultSet.getString(1), ',')));
                 }
-        );
+            }
+        });
         return sqlMode;
     }
 
     /**
-     * If strict mode is not enabled, MySQL sets the column to the implicit default value for the column data type: <ul>
-     * <li>For numeric types, the default is 0</li> <li>Integer or floating-point types declared with the AUTO_INCREMENT
-     * attribute, the default is the next value in the sequence. This is handled by sequences</li> <li>For string types
-     * other than ENUM, the default value is the empty string</li> <li>For ENUM, the default is the first enumeration
-     * value</li> <li>For date and time types other than TIMESTAMP, the default is the appropriate "zero" value for the
-     * type, we skip this</li> <li>For the first TIMESTAMP column in a table, the default value is the current date and
-     * time. This is converted to an explicit thing by MySQL, so we are OK</li> </ul>
+     * If strict mode is not enabled, MySQL sets the column to the implicit
+     * default value for the column data type:
+     * <ul>
+     * <li>For numeric types, the default is 0</li>
+     * <li>Integer or floating-point types declared with the AUTO_INCREMENT
+     * attribute, the default is the next value in the sequence. This is handled
+     * by sequences</li>
+     * <li>For string types other than ENUM, the default value is the empty
+     * string</li>
+     * <li>For ENUM, the default is the first enumeration value</li>
+     * <li>For date and time types other than TIMESTAMP, the default is the
+     * appropriate "zero" value for the type, we skip this</li>
+     * <li>For the first TIMESTAMP column in a table, the default value is the
+     * current date and time. This is converted to an explicit thing by MySQL,
+     * so we are OK</li>
+     * </ul>
      *
-     * @param script  default source script to translate
-     * @param context translation context
+     * @param script
+     *            default source script to translate
+     * @param context
+     *            translation context
      * @return string translated according to implicit rules
      */
     @Override
@@ -170,54 +183,54 @@ public class MySQLImplicitDefaultsTranslator extends ImplicitDefaultsTranslatorB
             behavior = DEFAULT_BEHAVIOR;
         }
         switch (column.getTypeCode()) {
-            case BIT:
-            case TINYINT:
-            case SMALLINT:
-            case INTEGER:
-            case BIGINT:
-            case FLOAT:
-            case REAL:
-            case DOUBLE:
-            case NUMERIC:
-            case DECIMAL:
-                result = valueOf(0);
-                break;
-            case CHAR:
-            case VARCHAR:
-            case BINARY:
-            case VARBINARY:
-            case BLOB:
-            case CLOB:
-                JdbcType jdbcType = column.getJdbcType();
-                if (jdbcType instanceof JdbcEnumType) {
-                    result = get(((JdbcEnumType) jdbcType).getValues(), 0);
-                } else {
-                    result = EMPTY;
-                }
-                break;
-            case DATE:
-                if (!behavior.equals(CONVERT_TO_NULL)) {
-                    result = context.translate(new ColumnScript(column, ZERO_DATE)).getScript();
-                } else {
-                    result = script.getScript();
-                }
-                break;
-            case TIME:
-                if (!behavior.equals(CONVERT_TO_NULL)) {
-                    result = context.translate(new ColumnScript(column, ZERO_TIME)).getScript();
-                } else {
-                    result = script.getScript();
-                }
-                break;
-            case TIMESTAMP:
-                if (!behavior.equals(CONVERT_TO_NULL)) {
-                    result = context.translate(new ColumnScript(column, ZERO_TIMESTAMP)).getScript();
-                } else {
-                    result = script.getScript();
-                }
-                break;
-            default:
+        case BIT:
+        case TINYINT:
+        case SMALLINT:
+        case INTEGER:
+        case BIGINT:
+        case FLOAT:
+        case REAL:
+        case DOUBLE:
+        case NUMERIC:
+        case DECIMAL:
+            result = valueOf(0);
+            break;
+        case CHAR:
+        case VARCHAR:
+        case BINARY:
+        case VARBINARY:
+        case BLOB:
+        case CLOB:
+            JdbcType jdbcType = column.getJdbcType();
+            if (jdbcType instanceof JdbcEnumType) {
+                result = get(((JdbcEnumType) jdbcType).getValues(), 0);
+            } else {
+                result = EMPTY;
+            }
+            break;
+        case DATE:
+            if (!behavior.equals(CONVERT_TO_NULL)) {
+                result = context.translate(new ColumnScript(column, ZERO_DATE)).getScript();
+            } else {
                 result = script.getScript();
+            }
+            break;
+        case TIME:
+            if (!behavior.equals(CONVERT_TO_NULL)) {
+                result = context.translate(new ColumnScript(column, ZERO_TIME)).getScript();
+            } else {
+                result = script.getScript();
+            }
+            break;
+        case TIMESTAMP:
+            if (!behavior.equals(CONVERT_TO_NULL)) {
+                result = context.translate(new ColumnScript(column, ZERO_TIMESTAMP)).getScript();
+            } else {
+                result = script.getScript();
+            }
+            break;
+        default:
+            result = script.getScript();
         }
         // case ENUM, and SET
         return result != null ? new SimpleScript(result) : null;

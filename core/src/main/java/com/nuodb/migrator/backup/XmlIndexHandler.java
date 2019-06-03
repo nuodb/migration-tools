@@ -60,7 +60,7 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
     protected void readAttributes(InputNode input, Index target, XmlReadContext context) throws Exception {
         super.readAttributes(input, target, context);
         target.setUnique(context.readAttribute(input, UNIQUE_ATTRIBUTE, boolean.class));
-        /*  read type property from XML */
+        /* read type property from XML */
         target.setType(context.readAttribute(input, INDEX_TYPE, String.class));
         String sortOrder = context.readAttribute(input, SORT_ORDER_ATTRIBUTE, String.class);
         if (sortOrder != null) {
@@ -75,10 +75,8 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
         Table table = getParent(context);
         String element = input.getName();
         if (COLUMN_ELEMENT.equals(element)) {
-            index.addColumn(
-                    table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)),
-                    index.getColumns().size()
-            );
+            index.addColumn(table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)),
+                    index.getColumns().size());
         }
     }
 
@@ -87,7 +85,7 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
         super.writeAttributes(index, output, context);
         context.writeAttribute(output, UNIQUE_ATTRIBUTE, index.isUnique());
         SortOrder sortOrder = index.getSortOrder();
-        /*  write type property in XML */
+        /* write type property in XML */
         if (index.getType() != null) {
             context.writeAttribute(output, INDEX_TYPE, upperCase(index.getType()));
         }
@@ -112,4 +110,3 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
         }
     }
 }
-

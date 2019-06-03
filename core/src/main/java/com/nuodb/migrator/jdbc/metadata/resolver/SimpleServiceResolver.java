@@ -120,8 +120,8 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         for (Map.Entry<DatabaseInfo, T> serviceEntry : serviceMap.entrySet()) {
             DatabaseInfo entryDatabaseInfo = serviceEntry.getKey();
             final T entryService = serviceEntry.getValue();
-            if (entryDatabaseInfo.isAssignable(databaseInfo) && (serviceDatabaseInfo == null ||
-                    serviceDatabaseInfo.isAssignable(entryDatabaseInfo))) {
+            if (entryDatabaseInfo.isAssignable(databaseInfo)
+                    && (serviceDatabaseInfo == null || serviceDatabaseInfo.isAssignable(entryDatabaseInfo))) {
                 service = entryService;
                 serviceDatabaseInfo = entryDatabaseInfo;
             }
@@ -145,8 +145,8 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         for (Map.Entry<DatabaseInfo, Class<? extends T>> serviceClassEntry : serviceClassMap.entrySet()) {
             DatabaseInfo entryDatabaseInfo = serviceClassEntry.getKey();
             Class<? extends T> entryServiceClass = serviceClassEntry.getValue();
-            if (entryDatabaseInfo.isAssignable(databaseInfo) && (serviceDatabaseInfo == null ||
-                    serviceDatabaseInfo.isAssignable(entryDatabaseInfo))) {
+            if (entryDatabaseInfo.isAssignable(databaseInfo)
+                    && (serviceDatabaseInfo == null || serviceDatabaseInfo.isAssignable(entryDatabaseInfo))) {
                 serviceClass = entryServiceClass;
                 serviceDatabaseInfo = entryDatabaseInfo;
             }

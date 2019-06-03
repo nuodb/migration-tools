@@ -54,21 +54,18 @@ public class QueryBuilderTest {
         table.addColumn("column1");
         table.addColumn("column2");
         Dialect dialect = new NuoDBDialect();
-        return new Object[][]{
-                {table, dialect, false, INSERT,
-                        "INSERT INTO \"table\" (\"column1\", \"column2\") VALUES (?, ?)"},
-                {table, dialect, false, INSERT,
-                        "INSERT INTO \"table\" (\"column1\", \"column2\") VALUES (?, ?)"},
-                {table, dialect, true, INSERT,
-                        "INSERT INTO \"schema\".\"table\" (\"column1\", \"column2\") VALUES (?, ?)"},
-                {table, dialect, true, REPLACE,
-                        "REPLACE INTO \"schema\".\"table\" (\"column1\", \"column2\") VALUES (?, ?)"}
-        };
+        return new Object[][] {
+                { table, dialect, false, INSERT, "INSERT INTO \"table\" (\"column1\", \"column2\") VALUES (?, ?)" },
+                { table, dialect, false, INSERT, "INSERT INTO \"table\" (\"column1\", \"column2\") VALUES (?, ?)" },
+                { table, dialect, true, INSERT,
+                        "INSERT INTO \"schema\".\"table\" (\"column1\", \"column2\") VALUES (?, ?)" },
+                { table, dialect, true, REPLACE,
+                        "REPLACE INTO \"schema\".\"table\" (\"column1\", \"column2\") VALUES (?, ?)" } };
     }
 
     @Test(dataProvider = "insertQueryBuilder")
     public void testInsertQueryBuilder(Table table, Dialect dialect, boolean qualifyNames, InsertType insertType,
-                                       String query) {
+            String query) {
         InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
         insertQueryBuilder.into(table);
         insertQueryBuilder.dialect(dialect);
@@ -89,23 +86,19 @@ public class QueryBuilderTest {
         table.addColumn("column1");
         table.addColumn("column2");
         Dialect dialect = new NuoDBDialect();
-        return new Object[][]{
-                {table, dialect, false, emptySet(),
-                        "SELECT \"column1\", \"column2\" FROM \"table\""},
-                {table, dialect, true, emptySet(),
-                        "SELECT \"column1\", \"column2\" FROM \"schema\".\"table\""},
-                {table, dialect, false, newArrayList("\"column1\">0"),
-                        "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\">0"},
-                {table, dialect, false, newArrayList("\"column1\">0", "\"column2\"<0"),
-                        "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\">0 AND \"column2\"<0"}
-        };
+        return new Object[][] { { table, dialect, false, emptySet(), "SELECT \"column1\", \"column2\" FROM \"table\"" },
+                { table, dialect, true, emptySet(), "SELECT \"column1\", \"column2\" FROM \"schema\".\"table\"" },
+                { table, dialect, false, newArrayList("\"column1\">0"),
+                        "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\">0" },
+                { table, dialect, false, newArrayList("\"column1\">0", "\"column2\"<0"),
+                        "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\">0 AND \"column2\"<0" } };
     }
 
     @Test(dataProvider = "selectQueryBuilder")
     public void testSelectQueryBuilder(Table table, Dialect dialect, boolean qualifyNames, Collection<String> filters,
-                                       String query) {
-        SelectQuery selectQuery = new SelectQueryBuilder().dialect(dialect).qualifyNames(
-                qualifyNames).from(table).filters(filters).build();
+            String query) {
+        SelectQuery selectQuery = new SelectQueryBuilder().dialect(dialect).qualifyNames(qualifyNames).from(table)
+                .filters(filters).build();
 
         assertNotNull(selectQuery);
         assertEquals(selectQuery.getDialect(), dialect);

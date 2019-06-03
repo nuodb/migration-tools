@@ -58,141 +58,139 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
         Field field = access.getField();
         Value value;
         switch (field.getTypeCode()) {
-            case Types.BIT:
-            case Types.TINYINT:
-            case Types.SMALLINT:
-            case Types.INTEGER:
-            case Types.BIGINT:
-            case Types.FLOAT:
-            case Types.REAL:
-            case Types.DOUBLE:
-            case Types.NUMERIC:
-            case Types.DECIMAL:
-                result = access.getValue(options);
-                value = string(result != null ? result.toString() : null);
-                break;
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
-            case Types.NVARCHAR:
-            case Types.LONGNVARCHAR:
-            case Types.NCHAR:
-                value = string(access.getValue(String.class, options));
-                break;
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
-            case Types.BLOB:
-                value = binary(access.getValue(byte[].class, options));
-                break;
-            case Types.OTHER:
-            case Types.JAVA_OBJECT:
-            case Types.STRUCT:
-                result = access.getValue(options);
-                value = binary(result != null ? write(result) : null);
-                break;
-            case Types.CLOB:
-            case Types.NCLOB:
-                value = string(access.getValue(String.class, options));
-                break;
-            case Types.REF:
-                result = access.getValue(options);
-                value = binary(write(new SerialRef((Ref) result)));
-                break;
-            case Types.DATALINK:
-                result = access.getValue(options);
-                value = string(result != null ? result.toString() : null);
-                break;
-            case Types.BOOLEAN:
-                result = access.getValue(options);
-                value = string(result != null ? result.toString() : null);
-                break;
-            case Types.ROWID:
-                result = access.getValue(options);
-                value = binary(result != null ? ((RowId) result).getBytes() : null);
-                break;
-            case Types.SQLXML:
-                value = string(access.getValue(String.class, options));
-                break;
-            default:
-                throw new ValueFormatException(format("Unsupported data type %s, type code %d on %s column",
-                        field.getTypeName(), field.getTypeCode(), getColumnName(field)));
+        case Types.BIT:
+        case Types.TINYINT:
+        case Types.SMALLINT:
+        case Types.INTEGER:
+        case Types.BIGINT:
+        case Types.FLOAT:
+        case Types.REAL:
+        case Types.DOUBLE:
+        case Types.NUMERIC:
+        case Types.DECIMAL:
+            result = access.getValue(options);
+            value = string(result != null ? result.toString() : null);
+            break;
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+        case Types.NVARCHAR:
+        case Types.LONGNVARCHAR:
+        case Types.NCHAR:
+            value = string(access.getValue(String.class, options));
+            break;
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+        case Types.BLOB:
+            value = binary(access.getValue(byte[].class, options));
+            break;
+        case Types.OTHER:
+        case Types.JAVA_OBJECT:
+        case Types.STRUCT:
+            result = access.getValue(options);
+            value = binary(result != null ? write(result) : null);
+            break;
+        case Types.CLOB:
+        case Types.NCLOB:
+            value = string(access.getValue(String.class, options));
+            break;
+        case Types.REF:
+            result = access.getValue(options);
+            value = binary(write(new SerialRef((Ref) result)));
+            break;
+        case Types.DATALINK:
+            result = access.getValue(options);
+            value = string(result != null ? result.toString() : null);
+            break;
+        case Types.BOOLEAN:
+            result = access.getValue(options);
+            value = string(result != null ? result.toString() : null);
+            break;
+        case Types.ROWID:
+            result = access.getValue(options);
+            value = binary(result != null ? ((RowId) result).getBytes() : null);
+            break;
+        case Types.SQLXML:
+            value = string(access.getValue(String.class, options));
+            break;
+        default:
+            throw new ValueFormatException(format("Unsupported data type %s, type code %d on %s column",
+                    field.getTypeName(), field.getTypeCode(), getColumnName(field)));
         }
         return value;
     }
 
     @Override
-    protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+    protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options)
+            throws Exception {
         Field field = access.getField();
         final String result = value.asString();
         switch (field.getTypeCode()) {
-            case Types.BIT:
-            case Types.BOOLEAN:
-                access.setValue(!isEmpty(result) ? Boolean.parseBoolean(result) : null,
-                        options);
-                break;
-            case Types.TINYINT:
-            case Types.SMALLINT:
-                access.setValue(!isEmpty(result) ? Short.parseShort(result) : null, options);
-                break;
-            case Types.INTEGER:
-                access.setValue(!isEmpty(result) ? Integer.parseInt(result) : null,
-                        options);
-                break;
-            case Types.BIGINT:
-                access.setValue(!isEmpty(result) ? Long.parseLong(result) : null, options);
-                break;
-            case Types.FLOAT:
-            case Types.REAL:
-                access.setValue(!isEmpty(result) ? Float.parseFloat(result) : null, options);
-                break;
-            case Types.DOUBLE:
-                access.setValue(!isEmpty(result) ? Double.parseDouble(result) : null, options);
-                break;
-            case Types.NUMERIC:
-            case Types.DECIMAL:
-                access.setValue(!isEmpty(result) ? new BigDecimal(result) : null, options);
-                break;
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
-            case Types.NVARCHAR:
-            case Types.LONGNVARCHAR:
-            case Types.NCHAR:
-                access.setValue(result, options);
-                break;
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
-                access.setValue(!isEmpty(result) ? result : null, options);
-                break;
-            case Types.OTHER:
-            case Types.JAVA_OBJECT:
-            case Types.STRUCT:
-                access.setValue(read(value.asBytes()), options);
-                break;
-            case Types.BLOB:
-                access.setValue(value.asBytes(), options);
-                break;
-            case Types.CLOB:
-                access.setValue(result, options);
-                break;
-            case Types.NCLOB:
-                access.setValue(result, options);
-                break;
-            case Types.REF:
-                access.setValue(!isEmpty(result) ? read(value.asBytes()) : null,
-                        options);
-                break;
-            case Types.DATALINK:
-                access.setValue(!isEmpty(result) ? new URL(result) : null, options);
-                break;
-            case Types.SQLXML:
-                access.setValue(!isEmpty(result) ? result : null, options);
-                break;
-            default:
-                throw new ValueFormatException(format("Unsupported data type %s, type code %d on %s column",
-                        field.getTypeName(), field.getTypeCode(), getColumnName(field)));
+        case Types.BIT:
+        case Types.BOOLEAN:
+            access.setValue(!isEmpty(result) ? Boolean.parseBoolean(result) : null, options);
+            break;
+        case Types.TINYINT:
+        case Types.SMALLINT:
+            access.setValue(!isEmpty(result) ? Short.parseShort(result) : null, options);
+            break;
+        case Types.INTEGER:
+            access.setValue(!isEmpty(result) ? Integer.parseInt(result) : null, options);
+            break;
+        case Types.BIGINT:
+            access.setValue(!isEmpty(result) ? Long.parseLong(result) : null, options);
+            break;
+        case Types.FLOAT:
+        case Types.REAL:
+            access.setValue(!isEmpty(result) ? Float.parseFloat(result) : null, options);
+            break;
+        case Types.DOUBLE:
+            access.setValue(!isEmpty(result) ? Double.parseDouble(result) : null, options);
+            break;
+        case Types.NUMERIC:
+        case Types.DECIMAL:
+            access.setValue(!isEmpty(result) ? new BigDecimal(result) : null, options);
+            break;
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+        case Types.NVARCHAR:
+        case Types.LONGNVARCHAR:
+        case Types.NCHAR:
+            access.setValue(result, options);
+            break;
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+            access.setValue(!isEmpty(result) ? result : null, options);
+            break;
+        case Types.OTHER:
+        case Types.JAVA_OBJECT:
+        case Types.STRUCT:
+            access.setValue(read(value.asBytes()), options);
+            break;
+        case Types.BLOB:
+            access.setValue(value.asBytes(), options);
+            break;
+        case Types.CLOB:
+            access.setValue(result, options);
+            break;
+        case Types.NCLOB:
+            access.setValue(result, options);
+            break;
+        case Types.REF:
+            access.setValue(!isEmpty(result) ? read(value.asBytes()) : null, options);
+            break;
+        case Types.DATALINK:
+            access.setValue(!isEmpty(result) ? new URL(result) : null, options);
+            break;
+        case Types.SQLXML:
+            access.setValue(!isEmpty(result) ? result : null, options);
+            break;
+        default:
+            throw new ValueFormatException(format("Unsupported data type %s, type code %d on %s column",
+                    field.getTypeName(), field.getTypeCode(), getColumnName(field)));
         }
     }
 
@@ -231,21 +229,21 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
     public ValueType getValueType(Field field) {
         ValueType valueType;
         switch (field.getTypeCode()) {
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
-            case Types.BLOB:
-            case Types.OTHER:
-            case Types.JAVA_OBJECT:
-            case Types.STRUCT:
-            case Types.REF:
-            case Types.DATALINK:
-            case Types.ROWID:
-                valueType = BINARY;
-                break;
-            default:
-                valueType = STRING;
-                break;
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+        case Types.BLOB:
+        case Types.OTHER:
+        case Types.JAVA_OBJECT:
+        case Types.STRUCT:
+        case Types.REF:
+        case Types.DATALINK:
+        case Types.ROWID:
+            valueType = BINARY;
+            break;
+        default:
+            valueType = STRING;
+            break;
         }
         return valueType;
     }

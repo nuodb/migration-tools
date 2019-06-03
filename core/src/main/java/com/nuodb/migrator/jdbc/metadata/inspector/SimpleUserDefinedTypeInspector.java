@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
 

@@ -59,14 +59,14 @@ public class JdbcRowIdValue extends JdbcTypeValueBase<RowId> {
     }
 
     @Override
-    public RowId getValue(ResultSet resultSet, int index,
-                          Field field, Map<String, Object> options) throws SQLException {
+    public RowId getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getRowId(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, RowId value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, RowId value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setRowId(index, value);
     }
 }

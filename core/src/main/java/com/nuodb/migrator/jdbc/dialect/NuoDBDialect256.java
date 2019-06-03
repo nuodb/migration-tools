@@ -45,7 +45,7 @@ public class NuoDBDialect256 extends NuoDBDialect206 {
 
     @Override
     public boolean supportsIndexInCreateTable() {
-       return true;
+        return true;
     }
 
     @Override

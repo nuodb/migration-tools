@@ -37,14 +37,13 @@ import org.testng.annotations.Test;
 import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 
-@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
+@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
 public class CustomSequenceTest extends MigrationTestBase {
     PreparedStatement pstmt = null;
 
     public void dotProduct() throws Exception {
-        List<Integer> actlist = DatabaseUtil.getVector(
-                "select sum(numb * vector) as dot from array3",
-                nuodbConnection, pstmt);
+        List<Integer> actlist = DatabaseUtil.getVector("select sum(numb * vector) as dot from array3", nuodbConnection,
+                pstmt);
         Assert.assertTrue(actlist.size() >= 1, "The actual list is empty");
         List<Integer> explist = new ArrayList<Integer>();
         explist.add(109);

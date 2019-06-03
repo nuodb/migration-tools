@@ -74,7 +74,7 @@ public class NuoDBTableInspector extends ManagedInspectorBase<Schema, TableInspe
         }
         String[] tableTypes = tableInspectionScope.getTableTypes();
         if (!Collections.isEmpty(tableTypes)) {
-            String []types = new String[tableTypes.length];
+            String[] types = new String[tableTypes.length];
             fill(types, "?");
             filters.add(eqOrIn("TYPE", types));
             parameters.addAll(asList(tableTypes));

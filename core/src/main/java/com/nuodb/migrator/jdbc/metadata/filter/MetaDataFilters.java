@@ -46,37 +46,37 @@ public class MetaDataFilters {
     }
 
     public static <T extends Identifiable> MetaDataFilter<T> newInvertAcceptFilter(MetaDataType objectType,
-                                                                                   MetaDataFilter<T> filter) {
+            MetaDataFilter<T> filter) {
         return new MetaDataInvertAcceptFilter<T>(objectType, filter);
     }
 
     public static <T extends Identifiable> MetaDataFilter<T> newNameEqualsFilter(MetaDataType objectType,
-                                                                                 boolean qualifyName, String name) {
+            boolean qualifyName, String name) {
         return new MetaDataNameEqualsFilter<T>(objectType, qualifyName, name);
     }
 
     public static <T extends Identifiable> MetaDataFilter<T> newNameMatchesFilter(MetaDataType objectType,
-                                                                                  boolean qualifyName, String regex) {
+            boolean qualifyName, String regex) {
         return new MetaDataNameMatchesFilter<T>(objectType, qualifyName, regex);
     }
 
     public static <T extends MetaData> MetaDataFilter<T> newEitherOfFilters(MetaDataType objectType,
-                                                                            MetaDataFilter<T>... filters) {
+            MetaDataFilter<T>... filters) {
         return newEitherOfFilters(objectType, newArrayList(filters));
     }
 
     public static <T extends MetaData> MetaDataFilter<T> newEitherOfFilters(MetaDataType objectType,
-                                                                            Collection<MetaDataFilter<T>> filters) {
+            Collection<MetaDataFilter<T>> filters) {
         return new MetaDataEitherOfFilters<T>(objectType, filters);
     }
 
     public static <T extends MetaData> MetaDataFilter<T> newAllOfFilters(MetaDataType objectType,
-                                                                         MetaDataFilter<T>... filters) {
+            MetaDataFilter<T>... filters) {
         return newAllOfFilters(objectType, newArrayList(filters));
     }
 
     public static <T extends MetaData> MetaDataFilter<T> newAllOfFilters(MetaDataType objectType,
-                                                                         Collection<MetaDataFilter<T>> filters) {
+            Collection<MetaDataFilter<T>> filters) {
         return new MetaDataAllOfFilters<T>(objectType, filters);
     }
 }

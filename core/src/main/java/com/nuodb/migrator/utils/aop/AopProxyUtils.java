@@ -35,8 +35,7 @@ import static java.util.Arrays.asList;
 public class AopProxyUtils {
 
     public static AopProxy getAopProxy(Object target, Class... interfaces) {
-        if (target instanceof AopProxy &&
-                asList(((AopProxy) target).getInterfaces()).containsAll(asList(interfaces))) {
+        if (target instanceof AopProxy && asList(((AopProxy) target).getInterfaces()).containsAll(asList(interfaces))) {
             return (AopProxy) target;
         } else {
             return createAopProxy(target, interfaces);

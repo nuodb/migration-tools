@@ -98,7 +98,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(DOUBLE, "DOUBLE");
         addJdbcTypeName(NUMERIC, "NUMERIC({P},{S})");
         addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
-        addJdbcTypeName(new JdbcTypeDesc(DECIMAL, "NUMBER"),newScale(0), "NUMBER");
+        addJdbcTypeName(new JdbcTypeDesc(DECIMAL, "NUMBER"), newScale(0), "NUMBER");
 
         addJdbcTypeName(CHAR, newSize(0), "CHAR");
         addJdbcTypeName(CHAR, "CHAR({N})");
@@ -116,7 +116,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(VARBINARY, "VARBINARY({N})");
         addJdbcTypeName(LONGVARBINARY, "VARBINARY({N})");
 
-        //For NuoDB 'binary' and 'binary varying' datatypes
+        // For NuoDB 'binary' and 'binary varying' datatypes
         addJdbcTypeName(new JdbcTypeDesc(BLOB, "BINARY"), "BINARY({N})");
         addJdbcTypeName(new JdbcTypeDesc(BLOB, "BINARY VARYING"), "VARBINARY({N})");
 
@@ -164,8 +164,8 @@ public class NuoDBDialect extends SimpleDialect {
 
         addJdbcTypeName(MYSQL, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(MYSQL, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");
-        addJdbcTypeName(MYSQL, createTypeNameTemplate(
-                new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"), "NUMERIC({N})", newSize(1)));
+        addJdbcTypeName(MYSQL,
+                createTypeNameTemplate(new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"), "NUMERIC({N})", newSize(1)));
 
         addJdbcTypeName(DB2, new JdbcTypeDesc(LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
         addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
@@ -180,9 +180,8 @@ public class NuoDBDialect extends SimpleDialect {
     protected void initTranslations() {
         addTranslator(new CurrentTimestampTranslator(NUODB_BASE,
                 newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()"), "CURRENT_TIMESTAMP", true));
-        addTranslator(new CurrentTimestampTranslator(MYSQL,
-                newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()", "LOCALTIME", "LOCALTIME()",
-                        "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW"));
+        addTranslator(new CurrentTimestampTranslator(MYSQL, newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()",
+                "NOW()", "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW"));
         addTranslator(new MySQLBitLiteralTranslator());
         addTranslator(new MySQLHexLiteralTranslator());
         addTranslator(new MySQLZeroDateTimeTranslator());
@@ -193,12 +192,10 @@ public class NuoDBDialect extends SimpleDialect {
                 newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW"));
         addTranslationRegex(MSSQL_SERVER, "N'(.*)'", "$1");
 
-        addTranslator(new CurrentTimestampTranslator(POSTGRE_SQL,
-                newArrayList("CURRENT_TIMESTAMP", "NOW()"), "NOW"));
+        addTranslator(new CurrentTimestampTranslator(POSTGRE_SQL, newArrayList("CURRENT_TIMESTAMP", "NOW()"), "NOW"));
         addTranslationRegex(POSTGRE_SQL, "'(.*)'::.*", "$1");
 
-        addTranslator(new CurrentTimestampTranslator(ORACLE,
-                newArrayList("CURRENT_DATE", "SYSDATE"), "NOW"));
+        addTranslator(new CurrentTimestampTranslator(ORACLE, newArrayList("CURRENT_DATE", "SYSDATE"), "NOW"));
 
         addTranslator(new CurrentTimestampTranslator(DB2,
                 newArrayList("CURRENT DATE", "CURRENT TIME", "CURRENT TIMESTAMP"), "NOW"));
@@ -228,12 +225,12 @@ public class NuoDBDialect extends SimpleDialect {
     public boolean supportsTransactionIsolation(int level) {
         boolean supports = false;
         switch (level) {
-            case WRITE_COMMITTED:
-            case CONSISTENT_READ:
-            case TRANSACTION_READ_COMMITTED:
-            case TRANSACTION_SERIALIZABLE:
-                supports = true;
-                break;
+        case WRITE_COMMITTED:
+        case CONSISTENT_READ:
+        case TRANSACTION_READ_COMMITTED:
+        case TRANSACTION_SERIALIZABLE:
+            supports = true;
+            break;
         }
         return supports;
     }
@@ -283,20 +280,22 @@ public class NuoDBDialect extends SimpleDialect {
         return false;
     }
 
-//    @Override
-//    public boolean supportsSessionTimeZone() {
-//        return true;
-//    }
-//
-//    @Override
-//    public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
-//        timeZone = timeZone == null ? getDefault() : timeZone;
-//        RemConnection remConnection = (RemConnection) (connection instanceof ConnectionProxy ?
-//                ((ConnectionProxy)connection).getConnection() : connection);
-//        SQLContext sqlContext = remConnection.getSqlContext();
-//        sqlContext.setTimeZone(timeZone);
-//        sqlContext.setTimeZoneId(timeZone.getID());
-//    }
+    // @Override
+    // public boolean supportsSessionTimeZone() {
+    // return true;
+    // }
+    //
+    // @Override
+    // public void setSessionTimeZone(Connection connection, TimeZone timeZone)
+    // throws SQLException {
+    // timeZone = timeZone == null ? getDefault() : timeZone;
+    // RemConnection remConnection = (RemConnection) (connection instanceof
+    // ConnectionProxy ?
+    // ((ConnectionProxy)connection).getConnection() : connection);
+    // SQLContext sqlContext = remConnection.getSqlContext();
+    // sqlContext.setTimeZone(timeZone);
+    // sqlContext.setTimeZoneId(timeZone.getID());
+    // }
 
     @Override
     public boolean supportsDropConstraints() {
@@ -351,16 +350,17 @@ public class NuoDBDialect extends SimpleDialect {
     @Override
     public String getDeleteAction(ReferenceAction deleteAction) {
         switch (deleteAction) {
-            case CASCADE:
-                return "CASCADE";
-            default:
-                return null;
+        case CASCADE:
+            return "CASCADE";
+        default:
+            return null;
         }
     }
 
     /**
-     * Returns true if DDL scripts for a primary key, indexes and foreign keys should be generated as a separate
-     * statements to speed up performance of migration.
+     * Returns true if DDL scripts for a primary key, indexes and foreign keys
+     * should be generated as a separate statements to speed up performance of
+     * migration.
      *
      * @param table
      * @return false for NuoDB

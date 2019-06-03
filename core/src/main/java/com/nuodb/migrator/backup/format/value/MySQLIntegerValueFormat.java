@@ -50,8 +50,7 @@ public class MySQLIntegerValueFormat extends ValueFormatBase<Long> {
     }
 
     @Override
-    protected void doSetValue(Value value, JdbcValueAccess<Long> access, Map<String, Object> options)
-            throws Throwable {
+    protected void doSetValue(Value value, JdbcValueAccess<Long> access, Map<String, Object> options) throws Throwable {
         access.setValue(value.asString() != null ? valueOf(value.asString()) : null, options);
     }
 

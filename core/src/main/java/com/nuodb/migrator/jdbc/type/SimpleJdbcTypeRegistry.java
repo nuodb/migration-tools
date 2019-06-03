@@ -72,8 +72,8 @@ public class SimpleJdbcTypeRegistry implements JdbcTypeRegistry {
     public JdbcTypeValue getJdbcType(JdbcTypeDesc jdbcTypeDesc, boolean required) {
         JdbcTypeValue jdbcTypeValue = findJdbcType(findJdbcTypeAlias(jdbcTypeDesc));
         if (jdbcTypeValue == null && required) {
-            throw new JdbcTypeException(format("Jdbc type %s, code(%d) is not supported",
-                    jdbcTypeDesc.getTypeName(), jdbcTypeDesc.getTypeCode()));
+            throw new JdbcTypeException(format("Jdbc type %s, code(%d) is not supported", jdbcTypeDesc.getTypeName(),
+                    jdbcTypeDesc.getTypeCode()));
         }
         return jdbcTypeValue;
     }
@@ -112,14 +112,13 @@ public class SimpleJdbcTypeRegistry implements JdbcTypeRegistry {
     }
 
     @Override
-    public  JdbcTypeAdapter getJdbcTypeAdapter(Class valueClass, Class typeClass) {
+    public JdbcTypeAdapter getJdbcTypeAdapter(Class valueClass, Class typeClass) {
         JdbcTypeAdapter jdbcTypeAdapter = null;
         if (valueClass != null && !typeClass.isAssignableFrom(valueClass)) {
             jdbcTypeAdapter = getJdbcTypeAdapter(typeClass);
             if (jdbcTypeAdapter == null) {
-                throw new JdbcTypeException(
-                        format("Jdbc type %s adapter not found to adapt %s type",
-                                typeClass.getName(), valueClass.getName()));
+                throw new JdbcTypeException(format("Jdbc type %s adapter not found to adapt %s type",
+                        typeClass.getName(), valueClass.getName()));
             }
         }
         return jdbcTypeAdapter;

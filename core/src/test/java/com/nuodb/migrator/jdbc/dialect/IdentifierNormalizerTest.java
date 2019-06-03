@@ -52,17 +52,15 @@ public class IdentifierNormalizerTest {
                 return invocation.getArguments()[0];
             }
         });
-        return new Object[][]{
-                {IdentifierNormalizers.NOOP, dialect, null, "Id", "Id"},
-                {IdentifierNormalizers.STANDARD, dialect, null, "Id", "Id"},
-                {IdentifierNormalizers.UPPER_CASE, dialect, null, "Id", "ID"},
-                {IdentifierNormalizers.LOWER_CASE, dialect, null, "Id", "id"},
-        };
+        return new Object[][] { { IdentifierNormalizers.NOOP, dialect, null, "Id", "Id" },
+                { IdentifierNormalizers.STANDARD, dialect, null, "Id", "Id" },
+                { IdentifierNormalizers.UPPER_CASE, dialect, null, "Id", "ID" },
+                { IdentifierNormalizers.LOWER_CASE, dialect, null, "Id", "id" }, };
     }
 
     @Test(dataProvider = "normalizeIdentifier")
     public void testNormalizeIdentifier(IdentifierNormalizer identifierNormalizer, Dialect dialect,
-                                        Identifiable identifiable, String identifier, String expected) {
+            Identifiable identifiable, String identifier, String expected) {
         assertEquals(identifierNormalizer.normalizeIdentifier(identifier, identifiable, dialect), expected);
     }
 }

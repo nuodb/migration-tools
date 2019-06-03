@@ -55,7 +55,7 @@ public class SingleCommitStrategy implements CommitStrategy {
             @Override
             public boolean execute() throws SQLException {
                 if (statement instanceof PreparedStatement) {
-                    ((PreparedStatement)statement).execute();
+                    ((PreparedStatement) statement).execute();
                 } else {
                     statement.execute(query.toString());
                 }
@@ -68,6 +68,7 @@ public class SingleCommitStrategy implements CommitStrategy {
             }
         };
     }
+
     public String toString() {
         return ObjectUtils.toString(this);
     }

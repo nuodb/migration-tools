@@ -36,8 +36,9 @@ import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * Temporary fix which screens program from incorrect decimal<->(bigint or integer) type mapping for DB-2288 "value
- * metadata type does not match DDL type"
+ * Temporary fix which screens program from incorrect decimal<->(bigint or
+ * integer) type mapping for DB-2288 "value metadata type does not match DDL
+ * type"
  *
  * @author Sergey Bushik
  */
@@ -49,8 +50,8 @@ public class NuoDBBigIntValueFormat extends ValueFormatBase<String> {
     }
 
     @Override
-    protected void doSetValue(Value variant, JdbcValueAccess<String> access,
-                              Map<String, Object> options) throws Exception {
+    protected void doSetValue(Value variant, JdbcValueAccess<String> access, Map<String, Object> options)
+            throws Exception {
         String value = variant.asString();
         access.setValue(!isEmpty(value) ? value : null, options);
     }

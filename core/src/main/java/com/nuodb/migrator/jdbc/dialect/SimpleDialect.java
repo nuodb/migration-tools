@@ -82,13 +82,8 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implements Dialect {
 
     private static final Pattern ALLOWED_IDENTIFIER_PATTERN = Pattern.compile("[a-zA-Z0-9_]*");
-    private static final ScriptEscapeUtils SCRIPT_ESCAPE_UTILS = new ScriptEscapeUtils(
-            new LookupTranslator(new String[][]{
-                    {"\0", "\\0"},
-                    {"'", "''"},
-                    {"\"", "\\\""},
-                    {"\\", "\\\\"}
-            }));
+    private static final ScriptEscapeUtils SCRIPT_ESCAPE_UTILS = new ScriptEscapeUtils(new LookupTranslator(
+            new String[][] { { "\0", "\\0" }, { "'", "''" }, { "\"", "\\\"" }, { "\\", "\\\\" } }));
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -151,12 +146,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript, String targetScript) {
-        getTranslationManager().addTranslation(sourceDatabaseInfo, sourceScript, getDatabaseInfo(),
-                targetScript);
+        getTranslationManager().addTranslation(sourceDatabaseInfo, sourceScript, getDatabaseInfo(), targetScript);
     }
 
     protected void addTranslation(DatabaseInfo sourceDatabaseInfo, Collection<String> sourceScripts,
-                                  String targetScript) {
+            String targetScript) {
         getTranslationManager().addTranslations(sourceDatabaseInfo, sourceScripts, getDatabaseInfo(), targetScript);
     }
 
@@ -295,13 +289,13 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     public boolean supportsTransactionIsolation(int level) {
         boolean supports = false;
         switch (level) {
-            case TRANSACTION_NONE:
-            case TRANSACTION_READ_UNCOMMITTED:
-            case TRANSACTION_READ_COMMITTED:
-            case TRANSACTION_REPEATABLE_READ:
-            case TRANSACTION_SERIALIZABLE:
-                supports = true;
-                break;
+        case TRANSACTION_NONE:
+        case TRANSACTION_READ_UNCOMMITTED:
+        case TRANSACTION_READ_COMMITTED:
+        case TRANSACTION_REPEATABLE_READ:
+        case TRANSACTION_SERIALIZABLE:
+            supports = true;
+            break;
         }
         return supports;
     }
@@ -553,8 +547,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     private String getDefaultValue(Column column, String script, boolean literal) {
-        return isDefaultValueQuoted(column, script, literal) ? getDefaultValueQuoted(column,
-                script, literal) : getDefaultValueNotQuoted(column, script, literal);
+        return isDefaultValueQuoted(column, script, literal) ? getDefaultValueQuoted(column, script, literal)
+                : getDefaultValueNotQuoted(column, script, literal);
     }
 
     protected boolean isDefaultValueQuoted(Column column, String script, boolean literal) {
@@ -806,7 +800,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName,
-                                   JdbcTypeOptions jdbcTypeOptions) {
+            JdbcTypeOptions jdbcTypeOptions) {
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, jdbcTypeOptions, typeName);
     }
 
@@ -819,12 +813,12 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,
-                                   int priority) {
+            int priority) {
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, typeName, priority);
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,
-                                   JdbcTypeOptions jdbcTypeOptions) {
+            JdbcTypeOptions jdbcTypeOptions) {
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeOptions, typeName);
     }
 
@@ -862,11 +856,14 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         SimpleDialect that = (SimpleDialect) o;
-        if (identifierNormalizer != null ? !identifierNormalizer.equals(
-                that.identifierNormalizer) : that.identifierNormalizer != null) return false;
+        if (identifierNormalizer != null ? !identifierNormalizer.equals(that.identifierNormalizer)
+                : that.identifierNormalizer != null)
+            return false;
         if (jdbcTypeNameMaps != null ? !jdbcTypeNameMaps.equals(that.jdbcTypeNameMaps) : that.jdbcTypeNameMaps != null)
             return false;
         if (jdbcTypeRegistry != null ? !jdbcTypeRegistry.equals(that.jdbcTypeRegistry) : that.jdbcTypeRegistry != null)

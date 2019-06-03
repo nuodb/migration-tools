@@ -55,10 +55,10 @@ public abstract class WorkRunnableBase extends WorkBase implements Runnable {
         } else {
             workManager.execute(this, session);
         }
-//        Throwable failure = (Throwable) workManager.getFailures().get(this);
-//        if (failure != null) {
-//            throw failure instanceof MigratorException ?
-//                    (MigratorException) failure : new MigratorException(failure);
-//        }
+        // Throwable failure = (Throwable) workManager.getFailures().get(this);
+        // if (failure != null) {
+        // throw failure instanceof MigratorException ?
+        // (MigratorException) failure : new MigratorException(failure);
+        // }
     }
 }

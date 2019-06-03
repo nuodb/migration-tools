@@ -119,7 +119,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"PointlessBooleanExpression", "ConstantConditions"})
+@SuppressWarnings({ "PointlessBooleanExpression", "ConstantConditions" })
 public class CliRunSupport extends CliSupport {
 
     protected Logger logger = getLogger(getClass());
@@ -136,149 +136,94 @@ public class CliRunSupport extends CliSupport {
      * @return group of options for the source database.
      */
     protected Group createSourceGroup() {
-        GroupBuilder group = newGroupBuilder().
-                withName(getMessage(SOURCE_GROUP_NAME)).
-                withRequired(true).
-                withMinimum(1);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(SOURCE_GROUP_NAME)).withRequired(true)
+                .withMinimum(1);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option driver = newBasicOptionBuilder().
-                withName(SOURCE_DRIVER).
-                withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
-                withRequired(true).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).
-                                withRequired(true).
-                                withMinimum(1).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option driver = newBasicOptionBuilder().withName(SOURCE_DRIVER)
+                .withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).withRequired(true)
+                .withArgument(newArgumentBuilder().withName(getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).withRequired(true)
+                        .withMinimum(1).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(driver);
 
-        Option url = newBasicOptionBuilder().
-                withName(SOURCE_URL).
-                withDescription(getMessage(SOURCE_URL_OPTION_DESCRIPTION)).
-                withRequired(true).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_URL_ARGUMENT_NAME)).
-                                withRequired(true).
-                                withMinimum(1).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option url = newBasicOptionBuilder().withName(SOURCE_URL)
+                .withDescription(getMessage(SOURCE_URL_OPTION_DESCRIPTION)).withRequired(true)
+                .withArgument(newArgumentBuilder().withName(getMessage(SOURCE_URL_ARGUMENT_NAME)).withRequired(true)
+                        .withMinimum(1).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(url);
 
-        Option username = newBasicOptionBuilder().
-                withName(SOURCE_USERNAME).
-                withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option username = newBasicOptionBuilder().withName(SOURCE_USERNAME)
+                .withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(username);
 
-        Option password = newBasicOptionBuilder().
-                withName(SOURCE_PASSWORD).
-                withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option password = newBasicOptionBuilder().withName(SOURCE_PASSWORD)
+                .withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(password);
 
-        Option properties = newBasicOptionBuilder().
-                withName(SOURCE_PROPERTIES).
-                withDescription(getMessage(SOURCE_PROPERTIES_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_PROPERTIES_ARGUMENT_NAME)).build()
-                ).build();
+        Option properties = newBasicOptionBuilder().withName(SOURCE_PROPERTIES)
+                .withDescription(getMessage(SOURCE_PROPERTIES_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(SOURCE_PROPERTIES_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(properties);
 
-        Option catalog = newBasicOptionBuilder().
-                withName(SOURCE_CATALOG).
-                withDescription(getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option catalog = newBasicOptionBuilder().withName(SOURCE_CATALOG)
+                .withDescription(getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(catalog);
 
-        Option schema = newBasicOptionBuilder().
-                withName(SOURCE_SCHEMA).
-                withDescription(getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option schema = newBasicOptionBuilder().withName(SOURCE_SCHEMA)
+                .withDescription(getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(schema);
 
-        Option autoCommit = newBasicOptionBuilder().
-                withName(SOURCE_AUTO_COMMIT).
-                withDescription(getMessage(SOURCE_AUTO_COMMIT_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_AUTO_COMMIT_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option autoCommit = newBasicOptionBuilder().withName(SOURCE_AUTO_COMMIT)
+                .withDescription(getMessage(SOURCE_AUTO_COMMIT_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(SOURCE_AUTO_COMMIT_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(autoCommit);
 
-        Option transactionIsolation = newBasicOptionBuilder().
-                withName(SOURCE_TRANSACTION_ISOLATION).
-                withDescription(getMessage(SOURCE_TRANSACTION_ISOLATION_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SOURCE_TRANSACTION_ISOLATION_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option transactionIsolation = newBasicOptionBuilder().withName(SOURCE_TRANSACTION_ISOLATION)
+                .withDescription(getMessage(SOURCE_TRANSACTION_ISOLATION_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(SOURCE_TRANSACTION_ISOLATION_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(transactionIsolation);
 
-        addConnectionGroupValidators(group, new ConnectionGroupInfo(
-                SOURCE_DRIVER, SOURCE_URL, SOURCE_USERNAME, SOURCE_PASSWORD,
-                SOURCE_CATALOG, SOURCE_SCHEMA, SOURCE_PROPERTIES, SOURCE_TRANSACTION_ISOLATION));
+        addConnectionGroupValidators(group, new ConnectionGroupInfo(SOURCE_DRIVER, SOURCE_URL, SOURCE_USERNAME,
+                SOURCE_PASSWORD, SOURCE_CATALOG, SOURCE_SCHEMA, SOURCE_PROPERTIES, SOURCE_TRANSACTION_ISOLATION));
         return group.build();
     }
 
     protected Group createOutputGroup() {
-        GroupBuilder group = newGroupBuilder().
-                withName(getMessage(OUTPUT_GROUP_NAME));
+        GroupBuilder group = newGroupBuilder().withName(getMessage(OUTPUT_GROUP_NAME));
 
-        Option type = newBasicOptionBuilder().
-                withName(OUTPUT_TYPE).
-                withDescription(getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).build()
-                ).build();
+        Option type = newBasicOptionBuilder().withName(OUTPUT_TYPE)
+                .withDescription(getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).build()).build();
         group.withOption(type);
 
-        Option path = newBasicOptionBuilder().
-                withName(OUTPUT_PATH).
-                withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).build()
-                ).build();
+        Option path = newBasicOptionBuilder().withName(OUTPUT_PATH)
+                .withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).build()).build();
         group.withOption(path);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option attributes = newRegexOptionBuilder().
-                withName(OUTPUT_OPTION).
-                withDescription(getMessage(OUTPUT_OPTION_DESCRIPTION)).
-                withRegex(OUTPUT_OPTION, 1, LOW).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(OUTPUT_OPTION_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build()
-                )
+        Option attributes = newRegexOptionBuilder().withName(OUTPUT_OPTION)
+                .withDescription(getMessage(OUTPUT_OPTION_DESCRIPTION)).withRegex(OUTPUT_OPTION, 1, LOW)
+                .withArgument(newArgumentBuilder().withName(getMessage(OUTPUT_OPTION_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build())
                 .build();
         group.withOption(attributes);
 
@@ -287,179 +232,110 @@ public class CliRunSupport extends CliSupport {
 
     protected Option createMigrationModeGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(MIGRATION_MODE_GROUP_NAME));
-        Option data = newBasicOptionBuilder().
-                withId(MIGRATION_MODE_DATA_ID).
-                withName(MIGRATION_MODE_DATA).
-                withDescription(getMessage(MIGRATION_MODE_DATA_OPTION_DESCRIPTION)).
-                withRequired(false).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(MIGRATION_MODE_DATA_ARGUMENT_NAME)).build()
-                ).build();
+        Option data = newBasicOptionBuilder().withId(MIGRATION_MODE_DATA_ID).withName(MIGRATION_MODE_DATA)
+                .withDescription(getMessage(MIGRATION_MODE_DATA_OPTION_DESCRIPTION)).withRequired(false)
+                .withArgument(newArgumentBuilder().withName(getMessage(MIGRATION_MODE_DATA_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(data);
-        Option schema = newBasicOptionBuilder().
-                withId(MIGRATION_MODE_SCHEMA_ID).
-                withName(MIGRATION_MODE_SCHEMA).
-                withDescription(getMessage(MIGRATION_MODE_SCHEMA_OPTION_DESCRIPTION)).
-                withRequired(false).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(MIGRATION_MODE_SCHEMA_ARGUMENT_NAME)).build()
-                ).build();
+        Option schema = newBasicOptionBuilder().withId(MIGRATION_MODE_SCHEMA_ID).withName(MIGRATION_MODE_SCHEMA)
+                .withDescription(getMessage(MIGRATION_MODE_SCHEMA_OPTION_DESCRIPTION)).withRequired(false)
+                .withArgument(newArgumentBuilder().withName(getMessage(MIGRATION_MODE_SCHEMA_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(schema);
         return group.build();
     }
 
     protected Group createCommitGroup() {
-        Option commitStrategy = newBasicOptionBuilder().
-                withName(COMMIT_STRATEGY).
-                withDescription(getMessage(COMMIT_STRATEGY_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(COMMIT_STRATEGY_ARGUMENT_NAME)).build()
-                ).build();
+        Option commitStrategy = newBasicOptionBuilder().withName(COMMIT_STRATEGY)
+                .withDescription(getMessage(COMMIT_STRATEGY_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(COMMIT_STRATEGY_ARGUMENT_NAME)).build()).build();
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option commitStrategyAttributes = newRegexOptionBuilder().
-                withName(COMMIT_STRATEGY_ATTRIBUTES).
-                withDescription(getMessage(COMMIT_STRATEGY_ATTRIBUTES_OPTION_DESCRIPTION)).
-                withRegex(COMMIT_STRATEGY_ATTRIBUTES, 1, LOW).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(COMMIT_STRATEGY_ATTRIBUTES_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build()
-                ).build();
-        return newGroupBuilder().
-                withName(getMessage(COMMIT_STRATEGY_GROUP_NAME)).
-                withOption(commitStrategy).
-                withOption(commitStrategyAttributes).build();
+        Option commitStrategyAttributes = newRegexOptionBuilder().withName(COMMIT_STRATEGY_ATTRIBUTES)
+                .withDescription(getMessage(COMMIT_STRATEGY_ATTRIBUTES_OPTION_DESCRIPTION))
+                .withRegex(COMMIT_STRATEGY_ATTRIBUTES, 1, LOW)
+                .withArgument(newArgumentBuilder().withName(getMessage(COMMIT_STRATEGY_ATTRIBUTES_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build())
+                .build();
+        return newGroupBuilder().withName(getMessage(COMMIT_STRATEGY_GROUP_NAME)).withOption(commitStrategy)
+                .withOption(commitStrategyAttributes).build();
     }
 
-
-
     protected Option createTimeZoneOption() {
-        return newBasicOptionBuilder().
-                withName(TIME_ZONE).
-                withAlias(TIME_ZONE_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(TIME_ZONE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TIME_ZONE_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withRequired(true).build()
-                ).build();
+        return newBasicOptionBuilder().withName(TIME_ZONE).withAlias(TIME_ZONE_SHORT, OptionFormat.SHORT)
+                .withDescription(getMessage(TIME_ZONE_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(TIME_ZONE_ARGUMENT_NAME)).withMinimum(1).withRequired(true).build())
+                .build();
     }
 
     protected Group createTargetGroup() {
-        GroupBuilder group = newGroupBuilder().
-                withName(getMessage(TARGET_GROUP_NAME));
+        GroupBuilder group = newGroupBuilder().withName(getMessage(TARGET_GROUP_NAME));
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option driver = newBasicOptionBuilder().
-                withName(TARGET_DRIVER).
-                withDescription(getMessage(TARGET_DRIVER_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_DRIVER_ARGUMENT_NAME)).
-                                withRequired(true).
-                                withMinimum(1).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option driver = newBasicOptionBuilder().withName(TARGET_DRIVER)
+                .withDescription(getMessage(TARGET_DRIVER_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_DRIVER_ARGUMENT_NAME)).withRequired(true)
+                        .withMinimum(1).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(driver);
 
-        Option url = newBasicOptionBuilder().
-                withName(TARGET_URL).
-                withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
-                withRequired(true).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
-                                withRequired(true).
-                                withMinimum(1).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option url = newBasicOptionBuilder().withName(TARGET_URL)
+                .withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).withRequired(true)
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_URL_ARGUMENT_NAME)).withRequired(true)
+                        .withMinimum(1).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(url);
 
-        Option username = newBasicOptionBuilder().
-                withName(TARGET_USERNAME).
-                withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option username = newBasicOptionBuilder().withName(TARGET_USERNAME)
+                .withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(username);
 
-        Option password = newBasicOptionBuilder().
-                withName(TARGET_PASSWORD).
-                withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option password = newBasicOptionBuilder().withName(TARGET_PASSWORD)
+                .withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(password);
 
-        Option properties = newBasicOptionBuilder().
-                withName(TARGET_PROPERTIES).
-                withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
-                ).build();
+        Option properties = newBasicOptionBuilder().withName(TARGET_PROPERTIES)
+                .withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(properties);
 
-        Option schema = newBasicOptionBuilder().
-                withName(TARGET_SCHEMA).
-                withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option schema = newBasicOptionBuilder().withName(TARGET_SCHEMA)
+                .withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(schema);
         group.withRequired(true);
         group.withMinimum(1);
 
-        addConnectionGroupValidators(group, new ConnectionGroupInfo(
-                null, TARGET_URL, TARGET_USERNAME, TARGET_PASSWORD,
+        addConnectionGroupValidators(group, new ConnectionGroupInfo(null, TARGET_URL, TARGET_USERNAME, TARGET_PASSWORD,
                 null, TARGET_SCHEMA, TARGET_PROPERTIES, null));
         return group.build();
     }
 
     protected Group createInputGroup() {
-        Option path = newBasicOptionBuilder().
-                withName(INPUT_PATH).
-                withDescription(getMessage(INPUT_PATH_OPTION_DESCRIPTION)).
-                withRequired(true).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(INPUT_PATH_ARGUMENT_NAME)).build()
-                ).build();
+        Option path = newBasicOptionBuilder().withName(INPUT_PATH)
+                .withDescription(getMessage(INPUT_PATH_OPTION_DESCRIPTION)).withRequired(true)
+                .withArgument(newArgumentBuilder().withName(getMessage(INPUT_PATH_ARGUMENT_NAME)).build()).build();
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option attributes = newRegexOptionBuilder().
-                withName(INPUT).
-                withDescription(getMessage(INPUT_OPTION_DESCRIPTION)).
-                withRegex(INPUT, 1, LOW).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(INPUT_OPTION_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build()
-                )
+        Option attributes = newRegexOptionBuilder().withName(INPUT)
+                .withDescription(getMessage(INPUT_OPTION_DESCRIPTION)).withRegex(INPUT, 1, LOW)
+                .withArgument(newArgumentBuilder().withName(getMessage(INPUT_OPTION_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build())
                 .build();
-        return newGroupBuilder().
-                withName(getMessage(INPUT_GROUP_NAME)).
-                withRequired(true).
-                withMinimum(1).
-                withOption(path).
-                withOption(attributes).build();
+        return newGroupBuilder().withName(getMessage(INPUT_GROUP_NAME)).withRequired(true).withMinimum(1)
+                .withOption(path).withOption(attributes).build();
     }
 
     protected Group createSchemaMigrationGroup() {
@@ -470,26 +346,17 @@ public class CliRunSupport extends CliSupport {
 
         group.withOption(createJdbcTypeGroup());
 
-        Option tableType = newBasicOptionBuilder().
-                withName(TABLE_TYPE).
-                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
+        Option tableType = newBasicOptionBuilder().withName(TABLE_TYPE)
+                .withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).withMaximum(MAX_VALUE).build())
+                .build();
         group.withOption(tableType);
 
-        Option metaData = newRegexOptionBuilder().
-                withName(META_DATA).
-                withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).
-                withRegex(META_DATA, 1, LOW).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(META_DATA_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withMinimum(1).withMaximum(MAX_VALUE).build()
-                ).build();
+        Option metaData = newRegexOptionBuilder().withName(META_DATA)
+                .withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).withRegex(META_DATA, 1, LOW)
+                .withArgument(newArgumentBuilder().withName(getMessage(META_DATA_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build())
+                .build();
         group.withOption(metaData);
 
         Collection<String> scriptTypeHelpValues = transform(asList(ScriptType.values()),
@@ -499,90 +366,57 @@ public class CliRunSupport extends CliSupport {
                         return scriptType.name().toLowerCase();
                     }
                 });
-        Option scriptType = newBasicOptionBuilder().
-                withName(SCRIPT_TYPE).
-                withDescription(getMessage(SCRIPT_TYPE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(SCRIPT_TYPE_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withMaximum(ScriptType.values().length).
-                                withHelpValues(scriptTypeHelpValues).build()
-                ).build();
+        Option scriptType = newBasicOptionBuilder().withName(SCRIPT_TYPE)
+                .withDescription(getMessage(SCRIPT_TYPE_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(SCRIPT_TYPE_ARGUMENT_NAME)).withMinimum(1)
+                        .withMaximum(ScriptType.values().length).withHelpValues(scriptTypeHelpValues).build())
+                .build();
         group.withOption(scriptType);
 
-        Option groupScriptsBy = newBasicOptionBuilder().
-                withName(GROUP_SCRIPTS_BY).
-                withDescription(getMessage(GROUP_SCRIPTS_BY_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(GROUP_SCRIPTS_BY_ARGUMENT_NAME)).build()
-                ).build();
+        Option groupScriptsBy = newBasicOptionBuilder().withName(GROUP_SCRIPTS_BY)
+                .withDescription(getMessage(GROUP_SCRIPTS_BY_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(GROUP_SCRIPTS_BY_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(groupScriptsBy);
 
-        Option namingStrategy = newBasicOptionBuilder().
-                withName(NAMING_STRATEGY).
-                withDescription(getMessage(NAMING_STRATEGY_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(NAMING_STRATEGY_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option namingStrategy = newBasicOptionBuilder().withName(NAMING_STRATEGY)
+                .withDescription(getMessage(NAMING_STRATEGY_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(NAMING_STRATEGY_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(namingStrategy);
 
-        Option identifierQuoting = newBasicOptionBuilder().
-                withName(IDENTIFIER_QUOTING).
-                withDescription(getMessage(IDENTIFIER_QUOTING_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(IDENTIFIER_QUOTING_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
+        Option identifierQuoting = newBasicOptionBuilder().withName(IDENTIFIER_QUOTING)
+                .withDescription(getMessage(IDENTIFIER_QUOTING_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                        .withName(getMessage(IDENTIFIER_QUOTING_ARGUMENT_NAME)).withOptionFormat(optionFormat).build()
 
                 ).build();
         group.withOption(identifierQuoting);
 
-        Option identifierNormalizer = newBasicOptionBuilder().
-                withName(IDENTIFIER_NORMALIZER).
-                withDescription(getMessage(IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(IDENTIFIER_NORMALIZER_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).build()
-                ).build();
+        Option identifierNormalizer = newBasicOptionBuilder().withName(IDENTIFIER_NORMALIZER)
+                .withDescription(getMessage(IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(IDENTIFIER_NORMALIZER_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).build())
+                .build();
         group.withOption(identifierNormalizer);
 
         return group.build();
     }
 
     protected Option createMetaDataFilterManagerGroup() {
-        GroupBuilder group = newGroupBuilder().
-                withName(getMessage(META_DATA_FILTER_MANAGER_GROUP_NAME)).
-                withMaximum(MAX_VALUE);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(META_DATA_FILTER_MANAGER_GROUP_NAME))
+                .withMaximum(MAX_VALUE);
 
-        Option table = newBasicOptionBuilder().
-                withName(TABLE).
-                withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withMaximum(1).
-                                withValueMinimum(1).
-                                withValueMaximum(MAX_VALUE).
-                                withRequired(true).build()
-                ).build();
+        Option table = newBasicOptionBuilder().withName(TABLE).withDescription(getMessage(TABLE_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TABLE_ARGUMENT_NAME)).withMinimum(1)
+                        .withMaximum(1).withValueMinimum(1).withValueMaximum(MAX_VALUE).withRequired(true).build())
+                .build();
         group.withOption(table);
 
-        Option tableExclude = newBasicOptionBuilder().
-                withName(TABLE_EXCLUDE).
-                withDescription(getMessage(TABLE_EXCLUDE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_EXCLUDE_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withMaximum(MAX_VALUE).
-                                withRequired(true).build()
-                ).build();
+        Option tableExclude = newBasicOptionBuilder().withName(TABLE_EXCLUDE)
+                .withDescription(getMessage(TABLE_EXCLUDE_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TABLE_EXCLUDE_ARGUMENT_NAME)).withMinimum(1)
+                        .withMaximum(MAX_VALUE).withRequired(true).build())
+                .build();
         group.withOption(tableExclude);
         return group.build();
     }
@@ -593,108 +427,79 @@ public class CliRunSupport extends CliSupport {
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option useNuoDBTypes = newBasicOptionBuilder().
-                withName(USE_NUODB_TYPES).
-                withDescription(getMessage(USE_NUODB_TYPES_OPTION_DESCRIPTION)).
-                withRequired(false).
-                withOptionProcessor(new NuoDBTypesOptionProcessor()).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(USE_NUODB_TYPES_OPTION_ARGUMENT_NAME)).build()
-                ).build();
+        Option useNuoDBTypes = newBasicOptionBuilder().withName(USE_NUODB_TYPES)
+                .withDescription(getMessage(USE_NUODB_TYPES_OPTION_DESCRIPTION)).withRequired(false)
+                .withOptionProcessor(new NuoDBTypesOptionProcessor())
+                .withArgument(newArgumentBuilder().withName(getMessage(USE_NUODB_TYPES_OPTION_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(useNuoDBTypes);
 
-        Option useImplicitDefaults = newBasicOptionBuilder().
-                withName(USE_EXPLICIT_DEFAULTS).
-                withDescription(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_DESCRIPTION)).
-                withRequired(false).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_ARGUMENT_NAME)).build()
-                ).build();
+        Option useImplicitDefaults = newBasicOptionBuilder().withName(USE_EXPLICIT_DEFAULTS)
+                .withDescription(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_DESCRIPTION)).withRequired(false)
+                .withArgument(
+                        newArgumentBuilder().withName(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_ARGUMENT_NAME)).build())
+                .build();
         group.withOption(useImplicitDefaults);
 
-        Option typeName = newBasicOptionBuilder().
-                withName(JDBC_TYPE_NAME).
-                withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))).
-                                withOptionProcessor(jdbcTypeOptionProcessor).
-                                withMinimum(1).withMaximum(MAX_VALUE).withRequired(true).build()
-                ).build();
+        Option typeName = newBasicOptionBuilder().withName(JDBC_TYPE_NAME)
+                .withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat)
+                        .withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)))
+                        .withOptionProcessor(jdbcTypeOptionProcessor).withMinimum(1).withMaximum(MAX_VALUE)
+                        .withRequired(true).build())
+                .build();
         group.withOption(typeName);
 
-        Option typeCode = newBasicOptionBuilder().
-                withName(JDBC_TYPE_CODE).
-                withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))).
-                                withMinimum(1).withMaximum(MAX_VALUE).withRequired(true).build()
-                ).build();
+        Option typeCode = newBasicOptionBuilder().withName(JDBC_TYPE_CODE)
+                .withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat)
+                        .withHelpValues(singleton(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))).withMinimum(1)
+                        .withMaximum(MAX_VALUE).withRequired(true).build())
+                .build();
         group.withOption(typeCode);
 
-        Option typeSize = newBasicOptionBuilder().
-                withName(JDBC_TYPE_SIZE).
-                withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
+        Option typeSize = newBasicOptionBuilder().withName(JDBC_TYPE_SIZE)
+                .withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat)
+                        .withHelpValues(singleton(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))).withMaximum(MAX_VALUE)
+                        .build())
+                .build();
         group.withOption(typeSize);
 
-        Option typePrecision = newBasicOptionBuilder().
-                withName(JDBC_TYPE_PRECISION).
-                withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
+        Option typePrecision = newBasicOptionBuilder().withName(JDBC_TYPE_PRECISION)
+                .withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat)
+                        .withHelpValues(singleton(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))).withMaximum(MAX_VALUE)
+                        .build())
+                .build();
         group.withOption(typePrecision);
 
-        Option typeScale = newBasicOptionBuilder().
-                withName(JDBC_TYPE_SCALE).
-                withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
+        Option typeScale = newBasicOptionBuilder().withName(JDBC_TYPE_SCALE)
+                .withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat)
+                        .withHelpValues(singleton(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))).withMaximum(MAX_VALUE)
+                        .build())
+                .build();
         group.withOption(typeScale);
         group.withMaximum(MAX_VALUE);
         return group.build();
     }
 
     protected Group createExecutorGroup() {
-        GroupBuilder group = newGroupBuilder().
-                withName(getMessage(EXECUTOR_GROUP_NAME)).
-                withRequired(false);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(EXECUTOR_GROUP_NAME)).withRequired(false);
         createExecutorGroup(group);
         return group.build();
     }
 
     protected void createExecutorGroup(GroupBuilder group) {
-        Option threads = newBasicOptionBuilder().
-                withName(THREADS).
-                withAlias(THREADS_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(THREADS_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(THREADS_ARGUMENT_NAME)).build()
-                ).build();
+        Option threads = newBasicOptionBuilder().withName(THREADS).withAlias(THREADS_SHORT, OptionFormat.SHORT)
+                .withDescription(getMessage(THREADS_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(THREADS_ARGUMENT_NAME)).build()).build();
         group.withOption(threads);
     }
 
@@ -711,7 +516,8 @@ public class CliRunSupport extends CliSupport {
         return filterManager;
     }
 
-    protected MetaDataFilter<Identifiable> getMetaDataFilter(OptionSet optionSet, String option, boolean invertAccept, boolean eitherOfFilters) {
+    protected MetaDataFilter<Identifiable> getMetaDataFilter(OptionSet optionSet, String option, boolean invertAccept,
+            boolean eitherOfFilters) {
         Collection<MetaDataFilter<Identifiable>> filters = newArrayList();
         for (String table : optionSet.<String>getValues(option)) {
             MetaDataFilter<Identifiable> filter;
@@ -725,8 +531,8 @@ public class CliRunSupport extends CliSupport {
         }
         MetaDataFilter<Identifiable> filter = null;
         if (!filters.isEmpty()) {
-            filter = eitherOfFilters ?
-                    newEitherOfFilters(MetaDataType.TABLE, filters) : newAllOfFilters(MetaDataType.TABLE, filters);
+            filter = eitherOfFilters ? newEitherOfFilters(MetaDataType.TABLE, filters)
+                    : newAllOfFilters(MetaDataType.TABLE, filters);
         }
         return filter;
     }
@@ -753,8 +559,8 @@ public class CliRunSupport extends CliSupport {
         ResourceSpec resource = new ResourceSpec();
         resource.setType((String) optionSet.getValue(OUTPUT_TYPE, TYPE));
         resource.setPath((String) optionSet.getValue(OUTPUT_PATH));
-        resource.setAttributes(parseAttributes(
-                optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));
+        resource.setAttributes(
+                parseAttributes(optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));
         return resource;
     }
 
@@ -763,20 +569,19 @@ public class CliRunSupport extends CliSupport {
     }
 
     protected Collection<MigrationMode> parseMigrationModeGroup(OptionSet optionSet, Option option,
-                                                                Collection<MigrationMode> defaultMigrationModes) {
+            Collection<MigrationMode> defaultMigrationModes) {
         Collection<MigrationMode> migrationModes = newHashSet();
         Option dataOption = optionSet.getOption(MIGRATION_MODE_DATA_ID);
         Object dataValue = optionSet.getValue(dataOption);
-        if (dataValue != null ? parseBoolean(String.valueOf(dataValue)) :
-                (optionSet.hasOption(dataOption) ||
-                        defaultMigrationModes.contains(MigrationMode.DATA))) {
+        if (dataValue != null ? parseBoolean(String.valueOf(dataValue))
+                : (optionSet.hasOption(dataOption) || defaultMigrationModes.contains(MigrationMode.DATA))) {
             migrationModes.add(MigrationMode.DATA);
         }
         Option schemaOption = optionSet.getOption(MIGRATION_MODE_SCHEMA_ID);
         Object schemaValue = optionSet.getValue(schemaOption);
-        if (schemaValue != null ? parseBoolean(String.valueOf(schemaValue)) :
-                (optionSet.hasOption(MIGRATION_MODE_SCHEMA) ||
-                        defaultMigrationModes.contains(MigrationMode.SCHEMA))) {
+        if (schemaValue != null ? parseBoolean(String.valueOf(schemaValue))
+                : (optionSet.hasOption(MIGRATION_MODE_SCHEMA)
+                        || defaultMigrationModes.contains(MigrationMode.SCHEMA))) {
             migrationModes.add(MigrationMode.SCHEMA);
         }
         return migrationModes;
@@ -784,7 +589,7 @@ public class CliRunSupport extends CliSupport {
 
     protected Map<String, Object> parseAttributes(List<String> values, Option option) {
         Map<String, Object> attributes = newHashMap();
-        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
+        for (Iterator<String> iterator = values.iterator(); iterator.hasNext();) {
             attributes.put(iterator.next(), iterator.next());
         }
         return attributes;
@@ -812,8 +617,7 @@ public class CliRunSupport extends CliSupport {
         if (commitStrategy == null) {
             commitStrategy = newInstance(commitStrategyValue);
         }
-        commitStrategy.setAttributes(parseAttributes(
-                optionSet.<String>getValues(COMMIT_STRATEGY_ATTRIBUTES),
+        commitStrategy.setAttributes(parseAttributes(optionSet.<String>getValues(COMMIT_STRATEGY_ATTRIBUTES),
                 optionSet.getOption(COMMIT_STRATEGY_ATTRIBUTES)));
         return commitStrategy;
     }
@@ -821,9 +625,12 @@ public class CliRunSupport extends CliSupport {
     /**
      * Parses URL encoded properties name1=value1&name2=value2
      *
-     * @param optionSet holding command line options
-     * @param trigger   key to key value pairs
-     * @param option    the option which contains parsed url
+     * @param optionSet
+     *            holding command line options
+     * @param trigger
+     *            key to key value pairs
+     * @param option
+     *            the option which contains parsed url
      */
     protected Map<String, Object> parseProperties(OptionSet optionSet, String trigger, Option option) {
         Map<String, Object> properties = newHashMap();
@@ -864,8 +671,7 @@ public class CliRunSupport extends CliSupport {
     protected ResourceSpec parseInputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = new ResourceSpec();
         resource.setPath((String) optionSet.getValue(INPUT_PATH));
-        resource.setAttributes(parseAttributes(
-                optionSet.<String>getValues(INPUT), optionSet.getOption(INPUT)));
+        resource.setAttributes(parseAttributes(optionSet.<String>getValues(INPUT), optionSet.getOption(INPUT)));
         return resource;
     }
 
@@ -884,10 +690,9 @@ public class CliRunSupport extends CliSupport {
     protected TranslationConfig parseTranslationConfig(OptionSet optionSet, Option option) {
         Object useExplicitDefaultsValue = optionSet.getValue(USE_EXPLICIT_DEFAULTS);
         TranslationConfig translationConfig = new TranslationConfig();
-        translationConfig.setUseExplicitDefaults(useExplicitDefaultsValue != null ?
-                parseBoolean(String.valueOf(useExplicitDefaultsValue)) :
-                (optionSet.hasOption(USE_EXPLICIT_DEFAULTS) ||
-                        TranslationConfig.USE_EXPLICIT_DEFAULTS));
+        translationConfig.setUseExplicitDefaults(
+                useExplicitDefaultsValue != null ? parseBoolean(String.valueOf(useExplicitDefaultsValue))
+                        : (optionSet.hasOption(USE_EXPLICIT_DEFAULTS) || TranslationConfig.USE_EXPLICIT_DEFAULTS));
         return translationConfig;
     }
 
@@ -937,8 +742,7 @@ public class CliRunSupport extends CliSupport {
             groupScriptsBy = groupScriptsByConditionMap.get(groupScriptsByCondition);
             if (groupScriptsBy == null) {
                 throw new OptionException(format("Unexpected value for %s option, valid values are %s",
-                        GROUP_SCRIPTS_BY, groupScriptsByConditionMap.keySet()), option
-                );
+                        GROUP_SCRIPTS_BY, groupScriptsByConditionMap.keySet()), option);
             }
         } else {
             groupScriptsBy = GroupScriptsBy.TABLE;
@@ -980,8 +784,7 @@ public class CliRunSupport extends CliSupport {
         if (identifierQuotingValue != null) {
             identifierQuoting = INSTANCE.getIdentifierQuotingMap().get(identifierQuotingValue);
             if (identifierQuoting == null) {
-                Class<IdentifierQuoting> identifierQuotingClass = loadClass(
-                        identifierQuotingValue);
+                Class<IdentifierQuoting> identifierQuotingClass = loadClass(identifierQuotingValue);
                 identifierQuoting = newInstance(identifierQuotingClass);
             }
         }
@@ -994,10 +797,8 @@ public class CliRunSupport extends CliSupport {
         if (identifierNormalizerValue != null) {
             identifierNormalizer = CliOptionValues.INSTANCE.getIdentifierNormalizerMap().get(identifierNormalizerValue);
             if (identifierNormalizer == null) {
-                Class<IdentifierNormalizer> identifierNormalizerClass =
-                        loadClass(identifierNormalizerValue);
-                identifierNormalizer =
-                        newInstance(identifierNormalizerClass);
+                Class<IdentifierNormalizer> identifierNormalizerClass = loadClass(identifierNormalizerValue);
+                identifierNormalizer = newInstance(identifierNormalizerClass);
             }
         }
         return identifierNormalizer != null ? identifierNormalizer : NOOP;
@@ -1011,13 +812,14 @@ public class CliRunSupport extends CliSupport {
         }
         return tableTypes.toArray(new String[tableTypes.size()]);
     }
+
     protected Collection<MetaDataType> parseObjectTypes(OptionSet optionSet) {
         Collection<MetaDataType> objectTypes = newArrayList(MetaDataType.TYPES);
         if (optionSet.hasOption(META_DATA)) {
             Collection<String> names = optionSet.getValues(META_DATA);
             Map<String, MetaDataType> objectTypeMap = new TreeMap<String, MetaDataType>(String.CASE_INSENSITIVE_ORDER);
             objectTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
-            for (Iterator<String> iterator = names.iterator(); iterator.hasNext(); ) {
+            for (Iterator<String> iterator = names.iterator(); iterator.hasNext();) {
                 String name = iterator.next();
                 MetaDataType objectType = objectTypeMap.get(replace(name, ".", "_"));
                 String booleanValue = iterator.next();
@@ -1038,7 +840,6 @@ public class CliRunSupport extends CliSupport {
         String threadsValue = (String) optionSet.getValue(THREADS);
         return !StringUtils.isEmpty(threadsValue) ? parseInt(threadsValue) : null;
     }
-
 
     public TimeZone getDefaultTimeZone() {
         return defaultTimeZone;

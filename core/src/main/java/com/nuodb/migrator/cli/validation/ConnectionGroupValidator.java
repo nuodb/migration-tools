@@ -79,27 +79,33 @@ public abstract class ConnectionGroupValidator implements OptionValidator {
 
     protected void validateUsername(CommandLine commandLine, Option option, String value) {
         JdbcUrl jdbcUrl = getInstance().parse(getUrlValue(commandLine));
-        if (jdbcUrl==null) return;
+        if (jdbcUrl == null)
+            return;
 
-        String jdbcUsername = (String)jdbcUrl.getParameters().get(USER);
-        String jdbcPassword = (String)jdbcUrl.getParameters().get(PASSWORD);
+        String jdbcUsername = (String) jdbcUrl.getParameters().get(USER);
+        String jdbcPassword = (String) jdbcUrl.getParameters().get(PASSWORD);
 
-        if (StringUtils.isBlank(jdbcUsername) && StringUtils.isBlank(jdbcPassword)) 
+        if (StringUtils.isBlank(jdbcUsername) && StringUtils.isBlank(jdbcPassword))
             return;
 
         String optionUsername = getUsernameValue(commandLine);
         String optionPasssword = getPasswordValue(commandLine);
 
-        if (StringUtils.isBlank(optionUsername) && StringUtils.isBlank(optionPasssword)) 
+        if (StringUtils.isBlank(optionUsername) && StringUtils.isBlank(optionPasssword))
             return;
 
         dbUserWarnMessage(jdbcUsername, jdbcPassword, optionUsername, optionPasssword);
     }
 
-    protected void dbUserWarnMessage(String jdbcUsername, String jdbcPassword, String optionUsername, String optionPasssword) {
-        if (!StringUtils.equals(optionUsername, jdbcUsername) || !StringUtils.equals(optionPasssword, jdbcPassword)){
-            logger.warn(format("JDBC URL parameters user: %s passowrd: %s are not matching with commandline options --source.username %s --source.password %s.",jdbcUsername, jdbcPassword, optionUsername,optionPasssword));
-            logger.warn(format("Commandline option values --source.username %s --source.password %s are used for database connection.", optionUsername, optionPasssword));
+    protected void dbUserWarnMessage(String jdbcUsername, String jdbcPassword, String optionUsername,
+            String optionPasssword) {
+        if (!StringUtils.equals(optionUsername, jdbcUsername) || !StringUtils.equals(optionPasssword, jdbcPassword)) {
+            logger.warn(format(
+                    "JDBC URL parameters user: %s passowrd: %s are not matching with commandline options --source.username %s --source.password %s.",
+                    jdbcUsername, jdbcPassword, optionUsername, optionPasssword));
+            logger.warn(format(
+                    "Commandline option values --source.username %s --source.password %s are used for database connection.",
+                    optionUsername, optionPasssword));
         }
     }
 
@@ -109,21 +115,20 @@ public abstract class ConnectionGroupValidator implements OptionValidator {
     protected void validateTransactionIsolation(CommandLine commandLine, Option option, String value) {
         Integer transactionIsolation = INSTANCE.getTransactionIsolation(option, value);
         Map<String, Integer> transactionIsolations = getTransactionIsolations();
-        if (transactionIsolation != null && transactionIsolations != null &&
-                !transactionIsolations.containsValue(transactionIsolation)) {
+        if (transactionIsolation != null && transactionIsolations != null
+                && !transactionIsolations.containsValue(transactionIsolation)) {
             StringBuilder result = new StringBuilder();
             for (Iterator<Map.Entry<String, Integer>> iterator = transactionIsolations.entrySet().iterator(); iterator
-                    .hasNext(); ) {
+                    .hasNext();) {
                 Map.Entry<String, Integer> entry = iterator.next();
                 result.append(format("%s or %d", entry.getKey(), entry.getValue()));
                 if (iterator.hasNext()) {
                     result.append(", ");
                 }
             }
-            throw new OptionException(
-                    format("Unexpected option value for %s. The database supports the following transaction isolations %s",
-                            getTransactionIsolationOption(), result.toString()), option
-            );
+            throw new OptionException(format(
+                    "Unexpected option value for %s. The database supports the following transaction isolations %s",
+                    getTransactionIsolationOption(), result.toString()), option);
         }
     }
 
@@ -210,4 +215,3 @@ public abstract class ConnectionGroupValidator implements OptionValidator {
         return connectionGroupInfo.getTransactionIsolationOption();
     }
 }
-

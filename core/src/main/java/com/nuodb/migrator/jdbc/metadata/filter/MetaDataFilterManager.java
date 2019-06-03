@@ -43,9 +43,11 @@ public class MetaDataFilterManager {
     private Collection<MetaDataFilter> metaDataFilters = newPrioritySet();
 
     /**
-     * Returns meta data filter for a requested object type or null of there is no registered filter.
+     * Returns meta data filter for a requested object type or null of there is
+     * no registered filter.
      *
-     * @param objectType requested object type to be filter.
+     * @param objectType
+     *            requested object type to be filter.
      * @return meta data filter or null if not found.
      */
     public MetaDataFilter getMetaDataFilter(MetaDataType objectType) {
@@ -62,13 +64,14 @@ public class MetaDataFilterManager {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         MetaDataFilterManager that = (MetaDataFilterManager) o;
 
-        if (metaDataFilters != null ? !metaDataFilters.equals(that.metaDataFilters) :
-                that.metaDataFilters != null)
+        if (metaDataFilters != null ? !metaDataFilters.equals(that.metaDataFilters) : that.metaDataFilters != null)
             return false;
 
         return true;

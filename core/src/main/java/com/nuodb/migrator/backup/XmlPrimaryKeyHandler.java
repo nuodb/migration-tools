@@ -52,16 +52,13 @@ public class XmlPrimaryKeyHandler extends XmlIdentifiableHandlerBase<PrimaryKey>
         String element = input.getName();
         Table table = getParent(context);
         if (COLUMN_ELEMENT.equals(element)) {
-            primaryKey.addColumn(
-                    table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)),
-                    primaryKey.getColumns().size()
-            );
+            primaryKey.addColumn(table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)),
+                    primaryKey.getColumns().size());
         }
     }
 
     @Override
-    protected void writeElements(PrimaryKey primaryKey, OutputNode output,
-                                 XmlWriteContext context) throws Exception {
+    protected void writeElements(PrimaryKey primaryKey, OutputNode output, XmlWriteContext context) throws Exception {
         for (Column column : primaryKey.getColumns()) {
             OutputNode element = output.getChild(COLUMN_ELEMENT);
             context.writeAttribute(element, NAME_ATTRIBUTE, column.getName());

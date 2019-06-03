@@ -47,7 +47,8 @@ public class MethodInterceptors {
     /**
      * Wraps before method advice and creates method interceptor
      *
-     * @param advice before method advice
+     * @param advice
+     *            before method advice
      * @return before method advice adapter
      */
     public static MethodInterceptor newBeforeMethodInterceptor(final BeforeMethod advice) {
@@ -63,7 +64,8 @@ public class MethodInterceptors {
     /**
      * Wraps after method advice and creates method interceptor
      *
-     * @param advice after method advice
+     * @param advice
+     *            after method advice
      * @return after method advice adapter
      */
     public static MethodInterceptor newAfterMethodInterceptor(final AfterMethod advice) {
@@ -81,7 +83,8 @@ public class MethodInterceptors {
     /**
      * Wraps after throws advice and creates method interceptor
      *
-     * @param advice after throws advice
+     * @param advice
+     *            after throws advice
      * @return after method advice adapter
      */
     public static MethodInterceptor newAfterThrowsInterceptor(final AfterThrows advice) {
@@ -100,14 +103,17 @@ public class MethodInterceptors {
     }
 
     /**
-     * Introduce requested interfaces by performing invocations on the delegate object
+     * Introduce requested interfaces by performing invocations on the delegate
+     * object
      *
-     * @param delegate   target for invocations
-     * @param interfaces array of interfaces to be introduced by returned advice
+     * @param delegate
+     *            target for invocations
+     * @param interfaces
+     *            array of interfaces to be introduced by returned advice
      * @return method interceptor, which introduces interfaces
      */
     public static MethodInterceptor newIntroduceInterfacesInterceptor(final Object delegate,
-                                                                      final Class... interfaces) {
+            final Class... interfaces) {
         return new MethodInterceptor() {
 
             private Collection<Class> introducedInterfaces = newArrayList(interfaces);

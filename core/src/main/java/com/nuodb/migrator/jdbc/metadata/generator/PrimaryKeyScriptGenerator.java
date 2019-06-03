@@ -40,7 +40,8 @@ import static java.util.Collections.singleton;
 /**
  * @author Sergey Bushik
  */
-public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> implements ConstraintScriptGenerator<PrimaryKey> {
+public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey>
+        implements ConstraintScriptGenerator<PrimaryKey> {
 
     public PrimaryKeyScriptGenerator() {
         super(PrimaryKey.class);
@@ -49,7 +50,7 @@ public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> i
     @Override
     public String getConstraintScript(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder("PRIMARY KEY (");
-        for (Iterator<Column> iterator = primaryKey.getColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = primaryKey.getColumns().iterator(); iterator.hasNext();) {
             Column column = iterator.next();
             buffer.append(scriptGeneratorManager.getName(column));
             if (iterator.hasNext()) {

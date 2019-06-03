@@ -65,8 +65,7 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
     protected void validateCatalog(CommandLine commandLine, Option option, String catalog) {
         if (!isEmpty(catalog)) {
             throw new OptionException(
-                    format("Unexpected option %s. NuoDB doesn't supports catalogs", getCatalogOption()), option
-            );
+                    format("Unexpected option %s. NuoDB doesn't supports catalogs", getCatalogOption()), option);
         }
     }
 
@@ -76,23 +75,24 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
         if (isEmpty(username)) {
             throw new OptionException(
                     format("Missing required option %s. The user name to authenticate with should be provided",
-                            getUsernameOption()), option
-            );
+                            getUsernameOption()),
+                    option);
         }
     }
 
     @Override
     protected void validatePassword(CommandLine commandLine, Option option, String password) {
         if (isEmpty(password)) {
-            throw new OptionException(format("Missing required option %s. The user's password should be provided",
-                    getPasswordOption()), option
-            );
+            throw new OptionException(
+                    format("Missing required option %s. The user's password should be provided", getPasswordOption()),
+                    option);
         }
     }
 
     /**
-     * Retrieves map of NuoDB transaction isolation levels, which consists of 2 standard levels read committed,
-     * serializable and 2 NuoDB specific write committed and consistent read.
+     * Retrieves map of NuoDB transaction isolation levels, which consists of 2
+     * standard levels read committed, serializable and 2 NuoDB specific write
+     * committed and consistent read.
      *
      * @return map of NuoDB transaction isolations
      */

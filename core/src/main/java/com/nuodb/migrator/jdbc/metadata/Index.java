@@ -135,18 +135,27 @@ public class Index extends ConstraintBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         Index index = (Index) o;
 
-        if (unique != index.unique) return false;
-        if (columns != null ? !columns.equals(index.columns) : index.columns != null) return false;
-        if (filterCondition != null ? !filterCondition.equals(index.filterCondition) : index.filterCondition != null) return false;
-        if (expression != null ? !expression.equals(index.expression) : index.expression != null) return false;
-        if (sortOrder != index.sortOrder) return false;
-        if (type != null ? !type.equals(index.type) : index.type != null) return false;
+        if (unique != index.unique)
+            return false;
+        if (columns != null ? !columns.equals(index.columns) : index.columns != null)
+            return false;
+        if (filterCondition != null ? !filterCondition.equals(index.filterCondition) : index.filterCondition != null)
+            return false;
+        if (expression != null ? !expression.equals(index.expression) : index.expression != null)
+            return false;
+        if (sortOrder != index.sortOrder)
+            return false;
+        if (type != null ? !type.equals(index.type) : index.type != null)
+            return false;
 
         return true;
     }
@@ -182,7 +191,7 @@ public class Index extends ConstraintBase {
         } else {
             Collection<Column> columns = getColumns();
             buffer.append('(');
-            for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
+            for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext();) {
                 Column column = iterator.next();
                 buffer.append(column.getName());
                 if (iterator.hasNext()) {
@@ -193,4 +202,3 @@ public class Index extends ConstraintBase {
         }
     }
 }
-

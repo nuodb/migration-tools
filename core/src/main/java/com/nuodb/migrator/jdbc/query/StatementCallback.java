@@ -35,5 +35,5 @@ import java.sql.Statement;
  */
 public interface StatementCallback<S extends Statement> {
 
-    void executeStatement(S statement)  throws SQLException;
+    void executeStatement(S statement) throws SQLException;
 }

@@ -88,7 +88,7 @@ public class StringUtils {
             String str2 = source2.toString();
             equalsIgnoreCase = str1.regionMatches(true, 0, str2, 0, Math.max(str1.length(), str2.length()));
         }
-        return  equalsIgnoreCase;
+        return equalsIgnoreCase;
     }
 
     public static boolean isDelimiter(char ch, char[] delimiters) {
@@ -135,11 +135,15 @@ public class StringUtils {
     }
 
     /**
-     * Prepends prefix to the provided source, adjusts prefix case to the case of the source.
+     * Prepends prefix to the provided source, adjusts prefix case to the case
+     * of the source.
      *
-     * @param prefix    to prepend to source
-     * @param source    to be prefixed
-     * @param delimiter for capitalized case
+     * @param prefix
+     *            to prepend to source
+     * @param source
+     *            to be prefixed
+     * @param delimiter
+     *            for capitalized case
      * @return auto cased string
      */
     public static String autoCase(CharSequence prefix, CharSequence source, char delimiter) {

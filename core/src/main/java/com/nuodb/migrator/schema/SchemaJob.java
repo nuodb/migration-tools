@@ -91,8 +91,7 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
         ConnectionSpec sourceSpec = getSourceSpec();
         SessionFactory sourceSessionFactory = newSessionFactory(
-                createConnectionProviderFactory().createConnectionProvider(
-                        sourceSpec), createDialectResolver());
+                createConnectionProviderFactory().createConnectionProvider(sourceSpec), createDialectResolver());
         Session sourceSession = sourceSessionFactory.openSession();
         setSourceSession(sourceSession);
 
@@ -100,8 +99,7 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
         ConnectionSpec targetSpec = getTargetSpec();
         if (targetSpec != null) {
             SessionFactory targetSessionFactory = newSessionFactory(
-                    createConnectionProviderFactory().createConnectionProvider(
-                            targetSpec), createDialectResolver());
+                    createConnectionProviderFactory().createConnectionProvider(targetSpec), createDialectResolver());
             targetSession = targetSessionFactory.openSession();
         }
         setTargetSession(targetSession);
@@ -120,7 +118,8 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
         if (outputSpec != null) {
             exporters.add(new FileScriptExporter(outputSpec.getPath(), outputSpec.getEncoding()));
         }
-        // Fallback to system out if neither database connection nor target file were provided
+        // Fallback to system out if neither database connection nor target file
+        // were provided
         if (exporters.isEmpty()) {
             exporters.add(SYSTEM_OUT);
         }
@@ -143,10 +142,10 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
     }
 
     protected Database inspect() throws SQLException {
-        InspectionScope inspectionScope = new TableInspectionScope(
-                getSourceSpec().getCatalog(), getSourceSpec().getSchema(), getTableTypes());
-        return createInspectionManager().inspect(
-                getSourceSession().getConnection(), inspectionScope, TYPES).getObject(DATABASE);
+        InspectionScope inspectionScope = new TableInspectionScope(getSourceSpec().getCatalog(),
+                getSourceSpec().getSchema(), getTableTypes());
+        return createInspectionManager().inspect(getSourceSession().getConnection(), inspectionScope, TYPES)
+                .getObject(DATABASE);
     }
 
     protected ScriptGeneratorManager createScriptGeneratorManager() throws SQLException {
@@ -167,16 +166,14 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
         }
 
         DialectResolver dialectResolver = createDialectResolver();
-        Dialect dialect = getTargetSession() != null ? dialectResolver.resolve(
-                getTargetSession().getConnection()) : dialectResolver.resolve(NUODB);
+        Dialect dialect = getTargetSession() != null ? dialectResolver.resolve(getTargetSession().getConnection())
+                : dialectResolver.resolve(NUODB);
         dialect.getTranslationManager().setTranslationConfig(getTranslationConfig());
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
-            jdbcTypeNameMap.addJdbcTypeName(
-                    jdbcTypeSpec.getTypeCode(), newOptions(
-                    jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
-                    jdbcTypeSpec.getTypeName()
-            );
+            jdbcTypeNameMap.addJdbcTypeName(jdbcTypeSpec.getTypeCode(),
+                    newOptions(jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
+                    jdbcTypeSpec.getTypeName());
         }
         dialect.setIdentifierQuoting(getIdentifierQuoting());
         dialect.setIdentifierNormalizer(getIdentifierNormalizer());

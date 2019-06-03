@@ -60,10 +60,8 @@ public abstract class XmlConnectionSpecHandler<T extends ConnectionSpec> extends
         target.setType(context.readAttribute(input, TYPE_ATTRIBUTE, String.class));
         target.setCatalog(context.readAttribute(input, CATALOG_ATTRIBUTE, String.class));
         target.setSchema(context.readAttribute(input, SCHEMA_ATTRIBUTE, String.class));
-        target.setAutoCommit(context.readAttribute(input, AUTO_COMMIT_ATTRIBUTE, Boolean.class,
-                DEFAULT_AUTO_COMMIT));
-        target.setTransactionIsolation(context.readAttribute(input, TRANSACTION_ISOLATION_ATTRIBUTE,
-                Integer.class));
+        target.setAutoCommit(context.readAttribute(input, AUTO_COMMIT_ATTRIBUTE, Boolean.class, DEFAULT_AUTO_COMMIT));
+        target.setTransactionIsolation(context.readAttribute(input, TRANSACTION_ISOLATION_ATTRIBUTE, Integer.class));
     }
 
     @Override

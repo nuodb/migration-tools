@@ -78,8 +78,10 @@ public class JdbcTypeDesc {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JdbcTypeDesc)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof JdbcTypeDesc))
+            return false;
         JdbcTypeDesc that = (JdbcTypeDesc) o;
         return typeCode == that.getTypeCode() && equalsIgnoreCase(typeName, that.getTypeName());
     }

@@ -45,8 +45,7 @@ public class StatementTemplate {
     }
 
     public <S extends Statement> void executeStatement(StatementFactory<S> statementFactory,
-                                                       StatementCallback<S> statementCallback)
-            throws SQLException {
+            StatementCallback<S> statementCallback) throws SQLException {
         S statement = statementFactory.createStatement(connection);
         try {
             statementCallback.executeStatement(statement);
@@ -57,8 +56,7 @@ public class StatementTemplate {
     }
 
     public <S extends Statement, V extends Object> V executeStatement(StatementFactory<S> statementFactory,
-                                                                      StatementAction<S, V> statementAction)
-            throws SQLException {
+            StatementAction<S, V> statementAction) throws SQLException {
         S statement = statementFactory.createStatement(connection);
         try {
             return statementAction.executeStatement(statement);

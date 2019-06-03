@@ -44,7 +44,7 @@ import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
 public class MetaDataSpec extends SpecBase {
 
     public static final Collection<MetaDataType> OBJECT_TYPES = newArrayList(TYPES);
-    public static final String[] TABLE_TYPES = new String[]{TABLE};
+    public static final String[] TABLE_TYPES = new String[] { TABLE };
 
     private Collection<MetaDataType> objectTypes = OBJECT_TYPES;
     private MetaDataFilterManager metaDataFilterManager = new MetaDataFilterManager();
@@ -81,16 +81,22 @@ public class MetaDataSpec extends SpecBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         MetaDataSpec that = (MetaDataSpec) o;
 
-        if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null) return false;
-        if (metaDataFilterManager != null ? !metaDataFilterManager.equals(that.metaDataFilterManager) :
-                that.metaDataFilterManager != null) return false;
-        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
+        if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null)
+            return false;
+        if (metaDataFilterManager != null ? !metaDataFilterManager.equals(that.metaDataFilterManager)
+                : that.metaDataFilterManager != null)
+            return false;
+        if (!Arrays.equals(tableTypes, that.tableTypes))
+            return false;
 
         return true;
     }

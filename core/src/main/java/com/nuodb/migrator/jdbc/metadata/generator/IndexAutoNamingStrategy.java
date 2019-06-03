@@ -43,4 +43,3 @@ public class IndexAutoNamingStrategy extends LengthLimitNamingStrategy<Index> {
         addNamingStrategy(new IndexHashNamingStrategy());
     }
 }
-

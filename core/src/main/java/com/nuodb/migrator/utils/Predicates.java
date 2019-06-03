@@ -92,8 +92,7 @@ public class Predicates {
         return com.google.common.base.Predicates.instanceOf(clazz);
     }
 
-    public static <A, B> Predicate<A> compose(Predicate<B> predicate,
-                                              Function<A, ? extends B> function) {
+    public static <A, B> Predicate<A> compose(Predicate<B> predicate, Function<A, ? extends B> function) {
         return com.google.common.base.Predicates.compose(predicate, function);
     }
 
@@ -114,8 +113,8 @@ public class Predicates {
     }
 
     /**
-     * Returns a predicate that evaluates to {@code true} if the object being tested {@code ==} the given target or both
-     * are null.
+     * Returns a predicate that evaluates to {@code true} if the object being
+     * tested {@code ==} the given target or both are null.
      */
     public static <T> Predicate<T> is(T target) {
         return target == null ? Predicates.<T>isNull() : new IsPredicate<T>(target);

@@ -31,7 +31,6 @@ import com.nuodb.migrator.jdbc.metadata.DeferrabilityMap;
 import com.nuodb.migrator.jdbc.metadata.ReferenceActionMap;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
-
 /**
  * @author Sergey Bushik
  */

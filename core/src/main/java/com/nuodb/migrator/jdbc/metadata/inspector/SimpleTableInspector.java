@@ -55,17 +55,17 @@ public class SimpleTableInspector extends TableInspectorBase<Schema, TableInspec
     @Override
     protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
-        return inspectionContext.getConnection().getMetaData().getTables(
-                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),
-                tableInspectionScope.getTable(), tableInspectionScope.getTableTypes());
+        return inspectionContext.getConnection().getMetaData().getTables(tableInspectionScope.getCatalog(),
+                tableInspectionScope.getSchema(), tableInspectionScope.getTable(),
+                tableInspectionScope.getTableTypes());
     }
 
     @Override
     protected void processResultSet(InspectionContext inspectionContext, ResultSet tables) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (tables.next()) {
-            Table table = addTable(inspectionResults,
-                    tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"), tables.getString("TABLE_NAME"));
+            Table table = addTable(inspectionResults, tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"),
+                    tables.getString("TABLE_NAME"));
             String comment = tables.getString("REMARKS");
             table.setComment(isEmpty(comment) ? null : comment);
             table.setType(tables.getString("TABLE_TYPE"));

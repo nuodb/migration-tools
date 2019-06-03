@@ -42,7 +42,8 @@ import static com.google.common.collect.Multimaps.newListMultimap;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Remembers values for the option between invocations and returns set of delta values
+ * Remembers values for the option between invocations and returns set of delta
+ * values
  *
  * @author Sergey Bushik
  */
@@ -51,8 +52,7 @@ public abstract class ValuesOptionProcessor implements OptionProcessor {
     protected transient final Logger logger = getLogger(getClass());
 
     private ListMultimap<String, Object> lastOptionValues = newListMultimap(
-            Maps.<String, Collection<Object>>newLinkedHashMap(),
-            new Supplier<List<Object>>() {
+            Maps.<String, Collection<Object>>newLinkedHashMap(), new Supplier<List<Object>>() {
                 @Override
                 public List<Object> get() {
                     return newArrayList();

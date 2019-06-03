@@ -65,12 +65,13 @@ public class SessionFactories {
         };
     }
 
-    public static SessionFactory newSessionFactory(final ConnectionProvider connectionProvider,
-                                                   final Dialect dialect, boolean enforceTableLocksForDDL) {
+    public static SessionFactory newSessionFactory(final ConnectionProvider connectionProvider, final Dialect dialect,
+            boolean enforceTableLocksForDDL) {
         return new SessionFactoryBase() {
             @Override
             protected SessionBase open(Map<Object, Object> context) throws SQLException {
-                return new SessionBase(this, connectionProvider.getConnection(), dialect, context, enforceTableLocksForDDL);
+                return new SessionBase(this, connectionProvider.getConnection(), dialect, context,
+                        enforceTableLocksForDDL);
             }
 
             @Override
@@ -81,7 +82,7 @@ public class SessionFactories {
     }
 
     public static SessionFactory newSessionFactory(final ConnectionProvider connectionProvider,
-                                                   final DialectResolver dialectResolver) {
+            final DialectResolver dialectResolver) {
         return new SessionFactoryBase() {
 
             private Dialect dialect;
@@ -112,7 +113,8 @@ public class SessionFactories {
         Statement statement;
         try {
             statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT value FROM system.properties WHERE property='ENFORCE_TABLE_LOCKS_FOR_DDL';");
+            ResultSet rs = statement
+                    .executeQuery("SELECT value FROM system.properties WHERE property='ENFORCE_TABLE_LOCKS_FOR_DDL';");
             if (rs.next()) {
                 return rs.getBoolean("VALUE");
             }

@@ -43,17 +43,15 @@ import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 import com.nuodb.migrator.integration.nuodb.linq.util.Product;
 
-@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
+@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
 public class JoinTest extends MigrationTestBase {
     PreparedStatement pstmt = null;
 
     public void crossJoin() throws Exception {
         List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
         String[] categories = list.toArray(new String[list.size()]);
-        List<Product> products = DatabaseUtil
-                .getProductList(
-                        "select * from products cross join array5 where cate_name=category",
-                        nuodbConnection, pstmt);
+        List<Product> products = DatabaseUtil.getProductList(
+                "select * from products cross join array5 where cate_name=category", nuodbConnection, pstmt);
         Assert.assertTrue(products.size() >= 1, "The product list is empty");
         HashMap<String, String> actMap = new HashMap<String, String>();
         HashMap<String, String> expMap = new HashMap<String, String>();
@@ -77,9 +75,8 @@ public class JoinTest extends MigrationTestBase {
     public void groupJoin() throws Exception {
         List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
         String[] categories = list.toArray(new String[list.size()]);
-        List<Product> products = DatabaseUtil.getProductList(
-                "select * from products join array5 where cate_name=category",
-                nuodbConnection, pstmt);
+        List<Product> products = DatabaseUtil
+                .getProductList("select * from products join array5 where cate_name=category", nuodbConnection, pstmt);
         Assert.assertTrue(products.size() >= 1, "The product list is empty");
         HashMap<String, ArrayList<String>> actmap = new HashMap<String, ArrayList<String>>();
         for (Product p : products) {
@@ -90,8 +87,7 @@ public class JoinTest extends MigrationTestBase {
                     Collections.sort(list1);
                     actmap.put(p.getCategory(), list1);
                 } else {
-                    ArrayList<String> list1 = (ArrayList<String>) actmap.get(p
-                            .getCategory());
+                    ArrayList<String> list1 = (ArrayList<String>) actmap.get(p.getCategory());
                     list1.add(p.getPname());
                     Collections.sort(list1);
                     actmap.put(p.getCategory(), list1);
@@ -114,9 +110,8 @@ public class JoinTest extends MigrationTestBase {
     public void crossAndGroupJoin() throws Exception {
         List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
         String[] categories = list.toArray(new String[list.size()]);
-        List<Product> products = DatabaseUtil.getProductList(
-                "select * from products  join array5 where cate_name=category",
-                nuodbConnection, pstmt);
+        List<Product> products = DatabaseUtil
+                .getProductList("select * from products  join array5 where cate_name=category", nuodbConnection, pstmt);
         List<String> strObj = new ArrayList<String>();
         Assert.assertTrue(products.size() >= 1, "The product list is empty");
         HashMap<String, String> actMap = new HashMap<String, String>();
@@ -136,15 +131,13 @@ public class JoinTest extends MigrationTestBase {
     }
 
     public void leftOuterJoin() throws Exception {
-        TreeMap<String, String> map = DatabaseUtil.getJoinProductList(
-                nuodbConnection, pstmt);
+        TreeMap<String, String> map = DatabaseUtil.getJoinProductList(nuodbConnection, pstmt);
         Iterator<Map.Entry<String, String>> it = map.entrySet().iterator();
         HashMap<String, String> actMap = new HashMap<String, String>();
         HashMap<String, String> expMap = new HashMap<String, String>();
         Assert.assertTrue(map.size() >= 1, "The map list is empty");
         while (it.hasNext()) {
-            Map.Entry<String, String> pairs = (Map.Entry<String, String>) it
-                    .next();
+            Map.Entry<String, String> pairs = (Map.Entry<String, String>) it.next();
             String key = (String) pairs.getKey();
             String value = (String) pairs.getValue();
             actMap.put(key, value);

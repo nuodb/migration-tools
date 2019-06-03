@@ -46,14 +46,13 @@ public class JdbcBlobValue extends JdbcTypeValueBase<Blob> {
     }
 
     @Override
-    public Blob getValue(ResultSet resultSet, int index,
-                         Field field, Map<String, Object> options) throws SQLException {
+    public Blob getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options) throws SQLException {
         return resultSet.getBlob(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Blob value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Blob value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setBlob(index, value);
     }
 }

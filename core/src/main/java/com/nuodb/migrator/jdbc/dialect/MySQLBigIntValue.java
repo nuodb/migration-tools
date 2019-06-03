@@ -50,15 +50,15 @@ public class MySQLBigIntValue extends JdbcTypeValueBase<BigInteger> {
     }
 
     @Override
-    public BigInteger getValue(ResultSet resultSet, int index,
-                               Field field, Map<String, Object> options) throws SQLException {
+    public BigInteger getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         String value = resultSet.getString(index);
         return value != null ? new BigInteger(value) : null;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigInteger value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, BigInteger value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setObject(index, value);
     }
 }

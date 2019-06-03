@@ -46,7 +46,8 @@ public class NuoDBIntegerValueFormat extends ValueFormatBase<String> {
     }
 
     @Override
-    protected void doSetValue(Value variant, JdbcValueAccess<String> access, Map<String, Object> options) throws Exception {
+    protected void doSetValue(Value variant, JdbcValueAccess<String> access, Map<String, Object> options)
+            throws Exception {
         String value = variant.asString();
         access.setValue(!isEmpty(value) ? value : null, options);
     }

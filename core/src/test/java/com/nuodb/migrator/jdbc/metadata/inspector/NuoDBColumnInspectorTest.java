@@ -52,7 +52,7 @@ import static org.testng.Assert.assertNotNull;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"unchecked", "ConstantConditions"})
+@SuppressWarnings({ "unchecked", "ConstantConditions" })
 public class NuoDBColumnInspectorTest extends InspectorTestBase {
 
     public NuoDBColumnInspectorTest() {

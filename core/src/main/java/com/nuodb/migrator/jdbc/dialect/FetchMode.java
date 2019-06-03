@@ -70,13 +70,17 @@ public class FetchMode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         FetchMode that = (FetchMode) o;
 
-        if (stream != that.stream) return false;
-        if (fetchSize != that.fetchSize) return false;
+        if (stream != that.stream)
+            return false;
+        if (fetchSize != that.fetchSize)
+            return false;
 
         return true;
     }

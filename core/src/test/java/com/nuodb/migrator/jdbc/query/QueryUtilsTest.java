@@ -44,16 +44,15 @@ public class QueryUtilsTest {
 
     @DataProvider(name = "where")
     public Object[][] createWhereData() {
-        return new Object[][]{
-                {"SELECT \"column1\", \"column2\" FROM \"table\"", emptySet(),
-                        AND, "SELECT \"column1\", \"column2\" FROM \"table\""},
-                {"SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\" > \"column2\""),
-                        AND, "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\" > \"column2\""},
-                {"SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\" > \"column2\"",
-                        "\"column1\" > 0"),
-                        OR, "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\" > \"column2\" OR " +
-                        "\"column1\" > 0"}
-        };
+        return new Object[][] {
+                { "SELECT \"column1\", \"column2\" FROM \"table\"", emptySet(), AND,
+                        "SELECT \"column1\", \"column2\" FROM \"table\"" },
+                { "SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\" > \"column2\""), AND,
+                        "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\" > \"column2\"" },
+                { "SELECT \"column1\", \"column2\" FROM \"table\"",
+                        newArrayList("\"column1\" > \"column2\"", "\"column1\" > 0"), OR,
+                        "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\" > \"column2\" OR "
+                                + "\"column1\" > 0" } };
     }
 
     @Test(dataProvider = "where")
@@ -63,14 +62,13 @@ public class QueryUtilsTest {
 
     @DataProvider(name = "orderBy")
     public Object[][] createOrderByData() {
-        return new Object[][]{
-                {"SELECT \"column1\", \"column2\" FROM \"table\"", null,
-                        null, "SELECT \"column1\", \"column2\" FROM \"table\""},
-                {"SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\""),
-                        null, "SELECT \"column1\", \"column2\" FROM \"table\" ORDER BY \"column1\""},
-                {"SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\"", "\"column2\""),
-                        ASC, "SELECT \"column1\", \"column2\" FROM \"table\" ORDER BY \"column1\", \"column2\" ASC"},
-        };
+        return new Object[][] {
+                { "SELECT \"column1\", \"column2\" FROM \"table\"", null, null,
+                        "SELECT \"column1\", \"column2\" FROM \"table\"" },
+                { "SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\""), null,
+                        "SELECT \"column1\", \"column2\" FROM \"table\" ORDER BY \"column1\"" },
+                { "SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\"", "\"column2\""), ASC,
+                        "SELECT \"column1\", \"column2\" FROM \"table\" ORDER BY \"column1\", \"column2\" ASC" }, };
     }
 
     @Test(dataProvider = "orderBy")

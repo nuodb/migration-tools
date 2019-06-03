@@ -62,14 +62,14 @@ public class JdbcNCharValue extends JdbcTypeValueBase<String> {
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int index,
-                           Field field, Map<String, Object> options) throws SQLException {
+    public String getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getNString(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, String value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setNString(index, value);
     }
 }

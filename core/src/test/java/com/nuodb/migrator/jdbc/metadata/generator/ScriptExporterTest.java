@@ -55,10 +55,8 @@ public class ScriptExporterTest {
 
     @BeforeMethod
     public void setUp() {
-        scripts = newArrayList(
-            new Script("CREATE TABLE \"users\" (\"used_id\" INTEGER);"),
-            new Script("CREATE TABLE \"links\" (\"link_id\" INTEGER);")
-        );
+        scripts = newArrayList(new Script("CREATE TABLE \"users\" (\"used_id\" INTEGER);"),
+                new Script("CREATE TABLE \"links\" (\"link_id\" INTEGER);"));
     }
 
     @DataProvider(name = "exportScripts")
@@ -75,11 +73,10 @@ public class ScriptExporterTest {
         Statement statement = mock(Statement.class);
         when(connection.createStatement()).thenReturn(statement);
 
-        return new Object[][]{
-                {new FileScriptExporter(file)},
-                {new ConnectionScriptExporter(SessionFactories.newSessionFactory(connectionProvider, new NuoDBDialect(), false).openSession())},
-                {new WriterScriptExporter(new NullOutputStream())}
-        };
+        return new Object[][] { { new FileScriptExporter(file) },
+                { new ConnectionScriptExporter(SessionFactories
+                        .newSessionFactory(connectionProvider, new NuoDBDialect(), false).openSession()) },
+                { new WriterScriptExporter(new NullOutputStream()) } };
     }
 
     @Test(dataProvider = "exportScripts")

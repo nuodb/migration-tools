@@ -35,91 +35,85 @@ package com.nuodb.migrator.integration.precision;
  */
 
 public class MySQLPrecision2 {
-	String varchar;
-	String text;
-	double decimal;
-	double floatType;
-	double doubleType;
-	String bit;
-	String charType;
+    String varchar;
+    String text;
+    double decimal;
+    double floatType;
+    double doubleType;
+    String bit;
+    String charType;
 
-	public MySQLPrecision2(String varchar, String text, double decimal,
-			double floatType, double doubleType, String bit, String charType) {
-		this.varchar = varchar;
-		this.text = text;
-		this.decimal = decimal;
-		this.floatType = floatType;
-		this.doubleType = doubleType;
-		this.bit = bit;
-		this.charType = charType;
-	}
+    public MySQLPrecision2(String varchar, String text, double decimal, double floatType, double doubleType, String bit,
+            String charType) {
+        this.varchar = varchar;
+        this.text = text;
+        this.decimal = decimal;
+        this.floatType = floatType;
+        this.doubleType = doubleType;
+        this.bit = bit;
+        this.charType = charType;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((bit == null) ? 0 : bit.hashCode());
-		result = prime * result
-				+ ((charType == null) ? 0 : charType.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(decimal);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(doubleType);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(floatType);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
-		result = prime * result + ((varchar == null) ? 0 : varchar.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((bit == null) ? 0 : bit.hashCode());
+        result = prime * result + ((charType == null) ? 0 : charType.hashCode());
+        long temp;
+        temp = Double.doubleToLongBits(decimal);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(doubleType);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(floatType);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((text == null) ? 0 : text.hashCode());
+        result = prime * result + ((varchar == null) ? 0 : varchar.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		MySQLPrecision2 other = (MySQLPrecision2) obj;
-		if (bit == null) {
-			if (other.bit != null)
-				return false;
-		} else if (!bit.equals(other.bit))
-			return false;
-		if (charType == null) {
-			if (other.charType != null)
-				return false;
-		} else if (!charType.equals(other.charType))
-			return false;
-		if (Double.doubleToLongBits(decimal) != Double
-				.doubleToLongBits(other.decimal))
-			return false;
-		if (Double.doubleToLongBits(doubleType) != Double
-				.doubleToLongBits(other.doubleType))
-			return false;
-		if (Double.doubleToLongBits(floatType) != Double
-				.doubleToLongBits(other.floatType))
-			return false;
-		if (text == null) {
-			if (other.text != null)
-				return false;
-		} else if (!text.equals(other.text))
-			return false;
-		if (varchar == null) {
-			if (other.varchar != null)
-				return false;
-		} else if (!varchar.equals(other.varchar))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MySQLPrecision2 other = (MySQLPrecision2) obj;
+        if (bit == null) {
+            if (other.bit != null)
+                return false;
+        } else if (!bit.equals(other.bit))
+            return false;
+        if (charType == null) {
+            if (other.charType != null)
+                return false;
+        } else if (!charType.equals(other.charType))
+            return false;
+        if (Double.doubleToLongBits(decimal) != Double.doubleToLongBits(other.decimal))
+            return false;
+        if (Double.doubleToLongBits(doubleType) != Double.doubleToLongBits(other.doubleType))
+            return false;
+        if (Double.doubleToLongBits(floatType) != Double.doubleToLongBits(other.floatType))
+            return false;
+        if (text == null) {
+            if (other.text != null)
+                return false;
+        } else if (!text.equals(other.text))
+            return false;
+        if (varchar == null) {
+            if (other.varchar != null)
+                return false;
+        } else if (!varchar.equals(other.varchar))
+            return false;
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return "MySQLPrecision2 [varchar=" + varchar + ", text=" + text
-				+ ", decimal=" + decimal + ", floatType=" + floatType
-				+ ", doubleType=" + doubleType + ", bit=" + bit + ", charType="
-				+ charType + "]";
-	}
+    @Override
+    public String toString() {
+        return "MySQLPrecision2 [varchar=" + varchar + ", text=" + text + ", decimal=" + decimal + ", floatType="
+                + floatType + ", doubleType=" + doubleType + ", bit=" + bit + ", charType=" + charType + "]";
+    }
 
 }

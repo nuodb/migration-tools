@@ -75,13 +75,14 @@ public class OracleDialect extends SimpleDialect {
 
     private static final Regex TIMESTAMP_REGEX = INSTANCE.compile("TIMESTAMP(*)");
     private static final Regex TIMESTAMP_WITH_TIME_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH TIME ZONE");
-    private static final Regex TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH LOCAL TIME ZONE");
+    private static final Regex TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX = INSTANCE
+            .compile("TIMESTAMP(*) WITH LOCAL TIME ZONE");
     public static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
     public static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND(*)");
 
-    private static  int CL_MAX_OPEN_CURSORS = 0;
+    private static int CL_MAX_OPEN_CURSORS = 0;
     private static final int DEFAULT_MAX_OPEN_CURSORS = 300;
-    private static final String MAX_OPEN_CURSORS = "maxopencursors"; 
+    private static final String MAX_OPEN_CURSORS = "maxopencursors";
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -128,34 +129,40 @@ public class OracleDialect extends SimpleDialect {
         try {
             userName = connection.getMetaData().getUserName();
             result = statement.executeQuery("SELECT VALUE FROM V$PARAMETER WHERE NAME = 'open_cursors'");
-        } catch(Exception e) {
-            int MAX = CL_MAX_OPEN_CURSORS == 0 ? DEFAULT_MAX_OPEN_CURSORS : CL_MAX_OPEN_CURSORS; 
+        } catch (Exception e) {
+            int MAX = CL_MAX_OPEN_CURSORS == 0 ? DEFAULT_MAX_OPEN_CURSORS : CL_MAX_OPEN_CURSORS;
             if (logger.isWarnEnabled()) {
-                logger.warn((format(" Oracle user %s don't have permission to access V$PARAMETER view, please contact Database Administrator ",userName)));
-                logger.warn((format(" Value for max_open_cursors set to %d. This might result in ORA-01000: maximum open cursors exceeded exception",MAX)));
+                logger.warn((format(
+                        " Oracle user %s don't have permission to access V$PARAMETER view, please contact Database Administrator ",
+                        userName)));
+                logger.warn((format(
+                        " Value for max_open_cursors set to %d. This might result in ORA-01000: maximum open cursors exceeded exception",
+                        MAX)));
             }
         }
         if (!(result == null) && result.next()) {
-            return maxOpenCursorsValue(result.getInt(1),CL_MAX_OPEN_CURSORS,DEFAULT_MAX_OPEN_CURSORS);
+            return maxOpenCursorsValue(result.getInt(1), CL_MAX_OPEN_CURSORS, DEFAULT_MAX_OPEN_CURSORS);
         } else {
-            return maxOpenCursorsValue(0,CL_MAX_OPEN_CURSORS,DEFAULT_MAX_OPEN_CURSORS);
+            return maxOpenCursorsValue(0, CL_MAX_OPEN_CURSORS, DEFAULT_MAX_OPEN_CURSORS);
         }
     }
 
-    public Integer maxOpenCursorsValue(int sMax ,int clMax, int defMax) {
+    public Integer maxOpenCursorsValue(int sMax, int clMax, int defMax) {
         if (clMax != 0) {
             if (sMax != 0 && sMax < clMax) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn((format("Oracle max_open_cursors value is %d and command line passing value is %d. This might result in ORA-01000: maximum open cursors exceeded exception ",sMax,clMax)));
+                    logger.warn((format(
+                            "Oracle max_open_cursors value is %d and command line passing value is %d. This might result in ORA-01000: maximum open cursors exceeded exception ",
+                            sMax, clMax)));
                 }
                 return clMax;
-            }else {
+            } else {
                 return clMax;
             }
-        }else {
+        } else {
             if (sMax != 0) {
                 return sMax;
-            }else {
+            } else {
                 return defMax;
             }
         }
@@ -187,10 +194,10 @@ public class OracleDialect extends SimpleDialect {
     public boolean supportsTransactionIsolation(int level) {
         boolean supports = false;
         switch (level) {
-            case TRANSACTION_READ_COMMITTED:
-            case TRANSACTION_SERIALIZABLE:
-                supports = true;
-                break;
+        case TRANSACTION_READ_COMMITTED:
+        case TRANSACTION_SERIALIZABLE:
+            supports = true;
+            break;
         }
         return supports;
     }

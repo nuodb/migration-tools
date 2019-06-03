@@ -50,14 +50,13 @@ public class BlockingThreadPool extends ThreadPoolExecutor {
     }
 
     public BlockingThreadPool(int poolSize, long blockTime, TimeUnit blockTimeUnit,
-                              Callable<Boolean> blockTimeCallback) {
+            Callable<Boolean> blockTimeCallback) {
         this(poolSize, KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, blockTime, blockTimeUnit, blockTimeCallback);
     }
 
-    public BlockingThreadPool(int poolSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
-                              long blockTime, TimeUnit blockTimeUnit, Callable<Boolean> blockTimeCallback) {
-        super(poolSize, poolSize, keepAliveTime, keepAliveTimeUnit,
-                new LinkedBlockingDeque<Runnable>(),
+    public BlockingThreadPool(int poolSize, long keepAliveTime, TimeUnit keepAliveTimeUnit, long blockTime,
+            TimeUnit blockTimeUnit, Callable<Boolean> blockTimeCallback) {
+        super(poolSize, poolSize, keepAliveTime, keepAliveTimeUnit, new LinkedBlockingDeque<Runnable>(),
                 new BlockingPolicy(blockTime, blockTimeUnit, blockTimeCallback));
         allowCoreThreadTimeOut(true);
     }

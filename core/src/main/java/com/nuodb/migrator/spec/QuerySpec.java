@@ -33,7 +33,7 @@ import com.nuodb.migrator.utils.ObjectUtils;
  * @author Sergey Bushik
  */
 public class QuerySpec {
-    
+
     private String query;
 
     public QuerySpec(String query) {
@@ -50,12 +50,15 @@ public class QuerySpec {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         QuerySpec that = (QuerySpec) o;
 
-        if (query != null ? !query.equals(that.query) : that.query != null) return false;
+        if (query != null ? !query.equals(that.query) : that.query != null)
+            return false;
 
         return true;
     }

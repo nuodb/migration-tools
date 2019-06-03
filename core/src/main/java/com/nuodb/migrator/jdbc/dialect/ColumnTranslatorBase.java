@@ -42,13 +42,12 @@ public abstract class ColumnTranslatorBase<S extends ColumnScript> extends Trans
         super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
     }
 
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
+    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, Class<? extends S> scriptClass) {
         super(sourceDatabaseInfo, scriptClass);
     }
 
     protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
+            Class<? extends S> scriptClass) {
         super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
     }
 

@@ -50,9 +50,8 @@ import static java.util.regex.Pattern.quote;
  */
 public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public static final String QUERY =
-            "SELECT T.SCHEMA, T.TABLENAME, T.CONSTRAINTNAME, T.CONSTRAINTTEXT FROM SYSTEM.TABLECONSTRAINTS AS T " +
-            "WHERE T.SCHEMA=? AND T.TABLENAME=?";
+    public static final String QUERY = "SELECT T.SCHEMA, T.TABLENAME, T.CONSTRAINTNAME, T.CONSTRAINTTEXT FROM SYSTEM.TABLECONSTRAINTS AS T "
+            + "WHERE T.SCHEMA=? AND T.TABLENAME=?";
 
     public NuoDBCheckInspector() {
         super(CHECK, TableInspectionScope.class);

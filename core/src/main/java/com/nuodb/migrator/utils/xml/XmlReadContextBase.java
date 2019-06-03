@@ -178,12 +178,15 @@ public abstract class XmlReadContextBase implements XmlReadContext {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         XmlReadContextBase that = (XmlReadContextBase) o;
 
-        if (map != null ? !map.equals(that.map) : that.map != null) return false;
+        if (map != null ? !map.equals(that.map) : that.map != null)
+            return false;
 
         return true;
     }

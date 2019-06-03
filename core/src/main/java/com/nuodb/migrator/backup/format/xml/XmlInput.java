@@ -74,8 +74,8 @@ public class XmlInput extends InputBase implements XmlFormat {
     @Override
     protected void init(InputStream inputStream) {
         try {
-            xmlReader = newInstance().createXMLStreamReader(
-                    getInputStream(), (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING));
+            xmlReader = newInstance().createXMLStreamReader(getInputStream(),
+                    (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING));
         } catch (XMLStreamException exception) {
             throw new InputException(exception);
         }
@@ -101,8 +101,8 @@ public class XmlInput extends InputBase implements XmlFormat {
                 ValueType valueType = valueTypes.get(index);
                 if (!nulls.get(index) && isNextElement(ELEMENT_COLUMN)) {
                     try {
-                        ValueType valueLevel = VALUE_TYPES.fromAlias(
-                                getAttributeValue(NULL_NS_URI, ATTRIBUTE_VALUE_TYPE));
+                        ValueType valueLevel = VALUE_TYPES
+                                .fromAlias(getAttributeValue(NULL_NS_URI, ATTRIBUTE_VALUE_TYPE));
                         valueType = valueLevel != null ? valueLevel : valueType;
                         value = xmlReader.getElementText();
                     } catch (XMLStreamException exception) {
@@ -111,12 +111,12 @@ public class XmlInput extends InputBase implements XmlFormat {
                 }
                 valueType = valueType != null ? valueType : STRING;
                 switch (valueType) {
-                    case BINARY:
-                        values[index] = binary(BASE64.decode(value));
-                        break;
-                    case STRING:
-                        values[index] = string(value);
-                        break;
+                case BINARY:
+                    values[index] = binary(BASE64.decode(value));
+                    break;
+                case STRING:
+                    values[index] = string(value);
+                    break;
                 }
                 index++;
             }
@@ -128,8 +128,8 @@ public class XmlInput extends InputBase implements XmlFormat {
         while (xmlReader.getEventType() != XMLStreamConstants.END_DOCUMENT) {
             try {
                 switch (xmlReader.next()) {
-                    case XMLStreamConstants.START_ELEMENT:
-                        return true;
+                case XMLStreamConstants.START_ELEMENT:
+                    return true;
                 }
             } catch (XMLStreamException exception) {
                 throw new InputException(exception);
@@ -143,8 +143,7 @@ public class XmlInput extends InputBase implements XmlFormat {
     }
 
     protected boolean isCurrentElement(String element) {
-        return xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT &&
-                xmlReader.getLocalName().equals(element);
+        return xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT && xmlReader.getLocalName().equals(element);
     }
 
     protected String getAttributeValue(String namespace, String attribute) {

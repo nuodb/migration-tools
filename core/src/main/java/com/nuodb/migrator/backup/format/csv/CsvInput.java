@@ -114,12 +114,12 @@ public class CsvInput extends InputBase implements CsvFormat {
             ValueType type = valueTypes.get(index);
             type = type != null ? type : STRING;
             switch (type) {
-                case BINARY:
-                    values[index] = binary(BASE64.decode(value));
-                    break;
-                case STRING:
-                    values[index] = string(value);
-                    break;
+            case BINARY:
+                values[index] = binary(BASE64.decode(value));
+                break;
+            case STRING:
+                values[index] = string(value);
+                break;
             }
             index++;
         }

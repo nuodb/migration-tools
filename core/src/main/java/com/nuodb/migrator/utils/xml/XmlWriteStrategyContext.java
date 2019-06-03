@@ -75,12 +75,15 @@ public class XmlWriteStrategyContext extends XmlWriteContextBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         XmlWriteStrategyContext that = (XmlWriteStrategyContext) o;
 
-        if (strategy != null ? !strategy.equals(that.strategy) : that.strategy != null) return false;
+        if (strategy != null ? !strategy.equals(that.strategy) : that.strategy != null)
+            return false;
 
         return true;
     }

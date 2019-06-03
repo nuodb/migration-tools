@@ -66,10 +66,7 @@ public class OracleUserDefineTypeInspectorTest extends InspectorTestBase {
         userDefinedType2.setName("DTYPE");
         userDefinedType2.setCode("STRUCT");
 
-        return new Object[][]{
-                {userDefinedType1},
-                {userDefinedType2}
-        };
+        return new Object[][] { { userDefinedType1 }, { userDefinedType2 } };
     }
 
     @Test(dataProvider = "inspect")
@@ -77,7 +74,8 @@ public class OracleUserDefineTypeInspectorTest extends InspectorTestBase {
         createResultSet(userDefinedType.getName(), userDefinedType.getCode());
 
         TableInspectionScope tableInspectionScope = new TableInspectionScope(null, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), tableInspectionScope, USER_DEFINED_TYPE);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), tableInspectionScope,
+                USER_DEFINED_TYPE);
         verifyInspectScope(getInspector(), tableInspectionScope);
 
         Collection<UserDefinedType> userDefinedTypes = inspectionResults.getObjects(USER_DEFINED_TYPE);

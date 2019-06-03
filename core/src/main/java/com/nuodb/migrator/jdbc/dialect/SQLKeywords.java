@@ -73,8 +73,7 @@ public class SQLKeywords implements Set<String> {
                 }
             }
         } catch (IOException exception) {
-            throw new DialectException(
-                    format("Failed loading reserved key words from %s", resource), exception);
+            throw new DialectException(format("Failed loading reserved key words from %s", resource), exception);
         } finally {
             closeQuietly(reader);
         }

@@ -49,14 +49,14 @@ public class NuoDBSmallIntValue extends JdbcTypeValueBase<String> {
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int index,
-                           Field field, Map<String, Object> options) throws SQLException {
+    public String getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getString(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, String value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setString(index, value);
     }
 }

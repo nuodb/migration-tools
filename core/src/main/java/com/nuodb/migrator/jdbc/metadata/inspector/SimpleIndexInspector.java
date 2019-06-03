@@ -53,9 +53,8 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
     @Override
     protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
-        return inspectionContext.getConnection().getMetaData().getIndexInfo(
-                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),
-                tableInspectionScope.getTable(), false, true);
+        return inspectionContext.getConnection().getMetaData().getIndexInfo(tableInspectionScope.getCatalog(),
+                tableInspectionScope.getSchema(), tableInspectionScope.getTable(), false, true);
     }
 
     @Override
@@ -65,11 +64,11 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
             if (indexes.getShort("TYPE") == tableIndexStatistic) {
                 continue;
             }
-            Table table = addTable(inspectionResults, indexes.getString("TABLE_CAT"),
-                    indexes.getString("TABLE_SCHEM"), indexes.getString("TABLE_NAME"));
+            Table table = addTable(inspectionResults, indexes.getString("TABLE_CAT"), indexes.getString("TABLE_SCHEM"),
+                    indexes.getString("TABLE_NAME"));
             Identifier identifier = valueOf(indexes.getString("INDEX_NAME"));
-            Index index = table.hasIndex(identifier) ? table.getIndex(identifier) :
-                    table.addIndex(new Index(identifier));
+            Index index = table.hasIndex(identifier) ? table.getIndex(identifier)
+                    : table.addIndex(new Index(identifier));
             processIndex(inspectionContext, indexes, index);
             inspectionResults.addObject(index);
         }
@@ -90,14 +89,13 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
         }
     }
 
-    protected String getExpression(InspectionContext inspectionContext, ResultSet indexes, Index index,
-                                   String column)
+    protected String getExpression(InspectionContext inspectionContext, ResultSet indexes, Index index, String column)
             throws SQLException {
         return null;
     }
 
     protected SortOrder getSortOrder(InspectionContext inspectionContext, ResultSet indexes, Index index,
-                                     String sortOrder) {
+            String sortOrder) {
         if (sortOrder != null) {
             return sortOrder.equals("A") ? SortOrder.ASC : SortOrder.DESC;
         } else {

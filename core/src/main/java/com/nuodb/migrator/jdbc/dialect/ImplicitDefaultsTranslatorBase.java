@@ -50,7 +50,8 @@ public abstract class ImplicitDefaultsTranslatorBase extends ColumnTranslatorBas
     /**
      * Checks if explicit defaults usage is set
      *
-     * @param context translation context
+     * @param context
+     *            translation context
      * @return true if any of the strict modes is on
      */
     protected boolean isUseExplicitDefaults(TranslationContext context) {

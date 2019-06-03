@@ -62,14 +62,14 @@ public class JdbcBinaryValue extends JdbcTypeValueBase<Object> {
     }
 
     @Override
-    public byte[] getValue(ResultSet resultSet, int index,
-                           Field field, Map<String, Object> options) throws SQLException {
+    public byte[] getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getBytes(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Object value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Object value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         if (byte[].class.isInstance(value)) {
             statement.setBytes(index, (byte[]) value);
         } else if (String.class.isInstance(value)) {

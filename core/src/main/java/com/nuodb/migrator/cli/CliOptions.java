@@ -28,9 +28,10 @@
 package com.nuodb.migrator.cli;
 
 /**
- * Contains literal constants for the available, recognized command line options, without their prefixes (i.e. double
- * hyphen --). Option prefixes, argument separators, argument value separators are specified in the option getValue
- * instance.
+ * Contains literal constants for the available, recognized command line
+ * options, without their prefixes (i.e. double hyphen --). Option prefixes,
+ * argument separators, argument value separators are specified in the option
+ * getValue instance.
  *
  * @author Sergey Bushik
  */

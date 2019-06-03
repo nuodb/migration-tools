@@ -58,7 +58,8 @@ import static java.lang.System.exit;
 import static org.apache.commons.lang3.StringUtils.split;
 
 /**
- * Main entry point of the command line interface, for the names of the available options see {@link CliOptions}.
+ * Main entry point of the command line interface, for the names of the
+ * available options see {@link CliOptions}.
  *
  * @author Sergey Bushik
  */
@@ -97,45 +98,26 @@ public class CliHandler extends CliSupport implements Bootable {
         if (logger.isDebugEnabled()) {
             logger.debug("Creating options to bind command line arguments to");
         }
-        Option help = newBasicOptionBuilder().
-                withId(HELP_ID).
-                withName(HELP).
-                withAlias(HELP_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(HELP_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(HELP_ARGUMENT_NAME)).build()
-                ).build();
+        Option help = newBasicOptionBuilder().withId(HELP_ID).withName(HELP).withAlias(HELP_SHORT, OptionFormat.SHORT)
+                .withDescription(getMessage(HELP_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(HELP_ARGUMENT_NAME)).build()).build();
 
-        Option version = newBasicOptionBuilder().
-                withId(VERSION_ID).
-                withName(VERSION).
-                withAlias(VERSION_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(VERSION_OPTION_DESCRIPTION)).build();
+        Option version = newBasicOptionBuilder().withId(VERSION_ID).withName(VERSION)
+                .withAlias(VERSION_SHORT, OptionFormat.SHORT).withDescription(getMessage(VERSION_OPTION_DESCRIPTION))
+                .build();
 
-
-        Option list = newBasicOptionBuilder().
-                withId(LIST_ID).
-                withName(LIST).
-                withAlias(LIST_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
+        Option list = newBasicOptionBuilder().withId(LIST_ID).withName(LIST).withAlias(LIST_SHORT, OptionFormat.SHORT)
+                .withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option config = newBasicOptionBuilder().
-                withId(CONFIG_ID).
-                withName(CONFIG).
-                withAlias(CONFIG_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(CONFIG_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withOptionProcessor(new ConfigOptionProcessor()).
-                                withMinimum(1).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
+        Option config = newBasicOptionBuilder().withId(CONFIG_ID).withName(CONFIG)
+                .withAlias(CONFIG_SHORT, OptionFormat.SHORT).withDescription(getMessage(CONFIG_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(CONFIG_ARGUMENT_NAME))
+                        .withOptionFormat(optionFormat).withOptionProcessor(new ConfigOptionProcessor()).withMinimum(1)
+                        .withMaximum(MAX_VALUE).build())
+                .build();
 
         Command command = new CliRunCommand(cliRunLookup);
         command.setId(COMMAND_ID);
@@ -145,14 +127,8 @@ public class CliHandler extends CliSupport implements Bootable {
         command.setRequired(false);
         command.setOptionFormat(getOptionFormat());
 
-        return newGroupBuilder().
-                withName(getMessage(ROOT_GROUP_NAME)).
-                withOption(help).
-                withOption(version).
-                withOption(list).
-                withOption(config).
-                withOption(command).
-                withRequired(true).build();
+        return newGroupBuilder().withName(getMessage(ROOT_GROUP_NAME)).withOption(help).withOption(version)
+                .withOption(list).withOption(config).withOption(command).withRequired(true).build();
     }
 
     protected void handleOptionSet(OptionSet options, Option root) {

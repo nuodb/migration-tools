@@ -36,8 +36,9 @@ import static java.sql.Types.BIT;
 import static java.util.regex.Pattern.compile;
 
 /**
- * Translates MySQL BIT literals http://dev.mysql.com/doc/refman/5.0/en/bit-field-literals.html to NuoDB BOOLEAN
- * equivalents.
+ * Translates MySQL BIT literals
+ * http://dev.mysql.com/doc/refman/5.0/en/bit-field-literals.html to NuoDB
+ * BOOLEAN equivalents.
  *
  * @author Sergey Bushik
  */
@@ -54,8 +55,8 @@ public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
 
     @Override
     protected boolean supportsScript(ColumnScript script, TranslationContext context) {
-        return script.getScript() != null && script.getColumn().getTypeCode() == BIT &&
-                PATTERN.matcher(script.getScript()).matches();
+        return script.getScript() != null && script.getColumn().getTypeCode() == BIT
+                && PATTERN.matcher(script.getScript()).matches();
     }
 
     @Override
@@ -65,14 +66,14 @@ public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
         if (matcher.matches()) {
             String literal = matcher.group(1);
             switch (parseInt(literal, 2)) {
-                case 0:
-                    target = FALSE;
-                    break;
-                case 1:
-                    target = TRUE;
-                    break;
-                default:
-                    target = literal;
+            case 0:
+                target = FALSE;
+                break;
+            case 1:
+                target = TRUE;
+                break;
+            default:
+                target = literal;
             }
         } else {
             target = null;

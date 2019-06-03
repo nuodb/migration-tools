@@ -69,7 +69,7 @@ public class IndentedBase implements Indented {
     protected void output(int indent, StringBuilder buffer, Collection<? extends Indented> items) {
         buffer.append("[");
         outputNewLine(buffer);
-        for (Iterator<? extends Indented> iterator = items.iterator(); iterator.hasNext(); ) {
+        for (Iterator<? extends Indented> iterator = items.iterator(); iterator.hasNext();) {
             Indented item = iterator.next();
             item.output(indent + INDENT, buffer);
             if (iterator.hasNext()) {

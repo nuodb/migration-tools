@@ -109,14 +109,19 @@ public class JdbcTypeOptions {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JdbcTypeOptions)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof JdbcTypeOptions))
+            return false;
 
         JdbcTypeOptions that = (JdbcTypeOptions) o;
 
-        if (size != null ? !size.equals(that.size) : that.size != null) return false;
-        if (scale != null ? !scale.equals(that.scale) : that.scale != null) return false;
-        if (precision != null ? !precision.equals(that.precision) : that.precision != null) return false;
+        if (size != null ? !size.equals(that.size) : that.size != null)
+            return false;
+        if (scale != null ? !scale.equals(that.scale) : that.scale != null)
+            return false;
+        if (precision != null ? !precision.equals(that.precision) : that.precision != null)
+            return false;
 
         return true;
     }

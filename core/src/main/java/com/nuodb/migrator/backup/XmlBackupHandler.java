@@ -78,8 +78,8 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
                     }
                 });
                 if (logger.isWarnEnabled()) {
-                    logger.warn(format("Ignoring table %s, which is referenced by %s constraints, " +
-                                    "but is not declared explicitly", table.getQualifiedName(), referenced));
+                    logger.warn(format("Ignoring table %s, which is referenced by %s constraints, "
+                            + "but is not declared explicitly", table.getQualifiedName(), referenced));
                 }
                 table.getSchema().removeTable(table);
             }
@@ -126,4 +126,3 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
         }
     }
 }
-

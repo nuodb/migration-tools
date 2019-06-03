@@ -82,9 +82,8 @@ public class OracleIndexInspector extends SimpleIndexInspector {
                 "NULL AS ASC_OR_DESC", "I.DISTINCT_KEYS AS CARDINALITY", "I.LEAF_BLOCKS AS PAGES",
                 "NULL AS FILTER_CONDITION");
         clusteredIndex.from("ALL_INDEXES I");
-        clusteredIndex.join("ALL_IND_COLUMNS C",
-                "C.INDEX_NAME = I.INDEX_NAME AND C.TABLE_OWNER = I.TABLE_OWNER AND " +
-                        "I.TABLE_NAME = I.TABLE_NAME AND C.INDEX_OWNER = I.OWNER");
+        clusteredIndex.join("ALL_IND_COLUMNS C", "C.INDEX_NAME = I.INDEX_NAME AND C.TABLE_OWNER = I.TABLE_OWNER AND "
+                + "I.TABLE_NAME = I.TABLE_NAME AND C.INDEX_OWNER = I.OWNER");
         if (!isEmpty(schema)) {
             clusteredIndex.where(containsAny(schema, "%") ? "I.OWNER LIKE ? ESCAPE '/'" : "I.OWNER=?");
             parameters.add(schema);
@@ -99,43 +98,36 @@ public class OracleIndexInspector extends SimpleIndexInspector {
 
     @Override
     protected String getExpression(InspectionContext inspectionContext, ResultSet indexes, final Index index,
-                                   String column) throws SQLException {
+            String column) throws SQLException {
         String indexType = indexes.getString("INDEX_TYPE");
         String expression = null;
-        if (equalsIgnoreCase(indexType, FUNCTION_BASED_NORMAL) ||
-                equalsIgnoreCase(indexType, FUNCTION_BASED_BITMAP)) {
+        if (equalsIgnoreCase(indexType, FUNCTION_BASED_NORMAL) || equalsIgnoreCase(indexType, FUNCTION_BASED_BITMAP)) {
             StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-            expression = template.executeStatement(
-                    new StatementFactory<PreparedStatement>() {
-                        @Override
-                        public PreparedStatement createStatement(Connection connection) throws SQLException {
-                            SelectQuery expressions = new SelectQuery();
-                            expressions.column("COLUMN_EXPRESSION");
-                            expressions.from("ALL_IND_EXPRESSIONS");
-                            expressions.where("TABLE_OWNER = ? AND TABLE_NAME = ? AND INDEX_NAME = ?");
-                            return connection.prepareStatement(expressions.toString());
-                        }
-                    }, new StatementAction<PreparedStatement, String>() {
-                        @Override
-                        public String executeStatement(PreparedStatement statement) throws SQLException {
-                            Table table = index.getTable();
-                            statement.setString(1, table.getSchema().getName());
-                            statement.setString(2, table.getName());
-                            statement.setString(3, index.getName());
-                            ResultSet expressions = statement.executeQuery();
-                            String expression = null;
-                            if (expressions.next()) {
-                                expression = expressions.getString(1);
-                            }
-                            return expression;
-                        }
+            expression = template.executeStatement(new StatementFactory<PreparedStatement>() {
+                @Override
+                public PreparedStatement createStatement(Connection connection) throws SQLException {
+                    SelectQuery expressions = new SelectQuery();
+                    expressions.column("COLUMN_EXPRESSION");
+                    expressions.from("ALL_IND_EXPRESSIONS");
+                    expressions.where("TABLE_OWNER = ? AND TABLE_NAME = ? AND INDEX_NAME = ?");
+                    return connection.prepareStatement(expressions.toString());
+                }
+            }, new StatementAction<PreparedStatement, String>() {
+                @Override
+                public String executeStatement(PreparedStatement statement) throws SQLException {
+                    Table table = index.getTable();
+                    statement.setString(1, table.getSchema().getName());
+                    statement.setString(2, table.getName());
+                    statement.setString(3, index.getName());
+                    ResultSet expressions = statement.executeQuery();
+                    String expression = null;
+                    if (expressions.next()) {
+                        expression = expressions.getString(1);
                     }
-            );
+                    return expression;
+                }
+            });
         }
         return expression;
     }
 }
-
-
-
-

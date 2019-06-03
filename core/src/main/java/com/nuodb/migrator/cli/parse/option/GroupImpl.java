@@ -62,8 +62,8 @@ public class GroupImpl extends OptionBase implements Group {
         super(id, name, description, required);
     }
 
-    public GroupImpl(int id, String name, String description, boolean required,
-                     int minimum, int maximum, List<Option> options) {
+    public GroupImpl(int id, String name, String description, boolean required, int minimum, int maximum,
+            List<Option> options) {
         super(id, name, description, required);
         this.minimum = minimum;
         this.maximum = maximum;
@@ -166,8 +166,9 @@ public class GroupImpl extends OptionBase implements Group {
     }
 
     /**
-     * Tests whether this option is required. For groups we evaluate the <code>required</code> flag common to all
-     * options, but also take the minimum constraints into account.
+     * Tests whether this option is required. For groups we evaluate the
+     * <code>required</code> flag common to all options, but also take the
+     * minimum constraints into account.
      *
      * @return a flag whether this option is required
      */
@@ -189,7 +190,7 @@ public class GroupImpl extends OptionBase implements Group {
     @Override
     protected void preProcessOption(CommandLine commandLine, ListIterator<String> arguments) {
         for (Option option : this.options) {
-            if (option.canProcess(commandLine,arguments)) {
+            if (option.canProcess(commandLine, arguments)) {
                 option.preProcess(commandLine, arguments);
                 break;
             }
@@ -294,7 +295,7 @@ public class GroupImpl extends OptionBase implements Group {
 
     @Override
     public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator,
-                     String separator) {
+            String separator) {
         hints = newHashSet(hints);
         boolean optional = !isRequired() && (hints.contains(OPTIONAL) || hints.contains(OPTIONAL_CHILD_GROUP));
         boolean expanded = (getName() == null) || hints.contains(GROUP_OPTIONS);
@@ -332,7 +333,7 @@ public class GroupImpl extends OptionBase implements Group {
                 Collections.sort(list, comparator);
             }
             // for each option.
-            for (Iterator i = list.iterator(); i.hasNext(); ) {
+            for (Iterator i = list.iterator(); i.hasNext();) {
                 Option option = (Option) i.next();
 
                 // append help information

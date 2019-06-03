@@ -106,10 +106,14 @@ public class MySQLDialect extends SimpleDialect {
         addJdbcTypeName(new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "INT({P}) UNSIGNED");
         addJdbcTypeName(new JdbcTypeDesc(INTEGER, "MEDIUMINT UNSIGNED"), "MEDIUMINT({P}) UNSIGNED");
         addJdbcTypeName(new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"), "BIGINT({P}) UNSIGNED");
-        // TINYTEXT - A CLOB column with a maximum length of 255 (2**8 - 1) characters.
-        // TEXT - A CLOB column with a maximum length of 65,535 (2**16 - 1) characters.
-        // MEDIUMTEXT - A CLOB column with a maximum length of 16,777,215 (2**24 - 1) characters.
-        // LONGTEXT - A CLOB column with a maximum length of 4,294,967,295 or 4GB (2**32 - 1) characters.
+        // TINYTEXT - A CLOB column with a maximum length of 255 (2**8 - 1)
+        // characters.
+        // TEXT - A CLOB column with a maximum length of 65,535 (2**16 - 1)
+        // characters.
+        // MEDIUMTEXT - A CLOB column with a maximum length of 16,777,215 (2**24
+        // - 1) characters.
+        // LONGTEXT - A CLOB column with a maximum length of 4,294,967,295 or
+        // 4GB (2**32 - 1) characters.
         addJdbcTypeName(CLOB, "TEXT");
         addJdbcTypeName(CLOB, newSize(255), "TINYTEXT");
         addJdbcTypeName(CLOB, newSize(65535), "TEXT");
@@ -129,11 +133,9 @@ public class MySQLDialect extends SimpleDialect {
 
     @Override
     protected void initTranslations() {
-        addTranslator(new CurrentTimestampTranslator(NUODB,
-                newArrayList("NOW"), "CURRENT_TIMESTAMP", true));
-        addTranslator(new CurrentTimestampTranslator(MYSQL,
-                newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()", "LOCALTIME", "LOCALTIME()",
-                        "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "CURRENT_TIMESTAMP", true));
+        addTranslator(new CurrentTimestampTranslator(NUODB, newArrayList("NOW"), "CURRENT_TIMESTAMP", true));
+        addTranslator(new CurrentTimestampTranslator(MYSQL, newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()",
+                "NOW()", "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "CURRENT_TIMESTAMP", true));
     }
 
     @Override
@@ -218,7 +220,8 @@ public class MySQLDialect extends SimpleDialect {
     /**
      * Forces driver to stream ResultSet http://goo.gl/kl1Nr
      *
-     * @param statement to stream ResultSet
+     * @param statement
+     *            to stream ResultSet
      * @throws SQLException
      */
     @Override
@@ -229,8 +232,10 @@ public class MySQLDialect extends SimpleDialect {
     /**
      * Will handle only MySQL triggers
      *
-     * @param session source session
-     * @param trigger column trigger to inline
+     * @param session
+     *            source session
+     * @param trigger
+     *            column trigger to inline
      * @return result script
      */
     @Override

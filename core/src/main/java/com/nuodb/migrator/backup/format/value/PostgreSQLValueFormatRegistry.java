@@ -38,4 +38,3 @@ public class PostgreSQLValueFormatRegistry extends SimpleValueFormatRegistry {
         addValueFormat(PostgreSQLBitVaryingValue.INSTANCE, new PostgreSQLBitVaryingValueFormat());
     }
 }
-

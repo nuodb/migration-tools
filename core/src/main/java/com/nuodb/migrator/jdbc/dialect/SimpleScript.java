@@ -42,8 +42,10 @@ public class SimpleScript implements Script, Comparable<Script> {
     /**
      * Constructs script detached from any database session
      *
-     * @param script  source of the script
-     * @param literal true if script is literal
+     * @param script
+     *            source of the script
+     * @param literal
+     *            true if script is literal
      */
     public SimpleScript(String script, boolean literal) {
         this.script = script;
@@ -62,13 +64,17 @@ public class SimpleScript implements Script, Comparable<Script> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         SimpleScript that = (SimpleScript) o;
 
-        if (literal != that.literal) return false;
-        if (script != null ? !script.equals(that.script) : that.script != null) return false;
+        if (literal != that.literal)
+            return false;
+        if (script != null ? !script.equals(that.script) : that.script != null)
+            return false;
 
         return true;
     }

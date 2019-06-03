@@ -79,9 +79,9 @@ public interface BackupLoaderContext {
 
     void setExecutorService(ExecutorService executorService);
 
-    Map<String,Object> getFormatAttributes();
+    Map<String, Object> getFormatAttributes();
 
-    void setFormatAttributes(Map<String,Object> formatAttributes);
+    void setFormatAttributes(Map<String, Object> formatAttributes);
 
     FormatFactory getFormatFactory();
 

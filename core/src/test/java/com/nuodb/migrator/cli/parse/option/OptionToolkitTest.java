@@ -38,8 +38,8 @@ public class OptionToolkitTest {
 
     @Test
     public void testBuildArgument() throws Exception {
-        Argument argument = optionToolkit.newArgumentBuilder().
-                withId(OPTION_ID).withMinimum(OPTION_MINIMUM).withMaximum(OPTION_MAXIMUM).build();
+        Argument argument = optionToolkit.newArgumentBuilder().withId(OPTION_ID).withMinimum(OPTION_MINIMUM)
+                .withMaximum(OPTION_MAXIMUM).build();
 
         assertNotNull(argument);
         assertEquals(argument.getId(), OPTION_ID);
@@ -49,8 +49,7 @@ public class OptionToolkitTest {
 
     @Test
     public void testBuildOption() throws Exception {
-        BasicOption option = optionToolkit.newBasicOptionBuilder().
-                withId(OPTION_ID).build();
+        BasicOption option = optionToolkit.newBasicOptionBuilder().withId(OPTION_ID).build();
 
         assertNotNull(option);
         assertEquals(option.getId(), OPTION_ID);
@@ -58,8 +57,8 @@ public class OptionToolkitTest {
 
     @Test
     public void testBuildGroup() throws Exception {
-        Group group = optionToolkit.newGroupBuilder().
-                withId(OPTION_ID).withMaximum(OPTION_MAXIMUM).withMinimum(OPTION_MINIMUM).build();
+        Group group = optionToolkit.newGroupBuilder().withId(OPTION_ID).withMaximum(OPTION_MAXIMUM)
+                .withMinimum(OPTION_MINIMUM).build();
 
         assertNotNull(group);
         assertEquals(group.getId(), OPTION_ID);

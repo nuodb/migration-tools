@@ -61,12 +61,15 @@ public class DirClassPath implements FileClassPath {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DirClassPath)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof DirClassPath))
+            return false;
 
         DirClassPath that = (DirClassPath) o;
 
-        if (dir != null ? !dir.equals(that.dir) : that.dir != null) return false;
+        if (dir != null ? !dir.equals(that.dir) : that.dir != null)
+            return false;
 
         return true;
     }

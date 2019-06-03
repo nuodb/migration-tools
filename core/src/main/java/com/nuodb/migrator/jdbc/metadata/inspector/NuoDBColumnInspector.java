@@ -55,9 +55,8 @@ import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
  */
 public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    private static final String QUERY =
-            "SELECT * FROM SYSTEM.FIELDS AS F INNER JOIN SYSTEM.DATATYPES AS D ON F.DATATYPE = D.ID\n" +
-                    "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
+    private static final String QUERY = "SELECT * FROM SYSTEM.FIELDS AS F INNER JOIN SYSTEM.DATATYPES AS D ON F.DATATYPE = D.ID\n"
+            + "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
     private String schema;
     private String tableName;
 
@@ -83,15 +82,17 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
         // Get the fields' type from databaseMetaData
         DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
         Map<String, JdbcTypeDesc> fieldsType = new HashMap<String, JdbcTypeDesc>();
-        try(ResultSet columnsFromDatabaseMetaData = databaseMetaData.getColumns(null, schema, tableName, null)){
+        try (ResultSet columnsFromDatabaseMetaData = databaseMetaData.getColumns(null, schema, tableName, null)) {
             if (columnsFromDatabaseMetaData.next()) {
                 do {
                     JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeAlias(
-                            columnsFromDatabaseMetaData.getInt("DATA_TYPE"), columnsFromDatabaseMetaData.getString("TYPE_NAME"));
+                            columnsFromDatabaseMetaData.getInt("DATA_TYPE"),
+                            columnsFromDatabaseMetaData.getString("TYPE_NAME"));
                     fieldsType.put(columnsFromDatabaseMetaData.getString("COLUMN_NAME"), typeDescAlias);
                 } while (columnsFromDatabaseMetaData.next());
             } else {
-                throw new SQLException("Failed to get columns of table " + schema + "." + tableName + " from the database meta data");
+                throw new SQLException(
+                        "Failed to get columns of table " + schema + "." + tableName + " from the database meta data");
             }
         }
 
@@ -103,13 +104,14 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
 
             JdbcTypeDesc typeDescAlias = fieldsType.get(columns.getString("FIELD"));
             if (typeDescAlias == null) {
-                throw new SQLException("The type of the field " + columns.getString("FIELD") + " of table " + schema + "." + tableName + " does not exist in the map of fields type: " + fieldsType.toString());
+                throw new SQLException("The type of the field " + columns.getString("FIELD") + " of table " + schema
+                        + "." + tableName + " does not exist in the map of fields type: " + fieldsType.toString());
             }
 
             jdbcType.setTypeCode(typeDescAlias.getTypeCode());
             jdbcType.setTypeName(typeDescAlias.getTypeName());
 
-            jdbcType.setSize((long)columns.getInt("LENGTH"));
+            jdbcType.setSize((long) columns.getInt("LENGTH"));
             jdbcType.setPrecision(columns.getInt("PRECISION"));
             jdbcType.setScale(columns.getInt("SCALE"));
             column.setJdbcType(getJdbcType(jdbcType, columns.getString("ENUMERATION")));

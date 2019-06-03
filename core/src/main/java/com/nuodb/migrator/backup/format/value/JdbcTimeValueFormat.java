@@ -50,7 +50,8 @@ public class JdbcTimeValueFormat extends ValueFormatBase<Time> {
     }
 
     @Override
-    protected void doSetValue(Value variant, JdbcValueAccess<Time> access, Map<String, Object> options) throws SQLException {
+    protected void doSetValue(Value variant, JdbcValueAccess<Time> access, Map<String, Object> options)
+            throws SQLException {
         final String value = variant.asString();
         try {
             access.setValue(!isEmpty(value) ? value : null, options);

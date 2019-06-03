@@ -65,8 +65,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     }
 
     protected Collection<Script> getScripts(Map<Schema, Collection<Script>> schemaScripts,
-                                            ScriptGeneratorManager scriptGeneratorManager,
-                                            boolean dropSchema, boolean useSchema) {
+            ScriptGeneratorManager scriptGeneratorManager, boolean dropSchema, boolean useSchema) {
         Collection<Script> scripts = newArrayList();
         if (schemaScripts.size() == 1) {
             Map.Entry<Schema, Collection<Script>> schemaScript = schemaScripts.entrySet().iterator().next();
@@ -86,9 +85,9 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                     scripts.add(getDropSchema(schema, scriptGeneratorManager));
                 }
                 if (useSchema) {
-                    scripts.add(schema.getIdentifier() != null ?
-                                new Script(dialect.getUseSchema(scriptGeneratorManager.getName(schema))) :
-                                new Script(dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog()))));
+                    scripts.add(schema.getIdentifier() != null
+                            ? new Script(dialect.getUseSchema(scriptGeneratorManager.getName(schema)))
+                            : new Script(dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog()))));
                 }
                 scripts.addAll(schemaScript.getValue());
             }

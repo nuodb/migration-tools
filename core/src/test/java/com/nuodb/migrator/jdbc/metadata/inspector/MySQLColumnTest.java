@@ -44,17 +44,12 @@ public class MySQLColumnTest {
 
     @DataProvider(name = "getValues")
     public Object[][] createGetValuesData() throws Exception {
-        return new Object[][]{
-                {"''", newArrayList("")},
-                {"'a''b'", newArrayList("a'b")},
-                {"'a b c'", newArrayList("a b c")},
-                {"'car''s','byke\"s'", newArrayList("car's", "byke\"s")},
-                {"'in\\\\out', 'in', 'out'", newArrayList("in\\out", "in", "out")},
-                {"'\\\\'", newArrayList("\\")},
-                {"'\\,'", newArrayList(",")},
-                {"'abcd','check','sample test'", newArrayList("abcd", "check", "sample test")},
-                {"'one','two','','three'", newArrayList("one", "two", "", "three")}
-        };
+        return new Object[][] { { "''", newArrayList("") }, { "'a''b'", newArrayList("a'b") },
+                { "'a b c'", newArrayList("a b c") }, { "'car''s','byke\"s'", newArrayList("car's", "byke\"s") },
+                { "'in\\\\out', 'in', 'out'", newArrayList("in\\out", "in", "out") }, { "'\\\\'", newArrayList("\\") },
+                { "'\\,'", newArrayList(",") },
+                { "'abcd','check','sample test'", newArrayList("abcd", "check", "sample test") },
+                { "'one','two','','three'", newArrayList("one", "two", "", "three") } };
     }
 
     @Test(dataProvider = "getValues")

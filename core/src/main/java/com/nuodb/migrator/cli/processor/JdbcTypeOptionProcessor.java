@@ -46,8 +46,7 @@ import static com.nuodb.migrator.cli.CliOptions.*;
  */
 public class JdbcTypeOptionProcessor extends ValuesOptionProcessor {
 
-    private ListMultimap<String, Object> values = newListMultimap(
-            Maps.<String, Collection<Object>>newLinkedHashMap(),
+    private ListMultimap<String, Object> values = newListMultimap(Maps.<String, Collection<Object>>newLinkedHashMap(),
             new Supplier<List<Object>>() {
                 @Override
                 public List<Object> get() {

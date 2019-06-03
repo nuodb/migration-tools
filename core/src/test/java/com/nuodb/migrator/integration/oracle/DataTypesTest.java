@@ -38,24 +38,19 @@ import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 @Test(groups = { "oracleintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
 public class DataTypesTest extends BaseDataTypeTest {
 
-	@DataProvider(name = "dataTypeOracle")
-	public Object[][] createDataTypeData() {
-		return new Object[][] { { "testdata_number" }, { "testdata_number" },
-				{ "testdata_integer" }, { "testdata_float" },
-				{ "testdata_binary_float" }, { "testdata_binary_double" },
-				{ "testdata_real" }, { "testdata_varchar" },
-				{ "testdata_char_varying" }, { "testdata_char" },
-				{ "testdata_date" }, { "testdata_timestamp" },
-				{ "testdata_withtimezone" }, { "testdata_withlocaltimezone" },
-				{ "testdata_clob" }, { "testdata_blob" }, { "testdata_raw" },
-				{ "testdata_long" }, { "testdata_nclob" },
-				{ "testdata_nvarchar2" }, { "testdata_nchar" },
-				{ "testdata_long_raw" }, { "testdata_timestamp0" },
-				{ "testdata_timestamp3" } };
-	}
+    @DataProvider(name = "dataTypeOracle")
+    public Object[][] createDataTypeData() {
+        return new Object[][] { { "testdata_number" }, { "testdata_number" }, { "testdata_integer" },
+                { "testdata_float" }, { "testdata_binary_float" }, { "testdata_binary_double" }, { "testdata_real" },
+                { "testdata_varchar" }, { "testdata_char_varying" }, { "testdata_char" }, { "testdata_date" },
+                { "testdata_timestamp" }, { "testdata_withtimezone" }, { "testdata_withlocaltimezone" },
+                { "testdata_clob" }, { "testdata_blob" }, { "testdata_raw" }, { "testdata_long" }, { "testdata_nclob" },
+                { "testdata_nvarchar2" }, { "testdata_nchar" }, { "testdata_long_raw" }, { "testdata_timestamp0" },
+                { "testdata_timestamp3" } };
+    }
 
-	@Test(dataProvider = "dataTypeOracle")
-	public void testDataType(String tableName) throws Exception {
-		super.testDataType(tableName);
-	}
+    @Test(dataProvider = "dataTypeOracle")
+    public void testDataType(String tableName) throws Exception {
+        super.testDataType(tableName);
+    }
 }

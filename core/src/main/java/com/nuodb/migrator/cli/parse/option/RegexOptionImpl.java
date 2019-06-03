@@ -56,8 +56,8 @@ import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
 public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
 
     /**
-     * Regular expression compiler used to compile wild char triggers into a pattern to match & process --table.*,
-     * --table.*.filter=<filter> options.
+     * Regular expression compiler used to compile wild char triggers into a
+     * pattern to match & process --table.*, --table.*.filter=<filter> options.
      */
     private RegexCompiler regexCompiler = AntRegexCompiler.INSTANCE;
     private Map<RegexTrigger, Integer> triggersGroups = Maps.newHashMap();
@@ -97,8 +97,10 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
     /**
      * Tests if arguments matches Ant style regexp for provided table names.
      *
-     * @param commandLine command line to store matched table names in.
-     * @param arguments   to withConnection regular expression on.
+     * @param commandLine
+     *            command line to store matched table names in.
+     * @param arguments
+     *            to withConnection regular expression on.
      */
     @Override
     public void processOption(CommandLine commandLine, ListIterator<String> arguments) {

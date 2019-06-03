@@ -49,10 +49,10 @@ public class MSSQLServerDialect extends SimpleDialect {
 
     public static final int DATETIMEOFFSET_CODE = -155;
     public static final String DATETIMEOFFSET_NAME = "DATETIMEOFFSET";
-    
+
     /**
-     * Add the jdbc type alias mapping between 'ntext' and 'clob' with 
-     * type code -16
+     * Add the jdbc type alias mapping between 'ntext' and 'clob' with type code
+     * -16
      * 
      */
     public static final int NTEXT_CODE = -16;
@@ -71,18 +71,18 @@ public class MSSQLServerDialect extends SimpleDialect {
         addJdbcTypeAlias(Types.LONGVARCHAR, "TEXT", CLOB);
         addJdbcTypeAlias(Types.LONGNVARCHAR, "XML", CLOB);
         addJdbcTypeAlias(DATETIMEOFFSET_CODE, DATETIMEOFFSET_NAME, TIMESTAMP);
-        
+
         /**
-         * Add the jdbc type alias mapping between 'ntext' and 'clob' with 
-         * type code -16
-         */  
-         addJdbcTypeAlias(NTEXT_CODE, NTEXT_NAME, CLOB);
-         
-         /**
-          * Add the jdbc type alias mapping between MSSQL UNIQUEIDENTIFIER and VARCHAR with 
-          * type code as 1
-          */ 
-         addJdbcTypeAlias(UNIQUEIDENTIFIER_CODE, UNIQUEIDENTIFIER_NAME, VARCHAR);
+         * Add the jdbc type alias mapping between 'ntext' and 'clob' with type
+         * code -16
+         */
+        addJdbcTypeAlias(NTEXT_CODE, NTEXT_NAME, CLOB);
+
+        /**
+         * Add the jdbc type alias mapping between MSSQL UNIQUEIDENTIFIER and
+         * VARCHAR with type code as 1
+         */
+        addJdbcTypeAlias(UNIQUEIDENTIFIER_CODE, UNIQUEIDENTIFIER_NAME, VARCHAR);
     }
 
     @Override
@@ -141,8 +141,7 @@ public class MSSQLServerDialect extends SimpleDialect {
     }
 
     @Override
-    public RowCountHandler createRowCountHandler(Table table, Column column, String filter,
-                                                      RowCountType rowCountType) {
+    public RowCountHandler createRowCountHandler(Table table, Column column, String filter, RowCountType rowCountType) {
         return new MSSQLServerTableRowCountHandler(this, table, column, filter, rowCountType);
     }
 }

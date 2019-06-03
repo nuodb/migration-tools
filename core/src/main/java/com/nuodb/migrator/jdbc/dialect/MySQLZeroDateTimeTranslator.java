@@ -39,10 +39,15 @@ import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.format;
 
 /**
- * Mimics MySQL's zeroDateTimeBehavior and converts zero'd date time values following these rules: <ul>
- * <li>convertToNull outputs NULL</li> <li>round outputs '00:00:00' for TIME, '0001-01-01' for DATE & YEAR, '0001-01-01
- * 00:00:00' for DATETIME & TIMESTAMP types</li> <li>exception causes runtime exception on the first encountered zero'd
- * date type value</li> </ul>
+ * Mimics MySQL's zeroDateTimeBehavior and converts zero'd date time values
+ * following these rules:
+ * <ul>
+ * <li>convertToNull outputs NULL</li>
+ * <li>round outputs '00:00:00' for TIME, '0001-01-01' for DATE & YEAR,
+ * '0001-01-01 00:00:00' for DATETIME & TIMESTAMP types</li>
+ * <li>exception causes runtime exception on the first encountered zero'd date
+ * type value</li>
+ * </ul>
  *
  * @author Sergey Bushik
  */
@@ -66,17 +71,17 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
             Column column = script.getColumn();
             String source = script.getScript();
             switch (column.getTypeCode()) {
-                case Types.TIME:
-                    supportsScript = ZERO_TIME.equals(source);
-                    break;
-                case Types.DATE:
-                    supportsScript = ZERO_DATE.equals(source);
-                    break;
-                case Types.TIMESTAMP:
-                    supportsScript = ZERO_TIMESTAMP.equals(source);
-                    break;
-                default:
-                    supportsScript = false;
+            case Types.TIME:
+                supportsScript = ZERO_TIME.equals(source);
+                break;
+            case Types.DATE:
+                supportsScript = ZERO_DATE.equals(source);
+                break;
+            case Types.TIMESTAMP:
+                supportsScript = ZERO_TIMESTAMP.equals(source);
+                break;
+            default:
+                supportsScript = false;
             }
         }
         return supportsScript;
@@ -93,30 +98,30 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         if (ROUND.equals(behavior)) {
             Column column = script.getColumn();
             switch (column.getTypeCode()) {
-                case Types.TIME:
-                    target = ROUND_TIME;
-                    break;
-                case Types.DATE:
-                    target = ROUND_DATE;
-                    break;
-                case Types.TIMESTAMP:
-                    target = ROUND_TIMESTAMP;
-                    break;
-                default:
-                    target = null;
+            case Types.TIME:
+                target = ROUND_TIME;
+                break;
+            case Types.DATE:
+                target = ROUND_DATE;
+                break;
+            case Types.TIMESTAMP:
+                target = ROUND_TIMESTAMP;
+                break;
+            default:
+                target = null;
             }
         } else if (!script.getColumn().isNullable() && CONVERT_TO_NULL.equals(behavior)) {
-            //tagret value can't be NULL with column is 'NOT NULL'. Retain the script value 
-            //to escape NuoDB syntax error.
+            // tagret value can't be NULL with column is 'NOT NULL'. Retain the
+            // script value
+            // to escape NuoDB syntax error.
             target = "'".concat(script.getScript().concat("'"));
         } else if (CONVERT_TO_NULL.equals(behavior)) {
             target = NULL;
         } else if (EXCEPTION.equals(behavior)) {
             Column column = script.getColumn();
             Table table = column.getTable();
-            throw new TranslatorException(
-                    format("Table %s column %s has zero date time value, whereas %s is %s",
-                            table.getQualifiedName(null), column.getName(), ZERO_DATE_TIME_BEHAVIOR, EXCEPTION));
+            throw new TranslatorException(format("Table %s column %s has zero date time value, whereas %s is %s",
+                    table.getQualifiedName(null), column.getName(), ZERO_DATE_TIME_BEHAVIOR, EXCEPTION));
         } else {
             target = null;
         }

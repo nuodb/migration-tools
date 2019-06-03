@@ -47,8 +47,7 @@ public class TraceJobExecutionListener implements JobExecutionListener {
         JobExecution execution = event.getJobExecution();
         JobStatus jobStatus = execution.getJobStatus();
         if (logger.isInfoEnabled()) {
-            logger.info(format("Job %s status is %s",
-                    execution.getJob().getName(), jobStatus.getJobStatusType()));
+            logger.info(format("Job %s status is %s", execution.getJob().getName(), jobStatus.getJobStatusType()));
         }
         if (!jobStatus.isRunning()) {
             Date startDate = jobStatus.getExecutionStartDate();
@@ -67,8 +66,8 @@ public class TraceJobExecutionListener implements JobExecutionListener {
             left = left / 60;
             long minutes = left % 60;
             long hours = left / 60;
-            logger.info(format("Job %1s execution duration %02d:%02d:%02d.%03d",
-                    execution.getJob().getName(), hours, minutes, seconds, millis));
+            logger.info(format("Job %1s execution duration %02d:%02d:%02d.%03d", execution.getJob().getName(), hours,
+                    minutes, seconds, millis));
         }
     }
 }

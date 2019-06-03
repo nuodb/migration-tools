@@ -42,8 +42,8 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
- * Expands --config (-c)=<file> [<file> ...] into a list of options loaded from the path and removes expanded path from
- * the iterator of arguments
+ * Expands --config (-c)=<file> [<file> ...] into a list of options loaded from
+ * the path and removes expanded path from the iterator of arguments
  *
  * @author Sergey Bushik
  */
@@ -72,12 +72,17 @@ public class ConfigOptionProcessor extends ValuesOptionProcessor {
     }
 
     /**
-     * Loads list of config parameters from the specified path, ignores line starting with comment symbol #
+     * Loads list of config parameters from the specified path, ignores line
+     * starting with comment symbol #
      *
-     * @param option which defines target config option
-     * @param path   path to the config, which can be a class path resources, a url or a file
+     * @param option
+     *            which defines target config option
+     * @param path
+     *            path to the config, which can be a class path resources, a url
+     *            or a file
      * @return list of loaded parameters, commented lines are ignored
-     * @throws OptionException if the config can't be loaded
+     * @throws OptionException
+     *             if the config can't be loaded
      */
     protected Collection<String> parseConfig(Option option, String path) {
         if (logger.isTraceEnabled()) {

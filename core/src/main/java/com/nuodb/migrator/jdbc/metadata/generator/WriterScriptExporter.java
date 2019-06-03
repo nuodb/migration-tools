@@ -36,8 +36,8 @@ import java.io.Writer;
  */
 public class WriterScriptExporter extends StreamScriptExporterBase {
 
-    public static final ScriptExporter SYSTEM_OUT =
-            new ProxyScriptExporter(new WriterScriptExporter(System.out), false);
+    public static final ScriptExporter SYSTEM_OUT = new ProxyScriptExporter(new WriterScriptExporter(System.out),
+            false);
 
     private Writer writer;
     private OutputStream outputStream;

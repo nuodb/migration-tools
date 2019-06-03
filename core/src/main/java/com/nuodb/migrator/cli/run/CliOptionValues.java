@@ -47,7 +47,8 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.sql.Connection.*;
 
 /**
- * Defines symbolic, readable names for parameters values and resolution of a name to a required constant.
+ * Defines symbolic, readable names for parameters values and resolution of a
+ * name to a required constant.
  *
  * @author Sergey Bushik
  */
@@ -101,8 +102,8 @@ public class CliOptionValues {
     }
 
     public Map<String, IdentifierNormalizer> getIdentifierNormalizerMap() {
-        Map<String, IdentifierNormalizer> identifierNormalizers =
-                new TreeMap<String, IdentifierNormalizer>(CASE_INSENSITIVE_ORDER);
+        Map<String, IdentifierNormalizer> identifierNormalizers = new TreeMap<String, IdentifierNormalizer>(
+                CASE_INSENSITIVE_ORDER);
         identifierNormalizers.put(IDENTIFIER_NORMALIZER_NOOP, NOOP);
         identifierNormalizers.put(IDENTIFIER_NORMALIZER_STANDARD, STANDARD);
         identifierNormalizers.put(IDENTIFIER_NORMALIZER_LOWERCASE, LOWER_CASE);
@@ -111,8 +112,8 @@ public class CliOptionValues {
     }
 
     public Map<String, IdentifierQuoting> getIdentifierQuotingMap() {
-        Map<String, IdentifierQuoting> identifierQuotings =
-                new TreeMap<String, IdentifierQuoting>(CASE_INSENSITIVE_ORDER);
+        Map<String, IdentifierQuoting> identifierQuotings = new TreeMap<String, IdentifierQuoting>(
+                CASE_INSENSITIVE_ORDER);
         identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, MINIMAL);
         identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, ALWAYS);
         return identifierQuotings;
@@ -124,8 +125,7 @@ public class CliOptionValues {
      * @return
      */
     public Map<String, Integer> getTransactionIsolationMap() {
-        Map<String, Integer> transactionIsolations =
-                new TreeMap<String, Integer>(CASE_INSENSITIVE_ORDER);
+        Map<String, Integer> transactionIsolations = new TreeMap<String, Integer>(CASE_INSENSITIVE_ORDER);
         // standard isolation levels
         transactionIsolations.put(TRANSACTION_ISOLATION_NONE, TRANSACTION_NONE);
         transactionIsolations.put(TRANSACTION_ISOLATION_READ_UNCOMMITTED, TRANSACTION_READ_UNCOMMITTED);
@@ -137,7 +137,6 @@ public class CliOptionValues {
         transactionIsolations.put(TRANSACTION_ISOLATION_CONSISTENT_READ, 7);
         return transactionIsolations;
     }
-
 
     /**
      * Parses transaction isolation value of a given option.

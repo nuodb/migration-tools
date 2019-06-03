@@ -157,21 +157,31 @@ public class DumpJobSpec extends JobSpecBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         DumpJobSpec that = (DumpJobSpec) o;
 
-        if (metaDataSpec != null ? !metaDataSpec.equals(that.metaDataSpec) : that.metaDataSpec != null) return false;
+        if (metaDataSpec != null ? !metaDataSpec.equals(that.metaDataSpec) : that.metaDataSpec != null)
+            return false;
         if (migrationModes != null ? !migrationModes.equals(that.migrationModes) : that.migrationModes != null)
             return false;
-        if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
-        if (queryLimit != null ? !queryLimit.equals(that.queryLimit) : that.queryLimit != null) return false;
-        if (querySpecs != null ? !querySpecs.equals(that.querySpecs) : that.querySpecs != null) return false;
-        if (sourceSpec != null ? !sourceSpec.equals(that.sourceSpec) : that.sourceSpec != null) return false;
-        if (threads != null ? !threads.equals(that.threads) : that.threads != null) return false;
-        if (timeZone != null ? !timeZone.equals(that.timeZone) : that.timeZone != null) return false;
+        if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null)
+            return false;
+        if (queryLimit != null ? !queryLimit.equals(that.queryLimit) : that.queryLimit != null)
+            return false;
+        if (querySpecs != null ? !querySpecs.equals(that.querySpecs) : that.querySpecs != null)
+            return false;
+        if (sourceSpec != null ? !sourceSpec.equals(that.sourceSpec) : that.sourceSpec != null)
+            return false;
+        if (threads != null ? !threads.equals(that.threads) : that.threads != null)
+            return false;
+        if (timeZone != null ? !timeZone.equals(that.timeZone) : that.timeZone != null)
+            return false;
 
         return true;
     }

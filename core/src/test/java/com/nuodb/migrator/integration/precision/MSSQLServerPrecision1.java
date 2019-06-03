@@ -28,7 +28,8 @@
 package com.nuodb.migrator.integration.precision;
 
 /**
- * Test to make sure all the Tables, Constraints, Views, Triggers etc have been migrated.
+ * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
+ * migrated.
  *
  * @author Krishnamoorthy Dhandapani
  */
@@ -79,9 +80,7 @@ public class MSSQLServerPrecision1 {
 
     @Override
     public String toString() {
-        return "MSSQLServerPrecision1 [t1=" + t1 + ", t2=" + t2 + ", t3="
-                + t3 + ", t4=" + t4 + "]";
+        return "MSSQLServerPrecision1 [t1=" + t1 + ", t2=" + t2 + ", t3=" + t3 + ", t4=" + t4 + "]";
     }
-
 
 }

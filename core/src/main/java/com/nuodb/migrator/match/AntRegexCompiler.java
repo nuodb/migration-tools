@@ -31,9 +31,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Compiles Ant style pattern to a matcher, where each '*' wildcard character interpreted as any number of symbols and
- * '?' sign meaning any single character. Builds additional capturing groups around wildcard symbols, so that they are
- * returned by {@link Match#matches()} method.
+ * Compiles Ant style pattern to a matcher, where each '*' wildcard character
+ * interpreted as any number of symbols and '?' sign meaning any single
+ * character. Builds additional capturing groups around wildcard symbols, so
+ * that they are returned by {@link Match#matches()} method.
  *
  * @author Sergey Bushik
  */
@@ -82,7 +83,6 @@ public class AntRegexCompiler extends PatternCompilerBase {
     }
 
     protected String quote(String pattern, int start, int end) {
-        return start == end ? EMPTY :
-                Pattern.quote(pattern.substring(start, end));
+        return start == end ? EMPTY : Pattern.quote(pattern.substring(start, end));
     }
 }

@@ -49,8 +49,8 @@ public class SimplePrimaryKeyInspector extends TableInspectorBase<Table, TableIn
     @Override
     protected ResultSet openResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
             throws SQLException {
-        return inspectionContext.getConnection().getMetaData().getPrimaryKeys(
-                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(), tableInspectionScope.getTable());
+        return inspectionContext.getConnection().getMetaData().getPrimaryKeys(tableInspectionScope.getCatalog(),
+                tableInspectionScope.getSchema(), tableInspectionScope.getTable());
     }
 
     @Override
@@ -66,8 +66,7 @@ public class SimplePrimaryKeyInspector extends TableInspectorBase<Table, TableIn
                 table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));
                 inspectionResults.addObject(primaryKey);
             }
-            primaryKey.addColumn(table.addColumn(primaryKeys.getString("COLUMN_NAME")),
-                    primaryKeys.getInt("KEY_SEQ"));
+            primaryKey.addColumn(table.addColumn(primaryKeys.getString("COLUMN_NAME")), primaryKeys.getInt("KEY_SEQ"));
         }
     }
 

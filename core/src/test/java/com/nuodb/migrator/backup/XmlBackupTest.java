@@ -151,78 +151,45 @@ public class XmlBackupTest {
         // column read
         column = new Column("column1");
         column.setNullable(true);
-        JdbcEnumType jdbcType =
-                new JdbcEnumType(new JdbcTypeDesc(1, "ENUM"), newOptions(1, 1, 0));
+        JdbcEnumType jdbcType = new JdbcEnumType(new JdbcTypeDesc(1, "ENUM"), newOptions(1, 1, 0));
         jdbcType.addValue("a");
         jdbcType.addValue("b");
         jdbcType.addValue("c");
         column.setJdbcType(jdbcType);
-        return new Object[][]{{
-                "<backup version=\"" + getVersion() + "\" format=\"csv\">\n" +
-                "<database/>\n" +
-                "<row-set/>\n" +
-                "</backup>", backup, defaultEquality()
-        }, {
-                "<database>\n" +
-                "<driver-info/>\n" +
-                "<database-info/>\n" +
-                "<connection-spec/>\n" +
-                "<catalog name=\"catalog1\"/>\n" +
-                "<catalog name=\"catalog2\"/>\n" +
-                "</database>", database, defaultEquality()
-        }, {
-                "<driver-info>\n" +
-                "<name>MySQL-AB JDBC Driver</name>\n" +
-                "<version>mysql-connector-java-5.1.20</version>\n" +
-                "<major-version>5</major-version>\n" +
-                "<minor-version>1</minor-version>\n" +
-                "</driver-info>", driverInfo, defaultEquality()
-        }, {
-                "<database-info>\n" +
-                "<product-name>MySQL</product-name>\n" +
-                "<product-version>5.5.31-log</product-version>\n" +
-                "<major-version>5</major-version>\n" +
-                "<minor-version>5</minor-version>\n" +
-                "</database-info>", databaseInfo, defaultEquality()
-        }, {
-                "<connection-spec type=\"driver\" catalog=\"test\">\n" +
-                "<driver>com.mysql.jdbc.Driver</driver>\n" +
-                "<url>jdbc:mysql://localhost/test</url>\n" +
-                "<username>root</username>\n" +
-                "</connection-spec>", connectionSpec, defaultEquality()
-        }, {
-                "<catalog name=\"catalog1\">\n" +
-                "<schema name=\"schema1\"/>\n" +
-                "<schema name=\"schema2\"/>\n" +
-                "</catalog>", catalog, reflectionEquality()
-        }, {
-                "<schema name=\"schema1\">\n" +
-                "<sequence name=\"sequence1\" start-with=\"6\" last-value=\"6\" " +
-                "increment-by=\"3\" min-value=\"0\" max-value=\"2147483647\" " +
-                "cycle=\"false\" order=\"true\" temporary=\"false\" cache=\"50\"/>\n" +
-                "<user-defined-type name=\"MTYPE\" code=\"ARRAY\"/>" +
-                "<table name=\"table1\" type=\"TABLE\">" +
-                "<column name=\"column1\" nullable=\"true\">\n" +
-                "<type code=\"12\" name=\"VARCHAR\" size=\"20\" precision=\"20\" scale=\"0\"/>\n" +
-                "</column>\n" +
-                "</table>\n" +
-                "</schema>", schema, reflectionEquality()
-        }, {
-                "<column name=\"column1\" nullable=\"true\">\n" +
-                "<enum code=\"1\" name=\"ENUM\" size=\"1\" precision=\"1\" scale=\"0\">\n" +
-                "<value>a</value>\n" +
-                "<value>b</value>\n" +
-                "<value>c</value>\n" +
-                "</enum>\n" +
-                "</column>", column, defaultEquality()
-        }};
+        return new Object[][] {
+                { "<backup version=\"" + getVersion() + "\" format=\"csv\">\n" + "<database/>\n" + "<row-set/>\n"
+                        + "</backup>", backup, defaultEquality() },
+                { "<database>\n" + "<driver-info/>\n" + "<database-info/>\n" + "<connection-spec/>\n"
+                        + "<catalog name=\"catalog1\"/>\n" + "<catalog name=\"catalog2\"/>\n" + "</database>", database,
+                        defaultEquality() },
+                { "<driver-info>\n" + "<name>MySQL-AB JDBC Driver</name>\n"
+                        + "<version>mysql-connector-java-5.1.20</version>\n" + "<major-version>5</major-version>\n"
+                        + "<minor-version>1</minor-version>\n" + "</driver-info>", driverInfo, defaultEquality() },
+                { "<database-info>\n" + "<product-name>MySQL</product-name>\n"
+                        + "<product-version>5.5.31-log</product-version>\n" + "<major-version>5</major-version>\n"
+                        + "<minor-version>5</minor-version>\n" + "</database-info>", databaseInfo, defaultEquality() },
+                { "<connection-spec type=\"driver\" catalog=\"test\">\n" + "<driver>com.mysql.jdbc.Driver</driver>\n"
+                        + "<url>jdbc:mysql://localhost/test</url>\n" + "<username>root</username>\n"
+                        + "</connection-spec>", connectionSpec, defaultEquality() },
+                { "<catalog name=\"catalog1\">\n" + "<schema name=\"schema1\"/>\n" + "<schema name=\"schema2\"/>\n"
+                        + "</catalog>", catalog, reflectionEquality() },
+                { "<schema name=\"schema1\">\n" + "<sequence name=\"sequence1\" start-with=\"6\" last-value=\"6\" "
+                        + "increment-by=\"3\" min-value=\"0\" max-value=\"2147483647\" "
+                        + "cycle=\"false\" order=\"true\" temporary=\"false\" cache=\"50\"/>\n"
+                        + "<user-defined-type name=\"MTYPE\" code=\"ARRAY\"/>"
+                        + "<table name=\"table1\" type=\"TABLE\">" + "<column name=\"column1\" nullable=\"true\">\n"
+                        + "<type code=\"12\" name=\"VARCHAR\" size=\"20\" precision=\"20\" scale=\"0\"/>\n"
+                        + "</column>\n" + "</table>\n" + "</schema>", schema, reflectionEquality() },
+                { "<column name=\"column1\" nullable=\"true\">\n"
+                        + "<enum code=\"1\" name=\"ENUM\" size=\"1\" precision=\"1\" scale=\"0\">\n"
+                        + "<value>a</value>\n" + "<value>b</value>\n" + "<value>c</value>\n" + "</enum>\n"
+                        + "</column>", column, defaultEquality() } };
     }
 
     @Test(dataProvider = "read")
     public <T> void testRead(String xml, T expected, Equality<T> equality) {
         T actual = xmlPersister.read((Class<T>) expected.getClass(), new StringReader(xml));
-        assertTrue(equality.equals(expected, actual),
-                format("Actual object does not match expected for xml\n%s", xml));
+        assertTrue(equality.equals(expected, actual), format("Actual object does not match expected for xml\n%s", xml));
     }
 
     @DataProvider(name = "write")
@@ -246,8 +213,7 @@ public class XmlBackupTest {
 
         Table table = new Table("table1");
         Column column = new Column("column1");
-        JdbcEnumType jdbcType =
-                new JdbcEnumType(new JdbcTypeDesc(1, "ENUM"), newOptions(1, 1, 0));
+        JdbcEnumType jdbcType = new JdbcEnumType(new JdbcTypeDesc(1, "ENUM"), newOptions(1, 1, 0));
         jdbcType.addValue("1");
         jdbcType.addValue("2");
         column.setJdbcType(jdbcType);
@@ -256,55 +222,25 @@ public class XmlBackupTest {
         index.addColumn(column, 1);
         table.addIndex(index);
         return new Object[][] {
-        {
-                backup,
-                "<backup version=\"" + getVersion() + "\" format=\"csv\"><database/></backup>"
-        }, {
-                database,
-                "<database/>"
-        }, {
-                databaseInfo,
-                "<databaseInfo>" +
-                "<product-name>NuoDB</product-name>" +
-                "<product-version/>" +
-                "<major-version>1</major-version>" +
-                "<minor-version>29</minor-version>" +
-                "</databaseInfo>"
-        }, {
-                driverInfo,
-                "<driverInfo>" +
-                "<name>NuoDB JDBC Driver</name>" +
-                "<version>1.0</version>" +
-                "<major-version>0</major-version>" +
-                "<minor-version>1</minor-version>" +
-                "</driverInfo>"
-        }, {
-                catalog,
-                "<catalog name=\"catalog1\">" +
-                "<schema name=\"schema1\"/>" +
-                "<schema name=\"schema2\"/>" +
-                "</catalog>"
-        }, {
-                schema,
-                "<schema name=\"schema1\">" +
-                "<sequence name=\"sequence1\"/>" +
-                "<user-defined-type name=\"MTYPE\" code=\"ARRAY\"/>" +
-                "<table name=\"table1\" type=\"TABLE\"/>" +
-                "</schema>"
-        }, {
-                table,
-                "<table name=\"table1\" type=\"TABLE\">" +
-                "<column name=\"column1\">" +
-                "<enum code=\"1\" name=\"ENUM\" size=\"1\" precision=\"1\" scale=\"0\">" +
-                "<value>1</value>" +
-                "<value>2</value>" +
-                "</enum>" +
-                "</column>" +
-                "<index unique=\"false\">" +
-                "<column name=\"column1\"/>" +
-                "</index>" +
-                "</table>"
-        }};
+                { backup, "<backup version=\"" + getVersion() + "\" format=\"csv\"><database/></backup>" },
+                { database, "<database/>" },
+                { databaseInfo,
+                        "<databaseInfo>" + "<product-name>NuoDB</product-name>" + "<product-version/>"
+                                + "<major-version>1</major-version>" + "<minor-version>29</minor-version>"
+                                + "</databaseInfo>" },
+                { driverInfo, "<driverInfo>" + "<name>NuoDB JDBC Driver</name>" + "<version>1.0</version>"
+                        + "<major-version>0</major-version>" + "<minor-version>1</minor-version>" + "</driverInfo>" },
+                { catalog,
+                        "<catalog name=\"catalog1\">" + "<schema name=\"schema1\"/>" + "<schema name=\"schema2\"/>"
+                                + "</catalog>" },
+                { schema,
+                        "<schema name=\"schema1\">" + "<sequence name=\"sequence1\"/>"
+                                + "<user-defined-type name=\"MTYPE\" code=\"ARRAY\"/>"
+                                + "<table name=\"table1\" type=\"TABLE\"/>" + "</schema>" },
+                { table, "<table name=\"table1\" type=\"TABLE\">" + "<column name=\"column1\">"
+                        + "<enum code=\"1\" name=\"ENUM\" size=\"1\" precision=\"1\" scale=\"0\">" + "<value>1</value>"
+                        + "<value>2</value>" + "</enum>" + "</column>" + "<index unique=\"false\">"
+                        + "<column name=\"column1\"/>" + "</index>" + "</table>" } };
     }
 
     @Test(dataProvider = "write")

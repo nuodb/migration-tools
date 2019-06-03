@@ -61,14 +61,14 @@ public class CompositeNamingStrategy<M extends MetaData> extends MetaDataHandler
         return null;
     }
 
-    protected String getName(NamingStrategy<M> namingStrategy, M object,
-                             ScriptGeneratorManager scriptGeneratorManager, boolean normalize) {
+    protected String getName(NamingStrategy<M> namingStrategy, M object, ScriptGeneratorManager scriptGeneratorManager,
+            boolean normalize) {
         return namingStrategy.getName(object, scriptGeneratorManager, normalize);
     }
 
     @Override
     public String getQualifiedName(M object, ScriptGeneratorManager scriptGeneratorManager, String catalog,
-                                   String schema, boolean normalize) {
+            String schema, boolean normalize) {
         for (NamingStrategy<M> namingStrategy : namingStrategies) {
             String qualifiedName = getQualifiedName(namingStrategy, object, scriptGeneratorManager, catalog, schema,
                     normalize);
@@ -80,8 +80,7 @@ public class CompositeNamingStrategy<M extends MetaData> extends MetaDataHandler
     }
 
     protected String getQualifiedName(NamingStrategy<M> namingStrategy, M object,
-                                      ScriptGeneratorManager scriptGeneratorManager,
-                                      String catalog, String schema, boolean normalize) {
+            ScriptGeneratorManager scriptGeneratorManager, String catalog, String schema, boolean normalize) {
         return namingStrategy.getQualifiedName(object, scriptGeneratorManager, catalog, schema, normalize);
     }
 

@@ -78,8 +78,7 @@ public class XmlWriteSourceAwareContext<T> implements XmlWriteContext {
     }
 
     @Override
-    public void write(OutputNode output, Object source, Class type,
-                      XmlWriteContext delegate) {
+    public void write(OutputNode output, Object source, Class type, XmlWriteContext delegate) {
         context.write(output, source, type, delegate);
     }
 
@@ -112,8 +111,8 @@ public class XmlWriteSourceAwareContext<T> implements XmlWriteContext {
         for (int index = 0; context != null && index < parent; index++) {
             context = context.getContext();
         }
-        return context instanceof XmlWriteSourceAwareContext ?
-                (T) ((XmlWriteSourceAwareContext) context).getSource() : null;
+        return context instanceof XmlWriteSourceAwareContext ? (T) ((XmlWriteSourceAwareContext) context).getSource()
+                : null;
     }
 
     public void setSource(T source) {
@@ -202,13 +201,17 @@ public class XmlWriteSourceAwareContext<T> implements XmlWriteContext {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         XmlWriteSourceAwareContext that = (XmlWriteSourceAwareContext) o;
 
-        if (context != null ? !context.equals(that.context) : that.context != null) return false;
-        if (source != null ? !source.equals(that.source) : that.source != null) return false;
+        if (context != null ? !context.equals(that.context) : that.context != null)
+            return false;
+        if (source != null ? !source.equals(that.source) : that.source != null)
+            return false;
 
         return true;
     }

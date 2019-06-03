@@ -45,8 +45,9 @@ import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Reads database meta data and creates meta model from it. Root meta model object is {@link Database} containing set of
- * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
+ * Reads database meta data and creates meta model from it. Root meta model
+ * object is {@link Database} containing set of catalogs, each catalog has a
+ * collection of schemas and schema is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
  */
@@ -69,7 +70,8 @@ public class InspectionManager {
         schemaInspector.register(MSSQL_SERVER, new MSSQLServerSchemaInspector());
         addInspector(schemaInspector);
 
-        InspectorResolver userDefinedTypeInspector = new InspectorResolver(USER_DEFINED_TYPE, new SimpleUserDefinedTypeInspector());
+        InspectorResolver userDefinedTypeInspector = new InspectorResolver(USER_DEFINED_TYPE,
+                new SimpleUserDefinedTypeInspector());
         userDefinedTypeInspector.register(ORACLE, new OracleUserDefinedTypeTypeInspector());
         addInspector(userDefinedTypeInspector);
 
@@ -138,28 +140,28 @@ public class InspectionManager {
     }
 
     public InspectionResults inspect(Connection connection, InspectionScope inspectionScope,
-                                     MetaDataType... objectTypes) throws SQLException {
+            MetaDataType... objectTypes) throws SQLException {
         InspectionResults inspectionResults = createInspectionResults();
         inspect(connection, inspectionResults, inspectionScope, objectTypes);
         return inspectionResults;
     }
 
-    public InspectionResults inspect(Connection connection, MetaData object,
-                                     MetaDataType... objectTypes) throws SQLException {
+    public InspectionResults inspect(Connection connection, MetaData object, MetaDataType... objectTypes)
+            throws SQLException {
         InspectionResults inspectionResults = createInspectionResults();
         inspect(connection, inspectionResults, object, objectTypes);
         return inspectionResults;
     }
 
-    public InspectionResults inspect(Connection connection, Collection<MetaData> objects,
-                                     MetaDataType... objectTypes) throws SQLException {
+    public InspectionResults inspect(Connection connection, Collection<MetaData> objects, MetaDataType... objectTypes)
+            throws SQLException {
         InspectionResults inspectionResults = createInspectionResults();
         inspect(connection, inspectionResults, objects, objectTypes);
         return inspectionResults;
     }
 
     public void inspect(Connection connection, InspectionResults inspectionResults, InspectionScope inspectionScope,
-                        MetaDataType... objectTypes) throws SQLException {
+            MetaDataType... objectTypes) throws SQLException {
         InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
         try {
             if (logger.isDebugEnabled()) {
@@ -172,7 +174,7 @@ public class InspectionManager {
     }
 
     public void inspect(Connection connection, InspectionResults inspectionResults, MetaData object,
-                        MetaDataType... objectTypes) throws SQLException {
+            MetaDataType... objectTypes) throws SQLException {
         InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
         try {
             if (logger.isDebugEnabled()) {
@@ -185,7 +187,7 @@ public class InspectionManager {
     }
 
     public void inspect(Connection connection, InspectionResults inspectionResults, Collection<MetaData> objects,
-                        MetaDataType... objectTypes) throws SQLException {
+            MetaDataType... objectTypes) throws SQLException {
         InspectionContext inspectionContext = null;
         try {
             inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
@@ -203,9 +205,9 @@ public class InspectionManager {
     }
 
     protected InspectionContext createInspectionContext(Connection connection, InspectionResults inspectionResults,
-                                                        MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = new SimpleInspectionContext(
-                this, connection, inspectionResults, objectTypes);
+            MetaDataType... objectTypes) throws SQLException {
+        InspectionContext inspectionContext = new SimpleInspectionContext(this, connection, inspectionResults,
+                objectTypes);
         inspectionContext.init();
         return inspectionContext;
     }

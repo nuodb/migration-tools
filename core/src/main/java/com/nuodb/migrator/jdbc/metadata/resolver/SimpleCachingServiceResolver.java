@@ -53,8 +53,7 @@ public class SimpleCachingServiceResolver<T> extends SimpleServiceResolver<T> {
         this(defaultService, Maps.<DatabaseInfo, T>newConcurrentMap());
     }
 
-    public SimpleCachingServiceResolver(T defaultService,
-                                        Map<DatabaseInfo, T> serviceMap) {
+    public SimpleCachingServiceResolver(T defaultService, Map<DatabaseInfo, T> serviceMap) {
         super(defaultService);
         this.serviceMap = serviceMap;
     }
@@ -63,8 +62,7 @@ public class SimpleCachingServiceResolver<T> extends SimpleServiceResolver<T> {
         this(defaultServiceClass, Maps.<DatabaseInfo, T>newConcurrentMap());
     }
 
-    public SimpleCachingServiceResolver(Class<? extends T> defaultServiceClass,
-                                        Map<DatabaseInfo, T> serviceMap) {
+    public SimpleCachingServiceResolver(Class<? extends T> defaultServiceClass, Map<DatabaseInfo, T> serviceMap) {
         super(defaultServiceClass);
         this.serviceMap = serviceMap;
     }

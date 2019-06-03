@@ -64,28 +64,25 @@ public class NuoDBDatabaseInfo extends DatabaseInfo {
         super(productName, productVersion, majorVersion);
     }
 
-    public NuoDBDatabaseInfo(String productName, String productVersion, Integer majorVersion,
-                             Integer minorVersion) {
+    public NuoDBDatabaseInfo(String productName, String productVersion, Integer majorVersion, Integer minorVersion) {
         super(productName, productVersion, majorVersion, minorVersion);
     }
 
     public NuoDBDatabaseInfo(DatabaseMetaData metaData) throws SQLException {
         super(metaData);
-        this.platformVersion = new StatementTemplate(metaData.getConnection()).executeStatement(
-                new StatementFactory<Statement>() {
+        this.platformVersion = new StatementTemplate(metaData.getConnection())
+                .executeStatement(new StatementFactory<Statement>() {
                     @Override
                     public Statement createStatement(Connection connection) throws SQLException {
                         return connection.createStatement();
                     }
-                },
-                new StatementAction<Statement, Integer>() {
+                }, new StatementAction<Statement, Integer>() {
                     @Override
                     public Integer executeStatement(Statement statement) throws SQLException {
                         ResultSet resultSet = statement.executeQuery(QUERY);
                         return resultSet.next() ? resultSet.getInt(1) : null;
                     }
-                }
-        );
+                });
     }
 
     public NuoDBDatabaseInfo(DatabaseMetaData metaData, Integer platformVersion) throws SQLException {
@@ -93,8 +90,8 @@ public class NuoDBDatabaseInfo extends DatabaseInfo {
         this.platformVersion = platformVersion;
     }
 
-    public NuoDBDatabaseInfo(String productName, String productVersion, Integer majorVersion,
-                             Integer minorVersion, Integer platformVersion) {
+    public NuoDBDatabaseInfo(String productName, String productVersion, Integer majorVersion, Integer minorVersion,
+            Integer platformVersion) {
         super(productName, productVersion, majorVersion, minorVersion);
         setPlatformVersion(platformVersion);
     }
@@ -133,9 +130,12 @@ public class NuoDBDatabaseInfo extends DatabaseInfo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         NuoDBDatabaseInfo that = (NuoDBDatabaseInfo) o;
 

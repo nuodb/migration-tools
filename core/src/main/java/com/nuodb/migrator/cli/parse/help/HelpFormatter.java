@@ -51,40 +51,11 @@ public class HelpFormatter {
     public static Set<HelpHint> OPTION_OUTPUT_HINTS;
 
     static {
-        USAGE_OUTPUT_HINTS = unmodifiableSet(
-                newHashSet(
-                        ALIASES,
-                        OPTIONAL,
-                        PROPERTY,
-                        SWITCH,
-                        GROUP_OPTIONS,
-                        GROUP_ARGUMENTS,
-                        GROUP_OUTER,
-                        ARGUMENT_BRACKETED,
-                        AUGMENT_ARGUMENT,
-                        AUGMENT_GROUP
-                ));
-        HELP_OUTPUT_HINTS = unmodifiableSet(
-                newHashSet(
-                        ALIASES,
-                        OPTIONAL,
-                        GROUP,
-                        AUGMENT_ARGUMENT
-                ));
-        OPTION_OUTPUT_HINTS = unmodifiableSet(
-                newHashSet(
-                        ALIASES,
-                        OPTIONAL,
-                        OPTIONAL_CHILD_GROUP,
-                        PROPERTY,
-                        SWITCH,
-                        GROUP,
-                        GROUP_OPTIONS,
-                        GROUP_ARGUMENTS,
-                        GROUP_OUTER,
-                        ARGUMENT_BRACKETED,
-                        AUGMENT_GROUP
-                ));
+        USAGE_OUTPUT_HINTS = unmodifiableSet(newHashSet(ALIASES, OPTIONAL, PROPERTY, SWITCH, GROUP_OPTIONS,
+                GROUP_ARGUMENTS, GROUP_OUTER, ARGUMENT_BRACKETED, AUGMENT_ARGUMENT, AUGMENT_GROUP));
+        HELP_OUTPUT_HINTS = unmodifiableSet(newHashSet(ALIASES, OPTIONAL, GROUP, AUGMENT_ARGUMENT));
+        OPTION_OUTPUT_HINTS = unmodifiableSet(newHashSet(ALIASES, OPTIONAL, OPTIONAL_CHILD_GROUP, PROPERTY, SWITCH,
+                GROUP, GROUP_OPTIONS, GROUP_ARGUMENTS, GROUP_OUTER, ARGUMENT_BRACKETED, AUGMENT_GROUP));
     }
 
     protected transient final Logger logger = getLogger(getClass());
@@ -175,9 +146,8 @@ public class HelpFormatter {
             usageWidth = Math.max(usageWidth, content.length());
         }
         for (Help help : helps) {
-            line(writer,
-                    pad(help.help(getHelpOutputHints(), getComparator()), usageWidth),
-                    getGutter(), help.getOption().getDescription());
+            line(writer, pad(help.help(getHelpOutputHints(), getComparator()), usageWidth), getGutter(),
+                    help.getOption().getDescription());
         }
         line(writer, getDivider());
     }
@@ -209,7 +179,6 @@ public class HelpFormatter {
         }
         return padded.toString();
     }
-
 
     public Set<HelpHint> getUsageOutputHints() {
         return usageOutputHints;

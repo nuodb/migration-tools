@@ -45,14 +45,16 @@ public interface Group extends Option {
     /**
      * Adds option to this option
      *
-     * @param option to be added
+     * @param option
+     *            to be added
      */
     void addOption(Option option);
 
     /**
      * Adds all the options from specified list to this option
      *
-     * @param options list of options
+     * @param options
+     *            list of options
      */
     void addOptions(Collection<Option> options);
 
@@ -66,10 +68,14 @@ public interface Group extends Option {
     /**
      * Appends help information to the specified buffer
      *
-     * @param buffer     the buffer to append to
-     * @param hints      a setValue of display hints
-     * @param comparator a comparator used to sort the options
-     * @param separator  the string used to separate member options
+     * @param buffer
+     *            the buffer to append to
+     * @param hints
+     *            a setValue of display hints
+     * @param comparator
+     *            a comparator used to sort the options
+     * @param separator
+     *            the string used to separate member options
      */
     void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator, String separator);
 }

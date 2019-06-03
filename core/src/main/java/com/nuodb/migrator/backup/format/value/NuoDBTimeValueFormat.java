@@ -45,7 +45,8 @@ public class NuoDBTimeValueFormat extends ValueFormatBase<String> {
     }
 
     @Override
-    protected void doSetValue(Value value, JdbcValueAccess<String> access, Map<String, Object> options) throws Exception {
+    protected void doSetValue(Value value, JdbcValueAccess<String> access, Map<String, Object> options)
+            throws Exception {
         access.setValue(value.asString(), options);
     }
 

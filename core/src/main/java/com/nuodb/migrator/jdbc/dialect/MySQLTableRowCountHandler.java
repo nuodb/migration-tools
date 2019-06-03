@@ -47,7 +47,7 @@ import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 public class MySQLTableRowCountHandler extends SimpleTableRowCountHandler {
 
     public MySQLTableRowCountHandler(Dialect dialect, Table table, Column column, String filter,
-                                     RowCountType rowCountType) {
+            RowCountType rowCountType) {
         super(dialect, table, column, filter, rowCountType);
     }
 
@@ -107,11 +107,11 @@ public class MySQLTableRowCountHandler extends SimpleTableRowCountHandler {
     protected Long getRowCount(ResultSet resultSet, RowCountQuery rowCountQuery) throws SQLException {
         Long rowCount = null;
         switch (rowCountQuery.getRowCountType()) {
-            case EXACT:
-                rowCount = resultSet.next() ? resultSet.getLong(1) : null;
-                break;
-            case APPROX:
-                rowCount = resultSet.next() ? resultSet.getLong("ROWS") : null;
+        case EXACT:
+            rowCount = resultSet.next() ? resultSet.getLong(1) : null;
+            break;
+        case APPROX:
+            rowCount = resultSet.next() ? resultSet.getLong("ROWS") : null;
         }
         return rowCount;
     }

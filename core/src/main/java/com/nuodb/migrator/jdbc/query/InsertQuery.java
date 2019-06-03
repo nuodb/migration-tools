@@ -90,8 +90,7 @@ public class InsertQuery extends QueryBase {
     @Override
     public void append(StringBuilder query) {
         query.append(insertType == null ? INSERT : insertType.getCommand());
-        query.append(" INTO ")
-                .append(isQualifyNames() ? into.getQualifiedName(dialect) : into.getName(dialect));
+        query.append(" INTO ").append(isQualifyNames() ? into.getQualifiedName(dialect) : into.getName(dialect));
         if (columns.size() == 0) {
             query.append(' ').append(dialect.getNoColumnsInsert());
         } else {

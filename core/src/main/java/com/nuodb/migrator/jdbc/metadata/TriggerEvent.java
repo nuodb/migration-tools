@@ -33,7 +33,7 @@ import com.nuodb.migrator.utils.EnumAlias;
  * @author Sergey Bushik
  */
 public enum TriggerEvent {
-    INSERT, DELETE, UPDATE,COMMIT;
+    INSERT, DELETE, UPDATE, COMMIT;
 
     private static final EnumAlias<TriggerEvent> TRIGGER_EVENTS = new EnumAlias<TriggerEvent>(TriggerEvent.class);
 

@@ -41,8 +41,8 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * @author Sergey Bushik
  */
-public class RegexOptionBuilderImpl<O extends RegexOption>
-        extends AugmentOptionBuilderBase<O> implements RegexOptionBuilder<O> {
+public class RegexOptionBuilderImpl<O extends RegexOption> extends AugmentOptionBuilderBase<O>
+        implements RegexOptionBuilder<O> {
 
     private List<RegexGroupPriority> regexGroupPriorityList = newArrayList();
 
@@ -99,7 +99,7 @@ public class RegexOptionBuilderImpl<O extends RegexOption>
     public RegexOptionBuilder withArgument(Argument argument) {
         return (RegexOptionBuilder) super.withArgument(argument);
     }
-    
+
     @Override
     public RegexOptionBuilder withRegex(String regex, int group, int priority) {
         regexGroupPriorityList.add(new RegexGroupPriority(regex, group, priority));
@@ -110,7 +110,8 @@ public class RegexOptionBuilderImpl<O extends RegexOption>
     public O build() {
         O option = super.build();
         for (RegexGroupPriority regexGroupPriority : regexGroupPriorityList) {
-            option.addRegex(regexGroupPriority.getRegex(), regexGroupPriority.getGroup(), regexGroupPriority.getPriority());
+            option.addRegex(regexGroupPriority.getRegex(), regexGroupPriority.getGroup(),
+                    regexGroupPriority.getPriority());
         }
         return option;
     }
@@ -141,14 +142,19 @@ public class RegexOptionBuilderImpl<O extends RegexOption>
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             RegexGroupPriority that = (RegexGroupPriority) o;
 
-            if (group != that.group) return false;
-            if (priority != that.priority) return false;
-            if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
+            if (group != that.group)
+                return false;
+            if (priority != that.priority)
+                return false;
+            if (regex != null ? !regex.equals(that.regex) : that.regex != null)
+                return false;
 
             return true;
         }

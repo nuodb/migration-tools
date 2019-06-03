@@ -53,15 +53,15 @@ public class JdbcSmallIntValue extends JdbcTypeValueBase<Short> {
     }
 
     @Override
-    public Short getValue(ResultSet resultSet, int index,
-                          Field field, Map<String, Object> options) throws SQLException {
+    public Short getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         short shortValue = resultSet.getShort(index);
         return resultSet.wasNull() ? null : shortValue;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Short value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Short value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setShort(index, value);
     }
 }

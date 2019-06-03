@@ -44,9 +44,10 @@ public class NuoDBDialect206 extends NuoDBDialect203 {
     }
 
     /**
-     * Checks whether groping of multiple CREATE INDEX statements, separated each by a comma (, ) is supported. Grouping
-     * of several statements will require only one table scan and performance time for the creation of the index will be
-     * improved.
+     * Checks whether groping of multiple CREATE INDEX statements, separated
+     * each by a comma (, ) is supported. Grouping of several statements will
+     * require only one table scan and performance time for the creation of the
+     * index will be improved.
      *
      * @return true
      */

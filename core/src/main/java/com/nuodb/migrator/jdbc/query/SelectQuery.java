@@ -71,9 +71,9 @@ public class SelectQuery extends QueryBase {
     public void from(Object... tables) {
         for (Object table : tables) {
             if (table instanceof Table) {
-                from((Table)table);
+                from((Table) table);
             } else {
-                from((String)table);
+                from((String) table);
             }
         }
     }
@@ -102,7 +102,7 @@ public class SelectQuery extends QueryBase {
         where.add(filter);
     }
 
-    public void orderBy(String ... columns) {
+    public void orderBy(String... columns) {
         orderBy(newArrayList(columns));
     }
 
@@ -130,7 +130,7 @@ public class SelectQuery extends QueryBase {
 
     protected void addSelect(StringBuilder query) {
         query.append("SELECT");
-        for (Iterator<Object> iterator = columns.iterator(); iterator.hasNext(); ) {
+        for (Iterator<Object> iterator = columns.iterator(); iterator.hasNext();) {
             query.append(" ");
             addColumn(query, iterator.next());
             if (iterator.hasNext()) {
@@ -149,7 +149,7 @@ public class SelectQuery extends QueryBase {
 
     protected void addFrom(StringBuilder query) {
         query.append(" FROM");
-        for (Iterator<Object> iterator = from.iterator(); iterator.hasNext(); ) {
+        for (Iterator<Object> iterator = from.iterator(); iterator.hasNext();) {
             query.append(" ");
             addTable(query, iterator.next());
             if (iterator.hasNext()) {
@@ -179,8 +179,8 @@ public class SelectQuery extends QueryBase {
 
     protected void addTable(StringBuilder query, Object table) {
         if (table instanceof Table) {
-            query.append(isQualifyNames() ?
-                    ((Table) table).getQualifiedName(dialect) : ((Table) table).getName(dialect));
+            query.append(
+                    isQualifyNames() ? ((Table) table).getQualifiedName(dialect) : ((Table) table).getName(dialect));
         } else {
             query.append(table);
         }
@@ -236,17 +236,25 @@ public class SelectQuery extends QueryBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SelectQuery)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof SelectQuery))
+            return false;
 
         SelectQuery that = (SelectQuery) o;
 
-        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
-        if (dialect != null ? !dialect.equals(that.dialect) : that.dialect != null) return false;
-        if (from != null ? !from.equals(that.from) : that.from != null) return false;
-        if (join != null ? !join.equals(that.join) : that.join != null) return false;
-        if (orderBy != null ? !orderBy.equals(that.orderBy) : that.orderBy != null) return false;
-        if (where != null ? !where.equals(that.where) : that.where != null) return false;
+        if (columns != null ? !columns.equals(that.columns) : that.columns != null)
+            return false;
+        if (dialect != null ? !dialect.equals(that.dialect) : that.dialect != null)
+            return false;
+        if (from != null ? !from.equals(that.from) : that.from != null)
+            return false;
+        if (join != null ? !join.equals(that.join) : that.join != null)
+            return false;
+        if (orderBy != null ? !orderBy.equals(that.orderBy) : that.orderBy != null)
+            return false;
+        if (where != null ? !where.equals(that.where) : that.where != null)
+            return false;
 
         return true;
     }

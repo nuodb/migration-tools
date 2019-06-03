@@ -70,13 +70,17 @@ public class ForeignKeyReference extends IndentedBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         ForeignKeyReference that = (ForeignKeyReference) o;
 
-        if (primaryColumn != null ? !primaryColumn.equals(that.primaryColumn) : that.primaryColumn != null) return false;
-        if (foreignColumn != null ? !foreignColumn.equals(that.foreignColumn) : that.foreignColumn != null) return false;
+        if (primaryColumn != null ? !primaryColumn.equals(that.primaryColumn) : that.primaryColumn != null)
+            return false;
+        if (foreignColumn != null ? !foreignColumn.equals(that.foreignColumn) : that.foreignColumn != null)
+            return false;
 
         return true;
     }

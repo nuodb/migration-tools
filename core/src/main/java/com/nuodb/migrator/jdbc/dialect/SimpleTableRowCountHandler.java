@@ -47,7 +47,7 @@ public class SimpleTableRowCountHandler extends SimpleRowCountHandler implements
     private String filter;
 
     public SimpleTableRowCountHandler(Dialect dialect, Table table, Column column, String filter,
-                                      RowCountType rowCountType) {
+            RowCountType rowCountType) {
         super(dialect, rowCountType);
         this.table = table;
         this.column = column;

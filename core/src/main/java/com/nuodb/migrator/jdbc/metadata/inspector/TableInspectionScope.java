@@ -74,14 +74,19 @@ public class TableInspectionScope extends SchemaInspectionScope {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         TableInspectionScope that = (TableInspectionScope) o;
 
-        if (table != null ? !table.equals(that.table) : that.table != null) return false;
-        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
+        if (table != null ? !table.equals(that.table) : that.table != null)
+            return false;
+        if (!Arrays.equals(tableTypes, that.tableTypes))
+            return false;
 
         return true;
     }

@@ -52,11 +52,10 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
     public String getLimitQuery(boolean parameterized) {
         String limitQuery;
         if (hasOffset()) {
-            limitQuery = parameterized ? createParameterizedLimitOffsetQuery(query) :
-                    createLimitOffsetQuery(query, getCount(), getOffset());
+            limitQuery = parameterized ? createParameterizedLimitOffsetQuery(query)
+                    : createLimitOffsetQuery(query, getCount(), getOffset());
         } else {
-            limitQuery = parameterized ? createParameterizedLimitQuery(query) :
-                    createLimitQuery(query, getCount());
+            limitQuery = parameterized ? createParameterizedLimitQuery(query) : createLimitQuery(query, getCount());
         }
         return limitQuery;
     }
@@ -138,5 +137,3 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
         statement.setLong(index + 1, getOffset());
     }
 }
-
-

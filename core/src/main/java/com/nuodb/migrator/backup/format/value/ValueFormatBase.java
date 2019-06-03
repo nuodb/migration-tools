@@ -58,13 +58,12 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
     protected abstract Value doGetValue(JdbcValueAccess<T> access, Map<String, Object> options) throws Throwable;
 
     protected Value onGetValueError(JdbcValueAccess access, Throwable cause) {
-        throw new ValueFormatException(format("Can't get %s %s column value",
-                getColumnName(access.getField()), access.getField().getTypeName()), cause);
+        throw new ValueFormatException(format("Can't get %s %s column value", getColumnName(access.getField()),
+                access.getField().getTypeName()), cause);
     }
 
     @Override
-    public void setValue(Value value, JdbcValueAccess<T> access,
-                         Map<String, Object> options) {
+    public void setValue(Value value, JdbcValueAccess<T> access, Map<String, Object> options) {
         try {
             doSetValue(value, access, options);
         } catch (ValueFormatException exception) {
@@ -74,12 +73,12 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
         }
     }
 
-    protected abstract void doSetValue(Value value, JdbcValueAccess<T> access,
-                                       Map<String, Object> options) throws Throwable;
+    protected abstract void doSetValue(Value value, JdbcValueAccess<T> access, Map<String, Object> options)
+            throws Throwable;
 
     protected void onSetValueError(JdbcValueAccess access, Throwable cause) {
-        throw new ValueFormatException(format("Can't set %s %s column value",
-                getColumnName(access.getField()), access.getField().getTypeName()), cause);
+        throw new ValueFormatException(format("Can't set %s %s column value", getColumnName(access.getField()),
+                access.getField().getTypeName()), cause);
     }
 
     protected String getColumnName(Field field) {
@@ -96,10 +95,8 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
     protected Connection getConnection(JdbcValueAccess<Object> access) {
         Connection connection = access.getConnection();
         if (connection instanceof ConnectionProxy) {
-            connection = ((ConnectionProxy)connection).getConnection();
+            connection = ((ConnectionProxy) connection).getConnection();
         }
         return connection;
     }
 }
-
-

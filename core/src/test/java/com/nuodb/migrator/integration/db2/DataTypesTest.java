@@ -38,24 +38,19 @@ import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 @Test(groups = { "db2integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 public class DataTypesTest extends BaseDataTypeTest {
 
-	@DataProvider(name = "dataTypeMysql")
-	public Object[][] createDataTypeData() {
-		return new Object[][] { { "testdata_smallint" },
-				{ "testdata_integer" }, { "testdata_bigint" },
-				{ "testdata_decimal" }, { "testdata_double" },
-				{ "testdata_real" }, { "testdata_varchar" },
-				{ "testdata_character" }, { "testdata_clob" },
-				{ "testdata_graphic" }, { "testdata_vargraphic" },
-				{ "testdata_dbclob" }, { "testdata_longvarchar" },
-				{ "testdata_longvargraphic" }, { "testdata_time" },
-				{ "testdata_date" }, { "testdata_timestamp" },
-				{ "testdata_blob" }, { "testdata_xml" }, { "testdata_num" },
-				{ "testdata_dec" } };
-	}
+    @DataProvider(name = "dataTypeMysql")
+    public Object[][] createDataTypeData() {
+        return new Object[][] { { "testdata_smallint" }, { "testdata_integer" }, { "testdata_bigint" },
+                { "testdata_decimal" }, { "testdata_double" }, { "testdata_real" }, { "testdata_varchar" },
+                { "testdata_character" }, { "testdata_clob" }, { "testdata_graphic" }, { "testdata_vargraphic" },
+                { "testdata_dbclob" }, { "testdata_longvarchar" }, { "testdata_longvargraphic" }, { "testdata_time" },
+                { "testdata_date" }, { "testdata_timestamp" }, { "testdata_blob" }, { "testdata_xml" },
+                { "testdata_num" }, { "testdata_dec" } };
+    }
 
-	@Test(dataProvider = "dataTypeMysql")
-	public void testDataType(String tableName) throws Exception {
-		super.testDataType(tableName);
-	}
+    @Test(dataProvider = "dataTypeMysql")
+    public void testDataType(String tableName) throws Exception {
+        super.testDataType(tableName);
+    }
 
 }

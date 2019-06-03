@@ -138,10 +138,13 @@ public class SimpleFieldList<T extends Field> implements FieldList<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         SimpleFieldList that = (SimpleFieldList) o;
-        if (items.equals(that.items)) return false;
+        if (items.equals(that.items))
+            return false;
         return true;
     }
 

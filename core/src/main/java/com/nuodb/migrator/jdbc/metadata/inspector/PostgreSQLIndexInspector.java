@@ -43,15 +43,18 @@ public class PostgreSQLIndexInspector extends SimpleIndexInspector {
     /**
      * http://www.postgresql.org/docs/9.0/static/sql-createindex.html
      *
-     * @param inspectionContext inspect scopes
-     * @param indexes           source result set
-     * @param index             for which expression is inspected
-     * @param column            based on one or more columns of the table
+     * @param inspectionContext
+     *            inspect scopes
+     * @param indexes
+     *            source result set
+     * @param index
+     *            for which expression is inspected
+     * @param column
+     *            based on one or more columns of the table
      * @return
      */
     @Override
-    protected String getExpression(InspectionContext inspectionContext, ResultSet indexes, Index index,
-                                   String column)
+    protected String getExpression(InspectionContext inspectionContext, ResultSet indexes, Index index, String column)
             throws SQLException {
         Dialect dialect = inspectionContext.getDialect();
         column = stripQuotes(dialect, column);

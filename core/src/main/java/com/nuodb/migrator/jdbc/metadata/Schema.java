@@ -188,14 +188,19 @@ public class Schema extends IdentifiableBase implements HasTables {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         Schema schema = (Schema) o;
 
-        if (database != null ? !database.equals(schema.database) : schema.database != null) return false;
-        if (catalog != null ? !catalog.equals(schema.catalog) : schema.catalog != null) return false;
+        if (database != null ? !database.equals(schema.database) : schema.database != null)
+            return false;
+        if (catalog != null ? !catalog.equals(schema.catalog) : schema.catalog != null)
+            return false;
 
         return true;
     }

@@ -39,10 +39,13 @@ public class HelpImpl implements Help {
     private final int indent;
 
     /**
-     * Creates a new HelpLineImpl to represent a particular Option in the online help.
+     * Creates a new HelpLineImpl to represent a particular Option in the online
+     * help.
      *
-     * @param option Option that the HelpLineImpl describes
-     * @param indent Level of indentation for this line
+     * @param option
+     *            Option that the HelpLineImpl describes
+     * @param indent
+     *            Level of indentation for this line
      */
     public HelpImpl(Option option, int indent) {
         this.option = option;
@@ -64,10 +67,13 @@ public class HelpImpl implements Help {
     }
 
     /**
-     * Builds a help string for the option using the specified settings and comparator.
+     * Builds a help string for the option using the specified settings and
+     * comparator.
      *
-     * @param hints      the settings to apply
-     * @param comparator a comparator to sort options when applicable
+     * @param hints
+     *            the settings to apply
+     * @param comparator
+     *            a comparator to sort options when applicable
      * @return the help string
      */
     public String help(Set<HelpHint> hints, Comparator<Option> comparator) {

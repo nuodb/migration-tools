@@ -72,7 +72,7 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
     private ValueHandleList valueHandleList;
 
     public LoadTableForkWork(LoadTable loadTable, RowReader rowReader, int thread,
-                             BackupLoaderManager backupLoaderManager) {
+            BackupLoaderManager backupLoaderManager) {
         super(backupLoaderManager, backupLoaderManager.getBackupLoaderContext().getTargetSessionFactory());
         this.thread = thread;
         this.rowReader = rowReader;
@@ -89,8 +89,9 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
     protected void init() throws Exception {
         backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         statement = getSession().getConnection().prepareStatement(loadTable.getQuery().toString());
-        CommitStrategy commitStrategy = backupLoaderContext.getCommitStrategy() != null ?
-                backupLoaderContext.getCommitStrategy() : new BatchCommitStrategy();
+        CommitStrategy commitStrategy = backupLoaderContext.getCommitStrategy() != null
+                ? backupLoaderContext.getCommitStrategy()
+                : new BatchCommitStrategy();
         commitExecutor = commitStrategy.createCommitExecutor(statement, loadTable.getQuery());
     }
 
@@ -104,8 +105,8 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
                 Value[] values = row.getValues();
                 initValueHandleList();
                 for (ValueHandle valueHandle : valueHandleList) {
-                    valueHandle.getValueFormat().setValue(values[index++],
-                            valueHandle.getJdbcValueAccess(), valueHandle.getJdbcValueAccessOptions());
+                    valueHandle.getValueFormat().setValue(values[index++], valueHandle.getJdbcValueAccess(),
+                            valueHandle.getJdbcValueAccessOptions());
                 }
                 commitExecutor.execute();
                 backupLoaderManager.afterLoadRow(this, loadTable, row);
@@ -122,8 +123,8 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
         if (valueHandleList == null) {
             ValueHandleListBuilder builder = newBuilder(getSession().getConnection(), statement);
             builder.withDialect(getSession().getDialect());
-            builder.withFields(newArrayList(transform(loadTable.getRowSet().getColumns(),
-                    new Function<Column, Field>() {
+            builder.withFields(
+                    newArrayList(transform(loadTable.getRowSet().getColumns(), new Function<Column, Field>() {
                         @Override
                         public Field apply(Column column) {
                             return loadTable.getTable().getColumn(column.getName());

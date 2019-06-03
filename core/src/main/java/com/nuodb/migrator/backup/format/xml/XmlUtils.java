@@ -33,10 +33,8 @@ package com.nuodb.migrator.backup.format.xml;
 public class XmlUtils {
 
     public static boolean isValid(char value) {
-        return (value == 0x9) || (value == 0xA) || (value == 0xD) ||
-                ((value >= 0x20) && (value <= 0xD7FF)) ||
-                ((value >= 0xE000) && (value <= 0xFFFD)) ||
-                ((value >= 0x10000) && (value <= 0x10FFFF));
+        return (value == 0x9) || (value == 0xA) || (value == 0xD) || ((value >= 0x20) && (value <= 0xD7FF))
+                || ((value >= 0xE000) && (value <= 0xFFFD)) || ((value >= 0x10000) && (value <= 0x10FFFF));
     }
 
     public static boolean isValid(String value) {

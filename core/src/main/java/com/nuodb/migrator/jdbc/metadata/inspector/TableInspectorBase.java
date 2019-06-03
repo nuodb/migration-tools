@@ -47,7 +47,7 @@ public abstract class TableInspectorBase<M extends MetaData, T extends TableInsp
     }
 
     protected TableInspectorBase(MetaDataType objectType, MetaDataType parentObjectType,
-                                 Class<? extends InspectionScope> inspectionScopeClass) {
+            Class<? extends InspectionScope> inspectionScopeClass) {
         super(objectType, parentObjectType, inspectionScopeClass);
     }
 
@@ -65,7 +65,6 @@ public abstract class TableInspectorBase<M extends MetaData, T extends TableInsp
     }
 
     public static TableInspectionScope createTableInspectionScope(Table table) {
-        return new TableInspectionScope(
-                table.getCatalog().getName(), table.getSchema().getName(), table.getName());
+        return new TableInspectionScope(table.getCatalog().getName(), table.getSchema().getName(), table.getName());
     }
 }

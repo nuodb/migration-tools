@@ -54,8 +54,8 @@ public class XmlCatalogHandler extends XmlIdentifiableHandlerBase<Catalog> imple
     protected Catalog createTarget(InputNode input, Class<? extends Catalog> type, XmlReadContext context) {
         Database database = getParent(context, 0);
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        return database != null ? (database.hasCatalog(name) ?
-                database.getCatalog(name) : database.addCatalog(name)) : new Catalog(name);
+        return database != null ? (database.hasCatalog(name) ? database.getCatalog(name) : database.addCatalog(name))
+                : new Catalog(name);
     }
 
     @Override

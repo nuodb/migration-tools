@@ -65,9 +65,9 @@ public class ObjectUtils {
     }
 
     public static String toString(Object object, Collection<String> includedFields, Collection<String> excludedFields,
-                                  ToStringStyle toStringStyle) {
-        FilterFieldsToStringBuilder filterFieldsToStringBuilder =
-                new FilterFieldsToStringBuilder(object, toStringStyle != null ? toStringStyle : TO_STRING_STYLE);
+            ToStringStyle toStringStyle) {
+        FilterFieldsToStringBuilder filterFieldsToStringBuilder = new FilterFieldsToStringBuilder(object,
+                toStringStyle != null ? toStringStyle : TO_STRING_STYLE);
         if (!isEmpty(includedFields)) {
             filterFieldsToStringBuilder.addIncludeFields(includedFields);
         }
@@ -95,8 +95,7 @@ public class ObjectUtils {
         }
 
         public <T> FilterFieldsToStringBuilder(T object, ToStringStyle style, StringBuffer buffer,
-                                               Class<? super T> reflectUpToClass, boolean outputTransients,
-                                               boolean outputStatics) {
+                Class<? super T> reflectUpToClass, boolean outputTransients, boolean outputStatics) {
             super(object, style, buffer, reflectUpToClass, outputTransients, outputStatics);
         }
 

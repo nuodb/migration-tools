@@ -73,17 +73,15 @@ public class ServiceResolverTest {
 
     @DataProvider(name = "resolveService")
     public Object[][] createResolveServiceData() {
-        return new Object[][]{
-                {"NuoDB", "1.0.1-129", 18, 2, 18, new ServiceInstance("service-1")},
-                {"NuoDB", "1.0.1-128", 16, 0, 16, new ServiceInstance("service-2")},
-                {"NuoDB", "1.0.1-128", 17, 0, 17, new ServiceInstance("service-3")},
-                {"NuoDB", "1.0.1-128", 17, 2, 17, new ServiceInstance("service-4")},
-        };
+        return new Object[][] { { "NuoDB", "1.0.1-129", 18, 2, 18, new ServiceInstance("service-1") },
+                { "NuoDB", "1.0.1-128", 16, 0, 16, new ServiceInstance("service-2") },
+                { "NuoDB", "1.0.1-128", 17, 0, 17, new ServiceInstance("service-3") },
+                { "NuoDB", "1.0.1-128", 17, 2, 17, new ServiceInstance("service-4") }, };
     }
 
     @Test(dataProvider = "resolveService")
     public void testResolveService(String productName, String productVersion, int majorVersion, int minorVersion,
-                                   int platformVersion, Service service) throws Exception {
+            int platformVersion, Service service) throws Exception {
         DatabaseMetaData metaData = createDatabaseMetaData(productName, productVersion, majorVersion, minorVersion);
         Connection connection = mock(Connection.class);
         given(connection.getMetaData()).willReturn(metaData);
@@ -104,17 +102,14 @@ public class ServiceResolverTest {
 
     @DataProvider(name = "resolveServiceClass")
     public Object[][] createResolveServiceClassData() {
-        return new Object[][]{
-                {"PostgreSQL", "9.2.4", 3, 10, Service1.class},
-                {"PostgreSQL", "9.2.3", 1, 10, Service2.class},
-                {"PostgreSQL", "9.2.3", 2, 0, Service3.class},
-                {"PostgreSQL", "9.2.3", 2, 9, Service4.class},
-        };
+        return new Object[][] { { "PostgreSQL", "9.2.4", 3, 10, Service1.class },
+                { "PostgreSQL", "9.2.3", 1, 10, Service2.class }, { "PostgreSQL", "9.2.3", 2, 0, Service3.class },
+                { "PostgreSQL", "9.2.3", 2, 9, Service4.class }, };
     }
 
     @Test(dataProvider = "resolveServiceClass")
     public void testResolveServiceClass(String productName, String productVersion, int majorVersion, int minorVersion,
-                                        Class<? extends Service> serviceClass) throws Exception {
+            Class<? extends Service> serviceClass) throws Exception {
         DatabaseMetaData metaData = createDatabaseMetaData(productName, productVersion, majorVersion, minorVersion);
         Connection connection = mock(Connection.class);
         given(connection.getMetaData()).willReturn(metaData);
@@ -127,8 +122,8 @@ public class ServiceResolverTest {
         verify(serviceResolver).resolve(any(DatabaseInfo.class));
     }
 
-    public static DatabaseMetaData createDatabaseMetaData(String productName, String productVersion,
-                                                          int majorVersion, int minorVersion) throws Exception {
+    public static DatabaseMetaData createDatabaseMetaData(String productName, String productVersion, int majorVersion,
+            int minorVersion) throws Exception {
         DatabaseMetaData metaData = mock(DatabaseMetaData.class);
         given(metaData.getDatabaseProductName()).willReturn(productName);
         given(metaData.getDatabaseProductVersion()).willReturn(productVersion);

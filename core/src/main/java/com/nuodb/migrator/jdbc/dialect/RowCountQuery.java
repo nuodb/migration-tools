@@ -53,13 +53,17 @@ public class RowCountQuery {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RowCountQuery)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof RowCountQuery))
+            return false;
 
         RowCountQuery that = (RowCountQuery) o;
 
-        if (query != null ? !query.equals(that.query) : that.query != null) return false;
-        if (rowCountType != that.rowCountType) return false;
+        if (query != null ? !query.equals(that.query) : that.query != null)
+            return false;
+        if (rowCountType != that.rowCountType)
+            return false;
 
         return true;
     }

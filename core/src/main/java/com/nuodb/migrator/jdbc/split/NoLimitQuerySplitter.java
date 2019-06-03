@@ -41,7 +41,6 @@ import java.sql.Statement;
  */
 public class NoLimitQuerySplitter extends QuerySplitterBase<Statement> {
 
-
     protected NoLimitQuerySplitter(Query query, ParametersBinder parametersBinder) {
         super(query, null, parametersBinder);
     }
@@ -57,20 +56,20 @@ public class NoLimitQuerySplitter extends QuerySplitterBase<Statement> {
     }
 
     @Override
-    protected Statement createStatement(Connection connection, QueryLimit queryLimit,
-                                        int splitIndex) throws SQLException {
+    protected Statement createStatement(Connection connection, QueryLimit queryLimit, int splitIndex)
+            throws SQLException {
         return connection.createStatement();
     }
 
     @Override
-    protected Statement prepareStatement(Connection connection, QueryLimit queryLimit,
-                                         int splitIndex) throws SQLException {
+    protected Statement prepareStatement(Connection connection, QueryLimit queryLimit, int splitIndex)
+            throws SQLException {
         return connection.prepareStatement(getQuery().toString());
     }
 
     @Override
-    protected ResultSet executeStatement(Statement statement, QueryLimit queryLimit,
-                                         int splitIndex) throws SQLException {
+    protected ResultSet executeStatement(Statement statement, QueryLimit queryLimit, int splitIndex)
+            throws SQLException {
         return statement.executeQuery(getQuery().toString());
     }
 }

@@ -31,15 +31,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Convert a date-time from a string into a  {@link DateTime}. The primary use case for this class is converting
- * date-times from a database <tt>ResultSet</tt> into a {@link DateTime}. It can also convert an ISO time, having a 'T'
- * separating the date from the time.
+ * Convert a date-time from a string into a {@link DateTime}. The primary use
+ * case for this class is converting date-times from a database
+ * <tt>ResultSet</tt> into a {@link DateTime}. It can also convert an ISO time,
+ * having a 'T' separating the date from the time.
  */
 final class DateTimeParser {
 
     /**
-     * Thrown when the given string cannot be converted into a <tt>DateTime</tt>, since it doesn't have a format allowed
-     * by this class. An unchecked exception.
+     * Thrown when the given string cannot be converted into a
+     * <tt>DateTime</tt>, since it doesn't have a format allowed by this class.
+     * An unchecked exception.
      */
     static final class UnknownDateTimeFormat extends RuntimeException {
         private static final long serialVersionUID = -7179421566055773208L;
@@ -70,25 +72,24 @@ final class DateTimeParser {
     // PRIVATE
 
     /**
-     * Gross pattern for dates. Detailed validation is done by DateTime. The Group index VARIES for y-m-d according to
-     * which option is selected Year: Group 1, 4, 6 Month: Group 2, 5 Day: Group 3
+     * Gross pattern for dates. Detailed validation is done by DateTime. The
+     * Group index VARIES for y-m-d according to which option is selected Year:
+     * Group 1, 4, 6 Month: Group 2, 5 Day: Group 3
      */
     private static final Pattern DATE = Pattern.compile("(\\d{1,4})-(\\d\\d)-(\\d\\d)|(\\d{1,4})-(\\d\\d)|(\\d{1,4})");
 
     /**
-     * Gross pattern for times. Detailed validation is done by DateTime. The Group index VARIES for h-m-s-f according to
-     * which option is selected Hour: Group 1, 5, 8, 10 Minute: Group 2, 6, 9 Second: Group 3, 7 Microsecond:  Group 4
+     * Gross pattern for times. Detailed validation is done by DateTime. The
+     * Group index VARIES for h-m-s-f according to which option is selected
+     * Hour: Group 1, 5, 8, 10 Minute: Group 2, 6, 9 Second: Group 3, 7
+     * Microsecond: Group 4
      */
-    private static final String CL = "\\:"; //colon is a special character
-    private static final String TT = "(\\d\\d)"; //colon is a special character
+    private static final String CL = "\\:"; // colon is a special character
+    private static final String TT = "(\\d\\d)"; // colon is a special character
     private static final String NUM_DIGITS_FOR_FRACTIONAL_SECONDS = "9";
     private static final Integer NUM_DIGITS = Integer.valueOf(NUM_DIGITS_FOR_FRACTIONAL_SECONDS);
-    private static final Pattern TIME = Pattern.compile("" +
-            TT + CL + TT + CL + TT + "\\." + "(\\d{1," + NUM_DIGITS_FOR_FRACTIONAL_SECONDS + "})" + "|" +
-            TT + CL + TT + CL + TT + "|" +
-            TT + CL + TT + "|" +
-            TT
-    );
+    private static final Pattern TIME = Pattern.compile("" + TT + CL + TT + CL + TT + "\\." + "(\\d{1,"
+            + NUM_DIGITS_FOR_FRACTIONAL_SECONDS + "})" + "|" + TT + CL + TT + CL + TT + "|" + TT + CL + TT + "|" + TT);
 
     private static final String COLON = ":";
     private static final int THIRD_POSITION = 2;
@@ -119,7 +120,8 @@ final class DateTimeParser {
     }
 
     /**
-     * Date and time can be separated with a single space, or with a 'T' character (case-sensitive).
+     * Date and time can be separated with a single space, or with a 'T'
+     * character (case-sensitive).
      */
     private Parts splitIntoDateAndTime(String aDateTime) {
         Parts result = new Parts();
@@ -137,7 +139,8 @@ final class DateTimeParser {
     }
 
     /**
-     * Return the index of a space character, or of a 'T' character. If not found, return -1.
+     * Return the index of a space character, or of a 'T' character. If not
+     * found, return -1.
      */
     int getDateTimeSeparator(String aDateTime) {
         int result = aDateTime.indexOf(" ");
@@ -179,7 +182,8 @@ final class DateTimeParser {
         String result = null;
         for (int id : aGroupIds) {
             result = aMatcher.group(id);
-            if (result != null) break;
+            if (result != null)
+                break;
         }
         return result;
     }
@@ -209,8 +213,8 @@ final class DateTimeParser {
     }
 
     /**
-     * Convert any number of decimals (1..9) into the form it would have taken if nanos had been used, by adding any 0's
-     * to the right side.
+     * Convert any number of decimals (1..9) into the form it would have taken
+     * if nanos had been used, by adding any 0's to the right side.
      */
     private String convertToNanoseconds(String aDecimalSeconds) {
         StringBuilder result = new StringBuilder(aDecimalSeconds);

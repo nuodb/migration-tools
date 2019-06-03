@@ -70,8 +70,7 @@ public abstract class ContextBase implements Context {
             candidate = initiateService(serviceType);
         }
         if (candidate == null) {
-            throw new ContextException(
-                    format("Service of %s type is not registered in this context", serviceType));
+            throw new ContextException(format("Service of %s type is not registered in this context", serviceType));
         }
         return candidate;
     }

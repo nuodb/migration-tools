@@ -61,7 +61,7 @@ public class ReflectionProxyFactory implements AopProxyFactory {
     public AopProxy createAopProxy() {
         Collection<Class> interfaces = newArrayList(this.interfaces);
         interfaces.add(AopProxy.class);
-        return (AopProxy) newProxyInstance(classLoader,
-                interfaces.toArray(new Class[interfaces.size()]), new ReflectionProxy(target));
+        return (AopProxy) newProxyInstance(classLoader, interfaces.toArray(new Class[interfaces.size()]),
+                new ReflectionProxy(target));
     }
 }

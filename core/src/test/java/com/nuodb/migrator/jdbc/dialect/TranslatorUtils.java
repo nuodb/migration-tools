@@ -44,21 +44,28 @@ import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
 public class TranslatorUtils {
 
     /**
-     * Creates simple script from provided string script object & database dialect
+     * Creates simple script from provided string script object & database
+     * dialect
      *
-     * @param script source for the translation
-     * @return simple script object initialized with source script, database dialect & connection url
+     * @param script
+     *            source for the translation
+     * @return simple script object initialized with source script, database
+     *         dialect & connection url
      */
     public static Script createScript(String script) throws SQLException {
         return new SimpleScript(script);
     }
 
     /**
-     * Creates column script initialized with a given default value, type code, type name & a session
+     * Creates column script initialized with a given default value, type code,
+     * type name & a session
      *
-     * @param defaultValue column default value
-     * @param typeCode     database type code
-     * @param typeName     database type name
+     * @param defaultValue
+     *            column default value
+     * @param typeCode
+     *            database type code
+     * @param typeName
+     *            database type name
      * @return fully initialized column script
      */
     public static Script createScript(String defaultValue, int typeCode, String typeName) {

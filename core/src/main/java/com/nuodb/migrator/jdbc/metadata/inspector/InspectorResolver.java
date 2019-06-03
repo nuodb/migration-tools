@@ -96,7 +96,7 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector<
 
     @Override
     public void inspectScopes(InspectionContext inspectionContext,
-                              Collection<? extends InspectionScope> inspectionScopes) throws SQLException {
+            Collection<? extends InspectionScope> inspectionScopes) throws SQLException {
         Inspector inspector = resolve(inspectionContext);
         if (inspector != null) {
             inspector.inspectScopes(inspectionContext, inspectionScopes);
@@ -118,13 +118,13 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector<
 
     @Override
     public ResultSet openResultSet(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query,
-                                   Statement statement) throws SQLException {
+            Statement statement) throws SQLException {
         return null;
     }
 
     @Override
     public void closeStatement(InspectionContext inspectionContext, InspectionScope inspectionScope, Query query,
-                               Statement statement) throws SQLException {
+            Statement statement) throws SQLException {
         System.out.println("InspectorResolver.closeStatement");
     }
 

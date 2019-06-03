@@ -59,17 +59,21 @@ public class SchemaInspectionScope extends InspectionScopeBase {
         this.schema = schema;
     }
 
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         SchemaInspectionScope that = (SchemaInspectionScope) o;
 
-        if (catalog != null ? !catalog.equals(that.catalog) : that.catalog != null) return false;
-        if (schema != null ? !schema.equals(that.schema) : that.schema != null) return false;
+        if (catalog != null ? !catalog.equals(that.catalog) : that.catalog != null)
+            return false;
+        if (schema != null ? !schema.equals(that.schema) : that.schema != null)
+            return false;
 
         return true;
     }

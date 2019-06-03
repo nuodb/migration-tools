@@ -52,18 +52,19 @@ public class PostgreSQL83IndexInspector extends PostgreSQLIndexInspector {
         query.columns("N.NSPNAME AS TABLE_SCHEM", "CT.RELNAME AS TABLE_NAME");
         query.columns("NOT I.INDISUNIQUE AS NON_UNIQUE", "NULL AS INDEX_QUALIFIER");
         query.column("CI.RELNAME AS INDEX_NAME");
-        query.column("CASE I.INDISCLUSTERED WHEN TRUE THEN 1 ELSE CASE AM.AMNAME WHEN 'HASH' THEN 2 ELSE 3 END END AS TYPE");
+        query.column(
+                "CASE I.INDISCLUSTERED WHEN TRUE THEN 1 ELSE CASE AM.AMNAME WHEN 'HASH' THEN 2 ELSE 3 END END AS TYPE");
         query.column("(I.KEYS).N AS ORDINAL_POSITION");
         query.column("PG_CATALOG.PG_GET_INDEXDEF(CI.OID, (I.KEYS).N, FALSE) AS COLUMN_NAME");
-        query.column("CASE AM.AMCANORDER WHEN TRUE THEN " +
-                "CASE I.INDOPTION [(I.KEYS).N - 1] & 1 WHEN 1 THEN 'D' ELSE 'A' END ELSE NULL END AS ASC_OR_DESC");
+        query.column("CASE AM.AMCANORDER WHEN TRUE THEN "
+                + "CASE I.INDOPTION [(I.KEYS).N - 1] & 1 WHEN 1 THEN 'D' ELSE 'A' END ELSE NULL END AS ASC_OR_DESC");
         query.columns("CI.RELTUPLES AS CARDINALITY", "CI.RELPAGES AS PAGES");
         query.column("PG_CATALOG.PG_GET_EXPR(I.INDPRED, I.INDRELID) AS FILTER_CONDITION");
         query.from("PG_CATALOG.PG_CLASS CT");
         query.innerJoin("PG_CATALOG.PG_NAMESPACE N", "CT.RELNAMESPACE = N.OID");
-        query.innerJoin("(SELECT I.INDEXRELID, I.INDRELID, I.INDOPTION, I.INDISPRIMARY, I.INDISUNIQUE, " +
-                "I.INDISCLUSTERED, I.INDPRED, I.INDEXPRS, INFORMATION_SCHEMA._PG_EXPANDARRAY(I.INDKEY) AS KEYS " +
-                "FROM PG_CATALOG.PG_INDEX I) I", "CT.OID = I.INDRELID");
+        query.innerJoin("(SELECT I.INDEXRELID, I.INDRELID, I.INDOPTION, I.INDISPRIMARY, I.INDISUNIQUE, "
+                + "I.INDISCLUSTERED, I.INDPRED, I.INDEXPRS, INFORMATION_SCHEMA._PG_EXPANDARRAY(I.INDKEY) AS KEYS "
+                + "FROM PG_CATALOG.PG_INDEX I) I", "CT.OID = I.INDRELID");
         query.innerJoin("PG_CATALOG.PG_CLASS CI", "CI.OID = I.INDEXRELID");
         query.innerJoin("PG_CATALOG.PG_AM AM", "CI.RELAM = AM.OID");
         String schema = tableInspectionScope.getSchema();
@@ -81,8 +82,8 @@ public class PostgreSQL83IndexInspector extends PostgreSQLIndexInspector {
     }
 
     @Override
-    protected void processIndex(InspectionContext inspectionContext, ResultSet indexes,
-                                Index index) throws SQLException {
+    protected void processIndex(InspectionContext inspectionContext, ResultSet indexes, Index index)
+            throws SQLException {
         super.processIndex(inspectionContext, indexes, index);
         index.setPrimary(indexes.getBoolean("PRIMARY"));
     }

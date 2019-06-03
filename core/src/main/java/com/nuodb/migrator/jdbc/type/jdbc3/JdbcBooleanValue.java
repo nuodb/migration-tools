@@ -49,15 +49,15 @@ public class JdbcBooleanValue extends JdbcTypeValueBase<Boolean> {
     }
 
     @Override
-    public Boolean getValue(ResultSet resultSet, int index,
-                            Field field, Map<String, Object> options) throws SQLException {
+    public Boolean getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         boolean booleanValue = resultSet.getBoolean(index);
         return resultSet.wasNull() ? null : booleanValue;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Boolean value,
-                                    int index, Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Boolean value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setBoolean(index, value);
     }
 }

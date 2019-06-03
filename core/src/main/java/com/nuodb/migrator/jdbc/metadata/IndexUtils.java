@@ -52,11 +52,12 @@ public class IndexUtils {
     private static final String COMMA = ", ";
 
     public static Collection<Script> getCreateMultipleIndexes(Collection<Index> indexes,
-                                                              final ScriptGeneratorManager scriptGeneratorManager) {
+            final ScriptGeneratorManager scriptGeneratorManager) {
         Collection<Script> multipleIndexesScripts = newArrayList();
         for (Index index : indexes) {
             Collection<Script> indexScripts = scriptGeneratorManager.getCreateScripts(index);
-            // indexScripts might be empty if index is a full-text or expression based index
+            // indexScripts might be empty if index is a full-text or expression
+            // based index
             if (indexScripts.size() > 0) {
                 multipleIndexesScripts.add(get(indexScripts, 0));
             }
@@ -79,10 +80,13 @@ public class IndexUtils {
     }
 
     /**
-     * Bypasses MIG-88 "an index on these columns already exists" and executes predicate for duplicated indexes
+     * Bypasses MIG-88 "an index on these columns already exists" and executes
+     * predicate for duplicated indexes
      *
-     * @param table     to get non repeating indexes for
-     * @param predicate receives each duplicate index
+     * @param table
+     *            to get non repeating indexes for
+     * @param predicate
+     *            receives each duplicate index
      * @return non repeating indexes
      */
     public static Collection<Index> getNonRepeatingIndexes(Table table, Predicate<Index> predicate) {
@@ -90,8 +94,8 @@ public class IndexUtils {
         for (Index index : table.getIndexes()) {
             Collection<Column> columns = newHashSet(index.getColumns());
             Index nonRepeatingIndex = nonRepeatingIndexes.get(columns);
-            boolean replaceWithUniqueIndex =
-                    index.isUnique() && nonRepeatingIndex != null && !nonRepeatingIndex.isUnique();
+            boolean replaceWithUniqueIndex = index.isUnique() && nonRepeatingIndex != null
+                    && !nonRepeatingIndex.isUnique();
             if (index.isPrimary() || replaceWithUniqueIndex || nonRepeatingIndex == null) {
                 nonRepeatingIndexes.put(columns, index);
             } else if (predicate != null) {

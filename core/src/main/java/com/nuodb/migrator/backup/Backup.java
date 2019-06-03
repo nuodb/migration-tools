@@ -125,16 +125,21 @@ public class Backup implements HasSize {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Backup backup = (Backup) o;
 
         if (database != null ? !database.equals(backup.database) : backup.database != null)
             return false;
-        if (format != null ? !format.equals(backup.format) : backup.format != null) return false;
-        if (rowSets != null ? !rowSets.equals(backup.rowSets) : backup.rowSets != null) return false;
-        if (version != null ? !version.equals(backup.version) : backup.version != null) return false;
+        if (format != null ? !format.equals(backup.format) : backup.format != null)
+            return false;
+        if (rowSets != null ? !rowSets.equals(backup.rowSets) : backup.rowSets != null)
+            return false;
+        if (version != null ? !version.equals(backup.version) : backup.version != null)
+            return false;
 
         return true;
     }

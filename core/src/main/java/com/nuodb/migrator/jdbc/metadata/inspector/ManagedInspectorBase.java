@@ -40,37 +40,35 @@ import java.util.Collection;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public abstract class ManagedInspectorBase<M extends MetaData, I extends InspectionScope> extends InspectorBase<M,
-        I> implements ManagedInspector<M, I> {
+public abstract class ManagedInspectorBase<M extends MetaData, I extends InspectionScope> extends InspectorBase<M, I>
+        implements ManagedInspector<M, I> {
 
     protected ManagedInspectorBase(Class<? extends MetaData> objectClass,
-                                   Class<? extends InspectionScope> inspectionScopeClass) {
+            Class<? extends InspectionScope> inspectionScopeClass) {
         super(objectClass, inspectionScopeClass);
     }
 
-    protected ManagedInspectorBase(MetaDataType objectType,
-                                   Class<? extends InspectionScope> inspectionScopeClass) {
+    protected ManagedInspectorBase(MetaDataType objectType, Class<? extends InspectionScope> inspectionScopeClass) {
         super(objectType, inspectionScopeClass);
     }
 
     protected ManagedInspectorBase(MetaDataType objectType, MetaDataType parentObjectType,
-                                   Class<? extends InspectionScope> inspectionScopeClass) {
+            Class<? extends InspectionScope> inspectionScopeClass) {
         super(objectType, parentObjectType, inspectionScopeClass);
     }
 
     @Override
     protected ManagedInspectionContext createInspectionContext(InspectionContext inspectionContext,
-                                                               Collection<? extends I> inspectionScopes) throws
-            SQLException {
-        ManagedInspectionContext managedInspectionContext =
-                new SimpleManagedInspectionContext<M, I>(this, inspectionContext);
+            Collection<? extends I> inspectionScopes) throws SQLException {
+        ManagedInspectionContext managedInspectionContext = new SimpleManagedInspectionContext<M, I>(this,
+                inspectionContext);
         managedInspectionContext.init();
         return managedInspectionContext;
     }
 
     @Override
-    public ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope,
-                                   Query query, Statement statement) throws SQLException {
+    public ResultSet openResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,
+            Statement statement) throws SQLException {
         ResultSet resultSet;
         if (inspectionContext instanceof ManagedInspectionContext) {
             ManagedInspectionContext managedInspectionContext = (ManagedInspectionContext) inspectionContext;
@@ -82,8 +80,8 @@ public abstract class ManagedInspectorBase<M extends MetaData, I extends Inspect
     }
 
     @Override
-    public ResultSet openResultSet(ManagedInspectionContext<I> inspectionContext, I inspectionScope,
-                                   Query query, Statement statement) throws SQLException {
+    public ResultSet openResultSet(ManagedInspectionContext<I> inspectionContext, I inspectionScope, Query query,
+            Statement statement) throws SQLException {
         return super.openResultSet(inspectionContext, inspectionScope, query, statement);
     }
 
@@ -101,14 +99,14 @@ public abstract class ManagedInspectorBase<M extends MetaData, I extends Inspect
     }
 
     @Override
-    public Statement createStatement(ManagedInspectionContext<I> inspectionContext, I inspectionScope,
-                                     Query query) throws SQLException {
+    public Statement createStatement(ManagedInspectionContext<I> inspectionContext, I inspectionScope, Query query)
+            throws SQLException {
         return super.createStatement(inspectionContext, inspectionScope, query);
     }
 
     @Override
-    public void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query,
-                                  Statement statement) throws SQLException {
+    public void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query, Statement statement)
+            throws SQLException {
         if (inspectionContext instanceof ManagedInspectionContext) {
             ((ManagedInspectionContext) inspectionContext).closeStatement(inspectionScope, query, statement);
         } else {
@@ -118,7 +116,7 @@ public abstract class ManagedInspectorBase<M extends MetaData, I extends Inspect
 
     @Override
     protected void closeResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,
-                                  ResultSet resultSet) throws SQLException {
+            ResultSet resultSet) throws SQLException {
         super.closeResultSet(inspectionContext, inspectionScope, query, resultSet);
     }
 

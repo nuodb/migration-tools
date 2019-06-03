@@ -46,11 +46,10 @@ import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
  */
 public class PostgreSQLCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    private static final String QUERY =
-            "SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS CCU " +
-            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON " +
-            "CCU.TABLE_CATALOG = CC.CONSTRAINT_CATALOG AND CCU.TABLE_SCHEMA = CC.CONSTRAINT_SCHEMA " +
-            "AND CCU.CONSTRAINT_NAME = CC.CONSTRAINT_NAME WHERE CCU.TABLE_SCHEMA=? AND CCU.TABLE_NAME=?";
+    private static final String QUERY = "SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS CCU "
+            + "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON "
+            + "CCU.TABLE_CATALOG = CC.CONSTRAINT_CATALOG AND CCU.TABLE_SCHEMA = CC.CONSTRAINT_SCHEMA "
+            + "AND CCU.CONSTRAINT_NAME = CC.CONSTRAINT_NAME WHERE CCU.TABLE_SCHEMA=? AND CCU.TABLE_NAME=?";
 
     public PostgreSQLCheckInspector() {
         super(CHECK, TableInspectionScope.class);
@@ -68,8 +67,8 @@ public class PostgreSQLCheckInspector extends TableInspectorBase<Table, TableIns
     protected void processResultSet(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
-            Table table = addTable(inspectionResults, null,
-                    checks.getString("TABLE_SCHEMA"), checks.getString("TABLE_NAME"));
+            Table table = addTable(inspectionResults, null, checks.getString("TABLE_SCHEMA"),
+                    checks.getString("TABLE_NAME"));
             Check check = new Check(checks.getString("CONSTRAINT_NAME"));
             check.setText(checks.getString("CHECK_CLAUSE"));
             table.addCheck(check);

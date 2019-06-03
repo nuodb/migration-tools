@@ -49,7 +49,8 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /**
- * Fixes "Stream has already been closed" https://issues.apache.org/jira/browse/DDLUTILS-29
+ * Fixes "Stream has already been closed"
+ * https://issues.apache.org/jira/browse/DDLUTILS-29
  *
  * @author Sergey Bushik
  */
@@ -59,22 +60,26 @@ public class OracleColumnInspector extends SimpleColumnInspector {
     private static final long cSize = 24;
 
     /**
-     * Fetches LONG or LONG RAW columns first, as these kind of columns are read as stream, if not read in a proper
-     * order, there will be an error
+     * Fetches LONG or LONG RAW columns first, as these kind of columns are read
+     * as stream, if not read in a proper order, there will be an error
      *
-     * @param inspectionContext with inspection data
-     * @param columns       result set holding column attributes
-     * @param column        to populate from result set
+     * @param inspectionContext
+     *            with inspection data
+     * @param columns
+     *            result set holding column attributes
+     * @param column
+     *            to populate from result set
      * @throws SQLException
      */
     @Override
-    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
+    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column)
+            throws SQLException {
         String defaultValue = trim(columns.getString("COLUMN_DEF"));
         if (startsWith(defaultValue, "'") && endsWith(defaultValue, "'")) {
             defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
         }
-        JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeAlias(
-                columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
+        JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeAlias(columns.getInt("DATA_TYPE"),
+                columns.getString("TYPE_NAME"));
         column.setTypeCode(typeDescAlias.getTypeCode());
         column.setTypeName(typeDescAlias.getTypeName());
 
@@ -96,8 +101,8 @@ public class OracleColumnInspector extends SimpleColumnInspector {
             if (column.getScale() != null) {
                 typeInfo.add(format("scale %d", column.getScale()));
             }
-            logger.warn(format("Unsupported type on table %s column %s: %s",
-                    column.getTable().getName(), column.getName(), join(typeInfo, ", ")));
+            logger.warn(format("Unsupported type on table %s column %s: %s", column.getTable().getName(),
+                    column.getName(), join(typeInfo, ", ")));
         }
 
         int columnSize = columns.getInt("COLUMN_SIZE");
@@ -112,9 +117,9 @@ public class OracleColumnInspector extends SimpleColumnInspector {
 
         column.setComment(columns.getString("REMARKS"));
         column.setPosition(columns.getInt("ORDINAL_POSITION"));
-        String autoIncrement =
-                newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
-                        columns.getString("IS_AUTOINCREMENT") : null;
+        String autoIncrement = newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null
+                ? columns.getString("IS_AUTOINCREMENT")
+                : null;
         column.setAutoIncrement("YES".equals(autoIncrement));
         column.setNullable("YES".equals(columns.getString("IS_NULLABLE")));
         column.setDefaultValue(valueOf(defaultValue, true));

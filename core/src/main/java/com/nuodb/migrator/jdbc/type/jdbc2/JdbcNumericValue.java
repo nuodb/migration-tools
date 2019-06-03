@@ -54,14 +54,14 @@ public class JdbcNumericValue extends JdbcTypeValueBase<BigDecimal> {
     }
 
     @Override
-    public BigDecimal getValue(ResultSet resultSet, int index,
-                               Field field, Map<String, Object> options) throws SQLException {
+    public BigDecimal getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
         return resultSet.getBigDecimal(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value,
-                                    int index, Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setBigDecimal(index, value);
     }
 }

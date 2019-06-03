@@ -52,8 +52,7 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
     public static final boolean THROW_FAILURE_ON_CLOSE = true;
     protected final transient Logger logger = getLogger(getClass());
     private boolean throwFailureOnClose = THROW_FAILURE_ON_CLOSE;
-    private Map<Work, Throwable> failures = synchronizedMap(
-            Maps.<Work, Throwable>newLinkedHashMap());
+    private Map<Work, Throwable> failures = synchronizedMap(Maps.<Work, Throwable>newLinkedHashMap());
     private List<L> listeners = newCopyOnWriteArrayList();
 
     @Override
@@ -150,8 +149,7 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
 
     protected void failure(Work work, Throwable failure) {
         if (logger.isWarnEnabled()) {
-            logger.warn(format("%s work failed with error %s",
-                    work.getName(), failure.getMessage()));
+            logger.warn(format("%s work failed with error %s", work.getName(), failure.getMessage()));
         }
         failures.put(work, failure);
         onFailure(work, failure);
@@ -178,8 +176,7 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
         Map<Work, Throwable> failures = getFailures();
         if (isThrowFailureOnClose() && !isEmpty(failures)) {
             final Throwable failure = get(failures.values(), 0);
-            throw failure instanceof MigratorException ?
-                    (MigratorException) failure : new WorkException(failure);
+            throw failure instanceof MigratorException ? (MigratorException) failure : new WorkException(failure);
         }
     }
 

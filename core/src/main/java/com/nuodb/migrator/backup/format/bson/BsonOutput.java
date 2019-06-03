@@ -112,12 +112,12 @@ public class BsonOutput extends OutputBase implements BsonFormat {
                 Value value = values[i];
                 if (!value.isNull()) {
                     switch (get(columns, i).getValueType()) {
-                        case BINARY:
-                            bsonWriter.writeBinary(value.asBytes());
-                            break;
-                        case STRING:
-                            bsonWriter.writeString(value.asString());
-                            break;
+                    case BINARY:
+                        bsonWriter.writeBinary(value.asBytes());
+                        break;
+                    case STRING:
+                        bsonWriter.writeString(value.asString());
+                        break;
                     }
                 }
             }

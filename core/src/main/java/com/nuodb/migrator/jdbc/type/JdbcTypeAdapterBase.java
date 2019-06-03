@@ -50,21 +50,22 @@ public abstract class JdbcTypeAdapterBase<T> implements JdbcTypeAdapter<T> {
                 format("Failed adapting %s to %s", value.getClass().getName(), getTypeClass().getName()));
     }
 
-
     protected <X> JdbcTypeException newUnwrapFailure(Class<X> valueClass) {
         return new JdbcTypeException(
-                format("Failed adapting %s to %s", valueClass.getName(), getTypeClass().getName())
-        );
+                format("Failed adapting %s to %s", valueClass.getName(), getTypeClass().getName()));
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         JdbcTypeAdapterBase that = (JdbcTypeAdapterBase) o;
 
-        if (typeClass != null ? !typeClass.equals(that.typeClass) : that.typeClass != null) return false;
+        if (typeClass != null ? !typeClass.equals(that.typeClass) : that.typeClass != null)
+            return false;
 
         return true;
     }

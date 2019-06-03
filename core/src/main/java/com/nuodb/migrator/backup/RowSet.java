@@ -149,16 +149,23 @@ public class RowSet implements HasSize {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         RowSet rowSet = (RowSet) o;
 
-        if (getRowCount() != rowSet.getRowCount()) return false;
-        if (chunks != null ? !chunks.equals(rowSet.chunks) : rowSet.chunks != null) return false;
-        if (columns != null ? !columns.equals(rowSet.columns) : rowSet.columns != null) return false;
-        if (name != null ? !name.equals(rowSet.name) : rowSet.name != null) return false;
-        if (type != null ? !type.equals(rowSet.type) : rowSet.type != null) return false;
+        if (getRowCount() != rowSet.getRowCount())
+            return false;
+        if (chunks != null ? !chunks.equals(rowSet.chunks) : rowSet.chunks != null)
+            return false;
+        if (columns != null ? !columns.equals(rowSet.columns) : rowSet.columns != null)
+            return false;
+        if (name != null ? !name.equals(rowSet.name) : rowSet.name != null)
+            return false;
+        if (type != null ? !type.equals(rowSet.type) : rowSet.type != null)
+            return false;
 
         return true;
     }

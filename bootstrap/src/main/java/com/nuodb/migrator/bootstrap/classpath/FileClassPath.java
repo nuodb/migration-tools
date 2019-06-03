@@ -32,7 +32,7 @@ package com.nuodb.migrator.bootstrap.classpath;
  */
 public interface FileClassPath extends ClassPath {
 
-    final char WINDOWS_FILE_SEPARATOR = '\\' ;
+    final char WINDOWS_FILE_SEPARATOR = '\\';
 
-    final char UNIX_FILE_SEPARATOR = '/' ;
+    final char UNIX_FILE_SEPARATOR = '/';
 }

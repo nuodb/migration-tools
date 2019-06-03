@@ -43,10 +43,8 @@ public class NuoDBColumnTest {
 
     @DataProvider(name = "getEnum")
     public Object[][] createGetEnumData() throws Exception {
-        return new Object[][]{
-                {"^v1^v2^v3^", newArrayList("v1", "v2", "v3")},
-                {"^\\\\^\\^^\\\\\\^^", newArrayList("\\", "^", "\\^")}
-        };
+        return new Object[][] { { "^v1^v2^v3^", newArrayList("v1", "v2", "v3") },
+                { "^\\\\^\\^^\\\\\\^^", newArrayList("\\", "^", "\\^") } };
     }
 
     @Test(dataProvider = "getEnum")

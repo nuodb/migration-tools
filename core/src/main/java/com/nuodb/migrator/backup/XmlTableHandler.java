@@ -60,7 +60,7 @@ import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"all"})
+@SuppressWarnings({ "all" })
 public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
 
     private static final String TYPE_ATTRIBUTE = "type";
@@ -99,8 +99,8 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     protected Table createTarget(InputNode input, Class<? extends Table> type, XmlReadContext context) {
         Schema schema = getParent(context, 0);
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        return schema != null ? (schema.hasTable(name) ?
-                schema.getTable(name) : schema.addTable(name)) : new Table(name);
+        return schema != null ? (schema.hasTable(name) ? schema.getTable(name) : schema.addTable(name))
+                : new Table(name);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
         context.put(COLUMNS, newLinkedHashSet());
         super.read(input, context);
     }
-    
+
     @Override
     protected void readAttributes(InputNode input, Table table, XmlReadContext context) throws Exception {
         table.setType(context.readAttribute(input, TYPE_ATTRIBUTE, String.class));
@@ -148,8 +148,8 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
             skip = indexOf(tableTypes, equalTo(table.getType())) == -1;
         }
         if (!skip) {
-            MetaDataFilter tableFilter = metaDataSpec != null ?
-                    metaDataSpec.getMetaDataFilter(MetaDataType.TABLE) : null;
+            MetaDataFilter tableFilter = metaDataSpec != null ? metaDataSpec.getMetaDataFilter(MetaDataType.TABLE)
+                    : null;
             skip = !(tableFilter == null || tableFilter.accepts(table));
         }
         return skip;

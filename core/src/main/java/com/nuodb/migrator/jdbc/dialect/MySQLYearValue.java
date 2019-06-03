@@ -60,14 +60,13 @@ public class MySQLYearValue extends JdbcDateValueBase<Date> {
     }
 
     @Override
-    public Date getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
-            throws SQLException {
+    public Date getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options) throws SQLException {
         return resultSet.getDate(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Date value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Date value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         Calendar calendar = CALENDAR.get();
         calendar.setTime(value);
         int year = calendar.get(Calendar.YEAR);

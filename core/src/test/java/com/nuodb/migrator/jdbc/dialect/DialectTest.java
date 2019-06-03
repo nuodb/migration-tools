@@ -70,25 +70,22 @@ public class DialectTest {
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=convertToNull");
         Session round = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=round");
-        return new Object[][]{
-                {createScript("00:00:00", Types.TIME, "TIME"), convertToNull, "'00:00:00'"},
-                {createScript("0000-00-00", DATE, "DATE"), convertToNull, "'0000-00-00'"},
-                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), convertToNull, "'0000-00-00 00:00:00'"},
-                {createScript("00:00:00", Types.TIME, "TIME"), round, "00:00:00"},
-                {createScript("0000-00-00", DATE, "DATE"), round, "0001-01-01"},
-                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), round, "0001-01-01 00:00:00"},
-        };
+        return new Object[][] { { createScript("00:00:00", Types.TIME, "TIME"), convertToNull, "'00:00:00'" },
+                { createScript("0000-00-00", DATE, "DATE"), convertToNull, "'0000-00-00'" },
+                { createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), convertToNull,
+                        "'0000-00-00 00:00:00'" },
+                { createScript("00:00:00", Types.TIME, "TIME"), round, "00:00:00" },
+                { createScript("0000-00-00", DATE, "DATE"), round, "0001-01-01" },
+                { createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), round, "0001-01-01 00:00:00" }, };
     }
 
     @DataProvider(name = "zeroDateTimeBehaviorException")
     public Object[][] createZeroDateTimeBehaviorExceptionData() throws Exception {
         Session session = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=exception");
-        return new Object[][]{
-                {createScript("00:00:00", Types.TIME, "TIME"), session},
-                {createScript("0000-00-00", DATE, "DATE"), session},
-                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), session}
-        };
+        return new Object[][] { { createScript("00:00:00", Types.TIME, "TIME"), session },
+                { createScript("0000-00-00", DATE, "DATE"), session },
+                { createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), session } };
     }
 
     @Test(dataProvider = "zeroDateTimeBehavior")
@@ -104,12 +101,8 @@ public class DialectTest {
 
     @DataProvider(name = "getCheckClause")
     public Object[][] createGetCheckClauseData() {
-        return new Object[][]{
-                {null, null},
-                {"F1 > 5", "(F1 > 5)"},
-                {"F1 in (0,1)", "(F1 in (0,1))"},
-                {"(F1 < 1) AND (F2 < 2)", "((F1 < 1) AND (F2 < 2))"},
-        };
+        return new Object[][] { { null, null }, { "F1 > 5", "(F1 > 5)" }, { "F1 in (0,1)", "(F1 in (0,1))" },
+                { "(F1 < 1) AND (F2 < 2)", "((F1 < 1) AND (F2 < 2))" }, };
     }
 
     @Test(dataProvider = "getCheckClause")
@@ -145,15 +138,9 @@ public class DialectTest {
         Column varchar = new Column();
         varchar.setJdbcType(new JdbcType(new JdbcTypeDesc(VARCHAR, "varchar")));
         varchar.setDefaultValue(valueOf("NULL"));
-        return new Object[][]{
-                {session, date, "'0000-00-00'"},
-                {session, time, "'00:00:00'"},
-                {session, timestamp, "'0000-00-00 00:00:00'"},
-                {session, timestamp1, null},
-                {session, timestamp2, null},
-                {session, timestamp3, "NULL"},
-                {session, varchar, "NULL"}
-        };
+        return new Object[][] { { session, date, "'0000-00-00'" }, { session, time, "'00:00:00'" },
+                { session, timestamp, "'0000-00-00 00:00:00'" }, { session, timestamp1, null },
+                { session, timestamp2, null }, { session, timestamp3, "NULL" }, { session, varchar, "NULL" } };
     }
 
     @Test(dataProvider = "getDefaultValue")
@@ -171,73 +158,68 @@ public class DialectTest {
     private void createGetMySQLTypeNamesData(Collection<Object[]> data) {
         MySQLDialect dialect = new MySQLDialect(MYSQL);
         // #1 test INT(10)
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(4, "INT"), newOptions(10, 10, 0)), "INT(10)"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(4, "INT"), newOptions(10, 10, 0)),
+                "INT(10)" });
         // #2 test DECIMAL(10, 2)
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(3, "DECIMAL"), newOptions(10, 10, 2)), "DECIMAL(10,2)"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(3, "DECIMAL"), newOptions(10, 10, 2)),
+                "DECIMAL(10,2)" });
         // #3 test DATETIME
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(93, "DATETIME")), "DATETIME"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(93, "DATETIME")), "DATETIME" });
         // #4 test TIMESTAMP
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(93, "TIMESTAMP")), "TIMESTAMP"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(93, "TIMESTAMP")), "TIMESTAMP" });
         // #6 test YEAR(4)
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(91, "YEAR"), newOptions(0, 0, 0)), "YEAR"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(91, "YEAR"), newOptions(0, 0, 0)),
+                "YEAR" });
         // #7 test CHAR(20)
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(1, "CHAR"), newOptions(20, 20, 0)), "CHAR(20)"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(1, "CHAR"), newOptions(20, 20, 0)),
+                "CHAR(20)" });
         // #8 test ENUM('abcd','check','sample test')
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcEnumType(new JdbcType(new JdbcTypeDesc(1, "ENUM")),
-                        newArrayList("abcd", "check", "sample test")), "ENUM('abcd','check','sample test')"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcEnumType(new JdbcType(new JdbcTypeDesc(1, "ENUM")),
+                newArrayList("abcd", "check", "sample test")), "ENUM('abcd','check','sample test')" });
         // #9 test SET('one','two','','three')
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcSetType(new JdbcType(new JdbcTypeDesc(1, "SET")),
-                        newArrayList("one", "two", "", "three")), "SET('one','two','','three')"});
+        data.add(new Object[] { dialect, MYSQL,
+                new JdbcSetType(new JdbcType(new JdbcTypeDesc(1, "SET")), newArrayList("one", "two", "", "three")),
+                "SET('one','two','','three')" });
         // #10 test TINYINT
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(-6, "TINYINT")), "TINYINT"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(-6, "TINYINT")), "TINYINT" });
         // #11 test VARCHAR(20)
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(12, "VARCHAR"), newOptions(20, 20, 0)), "VARCHAR(20)"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(12, "VARCHAR"), newOptions(20, 20, 0)),
+                "VARCHAR(20)" });
         // #12 test TINYINT
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(-6, "TINYINT"), newOptions(6, 6, 0)), "TINYINT"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(-6, "TINYINT"), newOptions(6, 6, 0)),
+                "TINYINT" });
         // #13 test TEXT
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(2005, "TEXT"), newOptions(65535, 65535, 0)), "TEXT"});
+        data.add(new Object[] { dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(2005, "TEXT"), newOptions(65535, 65535, 0)), "TEXT" });
         // #14 test DATE
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(91, "DATE"), newOptions(10, 10, 0)), "DATE"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(91, "DATE"), newOptions(10, 10, 0)),
+                "DATE" });
         // #15 test SMALLINT
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(5, "SMALLINT")), "SMALLINT"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(5, "SMALLINT")), "SMALLINT" });
         // #16 test TINYBLOB
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(-2, "TINYBLOB"), newOptions(255, 255, 0)), "TINYBLOB"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(-2, "TINYBLOB"), newOptions(255, 255, 0)),
+                "TINYBLOB" });
         // #17 test BIGINT UNSIGNED
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(-5, "BIGINT UNSIGNED"), newOptions(20, 20, 0)), "BIGINT(20) UNSIGNED"});
+        data.add(new Object[] { dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(-5, "BIGINT UNSIGNED"), newOptions(20, 20, 0)), "BIGINT(20) UNSIGNED" });
         // #18 test TINYTEXT
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(12, "TINYTEXT"), newOptions(255, 255, 0)), "TINYTEXT"});
+        data.add(new Object[] { dialect, MYSQL, new JdbcType(new JdbcTypeDesc(12, "TINYTEXT"), newOptions(255, 255, 0)),
+                "TINYTEXT" });
         // #19 test BLOB
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(2004, "BLOB"), newOptions(65535, 65535, 0)), "BLOB"});
+        data.add(new Object[] { dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(2004, "BLOB"), newOptions(65535, 65535, 0)), "BLOB" });
         // #20 test MEDIUMBLOB
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(2004, "MEDIUMBLOB"), newOptions(16777215, 16777215, 0)), "MEDIUMBLOB"});
+        data.add(new Object[] { dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(2004, "MEDIUMBLOB"), newOptions(16777215, 16777215, 0)), "MEDIUMBLOB" });
         // #20 test MEDIUMTEXT
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(2005, "MEDIUMTEXT"), newOptions(16777215, 16777215, 0)), "MEDIUMTEXT"});
+        data.add(new Object[] { dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(2005, "MEDIUMTEXT"), newOptions(16777215, 16777215, 0)), "MEDIUMTEXT" });
         // #20 test LONGBLOB
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(-4, "LONGBLOB"), newOptions(2147483647, 2147483647, 0)), "LONGBLOB"});
+        data.add(new Object[] { dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(-4, "LONGBLOB"), newOptions(2147483647, 2147483647, 0)), "LONGBLOB" });
         // #20 test LONGTEXT
-        data.add(new Object[]{dialect, MYSQL,
-                new JdbcType(new JdbcTypeDesc(-1, "LONGTEXT"), newOptions(2147483647, 2147483647, 0)), "LONGTEXT"});
+        data.add(new Object[] { dialect, MYSQL,
+                new JdbcType(new JdbcTypeDesc(-1, "LONGTEXT"), newOptions(2147483647, 2147483647, 0)), "LONGTEXT" });
     }
 
     @Test(dataProvider = "getTypeName")

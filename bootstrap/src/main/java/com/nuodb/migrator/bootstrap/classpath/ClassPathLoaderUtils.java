@@ -48,7 +48,7 @@ public class ClassPathLoaderUtils {
 
     public static ClassPathLoader createClassPathLoader(String path, ClassLoader parent) {
         Set<String> paths = new LinkedHashSet<String>();
-        for (StringTokenizer tokenizer = new StringTokenizer(path, PATH_SEPARATOR); tokenizer.hasMoreElements(); ) {
+        for (StringTokenizer tokenizer = new StringTokenizer(path, PATH_SEPARATOR); tokenizer.hasMoreElements();) {
             paths.add(tokenizer.nextToken());
         }
         return createClassPathLoader(paths, parent);
@@ -57,8 +57,8 @@ public class ClassPathLoaderUtils {
     public static ClassPathLoader createClassPathLoader(Collection<String> paths, ClassLoader parent) {
         ClassPathLoader classPathLoader = parent != null ? new ClassPathLoader() : new ClassPathLoader(parent);
         for (String path : paths) {
-            if ((classPathLoader.addUrl(path) || classPathLoader.addJar(path) ||
-                    classPathLoader.addJarDir(path) || classPathLoader.addDir(path))) {
+            if ((classPathLoader.addUrl(path) || classPathLoader.addJar(path) || classPathLoader.addJarDir(path)
+                    || classPathLoader.addDir(path))) {
                 // alright, the path was recognized
             } else {
                 if (logger.isDebugEnabled()) {
@@ -69,4 +69,3 @@ public class ClassPathLoaderUtils {
         return classPathLoader;
     }
 }
-

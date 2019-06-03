@@ -80,8 +80,8 @@ public class MSSQLServerSequenceInspectorTest extends InspectorTestBase {
         given(resultSet.getString("column_name")).willReturn(columnName);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager()
-                .inspect(getConnection(), inspectionScope, SEQUENCE);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope,
+                SEQUENCE);
 
         verifyInspectScope(getInspector(), inspectionScope);
         Collection<Sequence> sequences = inspectionResults.getObjects(SEQUENCE);

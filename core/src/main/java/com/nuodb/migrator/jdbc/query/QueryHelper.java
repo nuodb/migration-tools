@@ -109,7 +109,8 @@ public class QueryHelper {
     protected String getAlias(String expression) {
         String openQuote = quote(dialect.openQuote());
         String closeQuote = quote(dialect.closeQuote());
-        Matcher matcher = compile("\\s*(?i:AS)?\\s*((?:" + openQuote + ")?(\\w*)(?:" + closeQuote + ")?)$").matcher(expression);
+        Matcher matcher = compile("\\s*(?i:AS)?\\s*((?:" + openQuote + ")?(\\w*)(?:" + closeQuote + ")?)$")
+                .matcher(expression);
         if (matcher.find()) {
             return matcher.group(1);
         }

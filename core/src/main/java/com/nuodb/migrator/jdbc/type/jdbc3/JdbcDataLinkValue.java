@@ -50,14 +50,13 @@ public class JdbcDataLinkValue extends JdbcTypeValueBase<URL> {
     }
 
     @Override
-    public URL getValue(ResultSet resultSet, int index,
-                        Field field, Map<String, Object> options) throws SQLException {
+    public URL getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options) throws SQLException {
         return resultSet.getURL(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, URL value, int index,
-                                    Field field, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, URL value, int index, Field field,
+            Map<String, Object> options) throws SQLException {
         statement.setURL(index, value);
     }
 }

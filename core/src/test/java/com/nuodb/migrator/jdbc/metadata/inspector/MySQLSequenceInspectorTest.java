@@ -81,8 +81,8 @@ public class MySQLSequenceInspectorTest extends InspectorTestBase {
         given(columns.getString("FIELD")).willReturn(columnName);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, null, tableName);
-        InspectionResults inspectionResults = getInspectionManager()
-                .inspect(getConnection(), inspectionScope, SEQUENCE);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope,
+                SEQUENCE);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Sequence> sequences = inspectionResults.getObjects(SEQUENCE);

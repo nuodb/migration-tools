@@ -36,26 +36,22 @@ import org.testng.annotations.Test;
 import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 
-@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
+@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
 public class GenerationTest extends MigrationTestBase {
     PreparedStatement pstmt = null;
 
     public void oddOrEvenInRange() throws Exception {
-        List<Integer> list = DatabaseUtil.getNumArray(
-                "SELECT num FROM array WHERE cast (num as int) % 2 = 0",
+        List<Integer> list = DatabaseUtil.getNumArray("SELECT num FROM array WHERE cast (num as int) % 2 = 0",
                 nuodbConnection, pstmt);
         Assert.assertTrue(list.size() >= 1, "The list is empty");
         Integer[] acteven = list.toArray(new Integer[list.size()]);
-        List<Integer> list1 = DatabaseUtil.getNumArray(
-                "SELECT num FROM array WHERE cast (num as int) % 2 = 1",
+        List<Integer> list1 = DatabaseUtil.getNumArray("SELECT num FROM array WHERE cast (num as int) % 2 = 1",
                 nuodbConnection, pstmt);
         Assert.assertTrue(list1.size() >= 1, "The list1 is empty");
         Integer[] actodd = list1.toArray(new Integer[list1.size()]);
-        Integer expodd[] = {5, 1, 3, 9, 7};
-        Integer expeven[] = {4, 8, 6, 2, 0};
-        Assert.assertEqualsNoOrder(acteven, expeven,
-                "Even List condains odd number");
-        Assert.assertEqualsNoOrder(actodd, expodd,
-                "Odd List condains even number");
+        Integer expodd[] = { 5, 1, 3, 9, 7 };
+        Integer expeven[] = { 4, 8, 6, 2, 0 };
+        Assert.assertEqualsNoOrder(acteven, expeven, "Even List condains odd number");
+        Assert.assertEqualsNoOrder(actodd, expodd, "Odd List condains even number");
     }
 }

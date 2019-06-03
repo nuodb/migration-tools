@@ -53,8 +53,8 @@ public class MySQLOnUpdateTriggerTranslator extends TriggerTranslatorBase {
     @Override
     protected boolean supportsScript(TriggerScript script, TranslationContext context) {
         Column column = getColumn(script.getTrigger());
-        return column != null && TYPES.contains(column.getTypeCode()) &&
-                context.translate(new ColumnScript(column)) != null;
+        return column != null && TYPES.contains(column.getTypeCode())
+                && context.translate(new ColumnScript(column)) != null;
     }
 
     protected Column getColumn(Trigger trigger) {

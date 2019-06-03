@@ -89,7 +89,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"all"})
+@SuppressWarnings({ "all" })
 public class BackupWriter {
 
     public static final String FORMAT = CsvFormat.TYPE;
@@ -129,45 +129,52 @@ public class BackupWriter {
     }
 
     /**
-     * Adds a table with specified columns and filtering clause to the writing queue.
+     * Adds a table with specified columns and filtering clause to the writing
+     * queue.
      *
-     * @param table      to include into dump.
-     * @param columns    only specified columns will be writing.
-     * @param filter     to filter rows with.
-     * @param queryLimit which will be used for creating "pages", if query limit is null no limiting query splitter will
-     *                   be constructed.
+     * @param table
+     *            to include into dump.
+     * @param columns
+     *            only specified columns will be writing.
+     * @param filter
+     *            to filter rows with.
+     * @param queryLimit
+     *            which will be used for creating "pages", if query limit is
+     *            null no limiting query splitter will be constructed.
      */
-    public void addTable(Table table, Collection<Column> columns, String filter,
-                         QueryLimit queryLimit) {
+    public void addTable(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
         addTable(table, columns, filter, queryLimit, getWriteQueries());
     }
 
-    protected void addTable(Table table, Collection<Column> columns, String filter,
-                            QueryLimit queryLimit, Collection<WriteQuery> writeQueries) {
+    protected void addTable(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit,
+            Collection<WriteQuery> writeQueries) {
         writeQueries.add(createWriteQuery(table, columns, filter, queryLimit));
     }
 
     /**
      * Adds all tables contained within schema, catalog or database.
      *
-     * @param tables to include into dump.
+     * @param tables
+     *            to include into dump.
      */
     public void addTables(HasTables tables) {
         addTables(tables, null);
     }
 
     /**
-     * Adds tables restricted to certain types contained within schema, catalog or database.
+     * Adds tables restricted to certain types contained within schema, catalog
+     * or database.
      *
-     * @param tables to include into dump.
-     * @param tableTypes allowed table types.
+     * @param tables
+     *            to include into dump.
+     * @param tableTypes
+     *            allowed table types.
      */
     public void addTables(HasTables tables, InspectionScope inspectionScope) {
         addTables(tables, inspectionScope, getWriteQueries());
     }
 
-    protected void addTables(HasTables tables, InspectionScope inspectionScope,
-                             Collection<WriteQuery> writeQueries) {
+    protected void addTables(HasTables tables, InspectionScope inspectionScope, Collection<WriteQuery> writeQueries) {
         TableInspectionScope tableInspectionScope = (TableInspectionScope) inspectionScope;
         Identifier catalog = valueOf(tableInspectionScope != null ? tableInspectionScope.getCatalog() : null);
         Identifier schema = valueOf(tableInspectionScope != null ? tableInspectionScope.getSchema() : null);
@@ -177,12 +184,10 @@ public class BackupWriter {
             addTable = addTable && (catalog == null || table.getCatalog().getIdentifier().equals(catalog));
             addTable = addTable && (schema == null || table.getSchema().getIdentifier().equals(schema));
             if (addTable) {
-                writeQueries.add(createWriteQuery(
-                        table, table.getColumns(), null, getQueryLimit()));
+                writeQueries.add(createWriteQuery(table, table.getColumns(), null, getQueryLimit()));
             } else {
                 if (logger.isTraceEnabled()) {
-                    logger.trace(format("Table %s %s skipped",
-                            table.getQualifiedName(null), table.getType()));
+                    logger.trace(format("Table %s %s skipped", table.getQualifiedName(null), table.getType()));
                 }
             }
         }
@@ -241,8 +246,7 @@ public class BackupWriter {
     }
 
     protected InspectionScope getInspectionScope() {
-        return new TableInspectionScope(
-                sourceSpec.getCatalog(), sourceSpec.getSchema(), getTableTypes());
+        return new TableInspectionScope(sourceSpec.getCatalog(), sourceSpec.getSchema(), getTableTypes());
     }
 
     protected BackupWriterManager createBackupWriterManager(BackupOps backupOps, Map context) throws Exception {
@@ -283,11 +287,9 @@ public class BackupWriter {
         backupWriterContext.setSourceSessionFactory(sourceSessionFactory);
         backupWriterContext.setSourceSession(sourceSession);
         try {
-            backupWriterContext.setValueFormatRegistry(
-                    createValueFormatRegistry(sourceSession));
+            backupWriterContext.setValueFormatRegistry(createValueFormatRegistry(sourceSession));
             final Database database = getDatabase();
-            backupWriterContext.setDatabase(database == null ?
-                    openDatabase(backupWriterContext) : database);
+            backupWriterContext.setDatabase(database == null ? openDatabase(backupWriterContext) : database);
         } catch (Exception exception) {
             closeQuietly(sourceSession);
             throw exception;
@@ -296,8 +298,9 @@ public class BackupWriter {
 
     protected Database openDatabase(BackupWriterContext backupWriterContext) throws Exception {
         Session session = backupWriterContext.getSourceSession();
-        return getInspectionManager().inspect(session.getConnection(), getInspectionScope(),
-                getObjectTypes().toArray(new MetaDataType[0])).getObject(DATABASE);
+        return getInspectionManager()
+                .inspect(session.getConnection(), getInspectionScope(), getObjectTypes().toArray(new MetaDataType[0]))
+                .getObject(DATABASE);
     }
 
     protected Backup write(BackupWriterManager backupWriterManager) throws Exception {
@@ -310,8 +313,8 @@ public class BackupWriter {
             }
         } catch (Throwable failure) {
             backupWriterManager.writeFailed();
-            throw failure instanceof MigratorException ?
-                    (MigratorException) failure : new BackupWriterException(failure);
+            throw failure instanceof MigratorException ? (MigratorException) failure
+                    : new BackupWriterException(failure);
         } finally {
             backupWriterManager.close();
         }
@@ -345,15 +348,14 @@ public class BackupWriter {
         final BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
         ForkJoinPool executor = (ForkJoinPool) backupWriterContext.getExecutorService();
         if (work instanceof Runnable) {
-            executor.execute((Runnable)work);
+            executor.execute((Runnable) work);
         } else if (work instanceof ForkJoinTask) {
-            executor.execute((ForkJoinTask)work);
+            executor.execute((ForkJoinTask) work);
         } else {
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    backupWriterManager.execute(work,
-                            backupWriterContext.getSourceSessionFactory());
+                    backupWriterManager.execute(work, backupWriterContext.getSourceSessionFactory());
                 }
             });
         }
@@ -388,19 +390,20 @@ public class BackupWriter {
     }
 
     protected WriteQuery createWriteQuery(Table table, Collection<Column> columns, String filter,
-                                          QueryLimit queryLimit) {
-        return new WriteTable(table, columns, filter,
-                createQuerySplitter(table, columns, filter, queryLimit), new TableRowSet(table));
+            QueryLimit queryLimit) {
+        return new WriteTable(table, columns, filter, createQuerySplitter(table, columns, filter, queryLimit),
+                new TableRowSet(table));
     }
 
     protected QuerySplitter createQuerySplitter(Table table, Collection<Column> columns, String filter,
-                                                QueryLimit queryLimit) {
+            QueryLimit queryLimit) {
         QuerySplitter querySplitter;
         Query query = newQuery(table, columns, filter);
         Dialect dialect = table.getDatabase().getDialect();
         if (queryLimit != null && supportsLimitSplitter(dialect, table, filter)) {
-            querySplitter = newLimitSplitter(dialect, newCachingStrategy(newHandlerStrategy(
-                    dialect.createRowCountHandler(table, null, filter, EXACT))), query, queryLimit);
+            querySplitter = newLimitSplitter(dialect,
+                    newCachingStrategy(newHandlerStrategy(dialect.createRowCountHandler(table, null, filter, EXACT))),
+                    query, queryLimit);
         } else {
             querySplitter = newNoLimitSplitter(query);
         }

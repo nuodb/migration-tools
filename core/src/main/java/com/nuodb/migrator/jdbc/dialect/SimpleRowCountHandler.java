@@ -58,12 +58,12 @@ public class SimpleRowCountHandler implements RowCountHandler {
     protected RowCountQuery createRowCountQuery() {
         RowCountQuery rowCountQuery = null;
         switch (getRowCountType()) {
-            case APPROX:
-                rowCountQuery = createApproxRowCountQuery();
-                break;
-            case EXACT:
-                rowCountQuery = createExactRowCountQuery();
-                break;
+        case APPROX:
+            rowCountQuery = createApproxRowCountQuery();
+            break;
+        case EXACT:
+            rowCountQuery = createExactRowCountQuery();
+            break;
         }
         return rowCountQuery;
     }
@@ -83,21 +83,17 @@ public class SimpleRowCountHandler implements RowCountHandler {
 
     protected long getRowCount(Connection connection, final RowCountQuery rowCountQuery) throws SQLException {
         final MutableObject<Long> rowCount = new MutableObject<Long>();
-        new StatementTemplate(connection).executeStatement(
-                new StatementFactory<Statement>() {
-                    @Override
-                    public Statement createStatement(Connection connection)
-                            throws SQLException {
-                        return connection.createStatement();
-                    }
-                }, new StatementCallback<Statement>() {
-                    @Override
-                    public void executeStatement(Statement statement)
-                            throws SQLException {
-                        rowCount.setValue(getRowCount(statement, rowCountQuery));
-                    }
-                }
-        );
+        new StatementTemplate(connection).executeStatement(new StatementFactory<Statement>() {
+            @Override
+            public Statement createStatement(Connection connection) throws SQLException {
+                return connection.createStatement();
+            }
+        }, new StatementCallback<Statement>() {
+            @Override
+            public void executeStatement(Statement statement) throws SQLException {
+                rowCount.setValue(getRowCount(statement, rowCountQuery));
+            }
+        });
         return rowCount.getValue();
     }
 

@@ -35,8 +35,9 @@ import com.nuodb.migrator.cli.parse.OptionProcessor;
 import java.util.ListIterator;
 
 /**
- * Updates maximum value of container's argument option. Used with RegexOption when part of option name matching regular
- * expression is stored in the option items and option's argument.
+ * Updates maximum value of container's argument option. Used with RegexOption
+ * when part of option name matching regular expression is stored in the option
+ * items and option's argument.
  *
  * @author Sergey Bushik
  */

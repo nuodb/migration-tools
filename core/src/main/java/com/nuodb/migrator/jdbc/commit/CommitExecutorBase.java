@@ -56,13 +56,17 @@ public abstract class CommitExecutorBase<S extends Statement> implements CommitE
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         CommitExecutorBase that = (CommitExecutorBase) o;
 
-        if (query != null ? !query.equals(that.query) : that.query != null) return false;
-        if (statement != null ? !statement.equals(that.statement) : that.statement != null) return false;
+        if (query != null ? !query.equals(that.query) : that.query != null)
+            return false;
+        if (statement != null ? !statement.equals(that.statement) : that.statement != null)
+            return false;
 
         return true;
     }

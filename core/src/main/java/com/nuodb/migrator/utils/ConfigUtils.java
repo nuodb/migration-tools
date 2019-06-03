@@ -46,10 +46,12 @@ public class ConfigUtils {
     private static final String PREFIX = "#";
 
     /**
-     * Opens input stream to the specified path, which can be a class resources resolved using the context class loader,
-     * a url or a file
+     * Opens input stream to the specified path, which can be a class resources
+     * resolved using the context class loader, a url or a file
      *
-     * @param path path to the config, which is a class resources or a url or a file
+     * @param path
+     *            path to the config, which is a class resources or a url or a
+     *            file
      * @return input stream or null if the path wasn't recognized
      */
     public static InputStream loadConfig(String path) {
@@ -57,10 +59,12 @@ public class ConfigUtils {
     }
 
     /**
-     * Opens input stream to the specified path, which can be a class resources resolved using the provided class
-     * loader, a url or a file
+     * Opens input stream to the specified path, which can be a class resources
+     * resolved using the provided class loader, a url or a file
      *
-     * @param path path to the config, which is a class resources or a url or a file
+     * @param path
+     *            path to the config, which is a class resources or a url or a
+     *            file
      * @return input stream or null if the path wasn't recognized
      */
     public static InputStream loadConfig(String path, ClassLoader classLoader) {
@@ -93,9 +97,11 @@ public class ConfigUtils {
     /**
      * Reads config line by line, ignores lines starting with comment symbol #
      *
-     * @param input to read config lines from
+     * @param input
+     *            to read config lines from
      * @return a list of parameters
-     * @throws IOException if any input/output error during reading input occurs
+     * @throws IOException
+     *             if any input/output error during reading input occurs
      */
     public static Collection<String> parseConfig(InputStream input) throws IOException {
         Collection<String> parameters = newArrayList();

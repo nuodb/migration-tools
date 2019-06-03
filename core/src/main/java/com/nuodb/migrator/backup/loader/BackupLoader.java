@@ -118,7 +118,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"all"})
+@SuppressWarnings({ "all" })
 public class BackupLoader {
 
     public static final Collection<MigrationMode> MIGRATION_MODES = newHashSet(MigrationMode.values());
@@ -185,8 +185,7 @@ public class BackupLoader {
         backupLoaderContext.setCommitStrategy(getCommitStrategy());
 
         ExecutorService executorService = getExecutorService();
-        backupLoaderContext.setExecutorService(
-                executorService == null ? createExecutorService() : executorService);
+        backupLoaderContext.setExecutorService(executorService == null ? createExecutorService() : executorService);
         backupLoaderContext.setFormatAttributes(getFormatAttributes());
         backupLoaderContext.setFormatFactory(getFormatFactory());
         backupLoaderContext.setInsertTypeFactory(getInsertTypeFactory());
@@ -198,17 +197,18 @@ public class BackupLoader {
         openSourceSession(backupLoaderContext);
         openTargetSession(backupLoaderContext);
         if (backupLoaderContext.isLoadSchema()) {
-            backupLoaderContext.setLoadConstraints(
-                    createLoadConstraints(backupLoaderContext));
+            backupLoaderContext.setLoadConstraints(createLoadConstraints(backupLoaderContext));
         }
         return backupLoaderContext;
     }
 
     /**
-     * Returns a filtered list of source tables to load depending on the requested source table names and their patterns
-     * or all source tables if filter is not provided.
+     * Returns a filtered list of source tables to load depending on the
+     * requested source table names and their patterns or all source tables if
+     * filter is not provided.
      *
-     * @param backupLoaderContext backup loader context
+     * @param backupLoaderContext
+     *            backup loader context
      * @return
      */
     protected Collection<Table> getSourceTables(BackupLoaderContext backupLoaderContext) {
@@ -233,8 +233,7 @@ public class BackupLoader {
         backupLoaderManager.setBackupLoaderContext(backupLoaderContext);
         // add listener after load constraints is created
         if (backupLoaderManager.isLoadSchema()) {
-            backupLoaderManager.addListener(
-                    new LoadConstraintListener(this, backupLoaderManager));
+            backupLoaderManager.addListener(new LoadConstraintListener(this, backupLoaderManager));
         }
         for (BackupLoaderListener listener : getListeners()) {
             backupLoaderManager.addListener(listener);
@@ -267,10 +266,8 @@ public class BackupLoader {
         backupLoaderContext.setTargetSession(targetSession);
         backupLoaderContext.setTargetSpec(getTargetSpec());
         try {
-            backupLoaderContext.setScriptGeneratorManager(
-                    createScriptGeneratorManager(backupLoaderContext));
-            backupLoaderContext.setValueFormatRegistry(
-                    createValueFormatRegistry(targetSession));
+            backupLoaderContext.setScriptGeneratorManager(createScriptGeneratorManager(backupLoaderContext));
+            backupLoaderContext.setValueFormatRegistry(createValueFormatRegistry(targetSession));
         } catch (Exception exception) {
             closeQuietly(targetSession);
             throw exception;
@@ -279,8 +276,9 @@ public class BackupLoader {
 
     protected Database openDatabase(Session session) throws SQLException {
         InspectionScope inspectionScope = new TableInspectionScope(null, null, getTableTypes());
-        return getInspectionManager().inspect(session.getConnection(), inspectionScope,
-                DATABASE, CATALOG, SCHEMA, TABLE, COLUMN).getObject(DATABASE);
+        return getInspectionManager()
+                .inspect(session.getConnection(), inspectionScope, DATABASE, CATALOG, SCHEMA, TABLE, COLUMN)
+                .getObject(DATABASE);
     }
 
     protected ValueFormatRegistry createValueFormatRegistry(Session session) throws Exception {
@@ -293,13 +291,13 @@ public class BackupLoader {
         if (scriptExporter != null) {
             scriptExporters.add(scriptExporter);
         }
-        scriptExporters.add(new ProxyScriptExporter(new SessionScriptExporter(
-                backupLoaderContext.getTargetSession()), false));
+        scriptExporters
+                .add(new ProxyScriptExporter(new SessionScriptExporter(backupLoaderContext.getTargetSession()), false));
         return new CompositeScriptExporter(scriptExporters);
     }
 
-    protected ScriptGeneratorManager createScriptGeneratorManager(
-            BackupLoaderContext backupLoaderContext) throws SQLException {
+    protected ScriptGeneratorManager createScriptGeneratorManager(BackupLoaderContext backupLoaderContext)
+            throws SQLException {
         ScriptGeneratorManager scriptGeneratorManager = new ScriptGeneratorManager();
         Map<String, Object> attributes = scriptGeneratorManager.getAttributes();
         attributes.put(GROUP_SCRIPTS_BY, getGroupScriptsBy());
@@ -321,18 +319,16 @@ public class BackupLoader {
 
         DialectResolver dialectResolver = getDialectResolver();
         Session targetSession = backupLoaderContext.getTargetSession();
-        Dialect dialect = targetSession != null ? dialectResolver.resolve(
-                targetSession.getDatabaseInfo()) : dialectResolver.resolve(NUODB);
+        Dialect dialect = targetSession != null ? dialectResolver.resolve(targetSession.getDatabaseInfo())
+                : dialectResolver.resolve(NUODB);
         dialect.getTranslationManager().setTranslationConfig(getTranslationConfig());
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         Collection<JdbcTypeSpec> jdbcTypeSpecs = getJdbcTypeSpecs();
         if (jdbcTypeSpecs != null) {
             for (JdbcTypeSpec jdbcTypeSpec : jdbcTypeSpecs) {
-                jdbcTypeNameMap.addJdbcTypeName(
-                        jdbcTypeSpec.getTypeCode(), newOptions(
-                        jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
-                        jdbcTypeSpec.getTypeName()
-                );
+                jdbcTypeNameMap.addJdbcTypeName(jdbcTypeSpec.getTypeCode(),
+                        newOptions(jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
+                        jdbcTypeSpec.getTypeName());
             }
         }
         IdentifierQuoting identifierQuoting = getIdentifierQuoting();
@@ -367,26 +363,25 @@ public class BackupLoader {
             }
         } catch (Throwable failure) {
             backupLoaderManager.loadFailed();
-            throw failure instanceof MigratorException ?
-                    (MigratorException) failure : new BackupLoaderException(failure);
+            throw failure instanceof MigratorException ? (MigratorException) failure
+                    : new BackupLoaderException(failure);
         } finally {
             backupLoaderManager.close();
         }
-        hasTablesScriptGenerator.migratorSummary(backupLoaderManager.getBackupLoaderContext().getScriptGeneratorManager());
+        hasTablesScriptGenerator
+                .migratorSummary(backupLoaderManager.getBackupLoaderContext().getScriptGeneratorManager());
         return backupLoaderManager.getBackupLoaderContext().getBackup();
     }
 
     protected void loadSchema(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        ScriptGeneratorManager scriptGeneratorManager =
-                backupLoaderContext.getScriptGeneratorManager();
+        ScriptGeneratorManager scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
         Collection<MetaDataType> objectTypes = getObjectTypes();
         ScriptExporter scriptExporter = createScriptExporter(backupLoaderContext);
         try {
             scriptExporter.open();
             scriptGeneratorManager.setObjectTypes(
-                    removeAll(newArrayList(objectTypes),
-                            newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX)));
+                    removeAll(newArrayList(objectTypes), newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX)));
             Collection<Table> tables = backupLoaderContext.getSourceTables();
             Database database = backupLoaderContext.getBackup().getDatabase();
             if (isEmpty(tables)) {
@@ -396,8 +391,7 @@ public class BackupLoader {
                 Schema schema = null;
                 for (Table table : tables) {
                     if (schema == null || !schema.equals(table.getSchema())) {
-                        scriptExporter.exportScript(getUseSchema(
-                                schema = table.getSchema(), scriptGeneratorManager));
+                        scriptExporter.exportScript(getUseSchema(schema = table.getSchema(), scriptGeneratorManager));
                     }
                     scriptExporter.exportScripts(scriptGeneratorManager.getScripts(table));
                 }
@@ -423,8 +417,7 @@ public class BackupLoader {
                     continue;
                 }
                 if (schema == null || !schema.equals(sequence.getSchema())) {
-                    scripts.add(getUseSchema(
-                            schema = sequence.getSchema(), scriptGeneratorManager));
+                    scripts.add(getUseSchema(schema = sequence.getSchema(), scriptGeneratorManager));
                 }
                 scripts.addAll(scriptGeneratorManager.getScripts(sequence));
             }
@@ -435,15 +428,16 @@ public class BackupLoader {
     /**
      * Multi-threaded data load on table level in place, continue with row level
      *
-     * @param backupLoaderManager to manage this load
-     * @throws Exception if data loading caused error
+     * @param backupLoaderManager
+     *            to manage this load
+     * @throws Exception
+     *             if data loading caused error
      */
     protected void loadData(BackupLoaderManager backupLoaderManager) throws Exception {
-        BackupLoaderContext backupLoaderContext =
-                backupLoaderManager.getBackupLoaderContext();
+        BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         Database database = getDatabase();
-        backupLoaderContext.setDatabase(database != null ? database :
-                openDatabase(backupLoaderContext.getTargetSession()));
+        backupLoaderContext
+                .setDatabase(database != null ? database : openDatabase(backupLoaderContext.getTargetSession()));
         initLoadTables(backupLoaderContext);
         executeWork(new LoadTablesWork(backupLoaderManager), backupLoaderManager);
     }
@@ -451,8 +445,10 @@ public class BackupLoader {
     /**
      * Load constraints for source tables without row sets
      *
-     * @param backupLoaderManager to manage this load
-     * @throws Exception if constraints loading caused error
+     * @param backupLoaderManager
+     *            to manage this load
+     * @throws Exception
+     *             if constraints loading caused error
      */
     protected void loadConstraints(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
@@ -482,7 +478,7 @@ public class BackupLoader {
     }
 
     protected void loadConstraints(Collection<LoadConstraint> loadConstraints,
-                                   BackupLoaderManager backupLoaderManager) {
+            BackupLoaderManager backupLoaderManager) {
         if (!isEmpty(loadConstraints)) {
             for (LoadConstraint loadConstraint : loadConstraints) {
                 loadConstraint(loadConstraint, backupLoaderManager);
@@ -500,27 +496,26 @@ public class BackupLoader {
             boolean addScriptsInCreateTable = dialect.addScriptsInCreateTable(sourceTable);
             if (loadIndex) {
                 LoadIndexes loadIndexes = null;
-                Collection<Index> indexes = getNonRepeatingIndexes(sourceTable,
-                        new Predicate<Index>() {
-                            @Override
-                            public boolean apply(Index index) {
-                                if (logger.isTraceEnabled()) {
-                                    String indexName = index.getName();
-                                    String tableName = index.getTable().getQualifiedName();
-                                    Iterable<String> columnsNames = transform(index.getTable().getColumns(),
-                                            new Function<Identifiable, String>() {
-                                                @Override
-                                                public String apply(Identifiable column) {
-                                                    return column.getName();
-                                                }
-                                            });
-                                    logger.trace(format("Index %s on table %s skipped " +
-                                            "as index with column(s) %s is enqueued already",
-                                            indexName, tableName, join(columnsNames, ", ")));
-                                }
-                                return true;
-                            }
-                        });
+                Collection<Index> indexes = getNonRepeatingIndexes(sourceTable, new Predicate<Index>() {
+                    @Override
+                    public boolean apply(Index index) {
+                        if (logger.isTraceEnabled()) {
+                            String indexName = index.getName();
+                            String tableName = index.getTable().getQualifiedName();
+                            Iterable<String> columnsNames = transform(index.getTable().getColumns(),
+                                    new Function<Identifiable, String>() {
+                                        @Override
+                                        public String apply(Identifiable column) {
+                                            return column.getName();
+                                        }
+                                    });
+                            logger.trace(format(
+                                    "Index %s on table %s skipped " + "as index with column(s) %s is enqueued already",
+                                    indexName, tableName, join(columnsNames, ", ")));
+                        }
+                        return true;
+                    }
+                });
                 for (Index index : indexes) {
                     if (index.isPrimary()) {
                         continue;
@@ -528,12 +523,11 @@ public class BackupLoader {
                     if ((index.getType() != null) && (!index.isBtree())) {
                         continue;
                     }
-                    boolean uniqueInCreateTable = index.isUnique() &&
-                            size(index.getColumns()) == 1 && !get(index.getColumns(),0).isNullable() &&
-                            dialect.supportsUniqueInCreateTable();
+                    boolean uniqueInCreateTable = index.isUnique() && size(index.getColumns()) == 1
+                            && !get(index.getColumns(), 0).isNullable() && dialect.supportsUniqueInCreateTable();
                     boolean indexInCreateTable = dialect.supportsIndexInCreateTable();
-                    boolean addIndexInCreateTable =
-                            (uniqueInCreateTable || indexInCreateTable) && addScriptsInCreateTable;
+                    boolean addIndexInCreateTable = (uniqueInCreateTable || indexInCreateTable)
+                            && addScriptsInCreateTable;
                     if (!index.isPrimary() && !addIndexInCreateTable) {
                         if (dialect.supportsCreateMultipleIndexes()) {
                             if (loadIndexes == null) {
@@ -572,8 +566,7 @@ public class BackupLoader {
         LoadTables loadTables = createLoadTables(backupLoaderContext);
         backupLoaderContext.setLoadTables(loadTables);
         for (LoadTable loadTable : loadTables) {
-            loadTable.setThreads(backupLoaderContext.getParallelizer().
-                    getThreads(loadTable, backupLoaderContext));
+            loadTable.setThreads(backupLoaderContext.getParallelizer().getThreads(loadTable, backupLoaderContext));
         }
     }
 
@@ -587,12 +580,15 @@ public class BackupLoader {
                 continue;
             }
             TableRowSet tableRowSet = rowSet instanceof TableRowSet ? (TableRowSet) rowSet : null;
-            Catalog sourceCatalog = database.hasCatalog(tableRowSet.getCatalog()) ?
-                    database.getCatalog(tableRowSet.getCatalog()) : null;
-            Schema sourceSchema = sourceCatalog != null && sourceCatalog.hasSchema(tableRowSet.getSchema()) ?
-                    sourceCatalog.getSchema(tableRowSet.getSchema()) : null;
-            Table sourceTable = sourceSchema != null && sourceSchema.hasTable(tableRowSet.getTable()) ?
-                    sourceSchema.getTable(tableRowSet.getTable()) : null;
+            Catalog sourceCatalog = database.hasCatalog(tableRowSet.getCatalog())
+                    ? database.getCatalog(tableRowSet.getCatalog())
+                    : null;
+            Schema sourceSchema = sourceCatalog != null && sourceCatalog.hasSchema(tableRowSet.getSchema())
+                    ? sourceCatalog.getSchema(tableRowSet.getSchema())
+                    : null;
+            Table sourceTable = sourceSchema != null && sourceSchema.hasTable(tableRowSet.getTable())
+                    ? sourceSchema.getTable(tableRowSet.getTable())
+                    : null;
             if (!isEmpty(sourceTables) && (sourceTable == null || !sourceTables.contains(sourceTable))) {
                 continue;
             }
@@ -617,8 +613,7 @@ public class BackupLoader {
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    backupLoaderManager.execute(work,
-                            backupLoaderContext.getTargetSessionFactory());
+                    backupLoaderManager.execute(work, backupLoaderContext.getTargetSessionFactory());
                 }
             });
         }
@@ -627,8 +622,10 @@ public class BackupLoader {
     /**
      * Looks up source table meta data for a given load row set
      *
-     * @param loadTable           to look up source table for
-     * @param backupLoaderContext evaluation context
+     * @param loadTable
+     *            to look up source table for
+     * @param backupLoaderContext
+     *            evaluation context
      * @return source table
      */
     protected Table getTable(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
@@ -636,29 +633,31 @@ public class BackupLoader {
         Database database = backupLoaderContext.getBackup().getDatabase();
         if (loadTable.getRowSet() instanceof TableRowSet) {
             TableRowSet tableRowSet = (TableRowSet) loadTable.getRowSet();
-            Catalog catalog = database.hasCatalog(tableRowSet.getCatalog()) ?
-                    database.getCatalog(tableRowSet.getCatalog()) : null;
-            Schema schema = catalog != null && catalog.hasSchema(tableRowSet.getSchema()) ?
-                    catalog.getSchema(tableRowSet.getSchema()) : null;
-            table = schema != null && schema.hasTable(tableRowSet.getTable()) ?
-                    schema.getTable(tableRowSet.getTable()) : null;
+            Catalog catalog = database.hasCatalog(tableRowSet.getCatalog())
+                    ? database.getCatalog(tableRowSet.getCatalog())
+                    : null;
+            Schema schema = catalog != null && catalog.hasSchema(tableRowSet.getSchema())
+                    ? catalog.getSchema(tableRowSet.getSchema())
+                    : null;
+            table = schema != null && schema.hasTable(tableRowSet.getTable()) ? schema.getTable(tableRowSet.getTable())
+                    : null;
         }
         return table;
     }
 
     protected Query createQuery(RowSet rowSet, Table table, BackupLoaderContext backupLoaderContext) {
         InsertTypeFactory insertTypeFactory = backupLoaderContext.getInsertTypeFactory();
-        InsertType insertType = insertTypeFactory != null ?
-                insertTypeFactory.createInsertType(table, backupLoaderContext) : INSERT;
+        InsertType insertType = insertTypeFactory != null
+                ? insertTypeFactory.createInsertType(table, backupLoaderContext)
+                : INSERT;
         InsertQueryBuilder builder = new InsertQueryBuilder();
         builder.insertType(insertType).into(table);
-        builder.columns(newArrayList(transform(rowSet.getColumns(),
-                new Function<Column, String>() {
-                    @Override
-                    public String apply(Column column) {
-                        return column.getName();
-                    }
-                })));
+        builder.columns(newArrayList(transform(rowSet.getColumns(), new Function<Column, String>() {
+            @Override
+            public String apply(Column column) {
+                return column.getName();
+            }
+        })));
         return builder.build();
     }
 

@@ -35,18 +35,23 @@ import java.util.regex.Pattern;
 /**
  * Formats a {@link DateTime}, and implements {@link DateTime#format(String)}.
  * <p/>
- * <P>This class defines a mini-language for defining how a {@link DateTime} is formatted. See {@link
- * DateTime#format(String)} for details regarding the formatting mini-language.
+ * <P>
+ * This class defines a mini-language for defining how a {@link DateTime} is
+ * formatted. See {@link DateTime#format(String)} for details regarding the
+ * formatting mini-language.
  * <p/>
- * <P>The DateFormatSymbols class might be used to grab the locale-specific text, but the arrays it returns are wonky
- * and weird, so I have avoided it.
+ * <P>
+ * The DateFormatSymbols class might be used to grab the locale-specific text,
+ * but the arrays it returns are wonky and weird, so I have avoided it.
  */
 final class DateTimeFormatter {
 
     /**
-     * Constructor used for patterns that represent date-time elements using only numbers, and no localizable text.
+     * Constructor used for patterns that represent date-time elements using
+     * only numbers, and no localizable text.
      *
-     * @param aFormat uses the syntax described by {@link DateTime#format(String)}.
+     * @param aFormat
+     *            uses the syntax described by {@link DateTime#format(String)}.
      */
     DateTimeFormatter(String aFormat) {
         fFormat = aFormat;
@@ -56,12 +61,15 @@ final class DateTimeFormatter {
     }
 
     /**
-     * Constructor used for patterns that represent date-time elements using not only numbers, but text as well. The
-     * text needs to be localizable.
+     * Constructor used for patterns that represent date-time elements using not
+     * only numbers, but text as well. The text needs to be localizable.
      *
-     * @param aFormat uses the syntax described by {@link DateTime#format(String)}.
-     * @param aLocale used to schema text for Month, Weekday, and AM-PM indicator; required only by patterns which
-     *                return localized text, instead of numeric forms for date-time elements.
+     * @param aFormat
+     *            uses the syntax described by {@link DateTime#format(String)}.
+     * @param aLocale
+     *            used to schema text for Month, Weekday, and AM-PM indicator;
+     *            required only by patterns which return localized text, instead
+     *            of numeric forms for date-time elements.
      */
     DateTimeFormatter(String aFormat, Locale aLocale) {
         fFormat = aFormat;
@@ -71,15 +79,25 @@ final class DateTimeFormatter {
     }
 
     /**
-     * Constructor used for patterns that represent using not only numbers, but customized text as well.
+     * Constructor used for patterns that represent using not only numbers, but
+     * customized text as well.
      * <p/>
-     * <P>This constructor exists mostly since SimpleDateFormat doesn't support all locales, and it has a policy of N
-     * letters for text, where N != 3.
+     * <P>
+     * This constructor exists mostly since SimpleDateFormat doesn't support all
+     * locales, and it has a policy of N letters for text, where N != 3.
      *
-     * @param aFormat         must match the syntax described by {@link DateTime#format(String)}.
-     * @param aMonths         contains text for all 12 months, starting with January; size must be 12.
-     * @param aWeekdays       contains text for all 7 weekdays, starting with Sunday; size must be 7.
-     * @param aAmPmIndicators contains text for A.M and P.M. indicators (in that order); size must be 2.
+     * @param aFormat
+     *            must match the syntax described by
+     *            {@link DateTime#format(String)}.
+     * @param aMonths
+     *            contains text for all 12 months, starting with January; size
+     *            must be 12.
+     * @param aWeekdays
+     *            contains text for all 7 weekdays, starting with Sunday; size
+     *            must be 7.
+     * @param aAmPmIndicators
+     *            contains text for A.M and P.M. indicators (in that order);
+     *            size must be 2.
      */
     DateTimeFormatter(String aFormat, List<String> aMonths, List<String> aWeekdays, List<String> aAmPmIndicators) {
         fFormat = aFormat;
@@ -106,20 +124,23 @@ final class DateTimeFormatter {
     private Collection<EscapedRange> fEscapedRanges;
 
     /**
-     * Table mapping a Locale to the names of the months. Initially empty, populated only when a specific Locale is
-     * needed for presenting such text. Used for MMMM and MMM tokens.
+     * Table mapping a Locale to the names of the months. Initially empty,
+     * populated only when a specific Locale is needed for presenting such text.
+     * Used for MMMM and MMM tokens.
      */
     private final Map<Locale, List<String>> fMonths = new LinkedHashMap<Locale, List<String>>();
 
     /**
-     * Table mapping a Locale to the names of the weekdays. Initially empty, populated only when a specific Locale is
-     * needed for presenting such text. Used for WWWW and WWW tokens.
+     * Table mapping a Locale to the names of the weekdays. Initially empty,
+     * populated only when a specific Locale is needed for presenting such text.
+     * Used for WWWW and WWW tokens.
      */
     private final Map<Locale, List<String>> fWeekdays = new LinkedHashMap<Locale, List<String>>();
 
     /**
-     * Table mapping a Locale to the text used to indicate a.m. and p.m. Initially empty, populated only when a specific
-     * Locale is needed for presenting such text. Used for the 'a' token.
+     * Table mapping a Locale to the text used to indicate a.m. and p.m.
+     * Initially empty, populated only when a specific Locale is needed for
+     * presenting such text. Used for the 'a' token.
      */
     private final Map<Locale, List<String>> fAmPm = new LinkedHashMap<Locale, List<String>>();
 
@@ -166,7 +187,8 @@ final class DateTimeFormatter {
     }
 
     /**
-     * A section of fFormat bounded by a pair of escape characters; such ranges contain uninterpreted text.
+     * A section of fFormat bounded by a pair of escape characters; such ranges
+     * contain uninterpreted text.
      */
     private static final class EscapedRange {
         int Start;
@@ -179,9 +201,12 @@ final class DateTimeFormatter {
     private static final String ESCAPE_CHAR = "|";
     private static final Pattern ESCAPED_RANGE = Pattern.compile("\\|[^\\|]*\\|");
 
-    /* Here, 'token' means an item in the mini-language, having special meaning (defined below). */
+    /*
+     * Here, 'token' means an item in the mini-language, having special meaning
+     * (defined below).
+     */
 
-    //all date-related tokens are in upper case
+    // all date-related tokens are in upper case
     private static final String YYYY = "YYYY";
     private static final String YY = "YY";
     private static final String M = "M";
@@ -193,7 +218,7 @@ final class DateTimeFormatter {
     private static final String WWW = "WWW";
     private static final String WWWW = "WWWW";
 
-    //all time-related tokens are in lower case
+    // all time-related tokens are in lower case
     private static final String hh = "hh";
     private static final String h = "h";
     private static final String m = "m";
@@ -204,8 +229,8 @@ final class DateTimeFormatter {
     /**
      * The 12-hour clock style.
      * <p/>
-     * 12:00 am is midnight, 12:30am is 30 minutes past midnight, 12:00 pm is 12 noon. This item is almost always used
-     * with 'a' to indicate am/pm.
+     * 12:00 am is midnight, 12:30am is 30 minutes past midnight, 12:00 pm is 12
+     * noon. This item is almost always used with 'a' to indicate am/pm.
      */
     private static final String h12 = "h12";
 
@@ -214,12 +239,13 @@ final class DateTimeFormatter {
      */
     private static final String hh12 = "hh12";
 
-    private static final int AM = 0; //a.m. comes first in lists used by this class
+    private static final int AM = 0; // a.m. comes first in lists used by this
+                                     // class
     private static final int PM = 1;
 
     /**
-     * A.M./P.M. text is sensitive to Locale, in the same way that names of months and weekdays are sensitive to
-     * Locale.
+     * A.M./P.M. text is sensitive to Locale, in the same way that names of
+     * months and weekdays are sensitive to Locale.
      */
     private static final String a = "a";
 
@@ -228,8 +254,9 @@ final class DateTimeFormatter {
     private static final String EMPTY_STRING = "";
 
     /**
-     * The order of these items is significant, and is critical for how fFormat is interpreted. The 'longer' tokens must
-     * come first, in any group of related tokens.
+     * The order of these items is significant, and is critical for how fFormat
+     * is interpreted. The 'longer' tokens must come first, in any group of
+     * related tokens.
      */
     private static final List<String> TOKENS = new ArrayList<String>();
 
@@ -253,7 +280,7 @@ final class DateTimeFormatter {
         TOKENS.add(ss);
         TOKENS.add(s);
         TOKENS.add(a);
-        //should these be constants too?
+        // should these be constants too?
         TOKENS.add("fffffffff");
         TOKENS.add("ffffffff");
         TOKENS.add("fffffff");
@@ -272,19 +299,21 @@ final class DateTimeFormatter {
         Matcher matcher = ESCAPED_RANGE.matcher(fFormat);
         while (matcher.find()) {
             EscapedRange escapedRange = new EscapedRange();
-            escapedRange.Start = matcher.start(); //first pipe
-            escapedRange.End = matcher.end() - 1; //second pipe
+            escapedRange.Start = matcher.start(); // first pipe
+            escapedRange.End = matcher.end() - 1; // second pipe
             fEscapedRanges.add(escapedRange);
         }
     }
 
     /**
-     * Return true only if the start of the interpreted range is in an escaped range.
+     * Return true only if the start of the interpreted range is in an escaped
+     * range.
      */
     private boolean isInEscapedRange(InterpretedRange aInterpretedRange) {
-        boolean result = false; //innocent till shown guilty
+        boolean result = false; // innocent till shown guilty
         for (EscapedRange escapedRange : fEscapedRanges) {
-            //checking only the start is sufficient, because the tokens never contain the escape char
+            // checking only the start is sufficient, because the tokens never
+            // contain the escape char
             if (escapedRange.Start <= aInterpretedRange.Start && aInterpretedRange.Start <= escapedRange.End) {
                 result = true;
                 break;
@@ -294,8 +323,8 @@ final class DateTimeFormatter {
     }
 
     /**
-     * Scan fFormat for all tokens, in a specific order, and interpret them with the given DateTime. The interpreted
-     * tokens are saved for output later.
+     * Scan fFormat for all tokens, in a specific order, and interpret them with
+     * the given DateTime. The interpreted tokens are saved for output later.
      */
     private void interpretInput(DateTime aDateTime) {
         String format = fFormat;
@@ -316,15 +345,18 @@ final class DateTimeFormatter {
     }
 
     /**
-     * Return a temp placeholder string used to identify sections of fFormat that have already been interpreted. The
-     * returned string is a list of "@" characters, whose length is the same as aToken.
+     * Return a temp placeholder string used to identify sections of fFormat
+     * that have already been interpreted. The returned string is a list of "@"
+     * characters, whose length is the same as aToken.
      */
     private String withCharDenotingAlreadyInterpreted(String aToken) {
         StringBuilder result = new StringBuilder();
         for (int idx = 1; idx <= aToken.length(); ++idx) {
-            //any character that isn't interpreted, or a special regex char, will do here
-            //the fact that it's interpreted at location x is stored elsewhere;
-            //this is meant only to prevent multiple interpretations of the same text
+            // any character that isn't interpreted, or a special regex char,
+            // will do here
+            // the fact that it's interpreted at location x is stored elsewhere;
+            // this is meant only to prevent multiple interpretations of the
+            // same text
             result.append("@");
         }
         return result.toString();
@@ -451,7 +483,6 @@ final class DateTimeFormatter {
         return result;
     }
 
-
     /**
      * Pad 0..9 with a leading zero.
      */
@@ -480,8 +511,8 @@ final class DateTimeFormatter {
                 result = lookupMonthFor(aMonth);
             } else {
                 throw new IllegalArgumentException(
-                        "Your date pattern requires either a Locale, or your own custom localizations for text:" + DateUtils.quote(
-                                fFormat));
+                        "Your date pattern requires either a Locale, or your own custom localizations for text:"
+                                + DateUtils.quote(fFormat));
             }
         }
         return result;
@@ -506,7 +537,7 @@ final class DateTimeFormatter {
             }
             fMonths.put(fLocale, months);
         }
-        result = fMonths.get(fLocale).get(aMonth - 1); //list is 0-based
+        result = fMonths.get(fLocale).get(aMonth - 1); // list is 0-based
         return result;
     }
 
@@ -519,8 +550,8 @@ final class DateTimeFormatter {
                 result = lookupWeekdayFor(aWeekday);
             } else {
                 throw new IllegalArgumentException(
-                        "Your date pattern requires either a Locale, or your own custom localizations for text:" + DateUtils.quote(
-                                fFormat));
+                        "Your date pattern requires either a Locale, or your own custom localizations for text:"
+                                + DateUtils.quote(fFormat));
             }
         }
         return result;
@@ -535,18 +566,18 @@ final class DateTimeFormatter {
         if (!fWeekdays.containsKey(fLocale)) {
             List<String> weekdays = new ArrayList<String>();
             SimpleDateFormat format = new SimpleDateFormat("EEEE", fLocale);
-            //Feb 8, 2009..Feb 14, 2009 runs Sun..Sat
+            // Feb 8, 2009..Feb 14, 2009 runs Sun..Sat
             for (int idx = 8; idx <= 14; ++idx) {
                 Calendar firstDayOfWeek = new GregorianCalendar();
                 firstDayOfWeek.set(Calendar.YEAR, 2009);
-                firstDayOfWeek.set(Calendar.MONTH, 1); //month is 0-based
+                firstDayOfWeek.set(Calendar.MONTH, 1); // month is 0-based
                 firstDayOfWeek.set(Calendar.DAY_OF_MONTH, idx);
                 String weekdayText = format.format(firstDayOfWeek.getTime());
                 weekdays.add(weekdayText);
             }
             fWeekdays.put(fLocale, weekdays);
         }
-        result = fWeekdays.get(fLocale).get(aWeekday - 1); //list is 0-based
+        result = fWeekdays.get(fLocale).get(aWeekday - 1); // list is 0-based
         return result;
     }
 
@@ -565,9 +596,9 @@ final class DateTimeFormatter {
         Integer result = aHour;
         if (aHour != null) {
             if (aHour == 0) {
-                result = 12; //eg 12:30 am
+                result = 12; // eg 12:30 am
             } else if (aHour > 12) {
-                result = aHour - 12; //eg 14:00 -> 2:00
+                result = aHour - 12; // eg 14:00 -> 2:00
             }
         }
         return result;
@@ -582,9 +613,8 @@ final class DateTimeFormatter {
                 result = lookupAmPmFor(aHour);
             } else {
                 throw new IllegalArgumentException(
-                        "Your date pattern requires either a Locale, or your own custom localizations for text:" + DateUtils.quote(
-                                fFormat)
-                );
+                        "Your date pattern requires either a Locale, or your own custom localizations for text:"
+                                + DateUtils.quote(fFormat));
             }
         }
         return result;

@@ -54,9 +54,16 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
 
     /**
      * Fix for DB-953 generates:
-     * <pre>ALTER TABLE "table1" ADD FOREIGN KEY ("column1") REFERENCES "table2" ("column2");</pre>
+     * 
+     * <pre>
+     * ALTER TABLE "table1" ADD FOREIGN KEY ("column1") REFERENCES "table2" ("column2");
+     * </pre>
+     * 
      * instead of
-     * <pre>ALTER TABLE "table1" ADD CONSTRAINT "fk1" FOREIGN KEY ("column1") REFERENCES "table2" ("column2");</pre>
+     * 
+     * <pre>
+     * ALTER TABLE "table1" ADD CONSTRAINT "fk1" FOREIGN KEY ("column1") REFERENCES "table2" ("column2");
+     * </pre>
      *
      * @param foreignKey
      * @param scriptGeneratorManager
@@ -85,7 +92,10 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
 
     /**
      * Fix for DB-953 generates
-     * <pre>ALTER TABLE "table1" DROP FOREIGN KEY ("column1") REFERENCES "table2";</pre>
+     * 
+     * <pre>
+     * ALTER TABLE "table1" DROP FOREIGN KEY ("column1") REFERENCES "table2";
+     * </pre>
      *
      * @param foreignKey
      * @param scriptGeneratorManager
@@ -101,7 +111,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         buffer.append(dialect.getDropForeignKey());
         buffer.append(' ');
         buffer.append("(");
-        for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext();) {
             Column column = iterator.next();
             buffer.append(scriptGeneratorManager.getName(column));
             if (iterator.hasNext()) {
@@ -110,8 +120,8 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         }
         buffer.append(")");
         buffer.append(" REFERENCES ");
-        buffer.append(getPrimaryScriptGeneratorManager(foreignKey, scriptGeneratorManager).getQualifiedName(
-                foreignKey.getPrimaryTable()));
+        buffer.append(getPrimaryScriptGeneratorManager(foreignKey, scriptGeneratorManager)
+                .getQualifiedName(foreignKey.getPrimaryTable()));
         return singleton(new Script(buffer.toString(), foreignKey.getTable(), dialect.requiresTableLockForDDL()));
     }
 
@@ -124,7 +134,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("FOREIGN KEY (");
-        for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext();) {
             Column column = iterator.next();
             buffer.append(scriptGeneratorManager.getName(column));
             if (iterator.hasNext()) {
@@ -135,7 +145,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         buffer.append(" REFERENCES ");
         buffer.append(getPrimaryTable(foreignKey, scriptGeneratorManager));
         buffer.append(" (");
-        for (Iterator<Column> iterator = foreignKey.getPrimaryColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = foreignKey.getPrimaryColumns().iterator(); iterator.hasNext();) {
             Column column = iterator.next();
             buffer.append(scriptGeneratorManager.getName(column));
             if (iterator.hasNext()) {
@@ -157,27 +167,29 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
     }
 
     protected String getPrimaryTable(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
-        ScriptGeneratorManager primaryScriptGeneratorManager =
-                getPrimaryScriptGeneratorManager(foreignKey, scriptGeneratorManager);
-        return ObjectUtils.equals(scriptGeneratorManager, primaryScriptGeneratorManager) ?
-                scriptGeneratorManager.getName(foreignKey.getPrimaryTable()) :
-                primaryScriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable());
+        ScriptGeneratorManager primaryScriptGeneratorManager = getPrimaryScriptGeneratorManager(foreignKey,
+                scriptGeneratorManager);
+        return ObjectUtils.equals(scriptGeneratorManager, primaryScriptGeneratorManager)
+                ? scriptGeneratorManager.getName(foreignKey.getPrimaryTable())
+                : primaryScriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable());
     }
 
     /**
-     * Fixes cross database foreign keys generation https://github.com/nuodb/migration-tools/issues/3
+     * Fixes cross database foreign keys generation
+     * https://github.com/nuodb/migration-tools/issues/3
      *
-     * @param foreignKey             to create foreign script generator context
-     * @param scriptGeneratorManager current script generator context used for the session
-     * @return source context if primary and foreign schemas are equals or changes target schema & catalog name to
-     *         primary table schema & catalog.
+     * @param foreignKey
+     *            to create foreign script generator context
+     * @param scriptGeneratorManager
+     *            current script generator context used for the session
+     * @return source context if primary and foreign schemas are equals or
+     *         changes target schema & catalog name to primary table schema &
+     *         catalog.
      */
     protected ScriptGeneratorManager getPrimaryScriptGeneratorManager(ForeignKey foreignKey,
-                                                                      ScriptGeneratorManager scriptGeneratorManager) {
-        ScriptGeneratorManager primaryScriptGeneratorManager =
-                new ScriptGeneratorManager(scriptGeneratorManager);
-        if (scriptGeneratorManager.getTargetCatalog() == null &&
-            scriptGeneratorManager.getTargetSchema() == null) {
+            ScriptGeneratorManager scriptGeneratorManager) {
+        ScriptGeneratorManager primaryScriptGeneratorManager = new ScriptGeneratorManager(scriptGeneratorManager);
+        if (scriptGeneratorManager.getTargetCatalog() == null && scriptGeneratorManager.getTargetSchema() == null) {
 
             Table primaryTable = foreignKey.getPrimaryTable();
             List<String> qualifiers = newArrayList();

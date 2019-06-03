@@ -61,8 +61,7 @@ public class BatchCommitStrategy implements CommitStrategy {
     @Override
     public CommitExecutor createCommitExecutor(Statement statement, Query query) {
         instanceOf(statement, PreparedStatement.class);
-        return new CommitExecutorBase<PreparedStatement>(
-                (PreparedStatement) statement, query) {
+        return new CommitExecutorBase<PreparedStatement>((PreparedStatement) statement, query) {
 
             private long batches;
             private long batchSize = getBatchSize();
@@ -104,12 +103,15 @@ public class BatchCommitStrategy implements CommitStrategy {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         BatchCommitStrategy that = (BatchCommitStrategy) o;
 
-        if (batchSize != that.batchSize) return false;
+        if (batchSize != that.batchSize)
+            return false;
 
         return true;
     }

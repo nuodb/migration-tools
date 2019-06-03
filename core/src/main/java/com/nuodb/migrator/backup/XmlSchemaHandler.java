@@ -58,8 +58,8 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
     protected Schema createTarget(InputNode input, Class<? extends Schema> type, XmlReadContext context) {
         Catalog catalog = getParent(context, 0);
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        return catalog != null ? (catalog.hasSchema(name) ?
-                catalog.getSchema(name) : catalog.addSchema(name)) : new Schema(name);
+        return catalog != null ? (catalog.hasSchema(name) ? catalog.getSchema(name) : catalog.addSchema(name))
+                : new Schema(name);
     }
 
     @Override
@@ -92,8 +92,8 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
         SchemaInspectionScope schemaInspectionScope = getInspectionScope(context);
         Identifier catalogId = valueOf(schemaInspectionScope != null ? schemaInspectionScope.getCatalog() : null);
         Identifier schemaId = valueOf(schemaInspectionScope != null ? schemaInspectionScope.getSchema() : null);
-        return super.skip(schema, context) ||
-                (catalogId != null && !schema.getCatalog().getIdentifier().equals(catalogId)) ||
-                (schemaId != null && !schema.getIdentifier().equals(schemaId));
+        return super.skip(schema, context)
+                || (catalogId != null && !schema.getCatalog().getIdentifier().equals(catalogId))
+                || (schemaId != null && !schema.getIdentifier().equals(schemaId));
     }
 }

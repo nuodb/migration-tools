@@ -138,22 +138,20 @@ public class IndexUtilsTest {
         indexes.add(index1_3);
         indexes.add(index1_4);
         indexes.add(index1_5);
-        data.add(new Object[]{indexes, newArrayList(CREATE), targetDialect4,
-                newArrayList(
-                        "CREATE INDEX \"idx_t1_idx_1_2\" ON \"t1\" (\"c2\", \"c3\"), " +
-                        "CREATE INDEX \"idx_t1_idx_1_3\" ON \"t1\" (\"c3\"), " +
-                        "CREATE INDEX \"idx_t1_idx_1_5\" ON \"t1\" (\"c5\")"
-                )});
-        return data.toArray(new Object[][]{});
+        data.add(new Object[] { indexes, newArrayList(CREATE), targetDialect4,
+                newArrayList("CREATE INDEX \"idx_t1_idx_1_2\" ON \"t1\" (\"c2\", \"c3\"), "
+                        + "CREATE INDEX \"idx_t1_idx_1_3\" ON \"t1\" (\"c3\"), "
+                        + "CREATE INDEX \"idx_t1_idx_1_5\" ON \"t1\" (\"c5\")") });
+        return data.toArray(new Object[][] {});
     }
 
     @Test(dataProvider = "getIndexScripts")
     public void testIndexScripts(Collection<Index> indexes, Collection<ScriptType> scriptTypes, Dialect targetDialect,
-                               Collection<String> expected) throws Exception {
+            Collection<String> expected) throws Exception {
         scriptGeneratorManager.setTargetDialect(targetDialect == null ? createTargetDialect() : targetDialect);
         scriptGeneratorManager.setScriptTypes(scriptTypes);
 
-        Collection<Script> actualScripts = getCreateMultipleIndexes(indexes,scriptGeneratorManager);
+        Collection<Script> actualScripts = getCreateMultipleIndexes(indexes, scriptGeneratorManager);
         assertNotNull(actualScripts);
         Collection<String> actual = new ArrayList();
         for (Script script : actualScripts) {

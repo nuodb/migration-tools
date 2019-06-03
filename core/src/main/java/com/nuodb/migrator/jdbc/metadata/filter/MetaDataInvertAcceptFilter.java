@@ -58,13 +58,17 @@ public class MetaDataInvertAcceptFilter<T extends MetaData> extends MetaDataFilt
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         MetaDataInvertAcceptFilter that = (MetaDataInvertAcceptFilter) o;
 
-        if (filter != null ? !filter.equals(that.filter) : that.filter != null) return false;
+        if (filter != null ? !filter.equals(that.filter) : that.filter != null)
+            return false;
 
         return true;
     }

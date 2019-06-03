@@ -63,7 +63,7 @@ public class Xml10FilterReader extends FilterReader {
                 pos++;
             } else {
                 if (logger.isTraceEnabled()) {
-                    logger.trace(format("Filtered out &#%04x character", (int)ch));
+                    logger.trace(format("Filtered out &#%04x character", (int) ch));
                 }
                 continue;
             }
@@ -78,4 +78,3 @@ public class Xml10FilterReader extends FilterReader {
         return XMLChar.isValid(c);
     }
 }
-

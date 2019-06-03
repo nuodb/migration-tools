@@ -64,14 +64,14 @@ public class XmlDatabaseInfoHandler extends XmlReadWriteHandlerBase<DatabaseInfo
         } else if (MINOR_VERSION_ELEMENT.equals(element)) {
             databaseInfo.setMinorVersion(context.read(input, int.class));
         } else if (PLATFORM_VERSION_ELEMENT.equals(element)) {
-            ((XmlReadTargetAwareContext) context).setTarget(
-                    databaseInfo = new NuoDBDatabaseInfo(databaseInfo, context.read(input, int.class)));
+            ((XmlReadTargetAwareContext) context)
+                    .setTarget(databaseInfo = new NuoDBDatabaseInfo(databaseInfo, context.read(input, int.class)));
         }
     }
 
     @Override
-    protected void writeElements(DatabaseInfo databaseInfo, OutputNode output,
-                                 XmlWriteContext context) throws Exception {
+    protected void writeElements(DatabaseInfo databaseInfo, OutputNode output, XmlWriteContext context)
+            throws Exception {
         context.writeElement(output, PRODUCT_NAME_ELEMENT, databaseInfo.getProductName());
         context.writeElement(output, PRODUCT_VERSION_ELEMENT, databaseInfo.getProductVersion());
         context.writeElement(output, MAJOR_VERSION_ELEMENT, databaseInfo.getMajorVersion());

@@ -99,39 +99,34 @@ public class MySQLSequenceInspector extends TableInspectorBase<Table, TableInspe
             sequences.put(table, sequence);
         }
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.executeStatement(
-                new StatementFactory<Statement>() {
-                    @Override
-                    public Statement createStatement(Connection connection)
-                            throws SQLException {
-                        return connection.createStatement();
-                    }
-                },
-                new StatementCallback<Statement>() {
+        template.executeStatement(new StatementFactory<Statement>() {
+            @Override
+            public Statement createStatement(Connection connection) throws SQLException {
+                return connection.createStatement();
+            }
+        }, new StatementCallback<Statement>() {
 
-                    @Override
-                    public void executeStatement(Statement statement)
-                            throws SQLException {
-                        for (Map.Entry<Table, Sequence> sequenceEntry : sequences.entrySet()) {
-                            Table table = sequenceEntry.getKey();
-                            Sequence sequence = sequenceEntry.getValue();
-                            ResultSet columns = statement.executeQuery(
-                                    format(QUERY_COLUMN, table.getCatalog().getName(), table.getName()));
-                            Column column;
-                            try {
-                                column = columns.next() ? table.addColumn(columns.getString("FIELD")) : null;
-                            } finally {
-                                closeQuietly(columns);
-                            }
-                            if (column == null) {
-                                continue;
-                            }
-                            column.setSequence(sequence);
-                            column.getTable().getSchema().addSequence(sequence);
-                            inspectionResults.addObject(sequence);
-                        }
+            @Override
+            public void executeStatement(Statement statement) throws SQLException {
+                for (Map.Entry<Table, Sequence> sequenceEntry : sequences.entrySet()) {
+                    Table table = sequenceEntry.getKey();
+                    Sequence sequence = sequenceEntry.getValue();
+                    ResultSet columns = statement
+                            .executeQuery(format(QUERY_COLUMN, table.getCatalog().getName(), table.getName()));
+                    Column column;
+                    try {
+                        column = columns.next() ? table.addColumn(columns.getString("FIELD")) : null;
+                    } finally {
+                        closeQuietly(columns);
                     }
+                    if (column == null) {
+                        continue;
+                    }
+                    column.setSequence(sequence);
+                    column.getTable().getSchema().addSequence(sequence);
+                    inspectionResults.addObject(sequence);
                 }
-        );
+            }
+        });
     }
 }

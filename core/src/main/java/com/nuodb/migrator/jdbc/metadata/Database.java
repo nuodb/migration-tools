@@ -141,14 +141,13 @@ public class Database extends IdentifiableBase implements HasSchemas {
         if (tables.isEmpty()) {
             throw new MetaDataException(format("Can't find table %s", tableName));
         } else if (tables.size() > 1) {
-            throw new MetaDataException(format("Multiple tables %s match %s",
-                    Iterables.transform(tables,
-                            new Function<Table, String>() {
-                                @Override
-                                public String apply(Table table) {
-                                    return table.getQualifiedName(getDialect());
-                                }
-                            }), tableName));
+            throw new MetaDataException(
+                    format("Multiple tables %s match %s", Iterables.transform(tables, new Function<Table, String>() {
+                        @Override
+                        public String apply(Table table) {
+                            return table.getQualifiedName(getDialect());
+                        }
+                    }), tableName));
         }
         return get(tables, 0);
     }
@@ -223,8 +222,8 @@ public class Database extends IdentifiableBase implements HasSchemas {
         return newArrayList(filter(getTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table table) {
-                return ObjectUtils.equals(table.getSchema().getIdentifier(), schemaId) &&
-                        ObjectUtils.equals(table.getIdentifier(), tableId);
+                return ObjectUtils.equals(table.getSchema().getIdentifier(), schemaId)
+                        && ObjectUtils.equals(table.getIdentifier(), tableId);
             }
         }));
     }
@@ -236,9 +235,9 @@ public class Database extends IdentifiableBase implements HasSchemas {
         return newArrayList(filter(getTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table table) {
-                return ObjectUtils.equals(table.getCatalog().getIdentifier(), catalogId) &&
-                        ObjectUtils.equals(table.getSchema().getIdentifier(), schemaId) &&
-                        ObjectUtils.equals(table.getIdentifier(), tableId);
+                return ObjectUtils.equals(table.getCatalog().getIdentifier(), catalogId)
+                        && ObjectUtils.equals(table.getSchema().getIdentifier(), schemaId)
+                        && ObjectUtils.equals(table.getIdentifier(), tableId);
             }
         }));
     }
@@ -256,8 +255,10 @@ public class Database extends IdentifiableBase implements HasSchemas {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Database database = (Database) o;
 
@@ -265,7 +266,8 @@ public class Database extends IdentifiableBase implements HasSchemas {
             return false;
         if (databaseInfo != null ? !databaseInfo.equals(database.databaseInfo) : database.databaseInfo != null)
             return false;
-        if (driverInfo != null ? !driverInfo.equals(database.driverInfo) : database.driverInfo != null) return false;
+        if (driverInfo != null ? !driverInfo.equals(database.driverInfo) : database.driverInfo != null)
+            return false;
 
         return true;
     }

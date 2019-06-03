@@ -49,8 +49,8 @@ public class SimpleJdbcValueSetter implements JdbcValueSetter {
     }
 
     @Override
-    public <X> void setValue(PreparedStatement statement, Connection connection, int index, Field field,
-                             X value, Map<String, Object> options) throws SQLException {
+    public <X> void setValue(PreparedStatement statement, Connection connection, int index, Field field, X value,
+            Map<String, Object> options) throws SQLException {
         JdbcTypeAdapter<X> adapter = jdbcTypeRegistry.getJdbcTypeAdapter(value != null ? value.getClass() : null,
                 jdbcTypeValue.getValueClass());
         if (adapter != null) {
