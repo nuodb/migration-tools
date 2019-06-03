@@ -78,7 +78,7 @@ public class NuoDBColumnTriggerInspectorTest extends InspectorTestBase {
         given(resultSet.getInt("TYPE_MASK")).willReturn(1);
         given(resultSet.getInt("ACTIVE")).willReturn(1);
         given(resultSet.getString("TABLENAME")).willReturn(tableName);
-        given(resultSet.getString("TRIGGER_TEXT")).willReturn("NEW.`f1` = 'NOW'; END_TRIGGER;");
+        given(resultSet.getString("TRIGGER_TEXT")).willReturn("NEW.`f1` = 'NOW()'; END_TRIGGER;");
         inspectionResults.addObject(table);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName );
@@ -93,7 +93,7 @@ public class NuoDBColumnTriggerInspectorTest extends InspectorTestBase {
         columnTrigger.setColumn(column);
         columnTrigger.setTriggerEvent(TriggerEvent.valueOf("INSERT"));
         columnTrigger.setTriggerTime(TriggerTime.valueOf("BEFORE"));
-        columnTrigger.setTriggerBody("NEW.`f1` = 'NOW'; END_TRIGGER");
+        columnTrigger.setTriggerBody("NEW.`f1` = 'NOW()'; END_TRIGGER");
 
         Table table1 = createTable(catalogName, schemaName, tableName);
         table1.addColumn(column);
