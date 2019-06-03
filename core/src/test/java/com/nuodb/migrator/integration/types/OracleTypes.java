@@ -302,7 +302,7 @@ public class OracleTypes implements DatabaseTypes {
                                 || "INT".equalsIgnoreCase(type)) {
                         return defaultValue == null ? null : "'" + defaultValue + "'";
                 } else if ("TIMESTAMP".equalsIgnoreCase(type)) {
-                        return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW()'"
+                        return "CURRENT_TIMESTAMP".equals(defaultValue) ? "NOW()"
                                         : defaultValue;
                 }
                 return defaultValue;

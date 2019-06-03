@@ -308,7 +308,7 @@ public class MySQLTypes implements DatabaseTypes {
                         if ("0000-00-00 00:00:00".equals(defaultValue)) {
                                 return "'0000-00-00 00:00:00'";
                         }
-                        return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW()'" : "'"
+                        return "CURRENT_TIMESTAMP".equals(defaultValue) ? "NOW()" : "'"
                                         + defaultValue + "'";
                 } else if ("char".equalsIgnoreCase(type)) {
                         return defaultValue == null ? null : "'" + defaultValue + "'";
