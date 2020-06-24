@@ -46,7 +46,6 @@ import static java.lang.Boolean.parseBoolean;
  */
 @SuppressWarnings("PointlessBooleanExpression")
 public class CliSchemaJob extends CliJob<SchemaJobSpec> {
-
     public CliSchemaJob() {
         super(SCHEMA);
     }
@@ -115,44 +114,5 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
             resource.setPath((String) optionSet.getValue(OUTPUT_PATH));
         }
         return resource;
-    }
-
-    @Override
-    protected Group createTargetGroup() {
-        GroupBuilder group = newGroupBuilder().withName(getMessage(TARGET_GROUP_NAME));
-
-        Option url = newBasicOptionBuilder().withName(TARGET_URL)
-                .withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
-                        .withName(getMessage(TARGET_URL_ARGUMENT_NAME)).withMinimum(1).withRequired(true).build())
-                .build();
-        group.withOption(url);
-
-        Option username = newBasicOptionBuilder().withName(TARGET_USERNAME)
-                .withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION))
-                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()).build();
-        group.withOption(username);
-
-        Option password = newBasicOptionBuilder().withName(TARGET_PASSWORD)
-                .withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION))
-                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()).build();
-        group.withOption(password);
-
-        Option properties = newBasicOptionBuilder().withName(TARGET_PROPERTIES)
-                .withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION))
-                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build())
-                .build();
-        group.withOption(properties);
-
-        Option schema = newBasicOptionBuilder().withName(TARGET_SCHEMA)
-                .withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION))
-                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()).build();
-        group.withOption(schema);
-
-        Option autoCommit = newBasicOptionBuilder().withName(TARGET_AUTO_COMMIT)
-                .withDescription(getMessage(TARGET_AUTO_COMMIT_OPTION_DESCRIPTION))
-                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_AUTO_COMMIT_ARGUMENT_NAME)).build())
-                .build();
-        group.withOption(autoCommit);
-        return group.build();
     }
 }

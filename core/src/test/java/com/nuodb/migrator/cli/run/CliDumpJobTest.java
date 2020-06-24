@@ -59,7 +59,7 @@ public class CliDumpJobTest {
     @Test
     public void testParse() {
         String[] arguments = { "--source.driver=com.mysql.jdbc.Driver", "--source.url=jdbc:mysql://localhost:3306/test",
-                "--source.username=root", "--source.password=", "--source.catalog=test",
+                "--source.username=root", "--source.password=12345", "--source.catalog=test",
                 "--source.properties=profileSQL=true",
 
                 "--output.path=/tmp/dump.cat", "--output.type=xml",
@@ -82,6 +82,7 @@ public class CliDumpJobTest {
         connectionSpec.setDriver("com.mysql.jdbc.Driver");
         connectionSpec.setUrl("jdbc:mysql://localhost:3306/test");
         connectionSpec.setUsername("root");
+        connectionSpec.setPassword("12345");
         connectionSpec.setCatalog("test");
 
         Map<String, Object> properties = new HashMap<String, Object>();

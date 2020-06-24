@@ -82,11 +82,7 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
 
     @Override
     protected void validatePassword(CommandLine commandLine, Option option, String password) {
-        if (isEmpty(password)) {
-            throw new OptionException(
-                    format("Missing required option %s. The user's password should be provided", getPasswordOption()),
-                    option);
-        }
+        // Validated in PasswordOptionProcessor
     }
 
     /**

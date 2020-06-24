@@ -38,6 +38,7 @@ import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.processor.JdbcTypeOptionProcessor;
 import com.nuodb.migrator.cli.processor.NuoDBTypesOptionProcessor;
+import com.nuodb.migrator.cli.processor.PasswordOptionProcessor;
 import com.nuodb.migrator.cli.validation.ConnectionGroupInfo;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
@@ -113,7 +114,12 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.TimeZone.getTimeZone;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.replace;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -127,6 +133,10 @@ public class CliRunSupport extends CliSupport {
     public static final TimeZone DEFAULT_TIME_ZONE = getTimeZone("UTC");
 
     private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
+
+    private PasswordOptionProcessor sourcePasswordOptionProcessor = new PasswordOptionProcessor(SOURCE_PASSWORD);
+
+    private PasswordOptionProcessor targetPasswordOptionProcessor = new PasswordOptionProcessor(TARGET_PASSWORD);
 
     private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
@@ -163,8 +173,11 @@ public class CliRunSupport extends CliSupport {
         group.withOption(username);
 
         Option password = newBasicOptionBuilder().withName(SOURCE_PASSWORD)
-                .withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
+                .withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION))
+                .withRequired(false)
+                .withArgument(newArgumentBuilder()
                         .withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .withOptionProcessor(sourcePasswordOptionProcessor)
                 .build();
         group.withOption(password);
 
@@ -299,6 +312,7 @@ public class CliRunSupport extends CliSupport {
         Option password = newBasicOptionBuilder().withName(TARGET_PASSWORD)
                 .withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
                         .withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).withOptionFormat(optionFormat).build())
+                .withOptionProcessor(targetPasswordOptionProcessor)
                 .build();
         group.withOption(password);
 
@@ -542,7 +556,7 @@ public class CliRunSupport extends CliSupport {
         connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER));
         connectionSpec.setUrl((String) optionSet.getValue(SOURCE_URL));
         connectionSpec.setUsername((String) optionSet.getValue(SOURCE_USERNAME));
-        connectionSpec.setPassword((String) optionSet.getValue(SOURCE_PASSWORD));
+        connectionSpec.setPassword(sourcePasswordOptionProcessor.getPassword());
         connectionSpec.setProperties(parseProperties(optionSet, SOURCE_PROPERTIES, option));
         connectionSpec.setCatalog((String) optionSet.getValue(SOURCE_CATALOG));
         connectionSpec.setSchema((String) optionSet.getValue(SOURCE_SCHEMA));
@@ -659,7 +673,7 @@ public class CliRunSupport extends CliSupport {
             connection.setDriver((String) optionSet.getValue(TARGET_DRIVER, NUODB_DRIVER));
             connection.setUrl((String) optionSet.getValue(TARGET_URL));
             connection.setUsername((String) optionSet.getValue(TARGET_USERNAME));
-            connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD));
+            connection.setPassword(targetPasswordOptionProcessor.getPassword());
             connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA));
             connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES, option));
             return connection;

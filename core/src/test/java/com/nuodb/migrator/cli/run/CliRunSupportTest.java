@@ -98,13 +98,14 @@ public class CliRunSupportTest {
     @DataProvider(name = "sourceGroup")
     public Object[][] createSourceGroupData() {
         String[] arguments = { "--source.driver=com.mysql.jdbc.Driver", "--source.url=jdbc:mysql://localhost:3306/test",
-                "--source.username=root", "--source.password=", "--source.catalog=test",
+                "--source.username=root", "--source.password=12345", "--source.catalog=test",
                 "--source.properties=profileSQL=true" };
 
         DriverConnectionSpec expected = new DriverConnectionSpec();
         expected.setDriver("com.mysql.jdbc.Driver");
         expected.setUrl("jdbc:mysql://localhost:3306/test");
         expected.setUsername("root");
+        expected.setPassword("12345");
         expected.setCatalog("test");
 
         Map<String, Object> properties = Maps.newHashMap();
