@@ -35,12 +35,12 @@ This tool is designed to assist you in migrating data from supported SQL databas
 
 ### Dump schema & data from an existing database ###
 
-    $ bin/nuodb-migrator dump                                                
+    $ bin/nuodb-migrator dump
         [source database connection, required]
             --source.driver=driver                                      JDBC driver class name
             --source.url=url                                            Source database connection URL in the standard syntax jdbc:<subprotocol>:<subname>
             [--source.username=[username]]                              Source database username
-            [--source.password=[password]]                              Source database password
+            [--source.password=[password]]                              Source database password (will prompt if this option is not provided)
             [--source.properties=[properties]]                          Additional connection properties encoded as URL query string "property1=value1&property2=value2"
             [--source.catalog=[catalog]]                                Default database catalog name to use
             [--source.schema=[schema]]                                  Default database schema name to use
@@ -74,7 +74,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
            [--target.driver=driver]                                     JDBC driver class name, default is com.nuodb.jdbc.Driver
             --target.url=url                                            Target database connection URL in the format jdbc:com.nuodb://{broker1}:{port1},{broker2}:{port2},..,{brokerN}:{portN}/{database}?{params}
             [--target.username=[username]]                              Target database username
-            [--target.password=[password]]                              Target database password
+            [--target.password=[password]]                              Target database password (will prompt if this option is not provided)
             [--target.properties=[properties]]                          Additional connection properties encoded as URL query string "property1=value1&property2=value2"
             [--target.schema=[schema]]                                  Default database schema name to use
         [input specification, required]
@@ -120,23 +120,23 @@ This tool is designed to assist you in migrating data from supported SQL databas
 ### Generate a schema for a target NuoDB database ###
 
     $ bin/nuodb-migrator schema
-        [source database connection, required]                           
+        [source database connection, required]
             --source.driver=driver                                      JDBC driver class name
             --source.url=url                                            Source database connection URL in the standard syntax jdbc:<subprotocol>:<subname>
             [--source.username=[username]]                              Source database username
-            [--source.password=[password]]                              Source database password
+            [--source.password=[password]]                              Source database password (will prompt if this option is not provided)
             [--source.properties=[properties]]                          Additional connection properties encoded as URL query string "property1=value1&property2=value2"
             [--source.catalog=[catalog]]                                Default database catalog name to use
             [--source.schema=[schema]]                                  Default database schema name to use
             [--source.auto.commit=[true | false]]                       If set to true each individual statement is treated as a transaction and is automatically committed after it is executed, false by default
             [--source.transaction.isolation=[transaction isolation]]    Sets transaction isolation level, it's a symbolic name or an integer constant of the required level from JDBC standard: none or 0, read.uncommitted or 1, read.committed or 2, repeatable.read or 4, serializable or 8. NuoDB does not support all of the levels, only read.committed or 2, serializable or 8 and also supports two additional levels that are not in the JDBC standard: write.committed or 5, consistent.read or 7
-        [target database connection, optional]                         
+        [target database connection, optional]
             [--target.url=url]                                          Target database connection URL in the format jdbc:com.nuodb://{broker}:{port}/{database}
             [--target.username=[username]]                              Target database username
-            [--target.password=[password]]                              Target database password
+            [--target.password=[password]]                              Target database password (will prompt if this option is not provided)
             [--target.properties=[properties]]                          Additional connection properties encoded as URL query string "property1=value1&property2=value2"
             [--target.schema=[schema]]                                  Default database schema name to use
-        [script output, optional]                                      
+        [script output, optional]
             --output.path=output path                                   Saves script to a file specified by path
         [table names]
             [--table=table [table ...]]                                 Comma separated list of either simple table names or fully qualified names including catalog and schema or table name patterns using regex symbols, where * matches any number of characters and ? symbol to match any single character or mix of table names and table name patterns
