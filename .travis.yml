@@ -34,7 +34,7 @@ before_install:
   - ./test/mysql_setup.sh
   - ./test/nuodb_setup.sh
 
-install: mvn -U clean install
+install: mvn -T 1C -U clean install
 
 script:
   - ./test/mysql_basic.sh
