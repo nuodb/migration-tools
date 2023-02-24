@@ -275,7 +275,10 @@ public class BackupLoader {
     }
 
     protected Database openDatabase(Session session) throws SQLException {
-        InspectionScope inspectionScope = new TableInspectionScope(null, null, getTableTypes());
+        String catalog = getTargetSpec().getCatalog();
+        String schema = getTargetSpec().getSchema();
+        InspectionScope inspectionScope = new TableInspectionScope(catalog, schema, getTableTypes());
+
         return getInspectionManager()
                 .inspect(session.getConnection(), inspectionScope, DATABASE, CATALOG, SCHEMA, TABLE, COLUMN)
                 .getObject(DATABASE);
