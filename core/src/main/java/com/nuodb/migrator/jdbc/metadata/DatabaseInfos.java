@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public interface DatabaseInfos {
     final DatabaseInfo MYSQL = new DatabaseInfo("MySQL");
+    final DatabaseInfo MARIADB = new DatabaseInfo("MariaDB");
     final DatabaseInfo NUODB_BASE = new NuoDBDatabaseInfo("NuoDB");
     final DatabaseInfo NUODB_203 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 29);
     final DatabaseInfo NUODB_204 = new NuoDBDatabaseInfo("NuoDB", null, 2, 0, 30);
