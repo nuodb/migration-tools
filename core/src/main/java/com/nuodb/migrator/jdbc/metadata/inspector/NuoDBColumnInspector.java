@@ -49,6 +49,7 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBColumn.getJdbcType;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
+import static com.nuodb.migrator.globalStore.GlobalStore.getInstance;
 
 /**
  * @author Sergey Bushik
@@ -126,6 +127,22 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
                 Sequence sequence = new Sequence(identifier);
                 column.setSequence(sequence);
                 column.getTable().getSchema().addSequence(sequence);
+
+                // setting generatedAlways on dump job
+                String runningJob = getInstance().getState();
+
+                int flags = columns.getInt("FLAGS");
+                // System.out.println("flags for sequence: " + flags);
+                if (runningJob == "com.nuodb.migrator.dump.DumpJob") {
+                    if (flags >= 9) { /// flags | GENERATED_ALWAYS (which is
+                                      /// defined as a final static int 8)
+                        column.getSequence().setGeneratedAlways(true);
+
+                    } else {
+                        column.getSequence().setGeneratedAlways(false);
+
+                    }
+                }
             }
             column.setAutoIncrement(identifier != null);
 

@@ -35,6 +35,7 @@ import com.nuodb.migrator.backup.format.value.Value;
 import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.backup.format.value.ValueHandleListBuilder;
+import com.nuodb.migrator.globalStore.GlobalStore;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitExecutor;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
@@ -70,6 +71,7 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
     private PreparedStatement statement;
     private CommitExecutor commitExecutor;
     private ValueHandleList valueHandleList;
+    private CommitExecutor commitAlter; // MIG-178
 
     public LoadTableForkWork(LoadTable loadTable, RowReader rowReader, int thread,
             BackupLoaderManager backupLoaderManager) {
@@ -112,6 +114,26 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
                 backupLoaderManager.afterLoadRow(this, loadTable, row);
             }
             commitExecutor.finish();
+
+            // added to alter the table after loading the data
+            try {
+                // added gen always fix
+                GlobalStore global = GlobalStore.getInstance();
+                CommitStrategy commitStrategy = backupLoaderContext.getCommitStrategy() != null
+                        ? backupLoaderContext.getCommitStrategy()
+                        : new BatchCommitStrategy();
+
+                String alterScript = global.alterScript(loadTable);
+                if (alterScript != null) {
+                    PreparedStatement newStatement = getSession().getConnection().prepareStatement(alterScript);
+                    commitAlter = commitStrategy.createCommitExecutor(newStatement, null);
+
+                    commitAlter.execute();
+                    commitAlter.finish();
+                }
+            } catch (Exception npe) {
+                System.out.println("Issues while creating Alter statement" + npe);
+            }
         } catch (Exception exception) {
             System.out.println("--> LoadTableForkWork.execute: " + this.getLoadTable().getTable().getQualifiedName());
             exception.printStackTrace();
