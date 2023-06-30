@@ -152,19 +152,21 @@ public class CliRunSupport extends CliSupport {
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option driver = newBasicOptionBuilder().withName(SOURCE_DRIVER)
-                .withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).withRequired(true)
-                .withArgument(newArgumentBuilder().withName(getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).withRequired(true)
-                        .withMinimum(1).withOptionFormat(optionFormat).build())
-                .build();
-        group.withOption(driver);
-
         Option url = newBasicOptionBuilder().withName(SOURCE_URL)
                 .withDescription(getMessage(SOURCE_URL_OPTION_DESCRIPTION)).withRequired(true)
                 .withArgument(newArgumentBuilder().withName(getMessage(SOURCE_URL_ARGUMENT_NAME)).withRequired(true)
                         .withMinimum(1).withOptionFormat(optionFormat).build())
                 .build();
         group.withOption(url);
+
+        Option driver = newBasicOptionBuilder().withName(SOURCE_DRIVER)
+                .withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION))
+                .withRequired(false)
+                .withArgument(newArgumentBuilder().withName(getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).withRequired(true)
+                        .withMinimum(1).withOptionFormat(optionFormat).build())
+                .build();
+        group.withOption(driver);
+
 
         Option username = newBasicOptionBuilder().withName(SOURCE_USERNAME)
                 .withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
@@ -289,19 +291,19 @@ public class CliRunSupport extends CliSupport {
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        Option driver = newBasicOptionBuilder().withName(TARGET_DRIVER)
-                .withDescription(getMessage(TARGET_DRIVER_OPTION_DESCRIPTION))
-                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_DRIVER_ARGUMENT_NAME)).withRequired(true)
-                        .withMinimum(1).withOptionFormat(optionFormat).build())
-                .build();
-        group.withOption(driver);
-
         Option url = newBasicOptionBuilder().withName(TARGET_URL)
                 .withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).withRequired(true)
                 .withArgument(newArgumentBuilder().withName(getMessage(TARGET_URL_ARGUMENT_NAME)).withRequired(true)
                         .withMinimum(1).withOptionFormat(optionFormat).build())
                 .build();
         group.withOption(url);
+
+        Option driver = newBasicOptionBuilder().withName(TARGET_DRIVER)
+                .withDescription(getMessage(TARGET_DRIVER_OPTION_DESCRIPTION))
+                .withArgument(newArgumentBuilder().withName(getMessage(TARGET_DRIVER_ARGUMENT_NAME)).withRequired(true)
+                        .withMinimum(1).withOptionFormat(optionFormat).build())
+                .build();
+        group.withOption(driver);
 
         Option username = newBasicOptionBuilder().withName(TARGET_USERNAME)
                 .withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).withArgument(newArgumentBuilder()
@@ -670,7 +672,7 @@ public class CliRunSupport extends CliSupport {
     protected DriverConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
         if (optionSet.hasOption(TARGET_URL)) {
             DriverConnectionSpec connection = new DriverConnectionSpec();
-            connection.setDriver((String) optionSet.getValue(TARGET_DRIVER, NUODB_DRIVER));
+            connection.setDriver((String) optionSet.getValue(TARGET_DRIVER));
             connection.setUrl((String) optionSet.getValue(TARGET_URL));
             connection.setUsername((String) optionSet.getValue(TARGET_USERNAME));
             connection.setPassword(targetPasswordOptionProcessor.getPassword());
