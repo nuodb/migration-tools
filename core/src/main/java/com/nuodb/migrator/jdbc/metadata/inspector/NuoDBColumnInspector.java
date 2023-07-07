@@ -60,6 +60,11 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             + "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
     private String schema;
     private String tableName;
+    public class FieldFlags {
+        public static final int NotNull = (1 << 0);
+        public static final int GeneratedAlways = (1 << 3);
+        public static final int ComputedVisible = (1 << 4);
+    }
 
     public NuoDBColumnInspector() {
         super(COLUMN, TableInspectionScope.class);
@@ -134,14 +139,15 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
                 int flags = columns.getInt("FLAGS");
                 // System.out.println("flags for sequence: " + flags);
                 if (runningJob == "com.nuodb.migrator.dump.DumpJob") {
-                    if (flags >= 9) { /// flags | GENERATED_ALWAYS (which is
-                                      /// defined as a final static int 8)
-                        column.getSequence().setGeneratedAlways(true);
-
-                    } else {
-                        column.getSequence().setGeneratedAlways(false);
-
-                    }
+                    column.getSequence().setGeneratedAlways((flags & FieldFlags.GeneratedAlways) != 0);
+//                    if (flags >= 9) { /// flags | GENERATED_ALWAYS (which is
+//                                      /// defined as a final static int 8)
+//                        column.getSequence().setGeneratedAlways(true);
+//
+//                    } else {
+//                        column.getSequence().setGeneratedAlways(false);
+//
+//                    }
                 }
             }
             column.setAutoIncrement(identifier != null);

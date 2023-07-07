@@ -73,6 +73,8 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
     private ValueHandleList valueHandleList;
     private CommitExecutor commitAlter; // MIG-178
 
+
+
     public LoadTableForkWork(LoadTable loadTable, RowReader rowReader, int thread,
             BackupLoaderManager backupLoaderManager) {
         super(backupLoaderManager, backupLoaderManager.getBackupLoaderContext().getTargetSessionFactory());
@@ -131,8 +133,11 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
                     commitAlter.execute();
                     commitAlter.finish();
                 }
-            } catch (Exception npe) {
-                System.out.println("Issues while creating Alter statement" + npe);
+            } catch (Exception e) {
+                if(logger.isDebugEnabled()){
+                    logger.debug("Issue while executing Alter Statement after loading the data");
+                }
+
             }
         } catch (Exception exception) {
             System.out.println("--> LoadTableForkWork.execute: " + this.getLoadTable().getTable().getQualifiedName());

@@ -54,7 +54,7 @@ import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 
 
-@SuppressWarnings("all")
+//@SuppressWarnings("all")
 public class GlobalStoreTest {
 
     private GlobalStore globalStore;
@@ -82,7 +82,7 @@ public class GlobalStoreTest {
 
 
     @DataProvider(name = "alterScript")
-    public Object[][] testAlterScriptWithGeneratedAlways() {
+    public Object[][] testAlterScriptWithGeneratedAlwaysTrue() {
         GlobalStore gb = GlobalStore.getInstance();
 
 
@@ -105,6 +105,26 @@ public class GlobalStoreTest {
         String alterStat = "ALTER TABLE " + schema.getName() + "." + table.getName() + " MODIFY " + column.getName() + " " + column.getJdbcType().getTypeName() + " GENERATED ALWAYS AS IDENTITY";
 
 
+        return new Object[][]{
+                {table, gb, dialect, column, alterStat}
+        };
+    }
+
+    @Test(dataProvider = "alterScript")
+    public void testGeneratedAlwaysTrue(Table table, GlobalStore gb, Dialect dialect, Column col, String expected) {
+
+        LoadTable tb = new LoadTable(null, table, null);
+
+        String actualScripts = gb.alterScript(tb);
+
+        assertEquals(expected, actualScripts);
+
+
+    }
+
+    public Object[][] testAlterScriptWithGeneratedAlwaysFalse() {
+        GlobalStore gb = GlobalStore.getInstance();
+        Dialect dialect = new NuoDBDialect();
         Schema schema2 = new Schema("schema2");
         Table table2 = new Table("test_table2");
         Column column2 = table2.addColumn("id2");
@@ -120,9 +140,26 @@ public class GlobalStoreTest {
         table2.addColumn(column2);
         schema2.addTable(table2);
         gb.put(sequence2.getName(), sequence2.isGeneratedAlways());
-//        String alterStat2 =null;
+
+        return new Object[][]{{table2, gb, dialect, column2, null}};
+
+    }
+
+    @Test(dataProvider = "alterScript")
+    public void testGeneratedAlwaysFalse(Table table, GlobalStore gb, Dialect dialect, Column col, String expected) {
+
+        LoadTable tb = new LoadTable(null, table, null);
+
+        String actualScripts = gb.alterScript(tb);
+
+        assertEquals(expected, actualScripts);
 
 
+    }
+
+    public Object[][] testAlterScriptWithoutGeneratedAlways() {
+        GlobalStore gb = GlobalStore.getInstance();
+        Dialect dialect = new NuoDBDialect();
         Schema schema3 = new Schema("schema3");
         Table table3 = new Table("test_table3");
         Column column3 = table3.addColumn("id3");
@@ -134,54 +171,24 @@ public class GlobalStoreTest {
         sequence3.setName("sequence3");
         column3.setSequence(sequence3);
         schema3.addSequence(sequence3);
-//        column.getSequence().setGeneratedAlways(null);
         table3.addColumn(column3);
         schema3.addTable(table3);
         gb.put(sequence3.getName(), sequence3.isGeneratedAlways());
         String alterStat3 = "";
 
-
-        return new Object[][]{
-                {table, gb, dialect, column, alterStat},
-                {table2, gb, dialect, column2, null},
-                {table3, gb, dialect, column3, null}
-        };
-        // Arrange
-//        Dialect dialect = new NuoDBDialect();
-//        Schema schema = new Schema("schema1");
-//        Table table = new Table("test_table");
-//        Column column = table.addColumn("id");
-//        column.setTypeCode(BIGINT);
-//        column.setTypeName("BIGINT");
-//        column.setNullable(false);
-//        column.setPosition(1);
-//        Sequence sequence = createSequence(null, "schema1", "test_table", "id");
-//        column.setSequence(sequence);
-//        schema.addSequence(sequence);
-//        column.getSequence().setGeneratedAlways(true);
-//        table.addColumn(column);
-//        schema.addTable(table);
-//        when(mockedLoadTable.getTable()).thenReturn(table);
-//        globalStore.put("sequence_name", true);
-//        LoadTable tb = new LoadTable(null, table, null, 0);
-//        String alterScript = globalStore.alterScript(tb);
-////        String expected = "ALTER TABLE " + schema + "." + table + " MODIFY " + column + " " + column.getTypeName() + " " + "GENERATED ALWAYS AS IDENTITY";
-//        String expected = "ALTER TABLE  \"schema1\" . \"test_table\" MODIFY \"id\"  BIGINT GENERATED ALWAYS AS IDENTITY ";
-//      return new Object[][]{{dialect, expected, mockedLoadTable}};
+        return new Object[][] {  {table3, gb, dialect, column3, null}};
     }
 
     @Test(dataProvider = "alterScript")
-    public void testGeneratedAlways(Table table, GlobalStore gb, Dialect dialect, Column col, String expected) {
+    public void testWithoutGeneratedAlways(Table table, GlobalStore gb, Dialect dialect, Column col, String expected) {
 
-//        GlobalStore globalStore = GlobalStore.getInstance();
         LoadTable tb = new LoadTable(null, table, null);
 
-            String actualScripts = gb.alterScript(tb);
+        String actualScripts = gb.alterScript(tb);
 
         assertEquals(expected, actualScripts);
 
 
     }
-
 
 }
