@@ -49,6 +49,7 @@ import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeOptions;
+import com.nuodb.migrator.globalStore.GlobalStore;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -278,6 +279,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
                         column.getSequence() != null ? scriptGeneratorManager.getName(column.getSequence()) : null));
+                getGenerated(table, scriptGeneratorManager); // calling for
+                                                             // generatedAlways
             }
             if (column.isNullable()) {
                 buffer.append(dialect.getNullColumnString());
@@ -541,4 +544,21 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         }
         scripts.add(new Script(buffer.toString()));
     }
+
+    // added new method to save the sequence name and generatedAlways value in a
+    // hashmap
+    public void getGenerated(Table table, ScriptGeneratorManager scriptGeneratorManager) {
+
+        GlobalStore global = GlobalStore.getInstance();
+
+        for (Column column : table.getColumns()) {
+            if (column.getSequence() != null) {
+                String seqName = scriptGeneratorManager.getName((column.getSequence()));
+                global.put(seqName.toString(), column.getSequence().isGeneratedAlways());
+
+            }
+        }
+
+    }
+
 }

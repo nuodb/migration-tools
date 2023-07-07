@@ -49,6 +49,7 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBColumn.getJdbcType;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
+import static com.nuodb.migrator.globalStore.GlobalStore.getInstance;
 
 /**
  * @author Sergey Bushik
@@ -59,6 +60,12 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             + "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
     private String schema;
     private String tableName;
+
+    public class FieldFlags {
+        public static final int NotNull = (1 << 0);
+        public static final int GeneratedAlways = (1 << 3);
+        public static final int ComputedVisible = (1 << 4);
+    }
 
     public NuoDBColumnInspector() {
         super(COLUMN, TableInspectionScope.class);
@@ -126,6 +133,16 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
                 Sequence sequence = new Sequence(identifier);
                 column.setSequence(sequence);
                 column.getTable().getSchema().addSequence(sequence);
+
+                // setting generatedAlways on dump job
+                String runningJob = getInstance().getState();
+
+                int flags = columns.getInt("FLAGS");
+
+                if (runningJob == "com.nuodb.migrator.dump.DumpJob") {
+                    column.getSequence().setGeneratedAlways((flags & FieldFlags.GeneratedAlways) != 0);
+
+                }
             }
             column.setAutoIncrement(identifier != null);
 
