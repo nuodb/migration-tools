@@ -51,7 +51,7 @@ import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
 
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 
-//@SuppressWarnings("all")
+
 public class GlobalStoreTest {
 
     private GlobalStore globalStore;
@@ -75,8 +75,8 @@ public class GlobalStoreTest {
 
     }
 
-    @DataProvider(name = "alterScript")
-    public Object[][] testAlterScriptWithGeneratedAlwaysTrue() {
+    @Test
+    public void testAlterScriptWithGeneratedAlwaysTrue() {
         GlobalStore gb = GlobalStore.getInstance();
 
         Dialect dialect = new NuoDBDialect();
@@ -98,21 +98,14 @@ public class GlobalStoreTest {
         String alterStat = "ALTER TABLE " + schema.getName() + "." + table.getName() + " MODIFY " + column.getName()
                 + " " + column.getJdbcType().getTypeName() + " GENERATED ALWAYS AS IDENTITY";
 
-        return new Object[][] { { table, gb, dialect, column, alterStat } };
-    }
-
-    @Test(dataProvider = "alterScript")
-    public void testGeneratedAlwaysTrue(Table table, GlobalStore gb, Dialect dialect, Column col, String expected) {
-
         LoadTable tb = new LoadTable(null, table, null);
-
         String actualScripts = gb.alterScript(tb);
-
-        assertEquals(expected, actualScripts);
+        assertEquals(alterStat, actualScripts);
 
     }
 
-    public Object[][] testAlterScriptWithGeneratedAlwaysFalse() {
+    @Test
+    public void testAlterScriptWithGeneratedAlwaysFalse() {
         GlobalStore gb = GlobalStore.getInstance();
         Dialect dialect = new NuoDBDialect();
         Schema schema2 = new Schema("schema2");
@@ -122,61 +115,22 @@ public class GlobalStoreTest {
         column2.setTypeName("BIGINT");
         column2.setNullable(false);
         column2.setPosition(1);
-        Sequence sequence2 = createSequence(null, "schema2", "test_table2", "id2");
-        sequence2.setName("sequence2");
-        column2.setSequence(sequence2);
-        schema2.addSequence(sequence2);
-        column2.getSequence().setGeneratedAlways(false);
-        table2.addColumn(column2);
-        schema2.addTable(table2);
-        gb.put(sequence2.getName(), sequence2.isGeneratedAlways());
+         Sequence sequence2 = createSequence(null, "schema2", "test_table2", "id2");
+         sequence2.setName("sequence2");
+         column2.setSequence(sequence2);
+         schema2.addSequence(sequence2);
+         column2.getSequence().setGeneratedAlways(false);
+         table2.addColumn(column2);
+         schema2.addTable(table2);
+         gb.put(sequence2.getName(), sequence2.isGeneratedAlways());
+         String alterStat = null;
 
-        return new Object[][] { { table2, gb, dialect, column2, null } };
-
-    }
-
-    @Test(dataProvider = "alterScript")
-    public void testGeneratedAlwaysFalse(Table table, GlobalStore gb, Dialect dialect, Column col, String expected) {
-
-        LoadTable tb = new LoadTable(null, table, null);
-
+        LoadTable tb = new LoadTable(null, table2, null);
         String actualScripts = gb.alterScript(tb);
-
-        assertEquals(expected, actualScripts);
-
-    }
-
-    public Object[][] testAlterScriptWithoutGeneratedAlways() {
-        GlobalStore gb = GlobalStore.getInstance();
-        Dialect dialect = new NuoDBDialect();
-        Schema schema3 = new Schema("schema3");
-        Table table3 = new Table("test_table3");
-        Column column3 = table3.addColumn("id3");
-        column3.setTypeCode(BIGINT);
-        column3.setTypeName("BIGINT");
-        column3.setNullable(false);
-        column3.setPosition(1);
-        Sequence sequence3 = createSequence(null, "schema3", "test_table3", "id3");
-        sequence3.setName("sequence3");
-        column3.setSequence(sequence3);
-        schema3.addSequence(sequence3);
-        table3.addColumn(column3);
-        schema3.addTable(table3);
-        gb.put(sequence3.getName(), sequence3.isGeneratedAlways());
-        String alterStat3 = "";
-
-        return new Object[][] { { table3, gb, dialect, column3, null } };
-    }
-
-    @Test(dataProvider = "alterScript")
-    public void testWithoutGeneratedAlways(Table table, GlobalStore gb, Dialect dialect, Column col, String expected) {
-
-        LoadTable tb = new LoadTable(null, table, null);
-
-        String actualScripts = gb.alterScript(tb);
-
-        assertEquals(expected, actualScripts);
+        assertEquals(alterStat, actualScripts);
 
     }
+
+
 
 }
