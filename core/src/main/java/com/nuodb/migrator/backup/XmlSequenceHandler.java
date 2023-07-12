@@ -55,6 +55,7 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
     private static final String ORDER_ATTRIBUTE = "order";
     private static final String TEMPORARY_ATTRIBUTE = "temporary";
     private static final String CACHE_ATTRIBUTE = "cache";
+    private static final String GENERATED_ALWAYS_ATTRIBUTE = "generated-always";
 
     public XmlSequenceHandler() {
         super(Sequence.class);
@@ -72,6 +73,7 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
         sequence.setCycle(context.readAttribute(input, CYCLE_ATTRIBUTE, Boolean.class, false));
         sequence.setOrder(context.readAttribute(input, ORDER_ATTRIBUTE, Boolean.class, false));
         sequence.setTemporary(context.readAttribute(input, TEMPORARY_ATTRIBUTE, Boolean.class, false));
+        sequence.setGeneratedAlways(context.readAttribute(input, GENERATED_ALWAYS_ATTRIBUTE, Boolean.class, false));
     }
 
     @Override
@@ -129,6 +131,11 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
         Number cache = sequence.getCache();
         if (cache != null) {
             context.writeAttribute(output, CACHE_ATTRIBUTE, cache);
+        }
+        // writes the generated column to the XML
+        boolean is_generated = sequence.isGeneratedAlways();
+        if (is_generated) {
+            context.writeAttribute(output, GENERATED_ALWAYS_ATTRIBUTE, is_generated);
         }
     }
 }

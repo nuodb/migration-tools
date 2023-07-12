@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.job;
 
+import com.nuodb.migrator.globalStore.GlobalStore;
+
 import org.slf4j.Logger;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -45,6 +47,7 @@ public abstract class JobBase implements Job {
     public void init(JobExecution jobExecution) throws Exception {
         this.jobExecution = jobExecution;
         init();
+        setGlobalState(jobExecution);
     }
 
     protected abstract void init() throws Exception;
@@ -56,5 +59,11 @@ public abstract class JobBase implements Job {
 
     public JobExecution getJobExecution() {
         return jobExecution;
+    }
+
+    public void setGlobalState(JobExecution job) {
+        GlobalStore globalStore = GlobalStore.getInstance();
+        globalStore.setState(job.getJob().getName());
+
     }
 }
