@@ -300,6 +300,7 @@ public class CliRunSupport extends CliSupport {
 
         Option driver = newBasicOptionBuilder().withName(TARGET_DRIVER)
                 .withDescription(getMessage(TARGET_DRIVER_OPTION_DESCRIPTION))
+                .withRequired(false)
                 .withArgument(newArgumentBuilder().withName(getMessage(TARGET_DRIVER_ARGUMENT_NAME)).withRequired(true)
                         .withMinimum(1).withOptionFormat(optionFormat).build())
                 .build();

@@ -94,7 +94,6 @@ public class CliSchemaJobTest {
         schemaSpec.setSourceSpec(sourceConnectionSpec);
 
         DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
-        targetConnectionSpec.setDriver(NUODB_DRIVER);
         targetConnectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         targetConnectionSpec.setUsername("dba");
         targetConnectionSpec.setPassword("goalie");
