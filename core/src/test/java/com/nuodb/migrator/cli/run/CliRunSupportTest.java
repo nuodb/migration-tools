@@ -163,7 +163,6 @@ public class CliRunSupportTest {
                 "--target.password=goalie", "--target.schema=hockey" };
 
         DriverConnectionSpec expected = new DriverConnectionSpec();
-        expected.setDriver(JdbcConstants.NUODB_DRIVER);
         expected.setUrl("jdbc:com.nuodb://localhost/test");
         expected.setUsername("dba");
         expected.setPassword("goalie");
