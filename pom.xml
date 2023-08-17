@@ -16,8 +16,8 @@
     </modules>
 
     <properties>
-        <slf4j.version>1.7.5</slf4j.version>
-        <log4j.version>2.20.0</log4j.version>
+        <slf4j.version>2.0.7</slf4j.version>
+        <reload4j.version>1.2.25</reload4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
