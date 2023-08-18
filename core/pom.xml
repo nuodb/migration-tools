@@ -29,6 +29,7 @@
     </build>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/aopalliance/aopalliance -->
         <dependency>
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>
@@ -54,40 +55,40 @@
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.simpleframework/simple-xml -->
         <dependency>
             <groupId>org.simpleframework</groupId>
             <artifactId>simple-xml</artifactId>
-            <version>2.6.6</version>
+            <version>2.7.1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.7</version>
+            <version>1.16.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.1</version>
+            <version>3.13.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.7</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.4</version>
+            <version>2.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.1</version>
+            <version>1.10.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>13.0</version>
+            <version>32.1.2-jre</version>
         </dependency>
         <dependency>
             <groupId>xerces</groupId>
@@ -96,13 +97,13 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.4.1</version>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
         </dependency>
         <dependency>
             <groupId>de.undercouch</groupId>
             <artifactId>bson4jackson</artifactId>
-            <version>2.4.0</version>
+            <version>2.9.2</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
@@ -117,7 +118,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.2.3.RELEASE</version>
+            <version>5.3.29</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -141,7 +142,7 @@
         <dependency>
             <groupId>com.nuodb.jdbc</groupId>
             <artifactId>nuodb-jdbc</artifactId>
-            <version>20.0.0</version>
+            <version>24.1.0</version>
         </dependency>
     </dependencies>
 
@@ -330,7 +331,7 @@
                 </plugins>
             </build>
         </profile>
-		<profile>
+                <profile>
             <id>db2-integration-tests</id>
             <build>
                 <plugins>

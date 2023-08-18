@@ -40,9 +40,9 @@ public class Schema extends IdentifiableBase implements HasTables {
 
     private Database database;
     private Catalog catalog;
-    private final Collection<Sequence> sequences = newArrayList();
-    private final Map<Identifier, UserDefinedType> userDefinedTypes = newLinkedHashMap();
-    private final Map<Identifier, Table> tables = newLinkedHashMap();
+    private Collection<Sequence> sequences = newArrayList();
+    private Map<Identifier, UserDefinedType> userDefinedTypes = newLinkedHashMap();
+    private Map<Identifier, Table> tables = newLinkedHashMap();
 
     public Schema() {
         super(SCHEMA);
