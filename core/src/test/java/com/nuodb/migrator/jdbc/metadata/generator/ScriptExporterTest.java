@@ -28,7 +28,8 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.google.common.io.Files;
-import com.google.common.io.NullOutputStream;
+import com.google.common.io.ByteStreams;
+
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.session.SessionFactories;
@@ -76,7 +77,7 @@ public class ScriptExporterTest {
         return new Object[][] { { new FileScriptExporter(file) },
                 { new ConnectionScriptExporter(SessionFactories
                         .newSessionFactory(connectionProvider, new NuoDBDialect(), false).openSession()) },
-                { new WriterScriptExporter(new NullOutputStream()) } };
+                { new WriterScriptExporter(ByteStreams.nullOutputStream()) } };
     }
 
     @Test(dataProvider = "exportScripts")

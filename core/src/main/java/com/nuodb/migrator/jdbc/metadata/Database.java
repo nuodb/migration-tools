@@ -47,7 +47,7 @@ import static org.apache.commons.lang3.StringUtils.split;
 
 public class Database extends IdentifiableBase implements HasSchemas {
 
-    private final Map<Identifier, Catalog> catalogs = newLinkedHashMap();
+    private Map<Identifier, Catalog> catalogs = newLinkedHashMap();
 
     private Dialect dialect;
     private DriverInfo driverInfo;
