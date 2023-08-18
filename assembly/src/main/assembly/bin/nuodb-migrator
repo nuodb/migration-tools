@@ -53,9 +53,9 @@ fi
 # JAVA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y"
 
 CLASSPATH="${CLASSPATH:+$CLASSPATH:}$NUODB_MIGRATOR_HOME/conf"
+CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/slf4j-reload4j-${slf4j.version}.jar"
 CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/slf4j-api-${slf4j.version}.jar"
-CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/slf4j-log4j12-${slf4j.version}.jar"
-CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/log4j-${log4j.version}.jar"
+CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/reload4j-${reload4j.version}.jar"
 CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/nuodb-migrator-bootstrap-${project.version}.jar"
 
 exec "$JAVA" $JAVA_OPTS \
