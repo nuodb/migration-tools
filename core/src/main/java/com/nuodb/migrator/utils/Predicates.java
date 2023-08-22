@@ -44,9 +44,12 @@ public class Predicates {
         return com.google.common.base.Predicates.alwaysTrue();
     }
 
+    /* not compiling with latest Predicates, also does not seem to be needed
+       in source code.
     public static Predicate<Class<?>> assignableFrom(Class<?> clazz) {
         return com.google.common.base.Predicates.assignableFrom(clazz);
     }
+    */
 
     public static <T> Predicate<T> alwaysFalse() {
         return com.google.common.base.Predicates.alwaysFalse();
