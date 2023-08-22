@@ -18,10 +18,9 @@ jobs:
       - run:
           name: "Maven Install"
           command: "mvn -U clean install"
-
-      - store_artifacts:
-          path: ./core/target/surefire-reports
-          destination: surefire-reports
+          
+      - store_test_results:
+          path: ./core/target/surefire-reports/junitreports
 
       - store_artifacts:
           path: ./assembly/target/nuodb-migrator.tar
