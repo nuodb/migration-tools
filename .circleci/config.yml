@@ -14,9 +14,22 @@ jobs:
     # See: https://circleci.com/docs/configuration-reference/#steps
     steps:
       - checkout
+
       - run:
           name: "Maven Install"
           command: "mvn -U clean install"
+
+      - store_test_results:
+          path: ./core/target/surefire-reports
+
+      - store_artifacts:
+          path: ./core/target/surefire-reports
+
+      - store_artifacts:
+          path: ./assembly/target/nuodb-migrator.tar
+
+      - stpre_artifacts:
+          path: ./assembly/target/nuodb-migrator.zip
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
