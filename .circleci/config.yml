@@ -22,8 +22,9 @@ jobs:
       - run:
           name: Correct formatting of test results file
           command: |
-            sudo apt update && sudo apt install -y xmlstarlet
-            xmlstarlet ed --inplace --rename '//testng-results' -v 'testing-result' ./core/target/surefire-reports/testng-results.xml
+            sudo apt update
+            sudo apt install -y xmlstarlet
+            xmlstarlet ed --inplace --rename '//testng-results' -v 'testing-results' ./core/target/surefire-reports/testng-results.xml
 
       - store_test_results:
           path: ./core/target/surefire-reports
