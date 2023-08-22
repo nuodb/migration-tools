@@ -18,16 +18,6 @@ jobs:
       - run:
           name: "Maven Install"
           command: "mvn -U clean install"
-          
-      - run:
-          name: Correct formatting of test results file
-          command: |
-            sudo apt update
-            sudo apt install -y xmlstarlet
-            xmlstarlet ed --inplace --rename '//testng-results' -v 'testing-results' ./core/target/surefire-reports/testng-results.xml
-
-      - store_test_results:
-          path: ./core/target/surefire-reports
 
       - store_artifacts:
           path: ./core/target/surefire-reports
