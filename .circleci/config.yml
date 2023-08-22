@@ -28,7 +28,7 @@ jobs:
       - store_artifacts:
           path: ./assembly/target/nuodb-migrator.tar
 
-      - stpre_artifacts:
+      - store_artifacts:
           path: ./assembly/target/nuodb-migrator.zip
 
 # Orchestrate jobs using workflows
