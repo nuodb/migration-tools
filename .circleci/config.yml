@@ -1,0 +1,38 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/configuration-reference/#jobs
+jobs:
+  build:
+    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/configuration-reference/#executor-job
+    docker:
+      - image: cimg/openjdk:11.0.20
+    # Add steps to the job
+    # See: https://circleci.com/docs/configuration-reference/#steps
+    steps:
+      - checkout
+
+      - run:
+          name: "Maven Install"
+          command: "mvn -U clean install"
+
+      - store_test_results:
+          path: ./core/target/surefire-reports/junitreports
+
+      - store_artifacts:
+          path: ./assembly/target/nuodb-migrator.tar
+          destination: packages/nuodb-migrator.tar
+
+      - store_artifacts:
+          path: ./assembly/target/nuodb-migrator.zip
+          destination: packages/nuodb-migrator.zip
+
+# Orchestrate jobs using workflows
+# See: https://circleci.com/docs/configuration-reference/#workflows
+workflows:
+  build-workflow:
+    jobs:
+      - build
