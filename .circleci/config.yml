@@ -21,12 +21,15 @@ jobs:
 
       - store_artifacts:
           path: ./core/target/surefire-reports
+          destination: surefire-reports
 
       - store_artifacts:
           path: ./assembly/target/nuodb-migrator.tar
+          destination: packages
 
       - store_artifacts:
           path: ./assembly/target/nuodb-migrator.zip
+          destination: packages
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
