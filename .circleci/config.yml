@@ -19,6 +19,9 @@ jobs:
           name: "Maven Install"
           command: "mvn -U clean install"
 
+      - store_test_results:
+          path: ./core/target/surefire-reports
+
       - store_artifacts:
           path: ./core/target/surefire-reports
 
