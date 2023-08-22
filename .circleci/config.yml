@@ -18,6 +18,11 @@ jobs:
       - run:
           name: "Maven Install"
           command: "mvn -U clean install"
+          
+      - run:
+          name: Correct formatting of test results file
+          command: |
+            xmlstarlet ed --inplace --rename '//testng-results' -v 'testing-result' ./core/target/surefire-reports/testng-results.xml
 
       - store_test_results:
           path: ./core/target/surefire-reports
