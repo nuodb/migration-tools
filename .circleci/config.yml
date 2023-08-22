@@ -25,11 +25,11 @@ jobs:
 
       - store_artifacts:
           path: ./assembly/target/nuodb-migrator.tar
-          destination: packages/
+          destination: packages/nuodb-migrator.tar
 
       - store_artifacts:
           path: ./assembly/target/nuodb-migrator.zip
-          destination: packages/
+          destination: packages/nuodb-migrator.zip
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
