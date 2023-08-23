@@ -30,7 +30,7 @@ jobs:
           path: ./assembly/target/nuodb-migrator.zip
           destination: packages/nuodb-migrator.zip
     # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
-    resource_class: large
+    resource_class: small
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
