@@ -1,6 +1,6 @@
 # NuoDB Migrator #
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/nuodb/migration-tools/tree/circleci-project-setup.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nuodb/migration-tools/tree/circleci-project-setup)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/nuodb/migration-tools/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nuodb/migration-tools/tree/master)
 
 *A command-line interface for helping domain administrators manage backup and migration of their databases.*
 
