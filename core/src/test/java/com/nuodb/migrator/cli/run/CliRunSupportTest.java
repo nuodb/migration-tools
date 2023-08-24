@@ -54,7 +54,7 @@ import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createTable;
 import static java.util.TimeZone.getTimeZone;
-import static org.mockito.Matchers.notNull;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.*;

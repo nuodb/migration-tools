@@ -47,9 +47,12 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newAllOfFilters;
 import static com.nuodb.migrator.jdbc.metadata.filter.MetaDataFilters.newEitherOfFilters;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.ArgumentCaptor;
+
 
 /**
  * @author Mukund
@@ -76,7 +79,9 @@ public class BackupOpsValidateTableFilterTest {
 
         XmlBackupOps backupOps1 = spy(new XmlBackupOps());
         backupOps1.verifyFilter(databaseTable, all);
-        verify(backupOps1, times(1)).logWarnMessage(valueOf(anyString()));
+        ArgumentCaptor<Identifier> identifierCaptor = ArgumentCaptor.forClass(Identifier.class);
+        verify(backupOps1, times(1)).logWarnMessage(identifierCaptor.capture());
+        assertNotNull(identifierCaptor.getValue().value());
     }
 
     @DataProvider(name = "getData1")
@@ -97,6 +102,9 @@ public class BackupOpsValidateTableFilterTest {
 
         XmlBackupOps backupOps1 = spy(new XmlBackupOps());
         backupOps1.verifyFilter(databaseTable, all);
-        verify(backupOps1, times(1)).logWarnMessage(valueOf(anyString()));
+
+        ArgumentCaptor<Identifier> identifierCaptor = ArgumentCaptor.forClass(Identifier.class);
+        verify(backupOps1, times(1)).logWarnMessage(identifierCaptor.capture());
+        assertNotNull(identifierCaptor.getValue().value());
     }
 }
