@@ -84,17 +84,13 @@ public class DumpJobTest {
     private Dialect dialect;
     @Mock
     private Connection connection;
+    @Spy
+    @InjectMocks
+    private DumpJob dumpJob = new DumpJob(new DumpJobSpec());
 
 
     private JobExecutor jobExecutor;
     private Map<Object, Object> jobContext;
-
-    @Spy
-    @InjectMocks
-    private DumpJob dumpJob = new DumpJob(new DumpJobSpec());
-//    @Spy
-//    @InjectMocks
-//    private BackupWriter backupWriter = new BackupWriter();
 
     @BeforeMethod
     public void setUp() throws Exception {
