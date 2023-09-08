@@ -127,7 +127,7 @@
         <dependency>
             <groupId>com.nuodb.jdbc</groupId>
             <artifactId>nuodb-jdbc</artifactId>
-            <version>24.1.0</version>
+            <version>24.1.1</version>
         </dependency>
     </dependencies>
 
