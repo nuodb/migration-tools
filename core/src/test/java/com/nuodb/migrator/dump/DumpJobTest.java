@@ -43,9 +43,7 @@ import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.job.JobExecutor;
 import com.nuodb.migrator.spec.DumpJobSpec;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -58,7 +56,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
 import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -89,16 +87,14 @@ public class DumpJobTest {
     @Spy
     @InjectMocks
     private DumpJob dumpJob = new DumpJob(new DumpJobSpec());
-    @Spy
-    @InjectMocks
-    private BackupWriter backupWriter = new BackupWriter();
+
 
     private JobExecutor jobExecutor;
     private Map<Object, Object> jobContext;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        initMocks(this);
+        MockitoAnnotations.initMocks(this);
         DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
         given(databaseMetaData.getDatabaseProductName()).willReturn("NuoDB");
         given(connection.getMetaData()).willReturn(databaseMetaData);
@@ -155,6 +151,7 @@ public class DumpJobTest {
         Column column2 = table.addColumn("column2");
         column2.setTypeCode(Types.LONGVARCHAR);
 
+        BackupWriter backupWriter = Mockito.mock(BackupWriter.class);
         willReturn(backupWriter).given(dumpJob).getBackupWriter();
 
         jobExecutor.execute(jobContext);

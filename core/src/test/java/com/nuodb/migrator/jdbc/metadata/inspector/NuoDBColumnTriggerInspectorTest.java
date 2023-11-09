@@ -43,8 +43,8 @@ import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN_TRIGGER;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createTable;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 

@@ -11,8 +11,7 @@ import java.sql.Connection;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyVararg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertNotNull;
 
@@ -30,14 +29,15 @@ public class InspectionManagerTest {
         inspectionManager = spy(new InspectionManager());
 
         given(inspectionManager.createInspectionContext(any(Connection.class), any(InspectionResults.class),
-                (MetaDataType[]) anyVararg())).will(new Answer<InspectionContext>() {
-                    @Override
-                    public InspectionContext answer(InvocationOnMock invocation) throws Throwable {
-                        InspectionContext inspectionContext = (InspectionContext) spy(invocation.callRealMethod());
-                        willDoNothing().given(inspectionContext).close();
-                        return inspectionContext;
-                    }
-                });
+                any(MetaDataType[].class))).will(new Answer<InspectionContext>() {
+            @Override
+            public InspectionContext answer(InvocationOnMock invocation) throws Throwable {
+                InspectionContext inspectionContext = (InspectionContext) spy(invocation.callRealMethod());
+                willDoNothing().given(inspectionContext).close();
+                return inspectionContext;
+            }
+        });
+
     }
 
     @DataProvider(name = "inspect")

@@ -90,7 +90,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
         DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
         Map<String, JdbcTypeDesc> fieldsType = new HashMap<String, JdbcTypeDesc>();
         try (ResultSet columnsFromDatabaseMetaData = databaseMetaData.getColumns(null, schema, tableName, null)) {
-            if (columnsFromDatabaseMetaData.next()) {
+            if (columnsFromDatabaseMetaData != null && columnsFromDatabaseMetaData.next()) {
                 do {
                     JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeAlias(
                             columnsFromDatabaseMetaData.getInt("DATA_TYPE"),
