@@ -106,10 +106,11 @@
             <version>5.3.29</version>
             <scope>provided</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.0</version>
+            <artifactId>mockito-core</artifactId>
+            <version>5.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

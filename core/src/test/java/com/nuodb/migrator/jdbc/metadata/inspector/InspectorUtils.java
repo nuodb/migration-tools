@@ -36,7 +36,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
 /**
